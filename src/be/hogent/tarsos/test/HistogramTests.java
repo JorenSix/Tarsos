@@ -58,23 +58,6 @@ public class HistogramTests {
 		p.save();
 	}
 	
-	@Test
-	public void testMostEnergyRichOctaves(){		
-		Histogram range = PitchFunctions.readFrequencyTable("src/tarsos/test/data/african_range_frequency_table.txt");
-		Histogram energyRichOctaves = HistogramFunction.mostEnergyRichOctaves(range, 4);
-		
-		range = HistogramFunction.fold(range).normalize();
-		energyRichOctaves =  HistogramFunction.fold(energyRichOctaves).normalize();
-		range.plotCorrelation(energyRichOctaves,CorrelationMeasure.INTERSECTION);
-		
-		SimplePlot correlationPlot = new SimplePlot("ritch");
-		//plots the first histogram
-		correlationPlot.addData(0, range);
-		//plots the other (displaced) histogram
-		correlationPlot.addData(1, energyRichOctaves);
-		correlationPlot.save();		
-	}
-	
 	/**
 	 * Tests the correlation between two FrequencyTables (histograms) with intersection. 
 	 */
@@ -241,7 +224,7 @@ public class HistogramTests {
 	
 	@Test
 	public void testSmoothed(){
-		Histogram table = PitchFunctions.readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
+		Histogram table = PitchFunctions.readFrequencyTable("src/be/hogent/tarsos/test/data/other_african_octave_frequency_table.txt");
 		//table = table.normalize();
 		Histogram smoothedWeighted = table.smooth(true,2);
 		Histogram smoothed = table.smooth(false,2);
@@ -257,7 +240,7 @@ public class HistogramTests {
 	
 	@Test
 	public void testGaussianFilter(){
-		Histogram table = PitchFunctions.readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
+		Histogram table = PitchFunctions.readFrequencyTable("src/be/hogent/tarsos/test/data/other_african_octave_frequency_table.txt");
 		Histogram gaussian = table.gaussianSmooth(1.0);
 		Histogram doubleGaussian = gaussian.gaussianSmooth(1.0);
 		SimplePlot p = new SimplePlot("histogram_gaussian");
@@ -269,6 +252,33 @@ public class HistogramTests {
 		p.addLegend(2,"double gaussian");
 		p.save();
 	}
+	
+	@Test
+	public void testWrappingBehaviour(){
+		Histogram h = new Histogram(1.0, 13.0, 12,true);
+		//add some values for class with class middle 
+		//4 at value 1.5
+		h.add( 1.0);
+		h.add(13.0);
+		h.add(24.6);
+		h.add(25.2);
+		h.add(25.5);
+		assertEquals(4, h.getCount(1.0));
+		assertEquals(4, h.getCount(13.0));
+		assertEquals(h.getCount(25.5), h.getCount(1.0));
+		
+		h.add(14.0);
+		h.add(2.0);
+		assertEquals(h.getCount(2.0), h.getCount(14.0));
+		assertEquals(2, h.getCount(14.0));		
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testIndexOutOfBoundsException() {
+		Histogram h = new Histogram(1.0, 13.0, 12,false);
+		h.add(24.6);
+	}
+
 	
 	@Test
 	public void testHistogramMean(){
@@ -318,6 +328,9 @@ public class HistogramTests {
 		assertEquals(16,histogram.getCount(1.2));	
 	}
 	
+	/**
+	 * Tests some cases with fractional class widths
+	 */
 	@Test
 	public void testHistogramDoubleKey(){
 		//two class middles : 0.5 and 1.0
