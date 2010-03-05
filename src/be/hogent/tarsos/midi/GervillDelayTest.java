@@ -1,7 +1,6 @@
 package be.hogent.tarsos.midi;
 
 import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
@@ -12,48 +11,6 @@ import be.hogent.tarsos.ui.PianoTestFrame;
 
 public class GervillDelayTest {
 	
-	private static class ReceiverSink implements Receiver{
-		
-		Receiver[] receivers;
-		public ReceiverSink(Receiver... receivers){
-			this.receivers =  receivers;
-		}
-
-		@Override
-		public void close() {
-			for(Receiver receiver : receivers){
-				receiver.close();
-			}
-		}
-
-		@Override
-		public void send(MidiMessage message, long timeStamp) {
-			for(Receiver receiver : receivers){
-				receiver.send(message, timeStamp);
-			}
-		}
-	}
-	
-	private static class TransmitterSink implements Transmitter{
-		@Override
-		public void close() {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public Receiver getReceiver() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public void setReceiver(Receiver receiver) {
-			// TODO Auto-generated method stub
-			
-		}	
-	}
-	
 	public static void main(String[] args) throws Exception{
 		Receiver recv;
 		MidiDevice outputDevice = PlayAlong.getMidiDeviceInfo("Gervill",true);
@@ -63,7 +20,7 @@ public class GervillDelayTest {
 		midiInputDevice.open();
 		Transmitter	midiInputTransmitter = midiInputDevice.getTransmitter();
 		
-		recv = new ReceiverSink(recv , new DumpReceiver(System.out));
+		recv = new ReceiverSink(true,recv , new DumpReceiver(System.out));
 		midiInputTransmitter.setReceiver(recv);
 		
 		

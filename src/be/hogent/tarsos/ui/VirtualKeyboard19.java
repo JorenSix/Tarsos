@@ -1,4 +1,4 @@
-package be.hogent.tarsos.test.data;
+package be.hogent.tarsos.ui;
 
 import java.awt.Color;
 import java.awt.Graphics;

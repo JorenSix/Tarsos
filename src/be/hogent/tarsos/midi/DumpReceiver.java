@@ -171,11 +171,11 @@ public class DumpReceiver
 		switch (message.getCommand())
 		{
 		case 0x80:
-			strMessage = "note Off " + getKeyName(message.getData1()) + " velocity: " + message.getData2();
+			strMessage = "note Off " + message.getData1() + " velocity: " + message.getData2();
 			break;
-
+			
 		case 0x90:
-			strMessage = "note On " + getKeyName(message.getData1()) + " velocity: " + message.getData2();
+			strMessage = "note On  " + message.getData1() + " velocity: " + message.getData2();
 			break;
 
 		case 0xa0:

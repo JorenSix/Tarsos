@@ -21,14 +21,14 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Transmitter;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import be.hogent.tarsos.midi.DumpReceiver;
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.PlayAlong;
-import be.hogent.tarsos.test.data.VirtualKeyboard;
+import be.hogent.tarsos.midi.ReceiverSink;
 
 
 public class PianoTestFrame extends JFrame{
@@ -41,10 +41,8 @@ public class PianoTestFrame extends JFrame{
 	
 	Piano piano;
 	ChannelData cc;    // current channel
-
 	
-	
-	public PianoTestFrame(JComponent keyboard, double[] tuning){
+	public PianoTestFrame(UniversalVirtualKeyboard keyboard, double[] tuning){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
 		setLayout(new BorderLayout());
 	    Dimension dimension = new Dimension(650, 100);
@@ -57,42 +55,81 @@ public class PianoTestFrame extends JFrame{
         keyboardPanel.add(keyboard,BorderLayout.CENTER);
         
         
-        
-        Receiver recv;
-        
-        try {
-        	 MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("LoopBe Internal MIDI",true);
-			    MidiDevice	outputDevice = null;
-			    outputDevice = MidiSystem.getMidiDevice(synthInfo);
-			    outputDevice.open();
-			    recv = outputDevice.getReceiver();
+        try { 
+        	Receiver recv;
+        	 MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("Gervill",true);
+			 MidiDevice	outputDevice = null;
+			 outputDevice = MidiSystem.getMidiDevice(synthInfo);
+			 outputDevice.open();
+			 recv = outputDevice.getReceiver();
 				
-			
-			((VirtualKeyboard) keyboard).setReceiver(recv);
+			recv = new ReceiverSink(true,recv,new DumpReceiver(System.out));
+			keyboard.setReceiver(recv);
 
-			sendTunings(recv, 0, 5, "african", tuning);
-			sendTuningChange(recv, 0, 5);
+			sendTunings(recv, VirtualKeyboard.CHANNEL, 5, "african", tuning);
+			sendTuningChange(recv, VirtualKeyboard.CHANNEL, 5);
 			
-			MidiDevice midiInputDevice = PlayAlong.getMidiDeviceInfo("Keystation 49e",false);
+			/*
+			MidiDevice otherMidiInputDevice = PlayAlong.getMidiDeviceInfo("Keystation 49e",false);
+			otherMidiInputDevice.open();
+			Transmitter	otherMidiInputTransmitter = otherMidiInputDevice.getTransmitter();
+			otherMidiInputTransmitter.setReceiver(recv);
+			*/
+			
+			MidiDevice midiInputDevice = PlayAlong.getMidiDeviceInfo("LoopBe Internal MIDI",false);
 			midiInputDevice.open();
 			Transmitter	midiInputTransmitter = midiInputDevice.getTransmitter();
-			midiInputTransmitter.setReceiver(recv);
+			midiInputTransmitter.setReceiver(recv);						
 			
-			//DumpReceiver dumpReceiver = new DumpReceiver(System.out);
-			//midiInputTransmitter.setReceiver(dumpReceiver);
-			
-			//midiChannels[0].noteOn(69, 80);
-
-			this.add(keyboard,BorderLayout.CENTER);
 		} catch (MidiUnavailableException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidMidiDataException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}		
+		}	
+		this.add(keyboard,BorderLayout.CENTER);	
+	}
+	
+	public static void sendTuningChange(Receiver recv, int channel,
+	            int tuningpreset) throws InvalidMidiDataException {
+	        // Data Entry
+	        ShortMessage sm1 = new ShortMessage();
+	        sm1.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x64, 03);
+	        ShortMessage sm2 = new ShortMessage();
+	        sm2.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x65, 00);
+	        // Tuning program 19
+	        ShortMessage sm3 = new ShortMessage();
+	        sm3
+	                .setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x06,
+	                        tuningpreset);
+
+	        // Data Increment
+	        ShortMessage sm4 = new ShortMessage();
+	        sm4.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x60, 0x7F);
+	        // Data Decrement
+	        ShortMessage sm5 = new ShortMessage();
+	        sm5.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x61, 0x7F);
+
+	        recv.send(sm1, -1);
+	        recv.send(sm2, -1);
+	        recv.send(sm3, -1);
+	        recv.send(sm4, -1);
+	        recv.send(sm5, -1);
+	}
+	
+	public static void sendTunings(Receiver recv, int bank, int preset,
+	            String name, double[] tunings) throws IOException,
+	            InvalidMidiDataException {
+	        int[] itunings = new int[128];
+	        for (int i = 0; i < itunings.length; i++) {
+	            itunings[i] = (int) (tunings[i] * 16384.0 / 100.0);
+	        }
+
+	        SysexMessage msg = UniversalSysExBuilder.MidiTuningStandard
+	                .keyBasedTuningDump(UniversalSysExBuilder.ALL_DEVICES, bank,
+	                        preset, name, itunings);
+	        recv.send(msg, -1);
 	}
 	
 	/**
@@ -246,50 +283,7 @@ public class PianoTestFrame extends JFrame{
 	        }
 	    }
 	    
-	    public static void sendTuningChange(Receiver recv, int channel,
-	            int tuningpreset) throws InvalidMidiDataException {
-	        // Data Entry
-	        ShortMessage sm1 = new ShortMessage();
-	        sm1.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x64, 03);
-	        ShortMessage sm2 = new ShortMessage();
-	        sm2.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x65, 00);
-	        // Tuning program 19
-	        ShortMessage sm3 = new ShortMessage();
-	        sm3
-	                .setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x06,
-	                        tuningpreset);
 
-	        // Data Increment
-	        ShortMessage sm4 = new ShortMessage();
-	        sm4.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x60, 0x7F);
-	        // Data Decrement
-	        ShortMessage sm5 = new ShortMessage();
-	        sm5.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x61, 0x7F);
-
-	        recv.send(sm1, -1);
-	        recv.send(sm2, -1);
-	        recv.send(sm3, -1);
-	        recv.send(sm4, -1);
-	        recv.send(sm5, -1);
-	    }
-
-	    public static void sendTunings(Receiver recv, int bank, int preset,
-	            String name, double[] tunings) throws IOException,
-	            InvalidMidiDataException {
-	        int[] itunings = new int[128];
-	        for (int i = 0; i < itunings.length; i++) {
-	            itunings[i] = (int) (tunings[i] * 16384.0 / 100.0);
-	        }
-
-	        SysexMessage msg = UniversalSysExBuilder.MidiTuningStandard
-	                .keyBasedTuningDump(UniversalSysExBuilder.ALL_DEVICES, bank,
-	                        preset, name, itunings);
-	        recv.send(msg, -1);
-	    }
-
-	    
-
-	    
 	    /**
 	     * Stores MidiChannel information.
 	     */

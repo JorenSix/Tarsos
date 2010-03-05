@@ -16,8 +16,8 @@ import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.pitch.Sample.PitchUnit;
-import be.hogent.tarsos.test.data.VirtualKeyboard5;
 import be.hogent.tarsos.ui.PianoTestFrame;
+import be.hogent.tarsos.ui.UniversalVirtualKeyboard;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
@@ -88,7 +88,7 @@ public class PlayAlong {
 			tuningMax[i] = tuning[i] + tuning[i] * margin;
 		}
 		
-		final VirtualKeyboard5 keyboard = new VirtualKeyboard5();
+		final UniversalVirtualKeyboard keyboard = new UniversalVirtualKeyboard(peaks.size());
 		JFrame f = new PianoTestFrame(keyboard, tuning);
 		f.setVisible(true);
 		

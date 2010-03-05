@@ -1,4 +1,4 @@
-package be.hogent.tarsos.test.data;
+package be.hogent.tarsos.ui;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -20,15 +20,17 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
 import javax.swing.JComponent;
 
-public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitter, VirtualKeyboard {
-
+public class VirtualKeyboard5 extends JComponent implements Receiver, Transmitter, VirtualKeyboard {
+	
+	private static final int numberOfKeys = 65;
+	
     private static final long serialVersionUID = 1L;
 
-    private char[] virtualKeys = "zxcvbnmasdfghjqwertyu1234567".toCharArray();
+    private char[] virtualKeys = "qsdfghjklazertyuiop&й\"'(§и!за".toCharArray();
     
-    private boolean[] keyDown = new boolean[virtualKeys.length];
+    private boolean[] keyDown = new boolean[numberOfKeys];
     
-    private int lowestKey = 35;
+    private int lowestKey = 25;
     
     private Receiver recv = null;
     
@@ -43,13 +45,13 @@ public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitte
     public int getMidiNote(int x, int y)
     {
         int w = getWidth();
-        float nw = w / 128f;
+        float nw = w / numberOfKeys;
         
         int wn = (int)(x / nw);
         int oct = wn / 7;
         int n = oct * 7 + wn % 7;
         if(n < 0) n = 0;
-        if(n > 127) n = 127;
+        if(n > numberOfKeys - 1) n = numberOfKeys - 1;
         return n;
     }
     
@@ -57,7 +59,7 @@ public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitte
     {
         for (int i = 0; i < keyDown.length; i++) {
             if(keyDown[i])
-            if((i + lowestKey) < 128)
+            if((i + lowestKey) < numberOfKeys)
             {
                 ShortMessage sm = new ShortMessage();
                 try {
@@ -81,7 +83,7 @@ public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitte
         velocity = v;
     }
     
-    public VirtualKeyboard7() {
+    public VirtualKeyboard5() {
         super();
         setFocusable(true);
                 
@@ -120,29 +122,15 @@ public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitte
             }            
         });
         
+        
         addKeyListener(new KeyListener()
         {
-
-            
             public void keyPressed(KeyEvent e) {
                 char lc = Character.toLowerCase(e.getKeyChar());
                 for (int i = 0; i < virtualKeys.length; i++) {
                     if(virtualKeys[i] == lc)
                     {
-                        if(!keyDown[i])
-                        if((i + lowestKey) < 128)
-                        {
-                            ShortMessage sm = new ShortMessage();
-                            try {
-                                sm.setMessage(ShortMessage.NOTE_ON, channel, (i + lowestKey), velocity);
-                                if(recv != null)
-                                    recv.send(sm, -1);
-                                send(sm, -1);
-                            } catch (InvalidMidiDataException e1) {
-                                e1.printStackTrace();
-                            }                                        
-                            keyDown[i] = true;
-                        }                        
+                    	VirtualKeyboard5.this.pressKey(i);                   
                         return;
                     }
                 }
@@ -153,20 +141,7 @@ public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitte
                 for (int i = 0; i < virtualKeys.length; i++) {
                     if(virtualKeys[i] == lc)
                     {
-                        if(keyDown[i])
-                        if((i + lowestKey) < 128)
-                        {
-                            ShortMessage sm = new ShortMessage();
-                            try {
-                                sm.setMessage(ShortMessage.NOTE_OFF, channel, (i + lowestKey), 0);
-                                if(recv != null)
-                                    recv.send(sm, -1);
-                                send(sm, -1);
-                            } catch (InvalidMidiDataException e1) {
-                                e1.printStackTrace();
-                            }                                        
-                            keyDown[i] = false;
-                        }                        
+                        VirtualKeyboard5.this.releaseKey(i);                     
                         return;
                     }
                 }                
@@ -177,15 +152,15 @@ public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitte
                 if(e.getKeyChar() == '-')
                 {
                     allKeyboardKeyOff();
-                    lowestKey -= 7;
+                    lowestKey -= 5;
                     if(lowestKey < 0) lowestKey = 0;
                     repaint();
                 }
                 if(e.getKeyChar() == '+')
                 {
                     allKeyboardKeyOff();
-                    lowestKey += 7;
-                    if(lowestKey > 127) lowestKey -= 7;
+                    lowestKey += 5;
+                    if(lowestKey > numberOfKeys - 1) lowestKey -= 5;
                     repaint();
                 }
             }
@@ -206,6 +181,39 @@ public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitte
         });
     }
     
+    public void releaseKey(int i){
+    	 if(keyDown[i])
+         if((i + lowestKey) < numberOfKeys )
+         {
+             ShortMessage sm = new ShortMessage();
+             try {
+                 sm.setMessage(ShortMessage.NOTE_OFF, channel, (i + lowestKey), 0);
+                 if(recv != null)
+                     recv.send(sm, -1);
+                 send(sm, -1);
+             } catch (InvalidMidiDataException e1) {
+                 e1.printStackTrace();
+             }                                        
+             keyDown[i] = false;
+         }  
+    }
+    
+    public void pressKey(int i){
+    	if(!keyDown[i])
+        if((i + lowestKey) < numberOfKeys)
+        {
+            ShortMessage sm = new ShortMessage();
+            try {
+                sm.setMessage(ShortMessage.NOTE_ON, channel, (i + lowestKey), velocity);
+                if(recv != null)
+                    recv.send(sm, -1);
+                send(sm, -1);
+            } catch (InvalidMidiDataException e1) {
+                e1.printStackTrace();
+            }                                        
+            keyDown[i] = true;
+        } 
+    }
         
     public void paint(Graphics g) {
         super.paint(g);
@@ -218,10 +226,10 @@ public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitte
         int w = getWidth();
         int h = getHeight();
         
-        float nw = w / 128f;
+        float nw = w / numberOfKeys;
         float cx = 0;
         Rectangle2D rect = new Rectangle2D.Double();        
-        for (int i = 0; i < 128; i++) {
+        for (int i = 0; i < numberOfKeys; i++) {
             
                 rect.setRect(cx, 0, nw, h);
                 if(noteDown[i])
@@ -232,8 +240,10 @@ public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitte
                 g2.setColor(Color.BLACK);
                 g2.draw(rect);             
                               
-                if(i % 7 == 0)
+                if(i % 5 == 0)
                 g2.drawString("C", cx + 2, 12);
+                
+                g2.drawString(i + "", cx + 2, 24);
                 
                 if(hasFocus() && (i >= lowestKey))
                 if(i >= lowestKey)
@@ -277,5 +287,5 @@ public class VirtualKeyboard7 extends JComponent implements Receiver, Transmitte
     public void setReceiver(Receiver receiver) {
         recv = receiver;
     }
-
 }
+
