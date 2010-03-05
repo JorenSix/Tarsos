@@ -214,7 +214,7 @@ public class Histogram {
 				value = preventRoundingErrors(value + interval);
 			value = preventRoundingErrors(start + ((value - start) %  interval));
 		}	
-		if(value < start - classWidth / 2.0 || value > stop + classWidth / 2.0)
+		if(! validValue(value))
 			throw new IllegalArgumentException("Value not in the correct interval: " + value +" not " +
 					"between ["+ this.firstValidValue() + "," + this.lastValidValue() + "].");
 		double numberOfClasses = Math.floor((value + start)/classWidth);
@@ -648,7 +648,7 @@ public class Histogram {
 	 */
 	public static Histogram mean(List<Histogram> histograms){
 		Histogram mean = null;
-		if(histograms.size()==0){		
+		if(histograms.size()!=0){		
 			Histogram first = histograms.get(0);
 			mean = new Histogram(first);
 			for(double key : first.freqTable.keySet()){
