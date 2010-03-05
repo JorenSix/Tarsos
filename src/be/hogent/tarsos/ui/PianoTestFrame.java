@@ -26,11 +26,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.PlayAlong;
 import be.hogent.tarsos.test.data.VirtualKeyboard;
-import be.hogent.tarsos.ui.UniversalSysExBuilder.MidiTuningStandard;
 
 
 public class PianoTestFrame extends JFrame{

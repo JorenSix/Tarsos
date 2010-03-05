@@ -10,10 +10,9 @@ import java.util.ListIterator;
 
 import javax.imageio.ImageIO;
 
+import ptolemy.plot.Plot;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
-
-import ptolemy.plot.Plot;
 
 /**
  * @author Joren Six

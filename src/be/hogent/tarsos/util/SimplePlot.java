@@ -9,9 +9,8 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import be.hogent.tarsos.util.histogram.Histogram;
-
 import ptolemy.plot.Plot;
+import be.hogent.tarsos.util.histogram.Histogram;
 
 public class SimplePlot {
 	

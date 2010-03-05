@@ -3,11 +3,10 @@ package be.hogent.tarsos.pitch;
 import java.util.Iterator;
 import java.util.List;
 
-import be.hogent.tarsos.pitch.Sample.PitchUnit;
-import be.hogent.tarsos.util.StopWatch;
-
 import ptolemy.plot.Plot;
 import ptolemy.plot.PlotApplication;
+import be.hogent.tarsos.pitch.Sample.PitchUnit;
+import be.hogent.tarsos.util.StopWatch;
 
 public class PlotThread extends Thread{
 	

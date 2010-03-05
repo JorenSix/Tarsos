@@ -142,7 +142,7 @@ public class HistogramTests {
 		//realistic data test
 		//data = octave [0-1200]
 		//classwidth = 6
-		table = PitchFunctions.readFrequencyTable("src/tarsos/test/data/african_octave_frequency_table.txt");
+		table = PitchFunctions.readFrequencyTable("src/be/hogent/tarsos/test/data/african_octave_frequency_table.txt");
 		otherTable = new Histogram(table);
 		
 		//create an other table with the same values but 30 cents higher 		
@@ -274,7 +274,7 @@ public class HistogramTests {
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
-	public void testIndexOutOfBoundsException() {
+	public void testNonWrappingIllegalArgument() {
 		Histogram h = new Histogram(1.0, 13.0, 12,false);
 		h.add(24.6);
 	}
