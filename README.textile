@@ -1,0 +1,15 @@
+h1. Tarsos
+
+Currently Tarsos is a collection of Java classes to create, compare
+and process pitch-frequency histogram data.
+
+h2. Credits
+
+Tarsos is developed at University College Ghent, Faculty of Music 
+http://cons.hogent.be
+
+Tarsos uses a number of open source libraries 
+See the libs directory.
+
+
+
