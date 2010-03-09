@@ -1,12 +1,91 @@
-package be.hogent.tarsos.ui;
+package be.hogent.tarsos.midi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.ShortMessage;
 import javax.sound.midi.SysexMessage;
 
-public class UniversalSysExBuilder {
+/**
+ * @author Joren Six
+ *
+ * MidiUtils provides a lot of MIDI messages. Also it can be used to
+ * build and send tuning messages to a receiver.
+ *
+ * Uses a lot of unmodified code from the gervill software package,
+ * licensed under the GPL with the classpath exception.
+ * 
+ * <a href="https://gervill.dev.java.net/source/browse/gervill/src.demos/">Gervill source code</a>
+ *
+ */
+public class MidiUtils {
+	
+	
+	/**
+	 * Enables a tuning preset
+	 * @param recv the receiver to send the message to 
+	 * @param channel the channel to send the message on
+	 * @param tuningpreset the index of the tuning preset
+	 * @throws InvalidMidiDataException if something goes awry.
+	 */
+	public static void sendTuningChange(Receiver recv, int channel,
+			int tuningpreset) throws InvalidMidiDataException {
+		// Data Entry
+		ShortMessage sm1 = new ShortMessage();
+		sm1.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x64, 03);
+		ShortMessage sm2 = new ShortMessage();
+		sm2.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x65, 00);
+		// Tuning program 19
+		ShortMessage sm3 = new ShortMessage();
+		sm3
+				.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x06,
+						tuningpreset);
+
+		// Data Increment
+		ShortMessage sm4 = new ShortMessage();
+		sm4.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x60, 0x7F);
+		// Data Decrement
+		ShortMessage sm5 = new ShortMessage();
+		sm5.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x61, 0x7F);
+
+		recv.send(sm1, -1);
+		recv.send(sm2, -1);
+		recv.send(sm3, -1);
+		recv.send(sm4, -1);
+		recv.send(sm5, -1);
+	}
+
+	/**
+	 * Sends a {@link MidiUtils.MidiTuningStandard.keyBasedTuningDump} MIDI
+	 * message to a receiver using the specified tuning in cents.
+	 * @param recv
+	 * @param bank
+	 * @param preset
+	 * @param name
+	 * @param tunings
+	 * @throws IOException
+	 * @throws InvalidMidiDataException
+	 */
+	public static void sendTunings(Receiver recv, int bank, int preset,
+			String name, double[] tunings) throws IOException,
+			InvalidMidiDataException {
+		assert tunings.length == 128;
+		int[] itunings = new int[128];
+		for (int i = 0; i < itunings.length; i++) {
+			itunings[i] = (int) (tunings[i] * 16384.0 / 100.0);
+		}
+
+		SysexMessage msg = MidiUtils.MidiTuningStandard.keyBasedTuningDump(
+				MidiUtils.ALL_DEVICES, bank, preset, name, itunings);
+		recv.send(msg, -1);
+	}
+	
+	
+	
+	//------------- MIDI MESSAGES ------------------
+	
 
     public static final int ALL_DEVICES = 0x7F;
 
@@ -63,6 +142,7 @@ public class UniversalSysExBuilder {
             return setGeneralMidiMessage(targetDevice, GENERAL_MIDI_2_ON);
         }
     }
+
 
     public static class DeviceControl {
 
@@ -357,6 +437,10 @@ public class UniversalSysExBuilder {
         }
     }
 
+    /**
+     * 
+     * See: <a href="http://www.midi.org/techspecs/midituning.php">the MIDI Tuning Messages specification</a>
+     */
     public static class MidiTuningStandard {
 
         public static final int TUNING_A440 = 45 * 128 * 128;

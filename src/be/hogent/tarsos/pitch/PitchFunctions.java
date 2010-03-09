@@ -26,7 +26,8 @@ public class PitchFunctions {
 	private PitchFunctions(){}
 
 	/**
-	 * Converts the Hertz values to cent. The reference frequency is 32.7032 Hz. 
+	 * Converts the Hertz values to cent. 
+	 * The reference frequency is 32.7032 Hz. 
 	 * This is C1 on a piano keyboard with A4 tuned to 440 Hz.
 	 * This means that 0 cents is C1; 1200 is C2; 2400 is C3; ... also -1200 cents is C0 
 	 * @param pitchValuesInHertz the pitch values in Hertz
@@ -51,20 +52,22 @@ public class PitchFunctions {
 		return convertedValues;
 	}
 
-	private static void convertHertzToAbsoluteCent(List<Double> convertedValues){
-		//reference frequency of 32.7032... Hz
-		//27.5 Hz is A0 (440, 220, 110, 55, 27.5) 
-		double reference_frequency = 27.5 * Math.pow(2.0,0.25);//32.7 Hz
-		double log_two = Math.log(2.0);
+	private static void convertHertzToAbsoluteCent(List<Double> convertedValues){		
 		for(int i=0;i<convertedValues.size();i++){
 			Double valueInHertz = convertedValues.get(i);
-			double pitchValueInAbsoluteCent = 0.0;
-			if(valueInHertz != 0)
-				pitchValueInAbsoluteCent = 1200 * Math.log(valueInHertz/reference_frequency) / log_two;
-			//else
-			//	pitchValueInAbsoluteCent = 0.0 and not log(0) => Infinity
-			convertedValues.set(i, pitchValueInAbsoluteCent);
+			convertedValues.set(i, convertHertzToAbsoluteCent(valueInHertz));
 		}			
+	}
+	
+	//the reference frequency of 32.7032... Hz
+	//27.5 Hz is A0 (440, 220, 110, 55, 27.5) 
+	private static final double reference_frequency = 27.5 * Math.pow(2.0,0.25);//32.7 Hz
+	private static final double log_two = Math.log(2.0);
+	public static double convertHertzToAbsoluteCent(Double hertzValue){
+		double pitchValueInAbsoluteCent = 0.0;
+		if(hertzValue != 0)
+			pitchValueInAbsoluteCent = 1200 * Math.log(hertzValue/reference_frequency) / log_two;
+		return pitchValueInAbsoluteCent;
 	}
 
 	/**
@@ -286,19 +289,8 @@ public class PitchFunctions {
 		}
 	
 		for(int j=0;j<windowSize/2;j++)
-			filteredList.add(0.0);	
+			filteredList.add(0.0);
 		
-		/*
-		//scale
-		double maxOriginalValue = Double.NEGATIVE_INFINITY;
-		double maxNewValue = Double.NEGATIVE_INFINITY;
-		double scale = maxOriginalValue / maxNewValue;
-		for(int i=0;i<filteredList.size();i++){
-			maxOriginalValue = Math.max(maxOriginalValue,originalValue);	
-			maxNewValue = Math.max(maxNewValue,newValue);
-			filteredList.set(i, filteredList.get(i) * scale);
-		}
-		*/
 		return filteredList;
 	}
 
