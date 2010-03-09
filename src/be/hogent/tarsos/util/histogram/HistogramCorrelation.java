@@ -10,7 +10,7 @@ public interface HistogramCorrelation {
 	 * @param thisHistogram the first histogram
 	 * @param displacement the value to displace the otherHistogram (e.g. for optimal correlation, minimum distance between the two)
 	 * @param otherHistogram the second (not displaced) histogram
-	 * @return
+	 * @return the correlation between a histogram and a displaced histogram
 	 */
 	double correlation(Histogram thisHistogram,int displacement,Histogram otherHistogram);
 

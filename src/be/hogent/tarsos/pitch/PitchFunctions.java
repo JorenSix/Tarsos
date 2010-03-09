@@ -103,7 +103,7 @@ public class PitchFunctions {
 	/**
 	 * Calculates the median for a list of doubles.
 	 * The list is sorted in-place. 
-	 * @param The list.
+	 * @param list The list.
 	 * @return The median.
 	 * @exception If the list is null or empty the median is undefined and an error is thrown.
 	 */
@@ -328,7 +328,9 @@ public class PitchFunctions {
 	 * [0-400[, [400-800[ and [800-1200[. 
 	 *
 	 * @param values the data to distribute over the bins/classes.
-	 * @param resolution the with of the classes
+	 * @param classWidth the resolution or the with of the classes
+	 * @param start the starting value
+	 * @param stop the stopping value
 	 * @return The number of items in each class
 	 */
 	public static Histogram createFrequencyTable(List<Double> values,double classWidth,double start,double stop){

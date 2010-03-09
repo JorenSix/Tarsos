@@ -542,7 +542,7 @@ public class Histogram {
 	 * to chain modifications. E.g. <code>histo.normalize().addToEachBin(10)</code>
 	 * </p>
 	 * @param value the number of items to add.
-	 * @return 
+	 * @return returns the current histogram so it is possible to chain modifications.
 	 */
 	public Histogram addToEachBin(long value){
 		//do nothing if value == 0
@@ -605,7 +605,7 @@ public class Histogram {
 	 * Changes the current histogram and returns it so it is possible 
 	 * to chain modifications. E.g. <code>histo.normalize().addToEachBin(10)</code>
 	 * </p> 
-	 * @factor the factor to multiply each bin value with.
+	 * @param factor the factor to multiply each bin value with.
 	 * @return histogram with each bin value multiplied by the factor.
 	 */
 	public Histogram multiply(double factor) {	
@@ -620,7 +620,7 @@ public class Histogram {
 	 * Changes the current histogram and returns it so it is possible 
 	 * to chain modifications. E.g. <code>histo.normalize().addToEachBin(10)</code>
 	 * </p> 
-	 * @exponent The exponent to raise each bincount with.
+	 * @param exponent The exponent to raise each bincount with.
 	 * @return Histogram with each bin count raised with exponent.
 	 */
 	public Histogram raise(double exponent) {	
@@ -911,7 +911,7 @@ public class Histogram {
 	 * 
 	 * @param otherHistogram
 	 * @param correlationMeasure
-	 * @return
+	 * @return the correlation between this histogram with another histogram.
 	 */
 	public double correlation(Histogram otherHistogram,CorrelationMeasure correlationMeasure) {
 		if(otherHistogram.classWidth!=classWidth)

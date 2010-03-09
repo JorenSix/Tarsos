@@ -40,7 +40,7 @@ public class IPEMPitchDetection implements PitchDetector{
 	
 	/**
 	 * 
-	 * @param fileName
+	 * @param file the file to detect pitch for
 	 */
 	public IPEMPitchDetection(AudioFile file){			
 		this.file = file;

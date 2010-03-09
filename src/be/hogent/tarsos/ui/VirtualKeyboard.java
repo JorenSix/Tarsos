@@ -13,9 +13,9 @@ public interface VirtualKeyboard extends Transmitter, Receiver {
 	 */
 	public static final int VELOCITY = 85;
 	/**
-	 * The number of keys on the keyboard
+	 * The number of MIDI keys in total
 	 */
-	public static final int NUMBER_OF_KEYS = 128;
+	public static final int NUMBER_OF_MIDI_KEYS = 128;
 	
     // on a azerty (Belgian) keyboard)
 	public static final String mappedKeys = "qsdfghjklmazertyuiop&й\"'(§и!за";

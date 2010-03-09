@@ -16,9 +16,8 @@ public class PeakDetector {
 	 * Create a histogram with peak information. Instead of triangular peaks it creates a histogram (with the
 	 * same resolution (bin widths) as the original) with peaks in the form of gaussian curves.
 	 * @param histogram the histogram to detect peaks for
-	 * @param fileName the filename to save the peak information
-	 * @param start first value of the histogram e.g. 0 (cents) in case of a (octave) folded pitch histogram
-	 * @param stop last value of the histogram e.g. 1200 (cents) in case of a  (octave) folded pitch histogram
+	 * @param windowSize the windows to detect peaks in.
+	 * @param meanFactorThreshold the treshold when peaks are accepted.
 	 * @return a histogram with peak information. Can be used to match with other histograms (files)
 	 */
 	public static Histogram newPeakDetection(Histogram histogram, int windowSize, double meanFactorThreshold){

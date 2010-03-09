@@ -36,8 +36,12 @@ public class UniversalVirtualKeyboard extends JComponent implements
 	private final boolean[] keyDown;
 	
 	public UniversalVirtualKeyboard(int numberOfKeysPerOctave) {
-		//default: 7 octaves
-		this(numberOfKeysPerOctave,numberOfKeysPerOctave*7 > 128 ? 128 : numberOfKeysPerOctave*7 );
+		//default: 7 octaves 
+		//number of keys smaller than VirtualKeyboard.NUMBER_OF_MIDI_KEYS
+		this(numberOfKeysPerOctave, 
+				numberOfKeysPerOctave*7 > VirtualKeyboard.NUMBER_OF_MIDI_KEYS ? 
+						VirtualKeyboard.NUMBER_OF_MIDI_KEYS : 
+						numberOfKeysPerOctave*7 );
 	}
 
 	public UniversalVirtualKeyboard(int numberOfKeysPerOctave,int numberOfKeys) {
@@ -120,11 +124,12 @@ public class UniversalVirtualKeyboard extends JComponent implements
 	
 	/**
 	 * Sends a NOTE_ON or NOTE_OFF message on the requested key. 
-	 * @param midiKey The midi key to send the message for [0,127]
+	 * @param midiKey The midi key to send the message for [0,VirtualKeyboard.NUMBER_OF_MIDI_KEYS[
 	 * @param sendOnMessage <code>true</code> for NOTE_ON messages, <code>false</code> for NOTE_OFF
 	 */
 	private void sendNoteMessage(int midiKey, boolean sendOnMessage){
-		if(midiKey > numberOfKeys)
+		//midikey should be smaller than 128
+		if(midiKey >= VirtualKeyboard.NUMBER_OF_MIDI_KEYS)
 			throw new Error("Requested invalid midi key: " + midiKey);
 		
 		//do not send note on messages to pressed keys
@@ -202,6 +207,11 @@ public class UniversalVirtualKeyboard extends JComponent implements
 
 			cx += nw;
 		}
+	}
+	
+	protected void allKeysOff(){
+		for(int midiKey = 0 ; midiKey < VirtualKeyboard.NUMBER_OF_MIDI_KEYS ; midiKey++)
+			sendNoteMessage(midiKey, false);
 	}
 
 	@Override
