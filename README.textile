@@ -1,7 +1,7 @@
 h1. Tarsos
 
 Currently Tarsos is a collection of Java classes to create, compare
-and process pitch-frequency data using histograms.
+and process pitch-frequency data using histograms. 
 
 h2. Credits
 
