@@ -114,7 +114,6 @@ public class AudioTranscoder
 	 * checks if the file has the expected format, number of channels and sampling rate. If not 
 	 * then transcoding is required. If target is not found then transcoding is also required.
 	 * @param target the path to the transcoded file or file to transcode
-	 * @param channels Defines the number of channels the transcoded file should have.
 	 * @return false if the file is already transcoded as per the requested parameters, false otherwise.
 	 */
 	public static boolean transcodingRequired(String target){
