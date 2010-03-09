@@ -6,9 +6,10 @@ and process pitch-frequency data using histograms.
 h2. Credits
 
 Tarsos is developed at University College Ghent, Faculty of Music 
+
 "http://cons.hogent.be":http://cons.hogent.be
 
-Tarsos uses a number of open source libraries
+Tarsos uses a number of open source libraries:
  
 * "Gervill":https://gervill.dev.java.net/: a software sound synthesizer, supports the MIDI Tuning Standard. "API":https://gervill.dev.java.net/nonav/javadoc/index.html.
 * "Jave":http://www.sauronsoftware.it/projects/jave/: a wrapper for "ffmpeg":http://ffmpeg.org/. 
