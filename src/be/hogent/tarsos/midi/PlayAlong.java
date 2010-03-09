@@ -9,8 +9,8 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JFrame;
 
-import be.hogent.peak.Peak;
-import be.hogent.peak.PeakDetector;
+import be.hogent.tarsos.peak.Peak;
+import be.hogent.tarsos.peak.PeakDetector;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;

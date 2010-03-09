@@ -1,4 +1,4 @@
-package be.hogent.peak;
+package be.hogent.tarsos.peak;
 
 import java.util.ArrayList;
 import java.util.Collections;

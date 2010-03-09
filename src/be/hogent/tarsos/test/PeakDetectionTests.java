@@ -4,10 +4,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import be.hogent.peak.DifferenceScore;
-import be.hogent.peak.LocalHeightScore;
-import be.hogent.peak.LocalVolumeScore;
-import be.hogent.peak.PeakDetector;
+import be.hogent.tarsos.peak.DifferenceScore;
+import be.hogent.tarsos.peak.LocalHeightScore;
+import be.hogent.tarsos.peak.LocalVolumeScore;
+import be.hogent.tarsos.peak.PeakDetector;
 import be.hogent.tarsos.pitch.PitchFunctions;
 import be.hogent.tarsos.util.SimplePlot;
 import be.hogent.tarsos.util.histogram.CorrelationMeasure;

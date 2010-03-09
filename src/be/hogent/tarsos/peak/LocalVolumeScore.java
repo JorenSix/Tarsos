@@ -1,4 +1,4 @@
-package be.hogent.peak;
+package be.hogent.tarsos.peak;
 
 import org.apache.commons.math.stat.StatUtils;
 

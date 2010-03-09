@@ -1,4 +1,4 @@
-package be.hogent.peak;
+package be.hogent.tarsos.peak;
 
 
 public class Unit implements Comparable<Unit>

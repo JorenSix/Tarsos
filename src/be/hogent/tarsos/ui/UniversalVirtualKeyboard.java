@@ -36,6 +36,7 @@ public class UniversalVirtualKeyboard extends JComponent implements
 	private final boolean[] keyDown;
 	
 	public UniversalVirtualKeyboard(int numberOfKeysPerOctave) {
+		//default: 7 octaves
 		this(numberOfKeysPerOctave,numberOfKeysPerOctave*7 > 128 ? 128 : numberOfKeysPerOctave*7 );
 	}
 
@@ -46,7 +47,7 @@ public class UniversalVirtualKeyboard extends JComponent implements
 		this.numberOfKeys = numberOfKeys;
 		this.numberOfKeysPerOctave = numberOfKeysPerOctave;
 		this.currentlyPressedMidiNote = -1;
-		lowestAssignedKey = 3 * numberOfKeysPerOctave;
+		lowestAssignedKey = 3 * numberOfKeysPerOctave;//start at octave 3
 		
 		keyDown = new boolean[numberOfKeys];
 
@@ -80,9 +81,8 @@ public class UniversalVirtualKeyboard extends JComponent implements
                 int pressedKeyChar = e.getKeyChar();
                 for (int i = 0; i < VirtualKeyboard.mappedKeys.length(); i++) {
                     if(VirtualKeyboard.mappedKeys.charAt(i) == pressedKeyChar){
-                    	int midiKey = i+lowestAssignedKey;
-                    	if(midiKey < UniversalVirtualKeyboard.this.numberOfKeys)
-                        if(!keyDown[midiKey]){
+                    	int midiKey = i + lowestAssignedKey;
+                        if(midiKey < UniversalVirtualKeyboard.this.numberOfKeys && !keyDown[midiKey]){
                         	sendNoteMessage(midiKey,true);
                         }                        
                         return;
@@ -118,6 +118,11 @@ public class UniversalVirtualKeyboard extends JComponent implements
         });
 	}
 	
+	/**
+	 * Sends a NOTE_ON or NOTE_OFF message on the requested key. 
+	 * @param midiKey The midi key to send the message for [0,127]
+	 * @param sendOnMessage <code>true</code> for NOTE_ON messages, <code>false</code> for NOTE_OFF
+	 */
 	private void sendNoteMessage(int midiKey, boolean sendOnMessage){
 		if(midiKey > numberOfKeys)
 			throw new Error("Requested invalid midi key: " + midiKey);
@@ -125,7 +130,7 @@ public class UniversalVirtualKeyboard extends JComponent implements
 		//do not send note on messages to pressed keys
 		if(sendOnMessage && keyDown[midiKey])
 			return;
-		//do not send note off messages to keys that are not down
+		//do not send note off messages to keys that are not pressed
 		if(!sendOnMessage && !keyDown[midiKey])
 			return;
 		
@@ -205,9 +210,7 @@ public class UniversalVirtualKeyboard extends JComponent implements
 	}
 
 	@Override
-	public void close() {
-
-	}
+	public void close() {}
 
 	@Override
 	public Receiver getReceiver() {
@@ -216,7 +219,7 @@ public class UniversalVirtualKeyboard extends JComponent implements
 
 	@Override
 	public void send(MidiMessage message, long timeStamp) {
-
+		//implements Receiver send: makes sure the right keys are marked 
 		if (message instanceof ShortMessage) {
 			ShortMessage sm = (ShortMessage) message;
 			boolean correctChannel = sm.getChannel() == VirtualKeyboard.CHANNEL;
