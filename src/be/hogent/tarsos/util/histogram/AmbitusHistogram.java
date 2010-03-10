@@ -11,11 +11,13 @@ import be.hogent.tarsos.util.Configuration.Config;
  * Values outside the defined range are ignored!
  */
 public class AmbitusHistogram extends Histogram{
-	
 	public AmbitusHistogram() {
-		super(Configuration.getInt(Config.ambitus_start)
-			,Configuration.getInt(Config.ambitus_stop), 
-			1200 / Configuration.getInt(Config.histogram_bin_width),false,true);
+		super(
+			Configuration.getInt(Config.ambitus_start),
+			Configuration.getInt(Config.ambitus_stop), 
+			1200 / Configuration.getInt(Config.histogram_bin_width),
+			false,
+			true
+		);
 	}
-
 }
