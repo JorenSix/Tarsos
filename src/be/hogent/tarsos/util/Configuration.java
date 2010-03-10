@@ -37,16 +37,44 @@ public class Configuration {
 		 * The (relative) directory to save (text) data files
 		 */
 		data_directory(true),
+		
 		/**
 		 * The (relative) directory to save generated audio
 		 */
 		generated_audio_directory(true),
+		
+		
+		/**
+		 * The reference frequency to base all absolute cent calculations on.
+		 * <br>
+		 * The default value is the frequency of C0 with A4 tuned to 440Hz:
+		 * <br>
+		 * <code>440/32 * Math.pow(2.0,0.25) = 16.35 Hz</code> 
+		 */
+		absolute_cents_reference_frequency,
+		
+		/**
+		 * The Ambitus (range) start value in cents:
+		 * <br>
+         * The default value is 0 (from 16Hz)
+		 */
+		ambitus_start,
+		
+		/**
+		 The Ambitus (range) stop value in cents:
+		 * <br>
+         * The default value is <br>
+         * <code>1200 * 8 = 9600 cents = C8 = 4186.01 Hz<code>
+		 */
+		ambitus_stop,
+		
 		/**
 		 * Transcode the audio or just copy it.
 		 * <br>
 		 * The default is <code>true</code>.
 		 */
-		transcode_audio,		
+		transcode_audio,
+		
 		/**
 		 * If the transcoded audio format check is skipped 
 		 * the program only checks if the file exists, not its format.
@@ -62,13 +90,15 @@ public class Configuration {
 		 * <br>
 		 * The default is <code>data/transcoded_audio</code>.
 		 */
-		transcoded_audio_directory(true),		
+		transcoded_audio_directory(true),
+		
 		/**
 		 * The sampling rate for the transcoded audio.
 		 * <br>
 		 * The default rate is 44.1 kHz.
 		 */
-		transcoded_audio_sampling_rate,		
+		transcoded_audio_sampling_rate,
+		
 		/**
 		 * The audio codec used for the transcoded files.
 		 * <br> 
@@ -100,6 +130,9 @@ public class Configuration {
 		 * The default is mono so 1 channel.
 		 */
 		transcoded_audio_number_of_channels;
+		
+		
+		
 		
 		boolean isRequiredDirectory;
 		Config(boolean isRequiredDirectory){

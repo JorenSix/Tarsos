@@ -11,7 +11,6 @@ import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.SimplePlot;
 import be.hogent.tarsos.util.histogram.Histogram;
 
 

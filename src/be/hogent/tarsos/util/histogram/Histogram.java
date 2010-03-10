@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import org.apache.commons.math.stat.StatUtils;
 
@@ -40,6 +41,8 @@ import org.apache.commons.math.stat.StatUtils;
  *
  */
 public class Histogram {
+	private static final Logger log = Logger.getLogger(Histogram.class.getName());
+	
 	/**
 	 * The width of each class (or bin) is equal to stop - start / number of classes.
 	 */
@@ -68,6 +71,13 @@ public class Histogram {
 	 * mapped to values inside the range using a modulo calculation. If wraps 
 	 */
 	private boolean wraps; 
+	
+	
+	/**
+	 * if <code>true</code> values outside the valid range are ignored. Otherwise if a value 
+	 * outside the valid range is added an IllegalArgumentException is thrown.
+	 */
+	private boolean ignoreValuesOutsideRange;
 
 
 	/**
@@ -85,8 +95,10 @@ public class Histogram {
 	 * @param wraps indicates if the histogram wraps around the edges. More formal: If the histogram wraps 
 	 * values outside the range <code>]start - classWidht / 2, stop + classWidth / 2 [</code> are mapped to values 
 	 * inside the range using a modulo calculation.
+	 * @ignoreValuesOutsideRange if <code>true</code> values outside the valid range are ignored. Otherwise if a value 
+	 * outside the valid range is added an IllegalArgumentException is thrown.
 	 */
-	public Histogram(double start, double stop,int numberOfClasses,boolean wraps){
+	public Histogram(double start, double stop,int numberOfClasses,boolean wraps,boolean ignoreValuesOutsideRange){
 		if( stop <= start)
 			throw new IllegalArgumentException("The stopping value (" + stop + ") should be bigger than the starting value (" + start + ") .");
 
@@ -95,6 +107,7 @@ public class Histogram {
 		this.stop = stop;
 		this.freqTable = new TreeMap<Double, Long>();
 		this.wraps = wraps;
+		this.ignoreValuesOutsideRange = ignoreValuesOutsideRange;
 		
 		double lastKey = stop - getClassWidth() / 2;  
 
@@ -112,7 +125,7 @@ public class Histogram {
 	 * @param original the original histogram
 	 */
 	public Histogram(Histogram original) {
-		this(original.getStart(),original.getStop(),original.numberOfClasses,original.wraps);
+		this(original.getStart(),original.getStop(),original.numberOfClasses,original.wraps,original.ignoreValuesOutsideRange);
 	}
 
 	/**
@@ -129,7 +142,27 @@ public class Histogram {
 	 * @param numberOfClasses the number of classes between  the starting and stopping values. Also defines the classWidth.
 	 */
 	public Histogram(double start, double stop,int numberOfClasses){
-		this(start,stop,numberOfClasses,false);
+		this(start,stop,numberOfClasses,false,false);
+	}
+
+	/**
+	 * <p>
+	 * Create a Histogram with a certain number of classes with values in the range
+	 * <code>]start - classWidht / 2, stop + classWidth / 2 [</code> if the histogram wraps otherwise values
+	 * outside the range are mapped to values inside using a modulo calculation
+	 * </p>
+	 * 
+	 * @param start the starting value of the histogram. The starting value is not the same as 
+	 * the first class middle. The starting value is equal to <code>the first class middle - classWidth / 2</code>
+	 * @param stop the stopping value of the histogram. The stopping value is not the same as the last 
+	 * class middle. The stopping value is equal to <code>the last class middle + classWidth / 2</code>
+	 * @param numberOfClasses the number of classes between  the starting and stopping values. Also defines the classWidth.
+	 * @param wraps indicates if the histogram wraps around the edges. More formal: If the histogram wraps 
+	 * values outside the range <code>]start - classWidht / 2, stop + classWidth / 2 [</code> are mapped to values 
+	 * inside the range using a modulo calculation.
+	 */
+	public Histogram(double start, double stop,int numberOfClasses,boolean wraps) {
+		this(start,stop,numberOfClasses,wraps,true);
 	}
 
 	/**
@@ -175,6 +208,16 @@ public class Histogram {
 	 * @exception throws a null pointer exception when the value is not in the range of the histogram
 	 */
 	public Histogram add(double value){
+		
+		if(!wraps && !ignoreValuesOutsideRange && !validValue(value) )
+			throw new IllegalArgumentException("Value not in the correct interval: "
+					 + value +" not between " +
+					"["+ this.firstValidValue() + "," + this.lastValidValue() + "].");
+		else if (!wraps && ignoreValuesOutsideRange && !validValue(value))
+			log.info("Ignored value " + value +" (not between " +
+					"["+ this.firstValidValue() + "," + this.lastValidValue() + "]).");
+			
+		
 		double key = valueToKey(value);
 		Long count = freqTable.get(key);
 		assert count != null: "all key values should be initialized, " + key + " is not.";
@@ -204,7 +247,8 @@ public class Histogram {
 	 * @return the key closest to the value
 	 */
 	private double valueToKey(double value){
-		//TODO remove the value below zero limitation and test
+		//TODO remove the value below zero limitation 
+		//by changing the wraps modulo calculation and test
 		if(value < 0)
 			throw new IllegalArgumentException("Currently no values below zero are accepted");
 		
@@ -213,10 +257,10 @@ public class Histogram {
 			while(value < freqTable.firstKey() )
 				value = preventRoundingErrors(value + interval);
 			value = preventRoundingErrors(start + ((value - start) %  interval));
-		}	
-		if(! validValue(value))
-			throw new IllegalArgumentException("Value not in the correct interval: " + value +" not " +
-					"between ["+ this.firstValidValue() + "," + this.lastValidValue() + "].");
+		}
+		
+		assert validValue(value);
+		
 		double numberOfClasses = Math.floor((value + start)/classWidth);
 		double offset = classWidth/2 - start;
 		double key =  preventRoundingErrors(numberOfClasses * classWidth + offset);

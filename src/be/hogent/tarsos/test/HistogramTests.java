@@ -255,7 +255,7 @@ public class HistogramTests {
 	
 	@Test
 	public void testWrappingBehaviour(){
-		Histogram h = new Histogram(1.0, 13.0, 12,true);
+		Histogram h = new Histogram(1.0, 13.0, 12,true,false);
 		//add some values for class with class middle 
 		//4 at value 1.5
 		h.add( 1.0);
@@ -275,10 +275,20 @@ public class HistogramTests {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testNonWrappingIllegalArgument() {
-		Histogram h = new Histogram(1.0, 13.0, 12,false);
+		Histogram h = new Histogram(1.0, 13.0, 12,false,false);
 		h.add(24.6);
 	}
 
+	@Test
+	public void testIgnoreValuesOusideRange(){
+		Histogram h = new Histogram(7.0, 13.0, 12,false,true);
+		h.add(5656);
+		h.add(565);
+		h.add(791);
+		h.add(2);
+		h.add(8);
+		assertEquals(1, h.getSumFreq());		
+	}
 	
 	@Test
 	public void testHistogramMean(){

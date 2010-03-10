@@ -11,7 +11,7 @@ import be.hogent.tarsos.util.histogram.Histogram;
 public class CorrelationTests {
 
 	public Histogram buildTable(){
-		Histogram table = new Histogram(0,1,2,false);
+		Histogram table = new Histogram(0,1,2,false,false);
 		
 		//5 values in bin 1.0
 		table.add(0.5);

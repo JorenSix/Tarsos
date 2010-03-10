@@ -61,7 +61,7 @@ public class PitchFunctions {
 	
 	//the reference frequency of 32.7032... Hz
 	//27.5 Hz is A0 (440, 220, 110, 55, 27.5) 
-	private static final double reference_frequency = 27.5 * Math.pow(2.0,0.25);//32.7 Hz
+	private static final double reference_frequency = 27.5 * Math.pow(2.0,0.25)/2;//32.7 Hz
 	private static final double log_two = Math.log(2.0);
 	public static double convertHertzToAbsoluteCent(Double hertzValue){
 		double pitchValueInAbsoluteCent = 0.0;
