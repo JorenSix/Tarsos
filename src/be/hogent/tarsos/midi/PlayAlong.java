@@ -82,9 +82,9 @@ public class PlayAlong {
 		
 		
 		
-		//align tuning to MIDI note 69, A4 or 440Hz.
-		Double referenceNote = PitchFunctions.convertHertzToAbsoluteCent(440.0);
-		int referenceNoteMidiNumber = 69;
+		//align tuning to MIDI note 57, A3 or 220Hz.
+		Double referenceNote = PitchFunctions.convertHertzToAbsoluteCent(220.0);
+		int referenceNoteMidiNumber = 57;
 		
 		int midiNoteClosestToReference = -1;
 		double closestDistance = Double.MAX_VALUE;
@@ -99,7 +99,7 @@ public class PlayAlong {
 			}
 		}
 		
-		System.out.println("Closest to 440Hz, 69, " + referenceNote + " is " + midiNoteClosestToReference + ": " + tuning[midiNoteClosestToReference]);
+		System.out.println("Closest to 220Hz,57, " + referenceNote + " is " + midiNoteClosestToReference + ": " + tuning[midiNoteClosestToReference]);
 		
 		double rebasedTuning[] = new double [128];
 		int diff = referenceNoteMidiNumber - midiNoteClosestToReference;
@@ -111,35 +111,26 @@ public class PlayAlong {
 		
 		
 		try { 
-			Receiver recv;
+			
 			MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("Gervill",true);
-			MidiDevice outputDevice = null;
-			outputDevice = MidiSystem.getMidiDevice(synthInfo);
-			outputDevice.open();
-			
-
+			MidiDevice synthDevice = null;
+			synthDevice = MidiSystem.getMidiDevice(synthInfo);
+			synthDevice.open();
 			
 			
-			/*
-			MidiDevice otherMidiInputDevice = PlayAlong.getMidiDeviceInfo("Keystation 49e",false);
-			otherMidiInputDevice.open();
-			Transmitter	otherMidiInputTransmitter = otherMidiInputDevice.getTransmitter();
-			otherMidiInputTransmitter.setReceiver(recv);
-			*/
 			
-			MidiDevice midiInputDevice = PlayAlong.getMidiDeviceInfo("LoopBe Internal MIDI",false);
-			midiInputDevice.open();
-			Transmitter	midiInputTransmitter = midiInputDevice.getTransmitter();
 				
-			
-			recv = new ReceiverSink(true,outputDevice.getReceiver(),new DumpReceiver(System.out), keyboard);
+			Receiver recv;
+			recv = new ReceiverSink(true,synthDevice.getReceiver(),new DumpReceiver(System.out));
 			keyboard.setReceiver(recv);
 			
-			midiInputTransmitter.setReceiver(recv);
+			MidiDevice virtualMidiInputDevice = PlayAlong.getMidiDeviceInfo("LoopBe Internal MIDI",false);
+			virtualMidiInputDevice.open();
+			Transmitter	midiInputTransmitter = virtualMidiInputDevice.getTransmitter();
+			midiInputTransmitter.setReceiver(keyboard);
 			
 			MidiUtils.sendTunings(recv, 0, 2, "african", rebasedTuning);
-			MidiUtils.sendTuningChange(recv, VirtualKeyboard.CHANNEL, 2);
-			
+			MidiUtils.sendTuningChange(recv, VirtualKeyboard.CHANNEL, 2);			
 			
 		} catch (MidiUnavailableException e) {
 			e.printStackTrace();

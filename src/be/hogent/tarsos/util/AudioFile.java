@@ -3,6 +3,8 @@ package be.hogent.tarsos.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import be.hogent.tarsos.util.Configuration.Config;
+
 
 
 /**
@@ -15,8 +17,8 @@ public class AudioFile {
 	/**
 	 * Where to save the transcoded files
 	 */
-	public static final String TRANSCODE_DIRECTORY = FileUtils.combine("data", "transcoded_audio");
-	private static final String ORIGINAL_AUDIO_DIRECTORY = "audio";
+	public static final String TRANSCODED_AUDIO_DIRECTORY = Configuration.get(Config.transcoded_audio_directory);
+	private static final String ORIGINAL_AUDIO_DIRECTORY = Configuration.get(Config.audio_directory);
 	
 	private final String path;
 	/**
@@ -34,7 +36,8 @@ public class AudioFile {
 	 */
 	public String transcodedPath(){
 		String baseName = FileUtils.basename(FileUtils.sanitizedFileName(path));
-		return FileUtils.combine(TRANSCODE_DIRECTORY,baseName + ".wav");
+		String fileName = baseName + "." + Configuration.get(Config.transcoded_audio_format);
+		return FileUtils.combine(TRANSCODED_AUDIO_DIRECTORY,fileName);
 	}
 	
 	/**
@@ -49,14 +52,18 @@ public class AudioFile {
 	}
 	
 	/**
-	 * @return the name of
+	 * @return the name of the file (without extension)
 	 */
 	public String basename() {
 		return this.toString();
-	}	
+	}
 	
-	
-	
+	/**
+	 * Returns a list of AudioFiles included in one or more datasets. Datasets are
+	 * sub folders of the audio directory.
+	 * @param datasets the datasets to find AudioFiles for
+	 * @return a list of AudioFiles
+	 */
 	public static List<AudioFile> audioFiles(String... datasets){
 		List<AudioFile> files = new ArrayList<AudioFile>();
 		for(String dataset : datasets)

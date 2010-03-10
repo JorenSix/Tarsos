@@ -169,8 +169,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
         	int command = sendOnMessage ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
         	int velocity = sendOnMessage ? VirtualKeyboard.VELOCITY : 0;
             sm.setMessage(command, VirtualKeyboard.CHANNEL,midiKey, velocity);
-            if (recveiver != null)
-				recveiver.send(sm, -1);
+            
             send(sm, -1);
         } catch (InvalidMidiDataException e1) {
             e1.printStackTrace();
@@ -208,6 +207,10 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 
 	@Override
 	public void send(MidiMessage message, long timeStamp) {
+		//acts as a "MIDI cable" sends the received messages trough
+		if (recveiver != null)
+			recveiver.send(message, timeStamp);
+		
 		//implements Receiver send: makes sure the right keys are marked 
 		if (message instanceof ShortMessage) {
 			ShortMessage sm = (ShortMessage) message;
@@ -226,7 +229,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 	/**
 	 * Creates a virtual keyboard using the best representation available. 
 	 * For the moment there are two special keyboards: one with 12 keys (a
-	 * normal kayboard) and one with 19 keys. The rest use the 
+	 * normal keyboard) and one with 19 keys. The rest use the 
 	 * {@link UniversalVirtualKeyboard} class.
 	 * @param numberOfKeysPerOctave requested number of keys for each octave.
 	 * @return a <code>VirtualKeyboard</code> using the best representation available.

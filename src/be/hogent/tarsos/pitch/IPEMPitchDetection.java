@@ -57,7 +57,7 @@ public class IPEMPitchDetection implements PitchDetector{
 		String csvFileName =   FileUtils.getRuntimePath() + "/data/raw/ipem/" + transcodedBaseName + ".txt";
 		String command = null;
 		
-		String audioDirectory = FileUtils.combine(AudioFile.TRANSCODE_DIRECTORY, "") + "/";
+		String audioDirectory = FileUtils.combine(AudioFile.TRANSCODED_AUDIO_DIRECTORY, "") + "/";
 		String outputDirectory = FileUtils.getRuntimePath() + "/data/raw/ipem/";
 		
 		if(System.getProperty("os.name").contains("indows")){
