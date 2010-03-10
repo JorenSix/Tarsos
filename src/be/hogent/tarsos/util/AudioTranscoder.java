@@ -131,13 +131,19 @@ public class AudioTranscoder
 	 */
 	public static boolean transcodingRequired(String target,Integer channels,Integer samplingRate){
 		File targetFile = new File(target);
-		boolean transcodingRequired = true;
-		if(targetFile.exists()){
+		//if the file does not exist transcoding is always required
+		boolean transcodingRequired = ! targetFile.exists();
+		//if the file exists, check the format
+		//or skip the check (depending on the configuration)
+		if(targetFile.exists() && !Configuration.getBoolean(Config.skip_transcoded_audio_format_check)){
 			AudioInfo info = getInfo(target);
 			int currentSamplingRate = info.getSamplingRate();
 			int currentNumberOfChannels = info.getChannels();
-			String currentDecoder = info.getDecoder(); 		
-			transcodingRequired = !(currentSamplingRate == samplingRate && currentNumberOfChannels ==  channels && currentDecoder.equalsIgnoreCase(TARGET_CODEC));
+			String currentDecoder = info.getDecoder();
+			boolean samplingRateMatches = currentSamplingRate == samplingRate;
+			boolean numberOfChannelsMatches = currentNumberOfChannels ==  channels;
+			boolean codecMatches = currentDecoder.equalsIgnoreCase(TARGET_CODEC);
+			transcodingRequired = !(samplingRateMatches && numberOfChannelsMatches  && codecMatches);
 		}
 		return transcodingRequired;
 	}
