@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+
 /**
  * @author Joren Six
  * Utility class to access (read and write) configuration settings.
@@ -56,6 +57,12 @@ public class Configuration {
 		 */
 		skip_transcoded_audio_format_check,
 		
+		/**
+		 * The directory where the transcoded audio is saved.
+		 * <br>
+		 * The default is <code>data/transcoded_audio</code>.
+		 */
+		transcoded_audio_directory(true),		
 		/**
 		 * The sampling rate for the transcoded audio.
 		 * <br>
@@ -109,10 +116,9 @@ public class Configuration {
 	 * configuration values and creates the ones marked as required directory.
 	 */
 	public static void createRequiredDirectories(){
-		for(Config config : Config.values()){
+		for(Config config : Config.values())
 			if(config.isRequiredDirectory && FileUtils.mkdirs(get(config)))
 				log.info("Created directory: " + get(config));
-		}
 	}
 	
 
@@ -222,6 +228,25 @@ public class Configuration {
 				}
 			}
 		}
-		return userPreferences.get(key, defaultValue).trim();		
+		String configuredValue = userPreferences.get(key, defaultValue).trim();
+		configuredValue = handleConfiguredDirectory(key,configuredValue);
+		return configuredValue;		
+	}
+	
+	/**
+	 * Makes sure the correct path separator is used in configured directory names.
+	 * @param key the name of the configuration parameter.
+	 * @param configuredValue the configured value.
+	 * @return a path with correct path separator for the current operating system. 
+	 */
+	private static String handleConfiguredDirectory(String key, String configuredValue){
+		Config configurationKey = Config.valueOf(key);
+		if(configurationKey.isRequiredDirectory){
+			//split on / or on \ 
+			String [] path = configuredValue.split("(/|\\\\)");
+			//combine using the correct path separator
+			configuredValue = FileUtils.combine(path);			
+		}			
+		return configuredValue;		
 	}
 }
