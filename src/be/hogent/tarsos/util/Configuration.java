@@ -245,6 +245,7 @@ public class Configuration {
 			}
 		}
 		String defaultValue=defaultConfigurationProperties.getProperty(key);
+		
 		if(userPreferences==null){
 			userPreferences=Preferences.userRoot();
 			for(Config configKey : Config.values()){
