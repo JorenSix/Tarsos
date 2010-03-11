@@ -16,3 +16,4 @@ Tarsos uses a number of open source libraries:
 * "Apache Commons Math":http://commons.apache.org/math/: a library of lightweight, self-contained mathematics and statistics components "API":http://people.cs.ubc.ca/~kvdoel/jass/doc/index.html.
 * "JASS":http://people.cs.ubc.ca/~kvdoel/jass/: a unit generator based audio synthesis programming environment. "API":http://people.cs.ubc.ca/~kvdoel/jass/doc/index.html.
 * "Java-getopt":http://www.urbanophile.com/~arenn/hacking/download.html: a port of the GNU getopt family of functions. "API":http://www.urbanophile.com/~arenn/hacking/getopt/Package-gnu.getopt.html.
+* "Ptplot":http://ptolemy.berkeley.edu/java/ptplot5.7/ptolemy/plot/doc/index.htm a 2D plotting library. "API":http://ptolemy.berkeley.edu/java/ptplot5.7/doc/codeDoc/index.html.
