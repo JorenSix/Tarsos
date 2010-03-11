@@ -12,24 +12,23 @@ import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.MediaPlayer;
-import be.hogent.tarsos.util.SimplePlot;
 import be.hogent.tarsos.util.StopWatch;
-import be.hogent.tarsos.util.histogram.Histogram;
 
 
 public class Extractor {
 	
-	public static void testTonalShiftWithinFile(String fileName){		
+	public static void testTonalShiftWithinFile(String fileName){	
+		/*
 		PitchDetector detector;
 		detector = new IPEMPitchDetection(new AudioFile(fileName));
 		detector.executePitchDetection();
 		List<Sample> samples =  detector.getSamples();
 		
 		//Sample.printRangeInformation(detector.getName() + "_" + FileUtils.basename(fileName) + "_range.txt", samples);
-		Sample.printOctaveInformation(detector.getName() + "_" + FileUtils.basename(fileName) + "_octave.txt", samples);
+		//Sample.printOctaveInformation(detector.getName() + "_" + FileUtils.basename(fileName) + "_octave.txt", samples);
 		
-		Histogram firstQuarterFrequencyTable = Sample.printOctaveInformation(detector.getName() + "_" + FileUtils.basename(fileName) + "quarter_01_octave.txt", samples.subList(0,samples.size()/2));
-		Histogram fourthQuarterFrequencyTable = Sample.printOctaveInformation(detector.getName() + "_" + FileUtils.basename(fileName) + "quarter_04_octave.txt", samples.subList(samples.size()/2,samples.size()));
+	 	//Histogram firstQuarterFrequencyTable = Sample.printOctaveInformation(detector.getName() + "_" + FileUtils.basename(fileName) + "quarter_01_octave.txt", samples.subList(0,samples.size()/2));
+		//Histogram fourthQuarterFrequencyTable = Sample.printOctaveInformation(detector.getName() + "_" + FileUtils.basename(fileName) + "quarter_04_octave.txt", samples.subList(samples.size()/2,samples.size()));
 		
 		firstQuarterFrequencyTable = firstQuarterFrequencyTable.normalize();
 		fourthQuarterFrequencyTable = fourthQuarterFrequencyTable.normalize();
@@ -44,9 +43,11 @@ public class Extractor {
 		System.out.println(FileUtils.basename(fileName)+ "Max correlation:\t" + correlation + " displacement:\t" + displacementInCents);
 		
 		plot.save();
+		*/
 	}
 
 	public static void findBestTonalShift(List<String> fileNames){
+		/*
 		Histogram bestFirst = null;
 		Histogram bestSecond = null;
 		double  highestCorrelation = 0;
@@ -89,9 +90,11 @@ public class Extractor {
 		plot.save();
 		
 		System.out.println("Max correlation:\t" + highestCorrelation + " displacement:\t" + bestDisplacementInCents);
+		*/
 	}
 	
 	public static void findBestMatch(List<String> fileNames){
+		/*
 		Histogram bestFirst = null;
 		Histogram bestSecond = null;
 		double  highestCorrelation = 0;
@@ -151,12 +154,14 @@ public class Extractor {
 		plot.save();
 		
 		System.out.println("Max correlation:\t" + highestCorrelation + " displacement:\t" + bestDisplacementInCents);
+		*/
 	}
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {		
+		/*
 		for(AudioFile file : AudioFile.audioFiles("formats")){
 			PitchDetector detector;
 			detector = new AubioPitchDetection(file,AubioPitchDetectionMode.YIN);
@@ -174,11 +179,12 @@ public class Extractor {
 			FileUtils.mkdirs(FileUtils.combine("data","range",transcodedBasename));
 			Sample.printRangeInformation(transcodedBasename  + '/' + detector.getName() + "_range.txt", samples);
 			Sample.printOctaveInformation(transcodedBasename + '/' + detector.getName() +  "_octave.txt", samples);
-		}		
+		}	
+		*/	
 	}
 	
 	public static void bestDetector(String fileName){
-		
+		/*
 		List<PitchDetector> detectors;
 		detectors = new ArrayList<PitchDetector>();
 		detectors.add(new AubioPitchDetection(new AudioFile(fileName), AubioPitchDetectionMode.YIN));
@@ -202,6 +208,7 @@ public class Extractor {
 				System.out.println(FileUtils.basename(fileName) + ";" + detectors.get(i).getName()+ ";" + detectors.get(j).getName() + ";" + correlation + ";"  + histograms.get(i).getEntropy()+ ";" + histograms.get(j).getEntropy());
 			}
 		}
+		*/
 	}
 	
 	public static void showMelody(String fileName){

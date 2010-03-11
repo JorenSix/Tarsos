@@ -1,22 +1,15 @@
 package be.hogent.tarsos.pitch;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
-import javax.imageio.ImageIO;
-
-import ptolemy.plot.Plot;
-import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.histogram.Histogram;
+import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 
 /**
  * @author Joren Six
- * A sample is a collection of pitches with corresponding probabilities.  
+ * A sample is a collection of pitches with corresponding probabilities that starts at a certain time.  
  */
 public class Sample implements Comparable<Sample> {
 	
@@ -24,6 +17,12 @@ public class Sample implements Comparable<Sample> {
 	private final List<Double> pitches;//in hertz
 	private final List<Double> probabilities;//values from 0 to 1 (inclusive). One probability per pitch.
 	
+	/**
+	 * Defines the unit of the pitch value. 
+	 * Absolute Cents are compared to a configured
+	 * reference frequency. By default C0 (16Hz) is used.
+	 *
+	 */
 	public enum PitchUnit{
 		HERTZ,
 		ABSOLUTE_CENTS,
@@ -31,8 +30,16 @@ public class Sample implements Comparable<Sample> {
 		MIDI_KEY;
 	}
 	
+	/**
+	 * The source of the sample
+	 */
 	public SampleSource source;
 	
+	/**
+	 * The source of the sampe: the originating
+	 * software and/or algorithm.
+	 *
+	 */
 	public enum SampleSource{
 		IPEM,
 		AUBIO_YIN,
@@ -43,10 +50,24 @@ public class Sample implements Comparable<Sample> {
 	}
 	
 	
+	/**
+	 * Create a new sample
+	 * @param start the starting time
+	 * @param pitches the pitches (one or more)
+	 * @param probabilities the probabilities corresponding with the pitches
+	 */
 	public Sample(long start,List<Double> pitches,List<Double> probabilities){
 		this(start,pitches,probabilities,0);
 	}
 	
+	/**
+	 * Create a new sample
+	 * @param start the starting time
+	 * @param pitches the pitches (one or more)
+	 * @param probabilities the probabilities corresponding with the pitches
+	 * @param minimumAcceptableProbability the minimum accepted probability for each pitch, 
+	 * values with a lower probability are discarted.
+	 */
 	public Sample(long start,List<Double> pitches,List<Double> probabilities,double minimumAcceptableProbability){
 		this(start);
 		for(int i=0;i<probabilities.size();i++){
@@ -59,12 +80,23 @@ public class Sample implements Comparable<Sample> {
 		this.start=start;
 	}
 	
+	/**
+	 * Create a simple sample somple sumple semple.
+	 * The only pitch has a probability of 1.
+	 * @param start the starting time
+	 * @param pitch the pitch
+	 */
 	public Sample(long start,double pitch){
 		this(start);
 		this.pitches.add(pitch);
 		this.probabilities.add(1.0);
 	}
 
+	/**
+	 * Create an empty sample: no pitch detected at
+	 * this time.
+	 * @param start the starting time
+	 */
 	public Sample(long start) {
 		this.start=start;
 		this.pitches = new ArrayList<Double>();
@@ -110,93 +142,34 @@ public class Sample implements Comparable<Sample> {
 		return PitchFunctions.convertHertzTo(unit, pitchesWithoutHarmonics);		
 	}
 	
+	/**
+	 * Convert from the base unit (Hz) to another unit
+	 * @param unit the other unit
+	 * @return each pitch converted to the requested unit
+	 */
 	public List<Double> getPitchesIn(PitchUnit unit){
 		return PitchFunctions.convertHertzTo(unit, pitches);
 	}
 
+	/**
+	 * @return the starting time of the sample
+	 */
 	public long getStart() {
 		return this.start;
 	}
 	
-	public static Histogram printOctaveInformation(String fileName, List<Sample> samples) {
-		List<Double> pitchValuesInAbsoluteCent = new ArrayList<Double>();
-		double maxPitchInAbsoluteCents= Double.NEGATIVE_INFINITY;
-		double minPitchInAbsoluteCents = Double.POSITIVE_INFINITY;
-		for(Sample sample:samples){
-			for(Double pitch: sample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS)){
-				//only values greater than 32.7Hz (the reference cent value )
-				if(pitch > 0){
-					pitchValuesInAbsoluteCent.add(pitch);
-					maxPitchInAbsoluteCents = Math.max(maxPitchInAbsoluteCents, pitch);
-					minPitchInAbsoluteCents = Math.min(minPitchInAbsoluteCents, pitch);
-				}				
-			}
-		}
-		
-		//List<Double> newPitchValuesInCent  = PitchFunctions.medianFilter(pitchValuesInCent,9);			
-		//assert pitchValuesInCent.size() == newPitchValuesInCent.size();
-		//Histogram histogram = PitchFunctions.createFrequencyTable(pitchValuesInRelativeCent,6.0,0,1200);
-		//PitchFunctions.exportFrequencyTable(histogram, "data/octave/"+ fileName);
-		
-		double stop = Math.ceil(maxPitchInAbsoluteCents / 1200) * 1200;
-		double start = minPitchInAbsoluteCents > 0 ? Math.floor(minPitchInAbsoluteCents / 1200) * 1200 : 0;		
-		stop = stop == Double.NEGATIVE_INFINITY ? 12000 : stop ;
-		start = start == Double.POSITIVE_INFINITY ? 0 : start;		
-		Histogram histogram = PitchFunctions.createFrequencyTable(pitchValuesInAbsoluteCent,6.0,start,stop);
-		
-		Plot h = new Plot();
-		h.setXRange(0,1200);
-		
-		/*int numberOfColors = 7;
-		Color [] spectrum = new Color[ numberOfColors ];
-
-	      // Generate the colors and store them in the array.
-	      for ( int i = 0; i < numberOfColors; ++i ) {
-	         // Here we specify colors by Hue, Saturation, and Brightness,
-	         // each of which is a number in the range [0,1], and use
-	         // a utility routine to convert it to an RGB value before
-	         // passing it to the Color() constructor.
-	         spectrum[i] = new Color(Color.HSBtoRGB((float) ((i/(float)(numberOfColors*2))+ 0.5),(float)1,(float)1));
-	      }
-
-		
-		h.setColors(spectrum);
-		*/
-		
-		Histogram octaveHistogram = new Histogram(0,1200,200);
-		
-		for(double octaveKey : octaveHistogram.keySet()){
-			long sum = 0;
-			int dataset=0;
-			for(double rangeKey = octaveKey ; rangeKey < histogram.getStop() + histogram.getClassWidth()/2; rangeKey += 1200 ){
-				sum = sum + histogram.getCount(rangeKey);
-				dataset = (int)(rangeKey / 1200);
-				h.addPoint(dataset,octaveKey - histogram.getStart(),sum,true);			
-			}
-			octaveHistogram.setCount(octaveKey,sum);
-		}
-		
-		for(double temp = histogram.getStart() + histogram.getClassWidth()/2 ; temp < histogram.getStop() + histogram.getClassWidth()/2; temp += 1200 ){
-			int dataset = (int)(temp / 1200);
-			h.addLegend(dataset,"C" + dataset + "-B" + dataset + " [" + dataset * 1200  + "-"+ ((dataset * 1200) + 1199) +"]" );			
-		}
-		
-		h.setSize(1680,1050);
-		h.setTitle(FileUtils.basename(fileName));
-	
-		try {	
-			Thread.sleep(60);
-			BufferedImage image = h.exportImage();
-			ImageIO.write(image, "png", new File("data/range/" + fileName.substring(0,fileName.length()-4) + "color.octave.png"));
-		}catch (IOException e){
-			e.printStackTrace();
-		}catch (InterruptedException e1){
-			e1.printStackTrace();
-		}	
-		return octaveHistogram;
-	}
-	
-	public void removeUniquePitches(Sample other,double errorPercentage){		
+	/**
+	 * Removes pitches that are not present in both samples. The idea
+	 * here is to compare pitch annotations of the same musical piece at 
+	 * the same time by different algorithms and only keep the annotations both
+	 * agree on. 
+	 * @param other the other sample
+	 * @param errorPercentage a percentage that defines when two pitches are the 
+	 * same if the <code>errorPercentage</code> is 0.05 than 
+	 * 95, 100 , 105 are perceived as being the same.
+	 */
+	public void removeUniquePitches(Sample other,double errorPercentage){	
+		//TODO use another scale instead of simple percentages.
 		ListIterator<Double> thisPitchIterator = pitches.listIterator();
 		while(thisPitchIterator.hasNext()){
 			Double thisPitch = thisPitchIterator.next();
@@ -232,58 +205,20 @@ public class Sample implements Comparable<Sample> {
 		
 		return Double.NEGATIVE_INFINITY;
 	}
-		
-	public static void printRangeInformation(String fileName, List<Sample> samples) {		
-		List<Double> pitchValuesInCent = new ArrayList<Double>();
-		double maxPitchInAbsoluteCents= Double.NEGATIVE_INFINITY;
-		double minPitchInAbsoluteCents = Double.POSITIVE_INFINITY;
-		for(Sample sample:samples){
-			for(Double pitch : sample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS)){
-				pitchValuesInCent.add(pitch);
-				maxPitchInAbsoluteCents = Math.max(maxPitchInAbsoluteCents, pitch);
-				minPitchInAbsoluteCents = Math.min(minPitchInAbsoluteCents, pitch);				
-			}
-		}		
-		double stop = Math.ceil(maxPitchInAbsoluteCents / 1200) * 1200;
-		double start = minPitchInAbsoluteCents > 0 ? Math.floor(minPitchInAbsoluteCents / 1200) * 1200 : 0;
-		
-		stop = stop == Double.NEGATIVE_INFINITY ? 12000 : stop ;
-		start = start == Double.POSITIVE_INFINITY ? 0 : start;
-		
-		Histogram histogram = PitchFunctions.createFrequencyTable(pitchValuesInCent,6.0,start,stop);
-		
-		Plot h = new Plot();
-		h.setXRange(histogram.getStart(),histogram.getStop());
-
-		for(double current  : histogram.keySet()){
-			h.addPoint((int)(current / 1200),current,histogram.getCount(current),true);	
-		}
-		
-		h.setSize(1024,786);
-
-		h.setTitle(FileUtils.basename(fileName));
 	
-		try {			
-			Thread.sleep(60);
-			BufferedImage image = h.exportImage();
-			ImageIO.write(image, "png", new File("data/range/" + fileName.substring(0,fileName.length()-4) + "color.png"));
-		}catch (IOException e){
-			e.printStackTrace();
-		}catch (InterruptedException e1){
-			e1.printStackTrace();
+		
+	public static AmbitusHistogram ambitus(List<Sample> samples) {		
+		AmbitusHistogram ambitusHistogram = new AmbitusHistogram();
+		for(Sample sample:samples){
+			for(Double pitch: sample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS)){
+				ambitusHistogram.add(pitch);
+			}			
 		}
-		//PitchFunctions.exportFrequencyTable(histogram, "data/range/"+ fileName);
+		return ambitusHistogram;
 	}
 	
 	public static void findPeaks(List<Sample> samples) {
-		List<Double> pitchValuesInCent = new ArrayList<Double>();
-		for(Sample sample:samples){
-			for(Double pitch : sample.getPitchesIn(PitchUnit.RELATIVE_CENTS)){
-				pitchValuesInCent.add(pitch);
-			}
-		}
-		//Histogram frequencyTable = PitchFunctions.createFrequencyTable(pitchValuesInCent,6.0);
-		//PitchFunctions.peakDetection(frequencyTable,0.0,1200.0);
+		throw new Error("not implemented");
 	}
 
 	@Override

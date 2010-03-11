@@ -12,6 +12,7 @@ import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
+import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
 
 public class PeakExtractor {
@@ -51,8 +52,9 @@ public class PeakExtractor {
 				detector.executePitchDetection();
 				samples = detector.getSamples();
 				for(int i = 0 ; i < gaussians.length ; i ++){
-					Histogram octaveHistogram = Sample.printOctaveInformation(baseName + '/' + baseName + "_" + detector.getName() +  "_octave.txt", samples);
-					Sample.printRangeInformation(baseName + '/' + baseName + "_" + detector.getName() +  "_range.txt", samples);
+					Histogram octaveHistogram = new ToneScaleHistogram();
+					//Sample.printOctaveInformation(baseName + '/' + baseName + "_" + detector.getName() +  "_octave.txt", samples);
+					//Sample.printRangeInformation(baseName + '/' + baseName + "_" + detector.getName() +  "_range.txt", samples);
 					octaveHistogram.gaussianSmooth(gaussians[i]);
 					for(int j = 0 ; j < windowsize.length ; j ++)
 						for(int k = 0 ; k < threshold.length ; k ++){
