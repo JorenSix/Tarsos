@@ -46,7 +46,7 @@ public class SimplePlot {
 	
 	public void addData(int set,Histogram histogram,int displacement){
 		plot.setXRange(histogram.getStart(),histogram.getStop());
-		for(double current  = histogram.getStart() + histogram.getClassWidth()/2;current <= histogram.getStop() + histogram.getClassWidth()/2 ;current += histogram.getClassWidth()){
+		for(double current : histogram.keySet()){
 			double displacedValue = (current + displacement * histogram.getClassWidth()) % (histogram.getNumberOfClasses() * histogram.getClassWidth());
 			addData(set,current,histogram.getCount(displacedValue));
 		}

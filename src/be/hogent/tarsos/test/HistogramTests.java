@@ -11,7 +11,7 @@ import be.hogent.tarsos.pitch.PitchFunctions;
 import be.hogent.tarsos.util.SimplePlot;
 import be.hogent.tarsos.util.histogram.CorrelationMeasure;
 import be.hogent.tarsos.util.histogram.Histogram;
-import be.hogent.tarsos.util.histogram.HistogramFunction;
+import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
 
 
@@ -36,17 +36,18 @@ public class HistogramTests {
 		return table;
 	}
 	
+	
 	@Test
 	public void testCreateToneScale(){
 		double[] peaksA = {100,450,500};
-		Histogram a = HistogramFunction.createToneScale(peaksA,null,null,null);
+		Histogram a = ToneScaleHistogram.createToneScale(peaksA,null,null,null);
 		
 		double[] peaksB = {200,550};
 		double[] weights = {200,300};
 		double[] widths = {25,30};
 		double[] standardDeviations = {1,1.2};
 		
-		Histogram b = HistogramFunction.createToneScale(peaksB,weights,widths,standardDeviations);
+		Histogram b = ToneScaleHistogram.createToneScale(peaksB,weights,widths,standardDeviations);
 		a.plotCorrelation(b,CorrelationMeasure.INTERSECTION);
 		
 		SimplePlot p  = new SimplePlot("Gaussian_test_a");

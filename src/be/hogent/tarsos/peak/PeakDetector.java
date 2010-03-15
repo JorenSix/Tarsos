@@ -6,7 +6,7 @@ import java.util.List;
 
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
-import be.hogent.tarsos.util.histogram.HistogramFunction;
+import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
 
 public class PeakDetector {
@@ -41,7 +41,7 @@ public class PeakDetector {
 		
 		FileUtils.appendFile(sb.toString(),"peaks.csv");
 		
-		Histogram peakHistogram = HistogramFunction.createToneScale(peakPositionsDouble, peakHeights, peakWidths, peakStandardDeviations);
+		Histogram peakHistogram = ToneScaleHistogram.createToneScale(peakPositionsDouble, peakHeights, peakWidths, peakStandardDeviations);
 		
 		return peakHistogram;
 	}

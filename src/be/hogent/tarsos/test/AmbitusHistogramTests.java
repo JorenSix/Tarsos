@@ -23,6 +23,16 @@ public class AmbitusHistogramTests {
 		return ambitus;
 	}
 	
+	
+	@Test
+	public void testExportToScalaScaleFileFormat(){
+		ToneScaleHistogram histo = createTestAmbitus().toneScaleHistogram();
+		histo.exportToScalaScaleFileFormat("data/tests/scale.scl", "Test tone scale");
+		SimplePlot plot = new SimplePlot("Exported tone scale");
+		plot.addData(0,histo);
+		plot.save();
+	}
+	
 	@Test
 	public void testMostEnergyRichOctaves() {
 		AmbitusHistogram ambitus = createTestAmbitus();
