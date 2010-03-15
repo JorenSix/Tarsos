@@ -17,11 +17,14 @@ import javax.swing.JComponent;
 
 /**
  * @author Joren Six
- * 
+ * An abstract class to represent a keyboard.
+ * <p>
  * Uses refactored code from the gervill package licensed under the GPL 
  * with the classpath exception.
- * 
+ * </p>
+ * <p>
  * <a href="https://gervill.dev.java.net/source/browse/gervill/src.demos/">Gervill source code</a>
+ * </p>
  */
 public abstract class VirtualKeyboard extends JComponent implements Transmitter, Receiver {
 /**
@@ -46,15 +49,33 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 	
 	protected final int numberOfKeysPerOctave;
 	private Receiver recveiver = null;
-	// only one midi note can be pressed using the mouse
+	
+	/**
+	 * The (one and only) MIDI key currently pressed using the mouse
+	 */
 	private int currentlyPressedMidiNote;
 	
+	
+	/**
+	 * Lowest MIDI key assigned to a keyboard shortcut 
+	 */
 	protected int lowestAssignedKey;
 	
+	/**
+	 * Number of keys used in the representation (smaller than NUMBER_OF_MIDI_KEYS)
+	 */
 	protected final int numberOfKeys;
 
+	/**
+	 * Remember which of the keys are pressed (using the mouse, MIDI or keyboard)
+	 */
 	private final boolean[] keyDown;
 	
+	/**
+	 * Create a new keyboard that spans 7 octaves and uses
+	 * the specified number of keys per octave.
+	 * @param numberOfKeysPerOctave the number of keys per octave
+	 */
 	public VirtualKeyboard(int numberOfKeysPerOctave) {
 		//default: 7 octaves 
 		//number of keys smaller than VirtualKeyboard.NUMBER_OF_MIDI_KEYS
@@ -64,6 +85,12 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 						numberOfKeysPerOctave*7 );
 	}
 
+	/**
+	 * Create a new keyboard that has a number of keys per octave and 
+	 * a specified total number of keys.
+	 * @param numberOfKeysPerOctave the number of keys per octave
+	 * @param numberOfKeys the total number of keys used. E.g. 12 keys per octave and 4 octaves = 48 keys
+	 */
 	public VirtualKeyboard(int numberOfKeysPerOctave,int numberOfKeys) {
 		super();
 		setFocusable(true);
