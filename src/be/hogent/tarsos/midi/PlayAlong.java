@@ -70,7 +70,7 @@ public class PlayAlong {
 		FileUtils.mkdirs("data/range/" + baseName);
 		
 		//String toneScalefileName = baseName + '/' + baseName + "_" + detector.getName() +  "_octave.txt";
-		Histogram octaveHistogram = Sample.ambitus(samples).toneScaleHistogram();
+		Histogram octaveHistogram = Sample.ambitusHistogram(samples).toneScaleHistogram();
 		List<Peak> peaks = PeakDetector.detect(octaveHistogram, 15, 0.5);
 		System.out.println(peaks.size());
 		System.out.println("");

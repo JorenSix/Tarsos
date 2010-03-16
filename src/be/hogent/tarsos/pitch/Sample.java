@@ -9,16 +9,16 @@ import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 
 /**
  * @author Joren Six
- * A sample is a collection of pitches with corresponding probabilities that starts at a certain time.  
+ * A sample is a collection of pitches with corresponding probabilities that starts at a certain time.
  */
 public class Sample implements Comparable<Sample> {
-	
-	private long start;	
-	private final List<Double> pitches;//in hertz
+
+	private long start;
+	private final List<Double> pitches;//in Hz
 	private final List<Double> probabilities;//values from 0 to 1 (inclusive). One probability per pitch.
-	
+
 	/**
-	 * Defines the unit of the pitch value. 
+	 * Defines the unit of the pitch value.
 	 * Absolute Cents are compared to a configured
 	 * reference frequency. By default C0 (16Hz) is used.
 	 *
@@ -29,14 +29,14 @@ public class Sample implements Comparable<Sample> {
 		RELATIVE_CENTS,
 		MIDI_KEY;
 	}
-	
+
 	/**
 	 * The source of the sample
 	 */
 	public SampleSource source;
-	
+
 	/**
-	 * The source of the sampe: the originating
+	 * The source of the sample: the originating
 	 * software and/or algorithm.
 	 *
 	 */
@@ -48,8 +48,8 @@ public class Sample implements Comparable<Sample> {
 		AUBIO_FCOMB,
 		AUBIO_MCOMB
 	}
-	
-	
+
+
 	/**
 	 * Create a new sample
 	 * @param start the starting time
@@ -59,14 +59,14 @@ public class Sample implements Comparable<Sample> {
 	public Sample(long start,List<Double> pitches,List<Double> probabilities){
 		this(start,pitches,probabilities,0);
 	}
-	
+
 	/**
 	 * Create a new sample
 	 * @param start the starting time
 	 * @param pitches the pitches (one or more)
 	 * @param probabilities the probabilities corresponding with the pitches
-	 * @param minimumAcceptableProbability the minimum accepted probability for each pitch, 
-	 * values with a lower probability are discarted.
+	 * @param minimumAcceptableProbability the minimum accepted probability for each pitch,
+	 * values with a lower probability are discarded.
 	 */
 	public Sample(long start,List<Double> pitches,List<Double> probabilities,double minimumAcceptableProbability){
 		this(start);
@@ -79,7 +79,7 @@ public class Sample implements Comparable<Sample> {
 		}
 		this.start=start;
 	}
-	
+
 	/**
 	 * Create a simple sample somple sumple semple.
 	 * The only pitch has a probability of 1.
@@ -105,19 +105,19 @@ public class Sample implements Comparable<Sample> {
 
 	/**
 	 * Returns a list of non harmonic frequencies. This function only makes sense on polyphonic
-	 * pitch samples. 
-	 * @param unit 
-	 * @param errorPercentage defines the limits of what is seen as a harmonic. 
-	 * The list [100Hz,202Hz,230Hz] is reduced to [100Hz,230Hz] 
+	 * pitch samples.
+	 * @param unit
+	 * @param errorPercentage defines the limits of what is seen as a harmonic.
+	 * The list [100Hz,202Hz,230Hz] is reduced to [100Hz,230Hz]
 	 * if the error percentage is greater than or equal to 2% (0.02)
-	 *  
+	 *
 	 * @return a reduced list without harmonics
 	 */
 	public List<Double> getPitchesWithoutHarmonicsIn(PitchUnit unit,double errorPercentage){
-		
+
 		if(pitches.size()==1)
-			return pitches; 
-		
+			return pitches;
+
 		int numberOfHarmonicsToRemove = 5;
 		List<Double> pitches = new ArrayList<Double>(this.pitches);
 		List<Double> pitchesWithoutHarmonics = new ArrayList<Double>();
@@ -132,16 +132,16 @@ public class Sample implements Comparable<Sample> {
 				for(Double pitchToCheckWith : pitches){
 					if(maxPitchLimit  >= pitchToCheckWith  && pitchToCheckWith >= minPitchLimit){
 						//System.out.println(pitch  + " is harmonic of " + pitchToCheckWith + ": " + maxPitchLimit + " >= " + pitchToCheckWith + " >= " + minPitchLimit);
-						pitchIsHarmonic = true;						
-					}					
+						pitchIsHarmonic = true;
+					}
 				}
 			}
 			if(!pitchIsHarmonic)
 				pitchesWithoutHarmonics.add(pitch);
 		}
-		return PitchFunctions.convertHertzTo(unit, pitchesWithoutHarmonics);		
+		return PitchFunctions.convertHertzTo(unit, pitchesWithoutHarmonics);
 	}
-	
+
 	/**
 	 * Convert from the base unit (Hz) to another unit
 	 * @param unit the other unit
@@ -157,18 +157,18 @@ public class Sample implements Comparable<Sample> {
 	public long getStart() {
 		return this.start;
 	}
-	
+
 	/**
 	 * Removes pitches that are not present in both samples. The idea
-	 * here is to compare pitch annotations of the same musical piece at 
+	 * here is to compare pitch annotations of the same musical piece at
 	 * the same time by different algorithms and only keep the annotations both
-	 * agree on. 
+	 * agree on.
 	 * @param other the other sample
-	 * @param errorPercentage a percentage that defines when two pitches are the 
-	 * same if the <code>errorPercentage</code> is 0.05 than 
+	 * @param errorPercentage a percentage that defines when two pitches are the
+	 * same if the <code>errorPercentage</code> is 0.05 than
 	 * 95, 100 , 105 are perceived as being the same.
 	 */
-	public void removeUniquePitches(Sample other,double errorPercentage){	
+	public void removeUniquePitches(Sample other,double errorPercentage){
 		//TODO use another scale instead of simple percentages.
 		ListIterator<Double> thisPitchIterator = pitches.listIterator();
 		while(thisPitchIterator.hasNext()){
@@ -183,42 +183,38 @@ public class Sample implements Comparable<Sample> {
 				}
 			}
 			if(removeThisPitch && pitches.size() > 1){
-				thisPitchIterator.remove();	
+				thisPitchIterator.remove();
 			}
 		}
 	}
-	
-	public double returnMatchingPitch(Sample other,double errorPercentage){		
+
+	public double returnMatchingPitch(Sample other,double errorPercentage){
 		if(pitches.size()==0)
 			return Double.NEGATIVE_INFINITY;
-		
+
 		Double thisPitch = pitches.get(0);
 		Double deviation = thisPitch * errorPercentage;
 		Double maxPitchLimit = thisPitch + deviation;
 		Double minPitchLimit = thisPitch - deviation;
-		
+
 		for(Double otherPitch:other.pitches){
 			if(maxPitchLimit  >= otherPitch && otherPitch >= minPitchLimit){
 				return (otherPitch + thisPitch)/2;
 			}
 		}
-		
+
 		return Double.NEGATIVE_INFINITY;
 	}
-	
-		
-	public static AmbitusHistogram ambitus(List<Sample> samples) {		
+
+
+	public static AmbitusHistogram ambitusHistogram(List<Sample> samples) {
 		AmbitusHistogram ambitusHistogram = new AmbitusHistogram();
 		for(Sample sample:samples){
 			for(Double pitch: sample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS)){
 				ambitusHistogram.add(pitch);
-			}			
+			}
 		}
 		return ambitusHistogram;
-	}
-	
-	public static void findPeaks(List<Sample> samples) {
-		throw new Error("not implemented");
 	}
 
 	@Override
@@ -228,6 +224,6 @@ public class Sample implements Comparable<Sample> {
 		//then order by source name
 		return startCompare == 0 ? source.toString().compareTo(o.source.toString()) : startCompare;
 	}
-	
-	
+
+
 }

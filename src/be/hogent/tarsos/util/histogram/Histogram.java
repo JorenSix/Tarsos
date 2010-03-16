@@ -10,24 +10,27 @@ import java.util.logging.Logger;
 
 import org.apache.commons.math.stat.StatUtils;
 
+import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.SimplePlot;
+
 /**
  * @author Joren Six
- * A histogram is defined by a start value, a stop value and a number of classes. 
- * The 'key' of a class is the middle of the class. E.g. the keys of a histogram that starts 
+ * A histogram is defined by a start value, a stop value and a number of classes.
+ * The 'key' of a class is the middle of the class. E.g. the keys of a histogram that starts
  * at 0, stops at 5 and has 5 classes are {0.5,1.5,2.5,3.5,4.5}. The intervals for each key
  * are {[0,1[;[1,2[;[2,3[;[3,4];[4,5[} with [0,1[ meaning the interval between 0 inclusive and 1 exclusive.
- * 
+ *
  * <p>
- * The histogram uses a red and black tree as underlying structure: 
- * Search, insert and delete are O(log n). 
+ * The histogram uses a red and black tree as underlying structure:
+ * Search, insert and delete are O(log n).
  * The tree keeps the keys in order and makes iteration (in order) easy.
- * Optimization is possible by replacing the tree with arrays. 
+ * Optimization is possible by replacing the tree with arrays.
  * </p>
- * 
- * <p> 
- * The histogram uses doubles as key values. Java doubles are prone to rounding errors. 
+ *
+ * <p>
+ * The histogram uses doubles as key values. Java doubles are prone to rounding errors.
  * To prevent rounding errors the keys are rounded to a predefined number of decimals.
- * The number can be found in {@link #PRECISION_FACTOR}. E.g. if  {@link #PRECISION_FACTOR} 
+ * The number can be found in {@link #PRECISION_FACTOR}. E.g. if  {@link #PRECISION_FACTOR}
  * is 10000 then the number of significant decimals is 4; the minimum classWidth is 0.0001.
  * </p>
  *
@@ -42,7 +45,7 @@ import org.apache.commons.math.stat.StatUtils;
  */
 public class Histogram {
 	private static final Logger log = Logger.getLogger(Histogram.class.getName());
-	
+
 	/**
 	 * The width of each class (or bin) is equal to stop - start / number of classes.
 	 */
@@ -53,9 +56,9 @@ public class Histogram {
 	private final int numberOfClasses;
 	/**
 	 * A red black tree backing the frequency table, easy to iterate (in order)
-	 * TODO Optimization: serious optimization possible by using a plain array (or two) 
+	 * TODO Optimization: serious optimization possible by using a plain array (or two)
 	 */
-	private final TreeMap<Double, Long> freqTable; 	
+	private final TreeMap<Double, Long> freqTable;
 	/**
 	 * The starting value != the first class middle
 	 * start == the first class middle - classWidth / 2
@@ -68,16 +71,16 @@ public class Histogram {
 	private final double stop;//the stopping value
 	/**
 	 * If the histogram wraps values outside the range <code>]start - classWidht / 2, stop + classWidth / 2 [</code> are
-	 * mapped to values inside the range using a modulo calculation. If wraps 
+	 * mapped to values inside the range using a modulo calculation. If wraps
 	 */
-	private boolean wraps; 
-	
-	
+	private final boolean wraps;
+
+
 	/**
-	 * if <code>true</code> values outside the valid range are ignored. Otherwise if a value 
+	 * if <code>true</code> values outside the valid range are ignored. Otherwise if a value
 	 * outside the valid range is added an IllegalArgumentException is thrown.
 	 */
-	private boolean ignoreValuesOutsideRange;
+	private final boolean ignoreValuesOutsideRange;
 
 
 	/**
@@ -86,16 +89,16 @@ public class Histogram {
 	 * <code>]start - classWidht / 2, stop + classWidth / 2 [</code> if the histogram wraps otherwise values
 	 * outside the range are mapped to values inside using a modulo calculation
 	 * </p>
-	 * 
-	 * @param start the starting value of the histogram. The starting value is not the same as 
+	 *
+	 * @param start the starting value of the histogram. The starting value is not the same as
 	 * the first class middle. The starting value is equal to <code>the first class middle - classWidth / 2</code>
-	 * @param stop the stopping value of the histogram. The stopping value is not the same as the last 
+	 * @param stop the stopping value of the histogram. The stopping value is not the same as the last
 	 * class middle. The stopping value is equal to <code>the last class middle + classWidth / 2</code>
 	 * @param numberOfClasses the number of classes between  the starting and stopping values. Also defines the classWidth.
-	 * @param wraps indicates if the histogram wraps around the edges. More formal: If the histogram wraps 
-	 * values outside the range <code>]start - classWidht / 2, stop + classWidth / 2 [</code> are mapped to values 
+	 * @param wraps indicates if the histogram wraps around the edges. More formal: If the histogram wraps
+	 * values outside the range <code>]start - classWidht / 2, stop + classWidth / 2 [</code> are mapped to values
 	 * inside the range using a modulo calculation.
-	 * @ignoreValuesOutsideRange if <code>true</code> values outside the valid range are ignored. Otherwise if a value 
+	 * @ignoreValuesOutsideRange if <code>true</code> values outside the valid range are ignored. Otherwise if a value
 	 * outside the valid range is added an IllegalArgumentException is thrown.
 	 */
 	public Histogram(double start, double stop,int numberOfClasses,boolean wraps,boolean ignoreValuesOutsideRange){
@@ -108,8 +111,8 @@ public class Histogram {
 		this.freqTable = new TreeMap<Double, Long>();
 		this.wraps = wraps;
 		this.ignoreValuesOutsideRange = ignoreValuesOutsideRange;
-		
-		double lastKey = stop - getClassWidth() / 2;  
+
+		double lastKey = stop - getClassWidth() / 2;
 
 		for(double current = start + getClassWidth()/2;
 			wraps ? current < lastKey :current <= lastKey;
@@ -120,7 +123,7 @@ public class Histogram {
 	}
 
 	/**
-	 * Creates a new, empty histogram using the same parameters of 
+	 * Creates a new, empty histogram using the same parameters of
 	 * the original histogram. The parameter being start, wraps and stop and number of classes.
 	 * @param original the original histogram
 	 */
@@ -134,10 +137,10 @@ public class Histogram {
 	 * <code>]start - classWidht / 2, stop + classWidth / 2 [</code> if the histogram wraps otherwise values
 	 * outside the range are mapped to values inside using a modulo calculation
 	 * </p>
-	 * 
-	 * @param start the starting value of the histogram. The starting value is not the same as 
+	 *
+	 * @param start the starting value of the histogram. The starting value is not the same as
 	 * the first class middle. The starting value is equal to <code>the first class middle - classWidth / 2</code>
-	 * @param stop the stopping value of the histogram. The stopping value is not the same as the last 
+	 * @param stop the stopping value of the histogram. The stopping value is not the same as the last
 	 * class middle. The stopping value is equal to <code>the last class middle + classWidth / 2</code>
 	 * @param numberOfClasses the number of classes between  the starting and stopping values. Also defines the classWidth.
 	 */
@@ -151,14 +154,14 @@ public class Histogram {
 	 * <code>]start - classWidht / 2, stop + classWidth / 2 [</code> if the histogram wraps otherwise values
 	 * outside the range are mapped to values inside using a modulo calculation
 	 * </p>
-	 * 
-	 * @param start the starting value of the histogram. The starting value is not the same as 
+	 *
+	 * @param start the starting value of the histogram. The starting value is not the same as
 	 * the first class middle. The starting value is equal to <code>the first class middle - classWidth / 2</code>
-	 * @param stop the stopping value of the histogram. The stopping value is not the same as the last 
+	 * @param stop the stopping value of the histogram. The stopping value is not the same as the last
 	 * class middle. The stopping value is equal to <code>the last class middle + classWidth / 2</code>
 	 * @param numberOfClasses the number of classes between  the starting and stopping values. Also defines the classWidth.
-	 * @param wraps indicates if the histogram wraps around the edges. More formal: If the histogram wraps 
-	 * values outside the range <code>]start - classWidht / 2, stop + classWidth / 2 [</code> are mapped to values 
+	 * @param wraps indicates if the histogram wraps around the edges. More formal: If the histogram wraps
+	 * values outside the range <code>]start - classWidht / 2, stop + classWidth / 2 [</code> are mapped to values
 	 * inside the range using a modulo calculation.
 	 */
 	public Histogram(double start, double stop,int numberOfClasses,boolean wraps) {
@@ -173,11 +176,11 @@ public class Histogram {
 	 */
 	public double getKeyForClass(int i){
 		while(i < 0){//make sure i is positive
-			i +=  getNumberOfClasses();	
+			i +=  getNumberOfClasses();
 		}
 		//make sure i is within range
 		i = i % getNumberOfClasses();
-		double key = getStart() + i * getClassWidth() + getClassWidth() / 2.0; 
+		double key = getStart() + i * getClassWidth() + getClassWidth() / 2.0;
 		return preventRoundingErrors(key);
 	}
 
@@ -192,10 +195,10 @@ public class Histogram {
 	}
 
 	/**
-	 * @return the set with histogram keys; 
-	 * Do not add keys to the set directly. 
-	 * Use histogram methods instead. 
-	 * For performance reasons it is not wrapped 
+	 * @return the set with histogram keys;
+	 * Do not add keys to the set directly.
+	 * Use histogram methods instead.
+	 * For performance reasons it is not wrapped
 	 * in an immutable set so handle with care.
 	 */
 	public Set<Double> keySet(){
@@ -208,70 +211,72 @@ public class Histogram {
 	 * @exception throws a null pointer exception when the value is not in the range of the histogram
 	 */
 	public Histogram add(double value){
-		
-		if(!wraps && !ignoreValuesOutsideRange && !validValue(value) )
+
+		if(!wraps && !ignoreValuesOutsideRange && !validValue(value) ) {
 			throw new IllegalArgumentException("Value not in the correct interval: "
 					 + value +" not between " +
 					"["+ this.firstValidValue() + "," + this.lastValidValue() + "].");
-		else if (!wraps && ignoreValuesOutsideRange && !validValue(value))
+		} else if (!wraps && ignoreValuesOutsideRange && !validValue(value)) {
 			log.info("Ignored value " + value +" (not between " +
 					"["+ this.firstValidValue() + "," + this.lastValidValue() + "]).");
-			
-		
-		double key = valueToKey(value);
-		Long count = freqTable.get(key);
-		assert count != null: "all key values should be initialized, " + key + " is not.";
-		if(count != null)
-			freqTable.put(key, Long.valueOf(count.longValue() + 1));
+		}
+
+		if(value > 0){
+			double key = valueToKey(value);
+			Long count = freqTable.get(key);
+			assert count != null: "All key values should be initialized, " + key + " is not.";
+			if(count != null)
+				freqTable.put(key, Long.valueOf(count.longValue() + 1));
+		}
 		return this;
 	}
 
 
 	private static final double PRECISION_FACTOR = 10000.0;
 	/**
-	 * Prevents rounding errors by multiplying and dividing by 
+	 * Prevents rounding errors by multiplying and dividing by
 	 * {@link Histogram#PRECISION_FACTOR}
-	 * Limits the use of the histogram class for values (class widths) smaller 
-	 * than 1 / {@link Histogram#PRECISION_FACTOR}  
-	 * XXX This is dangerous. Alternatives to using doubles: casting to BigDecimal internally? 
+	 * Limits the use of the histogram class for values (class widths) smaller
+	 * than 1 / {@link Histogram#PRECISION_FACTOR}
+	 * XXX This is dangerous. Alternatives to using doubles: casting to BigDecimal internally?
 	 * @param value to prevent errors for.
-	 * @return a rounded value to 
+	 * @return a rounded value to
 	 */
 	private double preventRoundingErrors(double value){
-		return Math.floor(value * PRECISION_FACTOR) / PRECISION_FACTOR;		
+		return Math.floor(value * PRECISION_FACTOR) / PRECISION_FACTOR;
 	}
 	/**
-	 * returns the key for a value. 
+	 * returns the key for a value.
 	 * E.g. if the bin width is 1 then valueToKey(3.2) returns 3.5
 	 * @param value the value to get the key to
 	 * @return the key closest to the value
 	 */
 	private double valueToKey(double value){
-		//TODO remove the value below zero limitation 
+		//TODO remove the value below zero limitation
 		//by changing the wraps modulo calculation and test
 		if(value < 0)
 			throw new IllegalArgumentException("Currently no values below zero are accepted");
-		
+
 		if (wraps){
 			double interval = stop-start;
 			while(value < freqTable.firstKey() )
 				value = preventRoundingErrors(value + interval);
 			value = preventRoundingErrors(start + ((value - start) %  interval));
 		}
-		
+
 		assert validValue(value);
-		
+
 		double numberOfClasses = Math.floor((value + start)/classWidth);
 		double offset = classWidth/2 - start;
 		double key =  preventRoundingErrors(numberOfClasses * classWidth + offset);
 		assert key >= freqTable.firstKey();
 		assert key <= freqTable.lastKey();
-		return key; 
+		return key;
 	}
 
 	/**
 	 * Returns the number of values = v.
-	 * 
+	 *
 	 * @param value the value to lookup.
 	 * @return the frequency of v.
 	 */
@@ -331,7 +336,7 @@ public class Histogram {
 		//stop is cached for performance reasons
 		return stop;
 	}
-	
+
 	/**
 	 * @return <code>true</code> if values outside the interval are wrapped,
 	 * <code>false</code> otherwise.
@@ -343,20 +348,20 @@ public class Histogram {
 	/**
 	 * @return the first value that correctly maps to a key. A valid value lays in the interval
 	 * [{@link Histogram#firstValidValue()},{@link  Histogram#lastValidValue()}]
-	 *  
+	 *
 	 */
 	private double firstValidValue(){
 		return this.freqTable.firstKey() - classWidth / 2.0;
 	}
-	
+
 	/**
 	 * @return the last value that correctly maps to a key. A valid value lays in the interval
 	 * [{@link Histogram#firstValidValue()},{@link  Histogram#lastValidValue()}]
 	 */
 	private double lastValidValue(){
-		return this.freqTable.lastKey() + classWidth / 2.0;	
+		return this.freqTable.lastKey() + classWidth / 2.0;
 	}
-	
+
 	/**
 	 * c
 	 * A valid value lays in the interval
@@ -374,9 +379,9 @@ public class Histogram {
 	 * Returns 0 if v is not comparable to the values set.
 	 * </p>
 	 * <p>
-	 * Uses code from <a href="http://commons.apache.org/math">Apache Commons Math"</a> 
+	 * Uses code from <a href="http://commons.apache.org/math">Apache Commons Math"</a>
 	 * licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.
-	 * </p> 
+	 * </p>
 	 * @param v the value to lookup.
 	 * @return the proportion of values equal to v
 	 */
@@ -420,7 +425,7 @@ public class Histogram {
 	 * <p>
 	 * Returns <code>Double.NaN</code> if no values have been added.
 	 * </p>
-	 * 
+	 *
 	 * @param v the value to lookup
 	 * @return the proportion of values less than or equal to v
 	 */
@@ -429,12 +434,12 @@ public class Histogram {
 		if (sumFreq == 0) {
 			return Double.NaN;
 		}
-		return (double) getCumFreq(v) / (double) sumFreq;        
+		return (double) getCumFreq(v) / (double) sumFreq;
 	}
 
 	/**
 	 * Returns the sum of all frequencies (bin counts).
-	 * 
+	 *
 	 * @return the total frequency count.
 	 */
 	public long getSumFreq() {
@@ -451,7 +456,7 @@ public class Histogram {
 	 * (as a proportion between 0 and 1).
 	 * <p>
 	 * Returns <code>Double.NaN</code> if no values have been added.</p>
-	 * 
+	 *
 	 * @param v the value to lookup
 	 * @return the proportion of values equal to v
 	 */
@@ -460,25 +465,25 @@ public class Histogram {
 		if (sumFreq == 0) {
 			return Double.NaN;
 		}
-		return (double) getCount(v) / (double) sumFreq; 
+		return (double) getCount(v) / (double) sumFreq;
 	}
 
 	/**
 	 * Returns the entropy of the histogram.
-	 * 
-	 * <p> 
+	 *
+	 * <p>
 	 * The histogram entropy is defined to be the negation of the sum
 	 * of the products of the probability associated with each bin with
 	 * the base-2 log of the probability.
 	 * </p>
-	 * 
+	 *
 	 * <p>
-	 * Uses code from https://jai-core.dev.java.net/ 
-	 * The source code for the core Java Advanced Imaging API reference implementation is licensed under the 
-	 * Java Research License (JRL) for non-commercial use. The JRL allows users to download, build, and 
-	 * modify the source code in the jai-core project for research use, subject to the terms of the license.  
+	 * Uses code from https://jai-core.dev.java.net/
+	 * The source code for the core Java Advanced Imaging API reference implementation is licensed under the
+	 * Java Research License (JRL) for non-commercial use. The JRL allows users to download, build, and
+	 * modify the source code in the jai-core project for research use, subject to the terms of the license.
 	 * </p>
-	 * 
+	 *
 	 * @return The entropy of the histogram.
 	 *
 	 */
@@ -497,7 +502,7 @@ public class Histogram {
 
 	/**
 	 * Return a string representation of this histogram
-	 * 
+	 *
 	 * @return a string representation.
 	 */
 	@Override
@@ -507,12 +512,12 @@ public class Histogram {
 
 	/**
 	 * Returns a string representation of the histogram
-	 * 
+	 *
 	 * <p>
-	 * Uses code from <a href="http://commons.apache.org/math">Apache Commons Math"</a> 
+	 * Uses code from <a href="http://commons.apache.org/math">Apache Commons Math"</a>
 	 * licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.
-	 * </p> 
-	 * 
+	 * </p>
+	 *
 	 * @param asciiArt If true it generates an ascii representation of a histogram, otherwise it generates a frequency table
 	 * @return a string representation.
 	 */
@@ -557,10 +562,10 @@ public class Histogram {
 	//-----------------------------------------------------------
 
 	/**
-	 * Normalizes the peaks in a histogram. 
+	 * Normalizes the peaks in a histogram.
 	 * Every peak is reduced to it's relative weight (percent).
 	 * <p>
-	 * Changes the current histogram and returns it so it is possible 
+	 * Changes the current histogram and returns it so it is possible
 	 * to chain modifications. E.g. <code>histo.normalize().addToEachBin(10)</code>
 	 * </p>
 	 * @return a Histogram with normalized peak.
@@ -582,7 +587,7 @@ public class Histogram {
 	 * Adds a number of items to each bin.
 	 * Use a negative number to subtract a value from each bin.
 	 * <p>
-	 * Changes the current histogram and returns it so it is possible 
+	 * Changes the current histogram and returns it so it is possible
 	 * to chain modifications. E.g. <code>histo.normalize().addToEachBin(10)</code>
 	 * </p>
 	 * @param value the number of items to add.
@@ -599,19 +604,19 @@ public class Histogram {
 	}
 
 	/**
-	 * Searches the minimum number of items in a bin and 
+	 * Searches the minimum number of items in a bin and
 	 * subtracts all bins with this value.
 	 * <pre>
 	 * *
 	 * * *              *
-	 * * *   *          * *  
+	 * * *   *          * *
 	 * * * * *    =>    * *   *
 	 * -------          -------
 	 * </pre>
 	 * <p>
-	 * Changes the current histogram and returns it so it is possible 
+	 * Changes the current histogram and returns it so it is possible
 	 * to chain modifications. E.g. <code>histo.normalize().addToEachBin(10)</code>
-	 * </p> 
+	 * </p>
 	 * @return a baselined histogram
 	 */
 	public Histogram baselineHistogram(){
@@ -623,76 +628,77 @@ public class Histogram {
 	}
 
 	/**
-	 * Calculates the sum of two histograms. The value for each bin of other is added 
+	 * Calculates the sum of two histograms. The value for each bin of other is added
 	 * to the corresponding bin of this histogram.
 	 * The other histogram must have the same start, stop
 	 * and binWidth otherwise adding histograms makes no sense!
 	 * <p>
-	 * Changes the current histogram and returns it so it is possible 
+	 * Changes the current histogram and returns it so it is possible
 	 * to chain modifications. E.g.<code>histo.normalize().addToEachBin(10)</code>
 	 * </p>
-	 * @param other The other histogram 
+	 * @param other The other histogram
 	 * @return the changed histogram with more (or the same) number of items in the bins.
 	 */
-	public Histogram add(Histogram other) {		
+	public Histogram add(Histogram other) {
 		assert freqTable.keySet().size() == other.keySet().size();
 		assert start == other.start;
 		assert stop == other.stop;
 		for(double key : freqTable.keySet())
 			this.setCount(key, this.getCount(key) + other.getCount(key));
-		return this;		
+		return this;
 	}
 
 	/**
-	 * Multiplies each class (bin) count with a factor. 
+	 * Multiplies each class (bin) count with a factor.
 	 * <p>
-	 * Changes the current histogram and returns it so it is possible 
+	 * Changes the current histogram and returns it so it is possible
 	 * to chain modifications. E.g. <code>histo.normalize().addToEachBin(10)</code>
-	 * </p> 
+	 * </p>
 	 * @param factor the factor to multiply each bin value with.
 	 * @return histogram with each bin value multiplied by the factor.
 	 */
-	public Histogram multiply(double factor) {	
+	public Histogram multiply(double factor) {
 		for(double key : this.freqTable.keySet())
 			this.setCount(key, Math.round(this.getCount(key) * factor));
-		return this;		
+		return this;
 	}
 
 	/**
-	 * Raises each class count to the power of exponent. 
+	 * Raises each class count to the power of exponent.
 	 * <p>
-	 * Changes the current histogram and returns it so it is possible 
+	 * Changes the current histogram and returns it so it is possible
 	 * to chain modifications. E.g. <code>histo.normalize().addToEachBin(10)</code>
-	 * </p> 
+	 * </p>
 	 * @param exponent The exponent to raise each bincount with.
 	 * @return Histogram with each bin count raised with exponent.
 	 */
-	public Histogram raise(double exponent) {	
+	public Histogram raise(double exponent) {
 		for(double key : this.freqTable.keySet())
 			this.setCount(key, Math.round(Math.pow(this.getCount(key), exponent)));
-		return this;		
+		return this;
 	}
 
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public Histogram clone(){
 		Histogram clone = new Histogram(this);
 		for(double key : this.freqTable.keySet())
 			clone.setCount(key, this.getCount(key));
-		return clone;		
+		return clone;
 	}
 
 	/**
-	 * Calculates a histogram mean of a list of histograms. All histograms must have 
+	 * Calculates a histogram mean of a list of histograms. All histograms must have
 	 * the same start, stop and binWidth otherwise the mean histogram makes no sense!
 	 * @param histograms a list of histograms
 	 * @return a histogram with the mean values. If the list is empty it returns null.
 	 */
 	public static Histogram mean(List<Histogram> histograms){
 		Histogram mean = null;
-		if(histograms.size()!=0){		
+		if(histograms.size()!=0){
 			Histogram first = histograms.get(0);
 			mean = new Histogram(first);
 			for(double key : first.freqTable.keySet()){
@@ -721,7 +727,7 @@ public class Histogram {
 
 	/**
 	 * Computes a smoothed version of the histogram.
-	 * 
+	 *
 	 *
 	 * <p> The histogram is smoothed by averaging over a
 	 * moving window of a size specified by the method parameter: if
@@ -734,19 +740,19 @@ public class Histogram {
 	 * 1/3, the adjacent bins 2/9, and the next adjacent bins 1/9.
 	 *
 	 * <p>
-	 * Changes the current histogram and returns it so it is possible 
+	 * Changes the current histogram and returns it so it is possible
 	 * to chain modification e.g. <code>histo.normalize().addToEachBin(10)</code>
-	 * </p> 
+	 * </p>
 	 *
 	 * <p>
-	 * Uses code from https://jai-core.dev.java.net/ 
-	 * The source code for the core Java Advanced Imaging API reference 
-	 * implementation is licensed under the Java Research License (JRL) 
-	 * for non-commercial use. The JRL allows users to download, build, and 
-	 * modify the source code in the jai-core project for research use, 
-	 * subject to the terms of the license.  
+	 * Uses code from https://jai-core.dev.java.net/
+	 * The source code for the core Java Advanced Imaging API reference
+	 * implementation is licensed under the Java Research License (JRL)
+	 * for non-commercial use. The JRL allows users to download, build, and
+	 * modify the source code in the jai-core project for research use,
+	 * subject to the terms of the license.
 	 * </p>
-	 * 
+	 *
 	 * @param isWeighted Whether bins will be weighted using a triangular
 	 * weighting scheme favoring bins near the central bin.
 	 * @param k The smoothing parameter which must be non-negative or an
@@ -833,29 +839,29 @@ public class Histogram {
 			int smoothedCount = (int)(smoothedCounts[b]*factor + 0.5);
 			double key = getKeyForClass(b);
 			this.setCount(key, smoothedCount);
-		}     
+		}
 
 		return this;
 	}
 
 	/**
 	 * Smooth the histogram using Gaussians.
-	 * 
+	 *
 	 * <p> Each band of the histogram is smoothed by discrete convolution
 	 * with a kernel approximating a Gaussian impulse response with the
 	 * specified standard deviation.
 	 * <p>
-	 * <em>Changes the current histogram</em> and returns it so it is possible 
+	 * <em>Changes the current histogram</em> and returns it so it is possible
 	 * to chain modification e.g. <code>histo.normalize().addToEachBin(10)</code>
-	 * </p> 
-	 * 
-	 * <p>
-	 * Uses code from https://jai-core.dev.java.net/ 
-	 * The source code for the core Java Advanced Imaging API reference implementation is licensed under the 
-	 * Java Research License (JRL) for non-commercial use. The JRL allows users to download, build, and 
-	 * modify the source code in the JAI-core project for research use, subject to the terms of the license.  
 	 * </p>
-	 * 
+	 *
+	 * <p>
+	 * Uses code from https://jai-core.dev.java.net/
+	 * The source code for the core Java Advanced Imaging API reference implementation is licensed under the
+	 * Java Research License (JRL) for non-commercial use. The JRL allows users to download, build, and
+	 * modify the source code in the JAI-core project for research use, subject to the terms of the license.
+	 * </p>
+	 *
 	 * @param standardDeviation The standard deviation of the Gaussian
 	 * smoothing kernel which must be non-negative or an
 	 * <code>IllegalArgumentException</code> will be thrown.  If zero, the
@@ -925,7 +931,7 @@ public class Histogram {
 		double factor = getSumFreq()/(double)sum;
 		for(int b = 0; b < numberOfClasses; b++) {
 			int smoothedCount = (int)(smoothedCounts[b]*factor + 0.5);
-			double key = getKeyForClass(b);            	
+			double key = getKeyForClass(b);
 			this.setCount(key, smoothedCount);
 		}
 		return this;
@@ -952,7 +958,7 @@ public class Histogram {
 
 	/**
 	 * Return the correlation of this histogram with another one.
-	 * 
+	 *
 	 * @param otherHistogram
 	 * @param correlationMeasure
 	 * @return the correlation between this histogram with another histogram.
@@ -965,18 +971,18 @@ public class Histogram {
 	}
 
 	/**
-	 * Return the correlation of this histogram with another one. 
+	 * Return the correlation of this histogram with another one.
 	 * By default it uses the {@link CorrelationMeasure#INTERSECTION INTERSECTION} correlation measure.
 	 * @param otherHistogram the other histogram
 	 * @return the correlation the computed correlation
 	 */
 	public double correlation(Histogram otherHistogram){
 		return correlation(otherHistogram,CorrelationMeasure.INTERSECTION);
-	}	
+	}
 
 	public int displacementForOptimalCorrelation(Histogram otherHistogram,CorrelationMeasure correlationMeasure){
 		int optimalDisplacement=0;//displacement with best correlation
-		double maximumCorrelation = -1;//best found correlation		
+		double maximumCorrelation = -1;//best found correlation
 		int numberOfClasses = getNumberOfClasses();
 
 		//current displacement, incremented with class width
@@ -995,6 +1001,48 @@ public class Histogram {
 
 	public void plotCorrelation(Histogram otherHistogram,CorrelationMeasure correlationMeasure){
 		int displacement = displacementForOptimalCorrelation(otherHistogram);
-		correlationMeasure.getHistogramCorrelation().plotCorrelation(this, displacement, otherHistogram);	
+		correlationMeasure.getHistogramCorrelation().plotCorrelation(this, displacement, otherHistogram);
+	}
+
+	//-----------------------------------------------------------
+	//--                                                       --
+	//--                 Plot method                           --
+	//--                                                       --
+	//-----------------------------------------------------------
+
+	/**
+	 * Plots the histogram to a x y plot. The file is saved in PNG file format
+	 * so the fileName should end on PNG.
+	 *
+	 * @param fileName
+	 *            The file is saved in PNG file format so the fileName should
+	 *            end on PNG.
+	 * @param title
+	 *            The title of the histogram. Use an empty string or null for an
+	 *            empty title.
+	 */
+	public void plot(String fileName, String title) {
+		title = title == null ? "" : title;
+		SimplePlot plot = new SimplePlot(title);
+		plot.addData(0, this);
+		plot.save(fileName);
+	}
+
+	/**
+	 * Export the histogram data as a plain text file. The format uses ; to
+	 * separate keys from values.
+	 *
+	 * @param fileName
+	 *            Where to save the text file.
+	 */
+	public void export(String fileName){
+		StringBuilder sb = new StringBuilder();
+		sb.append("key;value\n");
+		for(double key : keySet())
+			sb.append(key)
+			  .append(";")
+			  .append(getCount(key))
+			  .append("\n");
+		FileUtils.writeFile(sb.toString(), fileName);
 	}
 }
