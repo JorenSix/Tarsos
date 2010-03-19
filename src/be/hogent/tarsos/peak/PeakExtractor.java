@@ -34,7 +34,7 @@ public class PeakExtractor {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String[] globDirectories = {"dekkmma_random","makam","maghreb"};
+		String[] globDirectories = {"machault"};
 		List<AudioFile> files = AudioFile.audioFiles(globDirectories);
 
  		System.out.println(files.size());
@@ -88,7 +88,7 @@ public class PeakExtractor {
 							FileUtils.appendFile(baseName + ";" + detector.getName() + ";" + threshold[k] + ";"+ windowsize[j] +";"+gaussians[i] +";","peaks.csv");
 							List<Peak> peaks = PeakDetector.detect(toneScaleHistogram, windowsize[j], threshold[k]);
 							Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
-							String peaksTitle = baseName + "_peaks_" + gaussians[i] + "_" + windowsize[j] + "_" +  threshold[k];
+							String peaksTitle = detector.getName() + "_" + baseName + "_peaks_" + gaussians[i] + "_" + windowsize[j] + "_" +  threshold[k];
 							SimplePlot p = new SimplePlot(peaksTitle);
 							appendFile(peaks);
 							p.addData(0,toneScaleHistogram);

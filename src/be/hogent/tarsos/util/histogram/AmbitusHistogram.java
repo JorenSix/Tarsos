@@ -19,7 +19,7 @@ import be.hogent.tarsos.util.Configuration.Config;
 /**
  * @author Joren Six
  * The AmbitusHistogram accepts values from 0 to 9600 cents
- * or +- from 16 to 40000Hz: the human hearing range is completely covered.<br>
+ * or +- from 16Hz to 40000Hz: the human hearing range is completely covered.<br>
  * The start and stop values can be configured.<br>
  * Values outside the defined range are ignored!
  */
@@ -50,8 +50,8 @@ public class AmbitusHistogram extends Histogram{
 		super.add(value);
 		//keep a histogram for each octave
 		int octaveIndex = (int) (value / 1200);
-		if(toneScaleHistogramPerOctave.size() > octaveIndex)
-		toneScaleHistogramPerOctave.get(octaveIndex).add(value);
+		if(toneScaleHistogramPerOctave.size() > octaveIndex && octaveIndex >= 0)
+			toneScaleHistogramPerOctave.get(octaveIndex).add(value);
 		return this;
 	}
 

@@ -26,6 +26,10 @@ public class SimplePlot {
 		plot.setTitle(title);
 	}
 
+	public void setSize(int width,int height){
+		plot.setSize(width,height);
+	}
+
 	public SimplePlot(){
 		this(new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss-" + new Random().nextInt(100)).format(new Date()));
 	}
