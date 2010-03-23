@@ -8,6 +8,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import be.hogent.tarsos.util.SimplePlot;
+
 import com.sun.media.sound.AudioFloatInputStream;
 
 /**
@@ -22,22 +24,25 @@ import com.sun.media.sound.AudioFloatInputStream;
 public class Yin {
 
 	private final double threshold = 0.10;
+
 	private final int bufferSize;
 	private final int overlapSize;
-	private float sampleRate;
+	private final float sampleRate;
 	private volatile boolean running;
 
-	public Yin(){
+	private final float[] yinBuffer;
+	private final float[] inputBuffer;
+
+	private Yin(float sampleRate){
+		this.sampleRate = sampleRate;
 		bufferSize = 1024;
 		overlapSize = bufferSize/2;
 		running = true;
+		inputBuffer = new float[bufferSize];
+		yinBuffer = new float[bufferSize/2];
 	}
 
-	/**
-	 * @param inputBuffer input signal
-	 * @param yinBuffer output buffer to store difference function (half length of input)
-	 */
-	private void difference(float[] inputBuffer, float[] yinBuffer){
+	private void difference(){
 		int j,tau;
 		float tmp;
 		for(tau=0;tau < yinBuffer.length;tau++){
@@ -51,7 +56,7 @@ public class Yin {
 		}
 	}
 
-	private void cumulativeMeanNormalizedDifference(float[] yinBuffer){
+	private void cumulativeMeanNormalizedDifference(){
 		int tau;
 		float tmp = 0;
 		yinBuffer[0] = 1;
@@ -61,54 +66,63 @@ public class Yin {
 		}
 	}
 
-	private int getPitch(float[] yinBuffer){
+	private float getPitch(){
+		difference();
+		cumulativeMeanNormalizedDifference();
 		int tau = 1;
 		do{
 			if(yinBuffer[tau] < threshold){
-				//change to aubio implementation:
+				//change to aubio implementation: extra array bounds check
 				while(tau + 1 <yinBuffer.length && yinBuffer[tau+1] < yinBuffer[tau])
 					tau++;
-				return tau;
+				return sampleRate/tau;
 			}
 			tau++;
 		}while(tau<yinBuffer.length);
-		return 0;
+		return -1;
 	}
 
 	public interface DetectedPitchHandler{
-		void handleDetectedPitch(float pitch);
+		/**
+		 * @param time in seconds
+		 * @param pitch in Hz
+		 */
+		void handleDetectedPitch(float time,float pitch);
 	}
 
-	public void processFile(String fileName,DetectedPitchHandler detectedPitchHandler)  throws UnsupportedAudioFileException, IOException{
+	public static void processFile(String fileName,DetectedPitchHandler detectedPitchHandler)  throws UnsupportedAudioFileException, IOException{
 		AudioInputStream ais = AudioSystem.getAudioInputStream(new File(fileName));
 		AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
-		AudioFormat format = afis.getFormat();
-		sampleRate = format.getSampleRate();
-		processStream(afis,detectedPitchHandler);
+		Yin.processStream(afis,detectedPitchHandler);
 	}
 
-	public void processStream(AudioFloatInputStream afis,DetectedPitchHandler detectedPitchHandler) throws UnsupportedAudioFileException, IOException{
-		float inputBuffer[] = new float[bufferSize];
-		float yinBuffer[] = new float[bufferSize/2];
+	public static void processStream(AudioFloatInputStream afis,DetectedPitchHandler detectedPitchHandler) throws UnsupportedAudioFileException, IOException{
 		AudioFormat format = afis.getFormat();
-		sampleRate = format.getSampleRate();
+		float sampleRate = format.getSampleRate();
+		double frameSize = format.getFrameSize();
+		double frameRate = format.getFrameRate();
+		float time = 0;
+		//number of bytes / frameSize * frameRate gives the number of seconds
+		//because we use float buffers there is a factor 2: 2 bytes per float?
+		//Seems to be correct but a float uses 4 bytes: confused programmer is confused.
+		float timeCalculationDivider = (float) (frameSize * frameRate / 2);
+		long floatsProcessed = 0;
+		Yin yin = new Yin(sampleRate);
+		int bufferStepSize = yin.bufferSize - yin.overlapSize;
+
 		//read full buffer
-		boolean hasMoreBytes = afis.read(inputBuffer,0, bufferSize) != -1;
-		while(hasMoreBytes && running) {
-			difference(inputBuffer, yinBuffer);
-			cumulativeMeanNormalizedDifference(yinBuffer);
-			float pitch = getPitch(yinBuffer);
-			if(pitch > 0){
-				pitch = sampleRate/pitch;//Hz
-			}else{
-				pitch = -1;
-			}
+		boolean hasMoreBytes = afis.read(yin.inputBuffer,0, yin.bufferSize) != -1;
+		floatsProcessed += yin.inputBuffer.length;
+		while(hasMoreBytes && yin.running) {
+			float pitch = yin.getPitch();
+			time = floatsProcessed / timeCalculationDivider;
 			if(detectedPitchHandler!=null)
-				detectedPitchHandler.handleDetectedPitch(pitch);
-			//slide buffer with defined overlap
-			for(int i = 0 ; i < overlapSize ; i++)
-				inputBuffer[i]=inputBuffer[i+overlapSize];
-			hasMoreBytes = afis.read(inputBuffer,overlapSize, bufferSize - overlapSize) != -1;
+				detectedPitchHandler.handleDetectedPitch(time,pitch);
+			//slide buffer with predefined overlap
+			for(int i = 0 ; i < yin.overlapSize ; i++)
+				yin.inputBuffer[i]=yin.inputBuffer[i+yin.overlapSize];
+			hasMoreBytes = afis.read(yin.inputBuffer,yin.overlapSize,bufferStepSize) != -1;
+			floatsProcessed += bufferStepSize;
 		}
 	}
 
@@ -117,12 +131,17 @@ public class Yin {
 	}
 
 	public static void main(String... args) throws UnsupportedAudioFileException, IOException{
-		Yin yin = new Yin();
-		yin.processFile("../Tarsos/audio/pitch_check/95-100Hz.wav", new DetectedPitchHandler() {
+		final SimplePlot p = new SimplePlot("Pitch tracking");
+		Yin.processFile("../Tarsos/audio/pitch_check/flute.novib.mf.C5B5.wav", new DetectedPitchHandler() {
 			@Override
-			public void handleDetectedPitch(float pitch) {
-				System.out.println(pitch);
+			public void handleDetectedPitch(float time,float pitch) {
+				System.out.println(time + "\t\t\t" + pitch);
+				if(pitch == -1)
+					pitch = 0;
+				p.addData(time,pitch);
 			}
 		});
+		//p.setYRange(0.0,200.0);
+		p.save();
 	}
 }
