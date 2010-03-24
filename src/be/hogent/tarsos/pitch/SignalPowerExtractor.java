@@ -16,6 +16,10 @@ import be.hogent.tarsos.util.SimplePlot;
 
 import com.sun.media.sound.AudioFloatInputStream;
 
+/**
+ * @author Joren Six
+ * An utility class to calculate and access the power of an audio file at any given time.
+ */
 public class SignalPowerExtractor {
 
 	private final AudioFile audioFile;
@@ -23,10 +27,37 @@ public class SignalPowerExtractor {
 	private double[] powerArray;
 
 
+	/**
+	 * Create a new power extractor
+	 * @param audioFile the audio file to extract power from.
+	 */
 	public SignalPowerExtractor(AudioFile audioFile){
 		this.audioFile = audioFile;
 	}
 
+	/**
+	 * Returns the relative power [0.0;1.0] at the given time.
+	 * @param seconds the time to get the relative power for.
+	 * @return A number between 0 and 1 inclusive that shows the relative power at the given time
+	 * @exception IndexOutOfBoundsException when the number of seconds is not between the start and end
+	 * of the song.
+	 */
+	public double powerAt(double seconds){
+		if(powerArray == null)
+			extractPower();
+		return powerArray[secondsToIndex(seconds)];
+	}
+
+	/**
+	 * Calculates an index value for the power array from a number of seconds
+	 */
+	private int secondsToIndex(double seconds){
+		return (int) (seconds/readWindow);
+	}
+
+	/**
+	 * Fills the power array with relative power values.
+	 */
 	private void extractPower(){
 		File inputFile = new File(audioFile.path());
 		AudioInputStream ais;
@@ -34,12 +65,13 @@ public class SignalPowerExtractor {
 			ais = AudioSystem.getAudioInputStream(inputFile);
 			AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
 			AudioFormat format = ais.getFormat();
-			double sampleRate = format.getSampleRate();
 
+			double sampleRate = format.getSampleRate();
 			double frameSize = format.getFrameSize();
 			double frameRate = format.getFrameRate();
 			double audioFileLengtInSeconds =  inputFile.length() / (frameSize * frameRate);
-			powerArray = new double[(int) (audioFileLengtInSeconds/readWindow) + 1];
+
+			powerArray = new double[secondsToIndex(audioFileLengtInSeconds) + 1];
 			int readAmount = (int)(readWindow * sampleRate);
 			float buffer[] = new float[readAmount];
 			double maxPower = -1;
@@ -61,20 +93,30 @@ public class SignalPowerExtractor {
 			}
 
 		} catch (UnsupportedAudioFileException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	private void createWaveFormPlot() {
+	/**
+	 * Creates a plot from a
+	 * @param waveFormPlotFileName
+	 */
+	public void saveWaveFormPlot(String waveFormPlotFileName) {
 		try {
+			File inputFile = new File(audioFile.path());
+			AudioInputStream ais;
+			ais = AudioSystem.getAudioInputStream(inputFile);
+			AudioFormat format = ais.getFormat();
+			double frameSize = format.getFrameSize();
+			double frameRate = format.getFrameRate();
+			double timeFactor = 2.0 / (frameSize * frameRate);
+
 			RandomAccessFile file = new RandomAccessFile(new File(audioFile.path()),"r");
-			SimplePlot p = new SimplePlot("waveform " + audioFile.basename());
-			p.setSize(3000, 300);
-			//skip header
+			SimplePlot p = new SimplePlot("Waveform " + audioFile.basename());
+			p.setSize(4000, 500);
+			//skip header (44 bytes, fixed length)
 			for(int i = 0 ; i < 44 ; i++){
 				file.read();
 			}
@@ -82,20 +124,28 @@ public class SignalPowerExtractor {
 			while((i1 = file.read()) != -1){
 				byte b1 = (byte) i1;
 				byte b2 = (byte) file.read();
-				if(index % 10 == 0){
+				if(index % 3 == 0){//write the power only every 10 bytes
 					double power = (b2 << 8 | b1 & 0xFF) / 32767.0;
-					p.addData(index,power);
+					double seconds = index * timeFactor;
+					p.addData(seconds,power);
 				}
 				index++;
 			}
-			p.save();
+			p.save(waveFormPlotFileName);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (UnsupportedAudioFileException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 
-	public void saveTextFile(String fileName){
+	/**
+	 * Creates a text file with relative power values for each sample.
+	 * @param textFileName where to save the text file?
+	 */
+	public void saveTextFile(String textFileName){
 		if(powerArray == null)
 			extractPower();
 
@@ -106,10 +156,14 @@ public class SignalPowerExtractor {
 			  .append(powerArray[index])
 			  .append("\n");
 		}
-		FileUtils.writeFile(sb.toString(), fileName);
+		FileUtils.writeFile(sb.toString(), textFileName);
 	}
 
-	public void savePlot(String fileName){
+	/**
+	 * Creates a 'power plot' of the signal.
+	 * @param powerPlotFileName where to save the plot.
+	 */
+	public void savePowerPlot(String powerPlotFileName){
 		if(powerArray == null)
 			extractPower();
 
@@ -117,7 +171,7 @@ public class SignalPowerExtractor {
 		for(int index = 0;index < powerArray.length;index++){
 			plot.addData(index * readWindow, powerArray[index]);
 		}
-		plot.save(fileName);
+		plot.save(powerPlotFileName);
 	}
 
 	public static void main(String... args){
@@ -126,11 +180,9 @@ public class SignalPowerExtractor {
 		for(AudioFile file:files){
 			System.out.println(file.basename());
 			SignalPowerExtractor spex = new SignalPowerExtractor(file);
-			spex.savePlot("data/tests/power_" + file.basename() + ".png");
+			spex.savePowerPlot("data/tests/power_" + file.basename() + ".png");
 			spex.saveTextFile("data/tests/power_" + file.basename() + ".txt");
-			spex.createWaveFormPlot();
+			spex.saveWaveFormPlot("data/tests/waveform_" + file.basename() + ".png");
 		}
 	}
-
-
 }
