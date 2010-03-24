@@ -109,4 +109,8 @@ public class SimplePlot {
 	public void setXRange(double startingValue, double stoppingValue) {
 		plot.setXRange(startingValue, stoppingValue);
 	}
+
+	public void setYRange(double d, double e) {
+		plot.setYRange(d, e);
+	}
 }
