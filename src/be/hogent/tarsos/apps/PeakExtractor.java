@@ -1,8 +1,10 @@
-package be.hogent.tarsos.peak;
+package be.hogent.tarsos.apps;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import be.hogent.tarsos.peak.Peak;
+import be.hogent.tarsos.peak.PeakDetector;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetectionMix;
@@ -34,7 +36,7 @@ public class PeakExtractor {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String[] globDirectories = {"machault"};
+		String[] globDirectories = {"dekkmma_random","makam","maghreb"};
 		List<AudioFile> files = AudioFile.audioFiles(globDirectories);
 
  		System.out.println(files.size());
