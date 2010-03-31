@@ -9,7 +9,9 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
@@ -41,6 +43,14 @@ public class FileUtils {
 	private static final char pathSeparator = File.separatorChar;
 	private static final char extensionSeparator = '.';
 
+	public static String temporaryDirectory(){
+		String tempDir = System.getProperty("java.io.tmpdir");
+		if(tempDir.contains(" "))
+			log.warning("Temporary directory (" + tempDir + ") contains whitespace");
+		return tempDir;
+
+	}
+
 	//disable the default constructor
 	private FileUtils(){}
 
@@ -57,8 +67,6 @@ public class FileUtils {
 		}
 		return file.getPath();
 	}
-
-
 
 	/**
 	 *
@@ -163,6 +171,34 @@ public class FileUtils {
 		}
 		return contents.toString();
 	}
+
+
+	/**
+	 * Reads the contents of a file in a jar.
+	 * @param path the path to read e.g. /package/name/here/help.html
+	 * @return the contents of the file when successful, an empty string otherwise.
+	 */
+	public static void copyFileFromJar(String source, String target){
+		try {
+			InputStream in = new FileUtils().getClass().getResourceAsStream(source);
+			OutputStream out;
+			out = new FileOutputStream(target);
+			byte[] buffer = new byte[4096];
+			int r;
+			while ((r = in.read(buffer)) != -1) {
+				out.write(buffer, 0, r);
+			}
+			out.close();
+			in.close();
+		} catch (FileNotFoundException e) {
+			log.severe("File not found: " + e.getMessage());
+			e.printStackTrace();
+		} catch (IOException e) {
+			log.severe("Exception while copying file from jar" + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
 
 	/**
 	 * Reads a CSV-file from disk. The separator can be chosen.

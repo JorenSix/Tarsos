@@ -6,6 +6,8 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
 import javax.swing.JFrame;
 
+import be.hogent.tarsos.apps.PlayAlong;
+
 public class GervillDelayTest {
 	
 	public static void main(String[] args) throws Exception{

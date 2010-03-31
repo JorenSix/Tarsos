@@ -2,18 +2,15 @@ package be.hogent.tarsos.midi;
 
 
 import jass.generators.LoopBuffer;
+import jass.generators.Mixer;
 import jass.render.SourcePlayer;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -21,6 +18,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
 import be.hogent.tarsos.pitch.PitchFunctions;
+import be.hogent.tarsos.pitch.SignalPowerExtractor;
+import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 
 
@@ -44,11 +43,17 @@ public class ToneSequenceBuilder {
 	private final List<Double> realTimes;
 
 	/**
+	 * Values between 0 and 1 that signify the strength of the signal <code>frequencies.size() == realTimes.size() == powers.size();</code>
+	 */
+	private List<Double> powers;
+
+	/**
 	 * Initializes the lists of frequencies and times.
 	 */
 	public ToneSequenceBuilder(){
 		frequencies = new ArrayList<Double>();
 		realTimes = new ArrayList<Double>();
+		powers = new ArrayList<Double>();
 	}
 
 	/**
@@ -67,10 +72,19 @@ public class ToneSequenceBuilder {
 	public void addTone(double frequency, double realTime) {
 		frequencies.add(frequency);
 		realTimes.add(realTime);
+		powers.add(0.75);
+	}
+
+	public void addTone(double frequency, double realTime,double power) {
+		frequencies.add(frequency);
+		realTimes.add(realTime);
+		realTimes.add(realTime);
+		powers.add(power);
 	}
 
 	/**
-	 * Clears the frequencies and times. When this method finishes the object is in the same state as a new instance of {@link ToneSequenceBuilder}.
+	 * Clears the frequencies and times. When this method finishes the object is in the
+	 *  same state as a new instance of {@link ToneSequenceBuilder}.
 	 */
 	public void clear(){
 		frequencies.clear();
@@ -85,23 +99,16 @@ public class ToneSequenceBuilder {
 	 * in the temporary directory.
 	 */
 	private URL sineWaveURL() throws IOException{
-		File sineWaveFile = new File(FileUtils.combine(System.getProperty("java.io.tmpdir"),"sin20ms.wav"));
+		File sineWaveFile = new File(FileUtils.combine(FileUtils.temporaryDirectory(),"sin20ms.wav"));
 		if (!sineWaveFile.exists()) {
-			InputStream in = this.getClass().getResourceAsStream("sin20ms.wav");
-			OutputStream out = new FileOutputStream(sineWaveFile);
-			byte[] buffer = new byte[4096];
-			int r;
-			while ((r = in.read(buffer)) != -1) {
-				out.write(buffer, 0, r);
-			}
-			out.close();
-			in.close();
+			FileUtils.copyFileFromJar("be.hogent.tarsos.midi.sin20ms.wav", sineWaveFile.getAbsolutePath());
 		}
 		return sineWaveFile.toURI().toURL();
 	}
 
 	/**
 	 * Write a WAV-file (sample rate 44.1 kHz) containing the tones and their respective durations (start times).
+	 * If the fileName the file played.
 	 * @param fileName the name of the file to render. e.g. "out.wav". Also temporary .raw file is generated: e.g. out.wav.raw. It can not be deleted using
 	 * java because the library jass keeps the file open until garbage collection. A delete on exit is requested but can fail.
 	 * Manually deleting the raw files is advised. So beware when generating a lot of files: temporarily you need twice the amount of hard disk space.
@@ -115,9 +122,10 @@ public class ToneSequenceBuilder {
 		//invariant: at any time the lists are equal in length
 		assert frequencies.size() == realTimes.size();
 
-		String rawFileName = fileName + ".raw";
-		if(smootFilterWindowSize > 0)
+		if(smootFilterWindowSize > 0){
 			frequencies = PitchFunctions.medianFilter(frequencies,smootFilterWindowSize);
+			powers = PitchFunctions.medianFilter(powers,smootFilterWindowSize);
+		}
 
 		URL sine50Hz44100 = sineWaveURL();
 
@@ -125,17 +133,38 @@ public class ToneSequenceBuilder {
 		float srate = 44100.f;
 		int bufferSize = 1024;
 		LoopBuffer tone = new LoopBuffer(srate, bufferSize, sine50Hz44100);
+		SourcePlayer player;
+		if(fileName != null){
+			String rawFileName = fileName + ".raw";
+			player = new SourcePlayer(bufferSize, srate, rawFileName);
+		} else {
+			player = new SourcePlayer(bufferSize, srate);
+		}
 
-		SourcePlayer player = new SourcePlayer(bufferSize, srate, rawFileName);
-		player.addSource(tone);
+		Mixer mixer = new Mixer(bufferSize,1);
+		player.addSource(mixer);
+		mixer.addSource(tone);
 		tone.setSpeed(0f / baseFreqWavFile);
+		if(fileName == null)
+			player.start();
+
 		for(int i = 0 ; i < frequencies.size() ; i++){
 			double freq = frequencies.get(i) == -1.0 ? 0.0 : frequencies.get(i);
 			tone.setSpeed((float) freq/baseFreqWavFile);
-			player.advanceTime(realTimes.get(i));
+			mixer.setGain(0,  (float) (1.41421 * Math.log(powers.get(i).floatValue())/Math.log(1.6)));
+			if(fileName == null) {
+				if(i > 0) Thread.sleep(Math.round((realTimes.get(i) - realTimes.get(i-1))* 1000));
+			}
+			else {
+				player.advanceTime(realTimes.get(i));
+			}
 		}
-		convertRawToWav(srate,rawFileName,fileName);
-		new File(rawFileName).deleteOnExit();
+
+		if(fileName != null) {
+			String rawFileName = fileName + ".raw";
+			convertRawToWav(srate,rawFileName,fileName);
+			new File(rawFileName).deleteOnExit();
+		}
 	}
 
 	/**
@@ -167,6 +196,7 @@ public class ToneSequenceBuilder {
 	 * @param smootFilterWindowSize the window size for the smoothing function (Median filter).
 	 */
 	public static void saveAsWav(String csvFileName, CSVFileHandler handler,int smootFilterWindowSize){
+		csvFileName = new File(csvFileName).getAbsolutePath();
 		try {
 			ToneSequenceBuilder builder = new ToneSequenceBuilder();
 			List<String[]> rows = FileUtils.readCSVFile(csvFileName,handler.getSeparator(),handler.getNumberOfExpectedColumn());
@@ -183,18 +213,33 @@ public class ToneSequenceBuilder {
 	 *
 	 *
 	 */
-	interface CSVFileHandler{
+	public interface CSVFileHandler{
 		void handleRow(ToneSequenceBuilder builder,String[] row);
 		String getSeparator();
 		int getNumberOfExpectedColumn();
 	}
 
-	public static CSVFileHandler AUBIO_CSVFILEHANDLER = new CSVFileHandler(){
+	public static CSVFileHandler AUBIO_CSVFILEHANDLER = new AubioCSVHandler();
+
+	private static class AubioCSVHandler implements CSVFileHandler{
+		private final SignalPowerExtractor extractor;
+
+		public AubioCSVHandler(){
+			extractor = null;
+		}
+
+		public AubioCSVHandler(String orignalFileName){
+			extractor = new SignalPowerExtractor(new AudioFile(orignalFileName));
+		}
+
 		@Override
 		public void handleRow(ToneSequenceBuilder builder, String[] row) {
 			double realTime = Double.parseDouble(row[0]);
 			double frequency = Double.parseDouble(row[1]);
-			builder.addTone(frequency,realTime);
+			if(extractor == null)
+				builder.addTone(frequency,realTime);
+			else
+				builder.addTone(frequency, realTime, extractor.powerAt(realTime));
 		}
 
 		@Override
@@ -235,8 +280,13 @@ public class ToneSequenceBuilder {
 		@Override
 		public void handleRow(ToneSequenceBuilder builder, String[] row) {
 			sampleNumber ++;
-			double realTime = (sampleNumber )/100.0;//100 Hz sample frequency (every 10 ms)
-			double frequency = Double.parseDouble(row[1]);
+			double realTime = sampleNumber/100.0;//100 Hz sample frequency (every 10 ms)
+			double frequency = 0.0;
+			try{
+				frequency = Double.parseDouble(row[0]);
+			}catch (NumberFormatException e){
+				//ignore
+			}
 			builder.addTone(frequency,realTime);
 		}
 		@Override
@@ -250,12 +300,17 @@ public class ToneSequenceBuilder {
 	}
 
 	public static void main(String[] args) throws Exception{
+
+		SignalPowerExtractor spex = new SignalPowerExtractor(new AudioFile("audio/dekkmma_voice_melodic/MR.1961.4.19-6.wav"));
+		spex.savePowerPlot("data/tests/hmm.png");
+		saveAsWav("data/raw/aubio/aubio_yin_MR.1961.4.19-6.txt", new AubioCSVHandler("audio/dekkmma_voice_melodic/MR.1961.4.19-6.wav"),9);
+
 		/*
 		saveAsWav("data/02_hicaz_klarnet.yin.txt", BOZKURT_CSVFILEHANDLER,0);
 		saveAsWav("data/05_ussaktaksim_ney.yin.txt", BOZKURT_CSVFILEHANDLER,0);
 		saveAsWav("data/03_huseynitaksim_tanbur.yin.txt", BOZKURT_CSVFILEHANDLER,0);
-		saveAsWav("data/raw/aubio/aubio_yin_MR.1961.4.19-6.txt", AUBIO_CSVFILEHANDLER,9);
-		*/
+
+
 
 		ToneSequenceBuilder builder = new ToneSequenceBuilder();
 		double realTime = 0;
@@ -265,7 +320,6 @@ public class ToneSequenceBuilder {
 		Random r = new Random();
 		double referenceFrequency = 8.17579891564371;//Hz
 		for(int i = 0;i<60;i++){
-
 			double centValue = startingCentValue + r.nextInt(numberOfChoises)*interval;
 			double frequency = referenceFrequency * Math.pow(2.0, centValue/1200.0);
 			realTime  +=  r.nextInt(10) * 0.05;
@@ -276,6 +330,8 @@ public class ToneSequenceBuilder {
 			}
 		}
 		builder.writeFile("middentoonstemming.wav", 0);
+
+		*/
 	}
 
 }

@@ -81,4 +81,13 @@ public class FileUtilsTests {
 		fileName = FileUtils.combine("data","tests","test_file");
 		assertEquals("test_file", FileUtils.basename(fileName));
 	}
+
+	@Test
+	public void testCombine(){
+		if(System.getProperty("os.name").contains("indows")){
+			assertEquals("c:\\blaat\\test", FileUtils.combine("c:","blaat","test"));
+		}else{
+			assertEquals("/home/joren/test.jpg", FileUtils.combine("home","joren","test.jpg"));
+		}
+	}
 }

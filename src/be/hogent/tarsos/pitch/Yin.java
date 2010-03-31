@@ -12,6 +12,8 @@ import be.hogent.tarsos.util.SimplePlot;
 
 import com.sun.media.sound.AudioFloatInputStream;
 
+
+
 /**
  * @author Joren Six
  *An implementation of the YIN pitch tracking algorithm.
@@ -28,59 +30,115 @@ public class Yin {
 	private final int bufferSize;
 	private final int overlapSize;
 	private final float sampleRate;
+	/**
+	 * A boolean to start and stop the algorithm.
+	 * Practical for real time processing of data.
+	 */
 	private volatile boolean running;
 
+	/**
+	 * The buffer that stores the calculated values.
+	 * It is exactly half the size of the input buffer.
+	 */
 	private final float[] yinBuffer;
+	/**
+	 * The original input buffer
+	 */
 	private final float[] inputBuffer;
 
 	private Yin(float sampleRate){
 		this.sampleRate = sampleRate;
 		bufferSize = 1024;
-		overlapSize = bufferSize/2;
+		overlapSize = bufferSize/2;//half of the buffer overlaps
 		running = true;
 		inputBuffer = new float[bufferSize];
 		yinBuffer = new float[bufferSize/2];
 	}
 
+	/**
+	 * Implements the difference function as described
+	 * in step 2 of the YIN paper
+	 */
 	private void difference(){
 		int j,tau;
-		float tmp;
+		float delta;
 		for(tau=0;tau < yinBuffer.length;tau++){
 			yinBuffer[tau] = 0;
 		}
 		for(tau = 1 ; tau < yinBuffer.length ; tau++){
 			for(j = 0 ; j < yinBuffer.length ; j++){
-				tmp = inputBuffer[j] - inputBuffer[j+tau];
-				yinBuffer[tau]+=  tmp * tmp;
+				delta = inputBuffer[j] - inputBuffer[j+tau];
+				yinBuffer[tau] += delta * delta;
 			}
 		}
 	}
 
+	/**
+	 * The cumulative mean normalized difference function
+	 * as described in step 3 of the YIN paper
+	 *
+	 * yinBuffer[0] == yinBuffer[1] = 1
+	 *
+	 */
 	private void cumulativeMeanNormalizedDifference(){
 		int tau;
-		float tmp = 0;
 		yinBuffer[0] = 1;
-		for(tau = 1 ; tau < yinBuffer.length ; tau++){
-			tmp += yinBuffer[tau];
-			yinBuffer[tau] *= (tau) /tmp;
+		//Very small optimization in comparison with AUBIO
+		//start the running sum with the correct value:
+		//the first value of the yinBuffer
+		float runningSum = yinBuffer[1];
+		//yinBuffer[1] is always 1
+		yinBuffer[1] = 1;
+		//now start at tau = 2
+		for(tau = 2 ; tau < yinBuffer.length ; tau++){
+			runningSum += yinBuffer[tau];
+			yinBuffer[tau] *= tau / runningSum;
 		}
+	}
+
+	/**
+	 * Implements step 4 of the YIN paper
+	 */
+	private int absoluteThreshold(){
+		//other loop construction
+		//compared with AUBIO
+		for(int tau = 1;tau<yinBuffer.length;tau++){
+			if(yinBuffer[tau] < threshold){
+				while(tau+1 < yinBuffer.length && yinBuffer[tau+1] < yinBuffer[tau])
+					tau++;
+				return tau;
+			}
+		}
+		//no pitch found
+		return -1;
 	}
 
 	private float getPitch(){
+		//step 2
 		difference();
+
+		//step 3
 		cumulativeMeanNormalizedDifference();
-		int tau = 1;
-		do{
-			if(yinBuffer[tau] < threshold){
-				//change to aubio implementation: extra array bounds check
-				while(tau + 1 <yinBuffer.length && yinBuffer[tau+1] < yinBuffer[tau])
-					tau++;
-				return sampleRate/tau;
-			}
-			tau++;
-		}while(tau<yinBuffer.length);
-		return -1;
+
+		//step 4
+		int tau =  absoluteThreshold();
+
+		//step 5:
+		//skip interpolation: has
+		//little effect on error rates,
+		//using the data of the YIN paper.
+		//parabolicInterpolation();
+
+		//step 6
+		//TODO: implement this optimization
+		//0.77% => 0.5% error rate,
+		//using the data of the YIN paper
+		//bestLocalEstimate()
+
+		//convert to Hz
+		return tau==-1 ? -1 : sampleRate/tau;
 	}
+
 
 	public interface DetectedPitchHandler{
 		/**
@@ -119,20 +177,23 @@ public class Yin {
 			if(detectedPitchHandler!=null)
 				detectedPitchHandler.handleDetectedPitch(time,pitch);
 			//slide buffer with predefined overlap
-			for(int i = 0 ; i < yin.overlapSize ; i++)
+			for(int i = 0 ; i < bufferStepSize ; i++)
 				yin.inputBuffer[i]=yin.inputBuffer[i+yin.overlapSize];
 			hasMoreBytes = afis.read(yin.inputBuffer,yin.overlapSize,bufferStepSize) != -1;
 			floatsProcessed += bufferStepSize;
 		}
 	}
 
+	/**
+	 * Stop the
+	 */
 	public void stop(){
 		running=false;
 	}
 
 	public static void main(String... args) throws UnsupportedAudioFileException, IOException{
 		final SimplePlot p = new SimplePlot("Pitch tracking");
-		Yin.processFile("../Tarsos/audio/pitch_check/flute.novib.mf.C5B5.wav", new DetectedPitchHandler() {
+		Yin.processFile("../Tarsos/data/transcoded_audio/de_Machault_-_Loyaut__que_point_ne_delay.wav", new DetectedPitchHandler() {
 			@Override
 			public void handleDetectedPitch(float time,float pitch) {
 				System.out.println(time + "\t\t\t" + pitch);

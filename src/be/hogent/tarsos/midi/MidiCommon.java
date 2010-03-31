@@ -50,15 +50,15 @@ import javax.sound.midi.MidiUnavailableException;
 public class MidiCommon
 {
 
-	public static void listDevicesAndExit(boolean bForInput,
+	public static void listDevices(boolean bForInput,
 					      boolean bForOutput)
 	{
-		listDevicesAndExit(bForInput, bForOutput, false);
+		listDevices(bForInput, bForOutput, false);
 	}
 
 
 
-	public static void listDevicesAndExit(boolean bForInput,
+	public static void listDevices(boolean bForInput,
 					      boolean bForOutput,
 					      boolean bVerbose)
 	{
@@ -112,7 +112,6 @@ public class MidiCommon
 		{
 			out("[No devices available]");
 		}
-		System.exit(0);
 	}
 
 
@@ -153,7 +152,7 @@ public class MidiCommon
 				}
 				catch (MidiUnavailableException e)
 				{
-				
+
 				}
 			}
 		}
@@ -161,7 +160,7 @@ public class MidiCommon
 	}
 
 
-	/** 
+	/**
 	 * Retrieve a MidiDevice.Info by index number.
 	 * This method returns a MidiDevice.Info whose index
 	 * is specified as parameter. This index matches the
