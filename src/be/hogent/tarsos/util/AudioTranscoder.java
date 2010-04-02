@@ -13,13 +13,15 @@ import java.util.logging.Logger;
 
 
 /**
- * @author Joren Six
+ *
  *
  * Transcodes audio. Uses ffmpeg: a vast number of formats are supported.
  * A compiled ffmpeg binary is provided for Windows and Linux (32bit).
  * If support on another platform is required check the
  * <a href="http://www.sauronsoftware.it/projects/jave/manual.php">documentation of JAVE</a>
  * or disable transcoding (trough configuration) and perform it manually .
+ *
+ * @author Joren Six
  */
 public class AudioTranscoder
 {

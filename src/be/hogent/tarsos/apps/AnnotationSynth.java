@@ -16,10 +16,8 @@ import be.hogent.tarsos.util.FileUtils;
 
 
 /**
- * @author jsix666
  * Generates audio from a set of annotations.
- * The
- *
+ * @author Joren Six
  */
 public class AnnotationSynth {
 

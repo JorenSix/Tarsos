@@ -14,7 +14,7 @@ import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SimplePlot;
 
 /**
- * @author Joren Six
+ *
  * A histogram is defined by a start value, a stop value and a number of classes.
  * The 'key' of a class is the middle of the class. E.g. the keys of a histogram that starts
  * at 0, stops at 5 and has 5 classes are {0.5,1.5,2.5,3.5,4.5}. The intervals for each key
@@ -33,15 +33,7 @@ import be.hogent.tarsos.util.SimplePlot;
  * The number can be found in {@link #PRECISION_FACTOR}. E.g. if  {@link #PRECISION_FACTOR}
  * is 10000 then the number of significant decimals is 4; the minimum classWidth is 0.0001.
  * </p>
- *
- */
-/**
- * @author jsix666
- *
- */
-/**
- * @author jsix666
- *
+ * @author Joren Six
  */
 public class Histogram {
 	private static final Logger log = Logger.getLogger(Histogram.class.getName());

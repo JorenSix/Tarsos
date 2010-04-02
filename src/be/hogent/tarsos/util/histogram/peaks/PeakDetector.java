@@ -8,6 +8,10 @@ import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
 
+/**
+ * @author Joren Six
+ *
+ */
 public class PeakDetector {
 
 

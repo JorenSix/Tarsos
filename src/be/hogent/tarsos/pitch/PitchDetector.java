@@ -3,7 +3,9 @@ package be.hogent.tarsos.pitch;
 import java.util.List;
 
 /**
+ *
  * A PitchDetector is able to annotate a song with pitches.
+ *
  * @author Joren Six
  */
 public interface PitchDetector {

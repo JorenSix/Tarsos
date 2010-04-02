@@ -23,10 +23,10 @@ import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 /**
- * @author Joren Six
  * Annotates an audio file with everything Tarsos is capable off
  * Pitch information, ambitus, tone scale peaks, waveform, scala files...
  *
+ * @author Joren Six
  */
 public class Annotate {
 

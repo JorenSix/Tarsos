@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 
 /**
  * Exports a DatabaseResult to a CSV-file.
+ *
  * @author Joren Six
  *
  */

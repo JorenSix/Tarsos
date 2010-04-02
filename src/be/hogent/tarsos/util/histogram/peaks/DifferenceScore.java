@@ -5,11 +5,17 @@ import org.apache.commons.math.stat.StatUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
 
 
+/**
+ *
+ *
+ * @author Joren Six
+ *
+ */
 public class DifferenceScore implements PeakScore{
-	
-	private int windowSize;
-	private double[] scores;
-	private Histogram histogram;
+
+	private final int windowSize;
+	private final double[] scores;
+	private final Histogram histogram;
 	public DifferenceScore(Histogram histogram, int windowSize){
 		this.histogram = histogram;
 		this.windowSize = windowSize;
@@ -29,30 +35,30 @@ public class DifferenceScore implements PeakScore{
 					after++;
 					double scoreBefore = scores[(before + histogram.getNumberOfClasses()) %  histogram.getNumberOfClasses()];
 					double scoreAfter = scores[after %  histogram.getNumberOfClasses()];
-					
-					//if there is a bigger score in this window 
+
+					//if there is a bigger score in this window
 					//set the current score to 0.0
 					if( scoreBefore >= currentScore || scoreAfter >= currentScore){
 						scores[i] = 0.0;
 						break;
-					} 
+					}
 				}
-			}			
+			}
 		}
 	}
-	
+
 	private void calculateScore(int index){
 		int before = 0;
 		int after = 0;
 		double[] beforeRange = new double[windowSize];
 		double[] afterRange = new double[windowSize];
 		for(int j = 0; j < windowSize; j++ ){
-			before--;			
+			before--;
 			after++;
 			beforeRange[j] += histogram.getCountForClass(index + before);
 			afterRange[j] += histogram.getCountForClass(index + after);
 		}
-		long current  =  histogram.getCountForClass(index);		
+		long current  =  histogram.getCountForClass(index);
 		boolean isPeak = StatUtils.mean(beforeRange) < current && current > StatUtils.mean(afterRange);
 		scores[index] = (isPeak ? 1.0 : 0.0) * histogram.getCountForClass(index);
 	}
@@ -61,12 +67,12 @@ public class DifferenceScore implements PeakScore{
 	public double score(Histogram originalHistogram, int index, int windowSize) {
 		return scores[index];
 	}
-	
+
 	public double derivative(Histogram originalHistogram, int index, int windowSize){
 		long valueBefore = originalHistogram.getCountForClass(index - windowSize);
 		long current  =  originalHistogram.getCountForClass(index);
 		return valueBefore - current;
 	}
-	
-	
+
+
 }

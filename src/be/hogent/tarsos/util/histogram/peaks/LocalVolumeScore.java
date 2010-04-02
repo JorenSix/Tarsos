@@ -5,6 +5,10 @@ import org.apache.commons.math.stat.StatUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
 
 
+/**
+ * @author Joren Six
+ *
+ */
 public class LocalVolumeScore implements PeakScore {
 
 	private final long[] volumes;

@@ -8,16 +8,18 @@ import java.awt.geom.Rectangle2D;
 
 
 /**
- * @author Joren Six
+ *
  * <p>
  * Represents a keyboard with an arbitrary number of (white) keys per octave.
  * Every octave is marked.
  * </p>
  * <p>
- * Uses refactored code from the gervill package licensed under the GPL 
+ * Uses refactored code from the gervill package licensed under the GPL
  * with the classpath exception.
  * </p>
  * <a href="https://gervill.dev.java.net/source/browse/gervill/src.demos/">Gervill source code</a>
+ *
+ * @author Joren Six
  */
 public class UniversalVirtualKeyboard  extends VirtualKeyboard {
 
@@ -40,7 +42,7 @@ public class UniversalVirtualKeyboard  extends VirtualKeyboard {
 			n = numberOfKeys - 1;
 		return n;
 	}
-	
+
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
@@ -69,7 +71,7 @@ public class UniversalVirtualKeyboard  extends VirtualKeyboard {
 
 			if (i % this.numberOfKeysPerOctave == 0)
 				g2.drawString("_", cx + 2, 12);
-			
+
 			if(i >= lowestAssignedKey){
                 if(i - lowestAssignedKey < VirtualKeyboard.mappedKeys.length()){
                     g2.setColor(Color.GRAY);

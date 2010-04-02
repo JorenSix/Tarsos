@@ -7,21 +7,21 @@ import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 
 /**
- * @author Joren Six
- * 
+ *
  * A normal keyboard with 12 tones.
- * 
- * Uses refactored code from the Gervill package licensed under the GPL 
+ *
+ * Uses refactored code from the Gervill package licensed under the GPL
  * with the classpath exception.
- * 
+ *
  * <a href="https://gervill.dev.java.net/source/browse/gervill/src.demos/">Gervill source code</a>
- * 
+ *
+ * @author Joren Six
  *
  */
 public class VirtualKeyboard12 extends VirtualKeyboard {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -2901538187056239209L;
 

@@ -8,8 +8,10 @@ import java.util.ListIterator;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 
 /**
- * @author Joren Six
+ *
  * A sample is a collection of pitches with corresponding probabilities that starts at a certain time.
+ *
+ * @author Joren Six
  */
 public class Sample implements Comparable<Sample> {
 

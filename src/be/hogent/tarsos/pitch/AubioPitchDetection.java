@@ -34,8 +34,10 @@ import be.hogent.tarsos.util.FileUtils;
 public class AubioPitchDetection implements PitchDetector{
 
 	/**
-	 * @author Joren Six
+	 *
 	 * The pitch detection mode defines which algorithm is used to detect pitch.
+	 *
+	 * @author Joren Six
 	 */
 	public enum AubioPitchDetectionMode{
 		/**

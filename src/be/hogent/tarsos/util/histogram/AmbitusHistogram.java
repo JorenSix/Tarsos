@@ -17,11 +17,13 @@ import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SimplePlot;
 
 /**
- * @author Joren Six
+ *
  * The AmbitusHistogram accepts values from 0 to 9600 cents
  * or +- from 16Hz to 40000Hz: the human hearing range is completely covered.<br>
  * The start and stop values can be configured.<br>
  * Values outside the defined range are ignored!
+ *
+ * @author Joren Six
  */
 public class AmbitusHistogram extends Histogram{
 

@@ -7,18 +7,20 @@ import java.util.List;
 
 
 /**
- * @author Joren Six
- * Represents an audio file. 
+ *
+ * Represents an audio file.
  * Facilitates transcoding, handling of path names and data sets.
+ *
+ * @author Joren Six
  */
 public class AudioFile {
-	
+
 	/**
 	 * Where to save the transcoded files
 	 */
 	public static final String TRANSCODED_AUDIO_DIRECTORY = Configuration.get(ConfKey.transcoded_audio_directory);
 	private static final String ORIGINAL_AUDIO_DIRECTORY = Configuration.get(ConfKey.audio_directory);
-	
+
 	private final String path;
 	/**
 	 * Create and transcode an audio file.
@@ -29,7 +31,7 @@ public class AudioFile {
 		if(AudioTranscoder.transcodingRequired(transcodedPath()))
 			AudioTranscoder.transcode(path, transcodedPath());
 	}
-	
+
 	/**
 	 * @return the path of the transcoded audio file.
 	 */
@@ -38,25 +40,26 @@ public class AudioFile {
 		String fileName = baseName + "." + Configuration.get(ConfKey.transcoded_audio_format);
 		return FileUtils.combine(TRANSCODED_AUDIO_DIRECTORY,fileName);
 	}
-	
+
 	/**
 	 * @return the path of the original file
 	 */
 	public String path(){
 		return this.path;
 	}
-	
+
+	@Override
 	public String toString(){
 		return FileUtils.basename(path);
 	}
-	
+
 	/**
 	 * @return the name of the file (without extension)
 	 */
 	public String basename() {
 		return this.toString();
 	}
-	
+
 	/**
 	 * Returns a list of AudioFiles included in one or more datasets. Datasets are
 	 * sub folders of the audio directory.

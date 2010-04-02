@@ -10,12 +10,13 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-
 import com.sun.media.sound.AudioFloatInputStream;
 
 /**
- * @author Joren Six
+ *
  * An utility class to calculate and access the power of an audio file at any given time.
+ *
+ * @author Joren Six
  */
 public class SignalPowerExtractor {
 

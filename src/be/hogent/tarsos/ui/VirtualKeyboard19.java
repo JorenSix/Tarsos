@@ -7,26 +7,27 @@ import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 
 /**
- * @author Joren Six
- * 
- * Uses code from the gervill package licensed under the GPL 
+ *
+ * Uses code from the gervill package licensed under the GPL
  * with the classpath exception.
- * 
+ *
  * <a href="https://gervill.dev.java.net/source/browse/gervill/src.demos/">Gervill source code</a>
- * 
+ *
+ * @author Joren Six
  */
 public class VirtualKeyboard19 extends VirtualKeyboard {
 
 	private static final long serialVersionUID = 3155583325975723313L;
 
 	/**
-	 * 
+	 *
 	 */
 	public VirtualKeyboard19() {
 		super(19, 19 * 5); // 19*5 = 95
 		mappedKeys = "qézs\"edrf(tg§yhèujikçolàp";
 	}
 
+	@Override
 	public int getMidiNote(int x, int y) {
 		int w = getWidth();
 		int h = getHeight();
@@ -85,6 +86,7 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
 		return n;
 	}
 
+	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
 		Graphics2D g2 = (Graphics2D) g;

@@ -1,11 +1,13 @@
 package be.hogent.tarsos.util.histogram;
 
 /**
- * @author Joren Six
+ *
  * Euclidean Distance (L2 norm) for modulo type histograms
+ *
+ * @author Joren Six
  */
 public class EuclideanDistance implements HistogramCorrelation {
-	
+
 	public double correlation(Histogram thisHistogam, int displacement,
 			Histogram otherHistogram) {
 		//number of bins (classes)
@@ -16,18 +18,18 @@ public class EuclideanDistance implements HistogramCorrelation {
 		double stop = thisHistogam.getStop();
 		//classWidth
 		double classWidth = thisHistogam.getClassWidth();
-		
+
 		//make displacement positive
 		if(displacement < 0)
 			displacement = ((displacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
-		
+
 		double distance = 0.0;
 
 		for(double current  = start + classWidth/2;current <= stop;current += classWidth){
 			double displacedValue = (current + displacement * classWidth) % (numberOfClasses * classWidth);
 			distance += Math.pow(thisHistogam.getCount(current) - otherHistogram.getCount(displacedValue),2);
 		}
-		
+
 		return -1 * Math.pow(distance,0.5);
 	}
 

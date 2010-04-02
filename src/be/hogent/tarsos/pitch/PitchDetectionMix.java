@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ *
  * PitchDetectionMix uses a mix of pitch detectors to annotate a song.
+ *
  * @author Joren Six
  */
 public class PitchDetectionMix implements PitchDetector {

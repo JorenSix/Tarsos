@@ -15,13 +15,13 @@ import com.sun.media.sound.AudioFloatInputStream;
 
 
 /**
+ *
+ * An implementation of the YIN pitch tracking algorithm.
+ * See <a href="http://recherche.ircam.fr/equipes/pcm/cheveign/ps/2002_JASA_YIN_proof.pdf">the YIN paper.</a>
+ *
+ * Implementation based on <a href="http://aubio.org">aubio</a>
+ *
  * @author Joren Six
- *An implementation of the YIN pitch tracking algorithm.
- *See <a href="http://recherche.ircam.fr/equipes/pcm/cheveign/ps/2002_JASA_YIN_proof.pdf">the YIN paper.</a>
- *
- *Implementation based on <a href="http://aubio.org">aubio</a>
- *
- *
  */
 public class Yin {
 
@@ -130,7 +130,7 @@ public class Yin {
 		//parabolicInterpolation();
 
 		//step 6
-		//TODO: implement this optimization
+		//TODO Implement optimization for the YIN algorithm.
 		//0.77% => 0.5% error rate,
 		//using the data of the YIN paper
 		//bestLocalEstimate()
@@ -185,7 +185,7 @@ public class Yin {
 	}
 
 	/**
-	 * Stop the
+	 * Stop the real time annotations.
 	 */
 	public void stop(){
 		running=false;
