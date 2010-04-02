@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package be.hogent.tarsos.midi;
 
@@ -8,12 +8,17 @@ import javax.sound.midi.Receiver;
 
 
 /**
- * @author Joren Six
  *
- * ReceiverSink acts sends messages to each registered <code>Receiver</code>
+ * ReceiverSink acts as a sink for MIDI messages.
+ * It is a Receiver and sends messages to each registered <code>Receiver</code>.
+ * It can be used to send messages to a synthesizer while monitoring the events
+ * by writing them to the command line, a log file,... or to build a MIDI file from
+ * any input
+ *
+ * @author Joren Six
  */
 public class ReceiverSink implements Receiver{
-	
+
 	Receiver[] receivers;
 	boolean ignoreTiming;
 	/**
