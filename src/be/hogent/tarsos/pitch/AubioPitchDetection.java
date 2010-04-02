@@ -5,10 +5,10 @@ import java.util.List;
 
 import be.hogent.tarsos.pitch.Sample.SampleSource;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.Execute;
 import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.Configuration.Config;
 
 
 /**
@@ -86,7 +86,7 @@ public class AubioPitchDetection implements PitchDetector{
 
 	@Override
 	public void executePitchDetection() {
-		String annotationsDirectory = Configuration.get(Config.raw_aubio_annotations_directory);
+		String annotationsDirectory = Configuration.get(ConfKey.raw_aubio_annotations_directory);
 		String csvFileName = FileUtils.combine(annotationsDirectory,this.name + "_" + file.basename() + ".txt");
 
 

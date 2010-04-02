@@ -5,10 +5,10 @@ import java.util.List;
 
 import be.hogent.tarsos.pitch.Sample.SampleSource;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.Execute;
 import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.Configuration.Config;
 
 
 /**
@@ -65,7 +65,7 @@ public class IPEMPitchDetection implements PitchDetector{
 
 		FileUtils.writeFile(transcodedBaseName + "\n", "lijst.txt");
 
-		String annotationsDirectory = Configuration.get(Config.raw_ipem_annotations_directory);
+		String annotationsDirectory = Configuration.get(ConfKey.raw_ipem_annotations_directory);
 		String csvFileName =  FileUtils.combine(FileUtils.getRuntimePath(),annotationsDirectory, transcodedBaseName + ".txt");
 		String command = null;
 
