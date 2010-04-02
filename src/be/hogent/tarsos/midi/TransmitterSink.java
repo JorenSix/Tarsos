@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package be.hogent.tarsos.midi;
 
@@ -8,15 +8,18 @@ import javax.sound.midi.Transmitter;
 
 /**
  * @author Joren Six
- * Sends messages to a list of Transmitters
+ * Sends messages to a list of Transmitters. Can be used
+ * to send MIDI messages to several receivers. Each
+ * transmitter in the sin should have the same receiver (or
+ * ReceiverSink)
  */
 public class TransmitterSink implements Transmitter{
-	
+
 	private final Transmitter[] transmitters;
 	public TransmitterSink(Transmitter... transmitters){
 		this.transmitters = transmitters;
 	}
-	
+
 	@Override
 	public void close() {
 		for(Transmitter transmitter:transmitters){
@@ -42,6 +45,6 @@ public class TransmitterSink implements Transmitter{
 	public void setReceiver(Receiver receiver) {
 		for(Transmitter transmitter:transmitters){
 			transmitter.setReceiver(receiver);
-		}		
-	}	
+		}
+	}
 }
