@@ -3,8 +3,6 @@ package be.hogent.tarsos.apps;
 import java.util.ArrayList;
 import java.util.List;
 
-import be.hogent.tarsos.peak.Peak;
-import be.hogent.tarsos.peak.PeakDetector;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetectionMix;
@@ -17,6 +15,8 @@ import be.hogent.tarsos.util.SimplePlot;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.peaks.Peak;
+import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 
 public class PeakExtractor {

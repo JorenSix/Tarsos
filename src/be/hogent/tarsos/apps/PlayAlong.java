@@ -23,8 +23,6 @@ import be.hogent.tarsos.midi.DumpReceiver;
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
-import be.hogent.tarsos.peak.Peak;
-import be.hogent.tarsos.peak.PeakDetector;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetector;
@@ -37,6 +35,8 @@ import be.hogent.tarsos.ui.VirtualKeyboard;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
+import be.hogent.tarsos.util.histogram.peaks.Peak;
+import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 
 public class PlayAlong {

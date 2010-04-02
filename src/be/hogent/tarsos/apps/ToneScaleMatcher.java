@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import be.hogent.tarsos.peak.Peak;
-import be.hogent.tarsos.peak.PeakDetector;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetector;
@@ -22,6 +20,8 @@ import be.hogent.tarsos.util.FileUtils.RowFilter;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.CorrelationMeasure;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.peaks.Peak;
+import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 public class ToneScaleMatcher {
 

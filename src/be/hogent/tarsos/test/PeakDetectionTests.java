@@ -6,15 +6,15 @@ import java.util.List;
 
 import org.junit.Test;
 
-import be.hogent.tarsos.peak.DifferenceScore;
-import be.hogent.tarsos.peak.LocalHeightScore;
-import be.hogent.tarsos.peak.LocalVolumeScore;
-import be.hogent.tarsos.peak.Peak;
-import be.hogent.tarsos.peak.PeakDetector;
 import be.hogent.tarsos.pitch.PitchFunctions;
 import be.hogent.tarsos.util.SimplePlot;
 import be.hogent.tarsos.util.histogram.CorrelationMeasure;
 import be.hogent.tarsos.util.histogram.Histogram;
+import be.hogent.tarsos.util.histogram.peaks.DifferenceScore;
+import be.hogent.tarsos.util.histogram.peaks.LocalHeightScore;
+import be.hogent.tarsos.util.histogram.peaks.LocalVolumeScore;
+import be.hogent.tarsos.util.histogram.peaks.Peak;
+import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 
 

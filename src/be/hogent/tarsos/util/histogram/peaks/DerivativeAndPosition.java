@@ -1,4 +1,4 @@
-package be.hogent.tarsos.peak;
+package be.hogent.tarsos.util.histogram.peaks;
 
 class DerivativeAndPosition implements Comparable<DerivativeAndPosition>{
 	Double derivative,position;

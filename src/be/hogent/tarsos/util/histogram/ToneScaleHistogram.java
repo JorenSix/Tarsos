@@ -3,11 +3,11 @@ package be.hogent.tarsos.util.histogram;
 import java.util.List;
 import java.util.logging.Logger;
 
-import be.hogent.tarsos.peak.Peak;
-import be.hogent.tarsos.peak.PeakDetector;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.histogram.peaks.Peak;
+import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 /**
  * @author Joren Six
