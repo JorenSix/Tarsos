@@ -41,27 +41,42 @@ import be.hogent.tarsos.util.histogram.Histogram;
 
 public class PlayAlong {
 
-	public static MidiDevice getMidiDeviceInfo(String strDeviceName, boolean bForOutput)
-	{
-		MidiDevice.Info[]	aInfos = MidiSystem.getMidiDeviceInfo();
-		for (int i = 0; i < aInfos.length; i++)
-		{
-			if (aInfos[i].getName().equals(strDeviceName))
-			{
-				try
-				{
-					MidiDevice device = MidiSystem.getMidiDevice(aInfos[i]);
-					boolean	bAllowsInput = (device.getMaxTransmitters() != 0);
-					boolean	bAllowsOutput = (device.getMaxReceivers() != 0);
-					if ((bAllowsOutput && bForOutput) || (bAllowsInput && !bForOutput))
-					{
-						return device;
-					}
-				}
-				catch (MidiUnavailableException e)
-				{
-				}
+	/**
+	 * Choose a MIDI device using a CLI. If an invalid device number is given the
+	 * user is requested to choose another one.
+	 * @param inputDevice is the MIDI device needed for input of events? E.G. a keyboard
+	 * @param outputDevice is the MIDI device needed to send events to? E.g. a (software) synthesizer.
+	 * @return the chosen MIDI device
+	 */
+	public static MidiDevice chooseDevice(boolean inputDevice,boolean outputDevice){
+		try {
+			//choose MIDI input device
+			MidiCommon.listDevices(inputDevice,outputDevice);
+			String deviceType = (inputDevice ? " IN " : "") + (outputDevice ? " OUT " : "");
+			System.out.print("Choose the MIDI" + deviceType + "device: ");
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			int deviceIndex = Integer.parseInt(br.readLine());
+			System.out.println();
+			Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[deviceIndex];
+
+			MidiDevice device = MidiSystem.getMidiDevice(midiDeviceInfo);
+			if( (device.getMaxTransmitters() == 0 == inputDevice) && (device.getMaxReceivers() == 0 == outputDevice) ){
+				System.out.println("Invalid choise, please try again");
+				return chooseDevice(inputDevice, outputDevice);
+			} else {
+				return device;
 			}
+		} catch (NumberFormatException e) {
+			System.out.println("Invalid number, please try again");
+			return chooseDevice(inputDevice, outputDevice);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (MidiUnavailableException e) {
+			System.out.println("The device is not available ( " + e.getMessage() + " ), please choose another device.");
+			return chooseDevice(inputDevice, outputDevice);
+		} catch (ArrayIndexOutOfBoundsException e){
+			System.out.println("Number out of bounds, please try again");
+			return chooseDevice(inputDevice, outputDevice);
 		}
 		return null;
 	}
@@ -107,14 +122,7 @@ public class PlayAlong {
 		}
 
 
-		//choose MIDI input device
-		if(device == -1){
-			MidiCommon.listDevices(true,false);
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			System.out.print("Choose the MIDI IN device: ");
-			device = Integer.parseInt(br.readLine());
-			System.out.println();
-		}
+
 
 		AudioFile fileToPlayAlongWith =new AudioFile(fileName);
 		PitchDetector detector = detectorString.equals("IPEM") ?
@@ -171,7 +179,6 @@ public class PlayAlong {
 
 
 		try {
-
 			MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("Gervill",true);
 			MidiDevice synthDevice = null;
 			synthDevice = MidiSystem.getMidiDevice(synthInfo);
@@ -182,7 +189,7 @@ public class PlayAlong {
 			keyboard.setReceiver(recv);
 
 			Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[device];
-			MidiDevice virtualMidiInputDevice = PlayAlong.getMidiDeviceInfo(midiDeviceInfo.getName(),false);
+			MidiDevice virtualMidiInputDevice =  MidiSystem.getMidiDevice(midiDeviceInfo);
 			virtualMidiInputDevice.open();
 			Transmitter midiInputTransmitter = virtualMidiInputDevice.getTransmitter();
 			midiInputTransmitter.setReceiver(keyboard);
@@ -221,38 +228,6 @@ public class PlayAlong {
 			}
 			currentSample = sampleIterator.next();
 		}
-		/*
-		final List<Double> midiKeys = PitchFunctions.medianFilter(midiKeysUnfiltered,7);
-		Thread t = new Thread(){
-
-			@Override
-			public void run() {
-				StopWatch watch = new StopWatch();
-				int previousMidiKey = 0;
-				for(int i = 0; i < midiKeys.size() ; i++){
-					int currentMidiKey = midiKeys.get(i).intValue();
-					if(currentMidiKey != previousMidiKey){
-						//keyboard.releaseKey(previousMidiKey);
-						//keyboard.pressKey(currentMidiKey);
-					}
-					long currentTick = time.get(i);
-					int numberOfTicksToSleep = (int) (currentTick - watch.ticksPassed());
-					if(numberOfTicksToSleep>0)
-						try {
-							Thread.sleep(numberOfTicksToSleep);
-						} catch (InterruptedException e) {
-					}
-					previousMidiKey = currentMidiKey;
-				}
-			}
-		};*/
-
-
-			//MediaPlayer m = new MediaPlayer(fileName);
-			//m.start();
-			//t.start();
-
-
 	}
 
 
