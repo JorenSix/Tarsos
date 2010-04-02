@@ -18,9 +18,9 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
 import be.hogent.tarsos.pitch.PitchFunctions;
-import be.hogent.tarsos.pitch.SignalPowerExtractor;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.SignalPowerExtractor;
 
 
 
@@ -299,41 +299,6 @@ public class ToneSequenceBuilder {
 		public String getSeparator() {
 			return " ";
 		}
-	}
-
-	public static void main(String[] args) throws Exception{
-
-		SignalPowerExtractor spex = new SignalPowerExtractor(new AudioFile("audio/dekkmma_voice_melodic/MR.1961.4.19-6.wav"));
-		spex.savePowerPlot("data/tests/hmm.png");
-		saveAsWav("data/raw/aubio/aubio_yin_MR.1961.4.19-6.txt", new AubioCSVHandler("audio/dekkmma_voice_melodic/MR.1961.4.19-6.wav"),9);
-
-		/*
-		saveAsWav("data/02_hicaz_klarnet.yin.txt", BOZKURT_CSVFILEHANDLER,0);
-		saveAsWav("data/05_ussaktaksim_ney.yin.txt", BOZKURT_CSVFILEHANDLER,0);
-		saveAsWav("data/03_huseynitaksim_tanbur.yin.txt", BOZKURT_CSVFILEHANDLER,0);
-
-
-
-		ToneSequenceBuilder builder = new ToneSequenceBuilder();
-		double realTime = 0;
-		int interval = 240; //cents
-		int numberOfChoises = 7; // +- 1.5 octaves
-		int startingCentValue = 1200 * 4 + 300;//cents relative to c0
-		Random r = new Random();
-		double referenceFrequency = 8.17579891564371;//Hz
-		for(int i = 0;i<60;i++){
-			double centValue = startingCentValue + r.nextInt(numberOfChoises)*interval;
-			double frequency = referenceFrequency * Math.pow(2.0, centValue/1200.0);
-			realTime  +=  r.nextInt(10) * 0.05;
-			builder.addTone(frequency, realTime);
-			if(builder.frequencies.size() > 5){
-				realTime  +=  r.nextInt(5) * 0.05; //0 -> 1 sec
-				builder.addTone(builder.frequencies.get(builder.frequencies.size()-3), realTime);
-			}
-		}
-		builder.writeFile("middentoonstemming.wav", 0);
-
-		*/
 	}
 
 }

@@ -12,7 +12,7 @@ import be.hogent.tarsos.util.FileUtils;
 
 
 /**
- * @author Joren Six
+ *
  * Calls aubio (http://aubio.org/) to execute pitch detection.
  *  Aubio should be installed correctly and available in PATH.
  *  This command is called when executing pitch detection:
@@ -29,6 +29,7 @@ import be.hogent.tarsos.util.FileUtils;
  *
  * See http://www.elec.qmul.ac.uk/research/thesis/Brossier07-phdthesis.pdf for more info.
  *
+ * @author Joren Six
  */
 public class AubioPitchDetection implements PitchDetector{
 
