@@ -25,11 +25,13 @@ import be.hogent.tarsos.util.FileUtils;
 
 
 /**
- * @author joren.six@hogent.be
+ *
  * Create a sequence of tones.
  * Tones are in this case a sine wave of a certain frequency (in Hertz) starting at a certain
  * time (in seconds) the current tone stops when another tone starts: this class generates only
  * one tone at the time (monophonic).
+ *
+ * @author Joren Six
  */
 public class ToneSequenceBuilder {
 
