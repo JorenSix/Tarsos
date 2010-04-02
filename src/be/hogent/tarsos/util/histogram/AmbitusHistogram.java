@@ -11,10 +11,10 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import ptolemy.plot.Plot;
+import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SimplePlot;
-import be.hogent.tarsos.util.Configuration.Config;
 
 /**
  * @author Joren Six
@@ -29,16 +29,16 @@ public class AmbitusHistogram extends Histogram{
 
 	public AmbitusHistogram() {
 		super(
-			Configuration.getInt(Config.ambitus_start),
-			Configuration.getInt(Config.ambitus_stop),
-			1200 / Configuration.getInt(Config.histogram_bin_width),
+			Configuration.getInt(ConfKey.ambitus_start),
+			Configuration.getInt(ConfKey.ambitus_stop),
+			1200 / Configuration.getInt(ConfKey.histogram_bin_width),
 			false,//does not wrap
 			true//ignore values outside human hearing range
 		);
 
 		//initialize the list of tone scales
-		for(int value = Configuration.getInt(Config.ambitus_start);
-			value < Configuration.getInt(Config.ambitus_stop);
+		for(int value = Configuration.getInt(ConfKey.ambitus_start);
+			value < Configuration.getInt(ConfKey.ambitus_stop);
 			value +=1200){
 			toneScaleHistogramPerOctave.add(new ToneScaleHistogram());
 		}

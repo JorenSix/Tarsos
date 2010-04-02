@@ -5,9 +5,9 @@ import java.util.logging.Logger;
 
 import be.hogent.tarsos.peak.Peak;
 import be.hogent.tarsos.peak.PeakDetector;
+import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.Configuration.Config;
 
 /**
  * @author Joren Six
@@ -58,7 +58,7 @@ public class ToneScaleHistogram extends Histogram {
 	 * wrapping histogram with values from 0 to 1200 cents.
 	 */
 	public ToneScaleHistogram() {
-		super(0, 1200, 1200 / Configuration.getInt(Config.histogram_bin_width),true);
+		super(0, 1200, 1200 / Configuration.getInt(ConfKey.histogram_bin_width),true);
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class ToneScaleHistogram extends Histogram {
 		ToneScaleHistogram toneScaleHistogram = new ToneScaleHistogram();
 		//unwrapped histogram of 3 x 1200 cents wide. Used to correctly calculate wrapping peaks
 		//The middle octave is the 'real' octave, the other two are used to 'fold' onto the middle one
-		Histogram unWrappedHistogram = new Histogram(0,3*1200, 3600 / Configuration.getInt(Config.histogram_bin_width));
+		Histogram unWrappedHistogram = new Histogram(0,3*1200, 3600 / Configuration.getInt(ConfKey.histogram_bin_width));
 
 		//shift the peaks to the middle octave + sanity checks
 		for(int i =0;i<peaks.length;i++){

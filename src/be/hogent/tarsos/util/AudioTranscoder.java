@@ -10,7 +10,6 @@ import it.sauronsoftware.jave.InputFormatException;
 import java.io.File;
 import java.util.logging.Logger;
 
-import be.hogent.tarsos.util.Configuration.Config;
 
 
 /**
@@ -32,21 +31,21 @@ public class AudioTranscoder
 	/**
 	 * Defines the target codec: signed 16 bit little endian pcm.
 	 */
-	private static final String  TARGET_CODEC = Configuration.get(Config.transcoded_audio_codec);
+	private static final String  TARGET_CODEC = Configuration.get(ConfKey.transcoded_audio_codec);
 	/**
 	 * Defines the target format: wav.
 	 */
-	private static final String  TARGET_FORMAT =  Configuration.get(Config.transcoded_audio_format);
+	private static final String  TARGET_FORMAT =  Configuration.get(ConfKey.transcoded_audio_format);
 	/**
 	 * The default sampling rate is used when no sampling rate is specified.
 	 * The default is set to 44.1kHz
 	 */
-	private static final Integer DEFAULT_SAMPLING_RATE = Configuration.getInt(Config.transcoded_audio_sampling_rate);//Hertz
+	private static final Integer DEFAULT_SAMPLING_RATE = Configuration.getInt(ConfKey.transcoded_audio_sampling_rate);//Hertz
 
 	/**
 	 * The number of channels used int he transcoded file.
 	 */
-	private static final Integer DEFAULT_NUMBER_OF_CHANNELS = Configuration.getInt(Config.transcoded_audio_number_of_channels);//Mono
+	private static final Integer DEFAULT_NUMBER_OF_CHANNELS = Configuration.getInt(ConfKey.transcoded_audio_number_of_channels);//Mono
 
 
 	/**
@@ -82,7 +81,7 @@ public class AudioTranscoder
 		if( ! sourceFile.canRead())
 			throw new IllegalArgumentException(source  + " can not be read, check file permissions. It should be a readable audiofile.");
 		//if transcoding is enabled transcode
-		if(Configuration.getBoolean(Config.transcode_audio)){
+		if(Configuration.getBoolean(ConfKey.transcode_audio)){
 			try {
 				Encoder e = new Encoder();
 				EncodingAttributes attributes = new EncodingAttributes();
@@ -134,7 +133,7 @@ public class AudioTranscoder
 		boolean transcodingRequired = ! targetFile.exists();
 		//if the file exists, check the format
 		//or skip the check (depending on the configuration)
-		if(targetFile.exists() && !Configuration.getBoolean(Config.skip_transcoded_audio_format_check)){
+		if(targetFile.exists() && !Configuration.getBoolean(ConfKey.skip_transcoded_audio_format_check)){
 			AudioInfo info = getInfo(target);
 			int currentSamplingRate = info.getSamplingRate();
 			int currentNumberOfChannels = info.getChannels();

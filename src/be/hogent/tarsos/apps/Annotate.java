@@ -14,10 +14,10 @@ import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.SignalPowerExtractor;
 import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SimplePlot;
-import be.hogent.tarsos.util.Configuration.Config;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
@@ -61,7 +61,7 @@ public class Annotate {
 		if(inputFile!=null  && ! FileUtils.exists(inputFile)){
 			printHelp();
 		} else if(inputFile == null) {
-			String pattern = Configuration.get(Config.audio_file_name_pattern);
+			String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
 			String globDirectory = FileUtils.combine(FileUtils.getRuntimePath(),"audio");
 			List<String> inputFiles = FileUtils.glob(globDirectory, pattern);
 			inputFiles.addAll(FileUtils.glob(globDirectory, pattern.toLowerCase()));

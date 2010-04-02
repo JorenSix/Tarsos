@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
-import be.hogent.tarsos.util.Configuration.Config;
 
 public class Execute {
 	private static final Logger log = Logger.getLogger(Execute.class.getName());
@@ -66,9 +65,9 @@ public class Execute {
 		int exitValue = Execute.command(command);
 		int commandNotFoundExitCode;
 		if (System.getProperty("os.name").contains("indows")) {
-			commandNotFoundExitCode = Configuration.getInt(Config.win_shell_executable_not_found_exit_code);
+			commandNotFoundExitCode = Configuration.getInt(ConfKey.win_shell_executable_not_found_exit_code);
 		} else {
-			commandNotFoundExitCode = Configuration.getInt(Config.unix_shell_executable_not_found_exit_code);
+			commandNotFoundExitCode = Configuration.getInt(ConfKey.unix_shell_executable_not_found_exit_code);
 		}
 		if(exitValue != commandNotFoundExitCode)
 			executableIsInPath = true;
@@ -90,8 +89,8 @@ public class Execute {
 		|| redirectOutputToFile.equals("") ? "" : " > "
 		+ redirectOutputToFile;
 		String[] cmd = new String[3];
-		cmd[0] = Configuration.get(Config.win_shell_executable);
-		cmd[1] = Configuration.get(Config.win_shell_executable_option);
+		cmd[0] = Configuration.get(ConfKey.win_shell_executable);
+		cmd[1] = Configuration.get(ConfKey.win_shell_executable_option);
 		cmd[2] = command + redirectOutputToFile;
 		return cmd;
 	}
@@ -101,8 +100,8 @@ public class Execute {
 		|| redirectOutputToFile.equals("") ? "" : "| cat > "
 		+ redirectOutputToFile;
 		String[] cmd = new String[3];
-		cmd[0] = Configuration.get(Config.unix_shell_executable);
-		cmd[1] = Configuration.get(Config.unix_shell_executable_option);
+		cmd[0] = Configuration.get(ConfKey.unix_shell_executable);
+		cmd[1] = Configuration.get(ConfKey.unix_shell_executable_option);
 		cmd[2] = command + " 2>&1 " + redirectOutputToFile ;
 		return cmd;
 	}

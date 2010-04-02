@@ -3,7 +3,6 @@ package be.hogent.tarsos.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import be.hogent.tarsos.util.Configuration.Config;
 
 
 
@@ -17,8 +16,8 @@ public class AudioFile {
 	/**
 	 * Where to save the transcoded files
 	 */
-	public static final String TRANSCODED_AUDIO_DIRECTORY = Configuration.get(Config.transcoded_audio_directory);
-	private static final String ORIGINAL_AUDIO_DIRECTORY = Configuration.get(Config.audio_directory);
+	public static final String TRANSCODED_AUDIO_DIRECTORY = Configuration.get(ConfKey.transcoded_audio_directory);
+	private static final String ORIGINAL_AUDIO_DIRECTORY = Configuration.get(ConfKey.audio_directory);
 	
 	private final String path;
 	/**
@@ -36,7 +35,7 @@ public class AudioFile {
 	 */
 	public String transcodedPath(){
 		String baseName = FileUtils.basename(FileUtils.sanitizedFileName(path));
-		String fileName = baseName + "." + Configuration.get(Config.transcoded_audio_format);
+		String fileName = baseName + "." + Configuration.get(ConfKey.transcoded_audio_format);
 		return FileUtils.combine(TRANSCODED_AUDIO_DIRECTORY,fileName);
 	}
 	
