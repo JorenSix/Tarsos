@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import be.hogent.tarsos.pitch.SignalPowerExtractor;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.SignalPowerExtractor;
 
 public class SignalPowerExtractorTest {
 

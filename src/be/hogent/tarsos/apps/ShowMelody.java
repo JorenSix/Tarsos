@@ -1,4 +1,4 @@
-package be.hogent.tarsos.pitch;
+package be.hogent.tarsos.apps;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -8,14 +8,19 @@ import java.util.List;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import be.hogent.tarsos.pitch.AubioPitchDetection;
+import be.hogent.tarsos.pitch.PitchDetectionMix;
+import be.hogent.tarsos.pitch.PitchDetector;
+import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
+import be.hogent.tarsos.ui.PlotThread;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.MediaPlayer;
 import be.hogent.tarsos.util.StopWatch;
 
 
-public class Extractor {
+public class ShowMelody {
 	
 	public static void testTonalShiftWithinFile(String fileName){	
 		/*
