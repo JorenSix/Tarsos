@@ -12,8 +12,6 @@ import be.hogent.tarsos.util.SimplePlot;
 
 import com.sun.media.sound.AudioFloatInputStream;
 
-
-
 /**
  *
  * An implementation of the YIN pitch tracking algorithm.
@@ -100,8 +98,8 @@ public class Yin {
 	 * Implements step 4 of the YIN paper
 	 */
 	private int absoluteThreshold(){
-		//other loop construction
-		//compared with AUBIO
+		//Uses another loop construct
+		//than the AUBIO implementation
 		for(int tau = 1;tau<yinBuffer.length;tau++){
 			if(yinBuffer[tau] < threshold){
 				while(tau+1 < yinBuffer.length && yinBuffer[tau+1] < yinBuffer[tau])
@@ -185,7 +183,7 @@ public class Yin {
 	}
 
 	/**
-	 * Stop the real time annotations.
+	 * Stops real time annotation.
 	 */
 	public void stop(){
 		running=false;
