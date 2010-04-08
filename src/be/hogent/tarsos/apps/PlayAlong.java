@@ -28,6 +28,7 @@ import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.PitchFunctions;
 import be.hogent.tarsos.pitch.Sample;
+import be.hogent.tarsos.pitch.YinPitchDetection;
 import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.pitch.Sample.PitchUnit;
 import be.hogent.tarsos.ui.PianoTestFrame;
@@ -91,7 +92,7 @@ public class PlayAlong {
 
 		Getopt g = new Getopt("playalong", args, "-i:d:h:m", longopts);
 		int device = -1;
-		String detectorString = "IPEM";
+		String detectorString = "TARSOS";
 		String fileName = null;
 
 		int c;
@@ -122,13 +123,13 @@ public class PlayAlong {
 		}
 
 
+		AudioFile fileToPlayAlongWith = new AudioFile(fileName);
+		PitchDetector detector =  new YinPitchDetection(fileToPlayAlongWith);
+		if(detectorString.equals("AUBIO"))
+			detector = new AubioPitchDetection(fileToPlayAlongWith, AubioPitchDetectionMode.YIN);
+		else if(detectorString.equals("IPEM"))
+			detector = new IPEMPitchDetection(fileToPlayAlongWith);
 
-
-		AudioFile fileToPlayAlongWith =new AudioFile(fileName);
-		PitchDetector detector = detectorString.equals("IPEM") ?
-				new IPEMPitchDetection(fileToPlayAlongWith)
-				:
-				new AubioPitchDetection(fileToPlayAlongWith, AubioPitchDetectionMode.YIN);
 		detector.executePitchDetection();
 		final List<Sample> samples = detector.getSamples();
 		String baseName = FileUtils.basename(fileName);
@@ -188,8 +189,13 @@ public class PlayAlong {
 			recv = new ReceiverSink(true,synthDevice.getReceiver(),new DumpReceiver(System.out));
 			keyboard.setReceiver(recv);
 
-			Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[device];
-			MidiDevice virtualMidiInputDevice =  MidiSystem.getMidiDevice(midiDeviceInfo);
+			MidiDevice virtualMidiInputDevice;
+			if(device == -1) {
+				virtualMidiInputDevice = chooseDevice(true,false);
+			} else {
+				Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[device];
+				virtualMidiInputDevice =  MidiSystem.getMidiDevice(midiDeviceInfo);
+			}
 			virtualMidiInputDevice.open();
 			Transmitter midiInputTransmitter = virtualMidiInputDevice.getTransmitter();
 			midiInputTransmitter.setReceiver(keyboard);
@@ -237,7 +243,7 @@ public class PlayAlong {
 		System.out.println("");
 		System.out.println("-----------------------");
 		System.out.println("");
-		System.out.println("java -jar playalong.jar --in file.wav [--detector AUBIO|IPEM] [--midi_in 1]");
+		System.out.println("java -jar playalong.jar --in file.wav [--detector TARSOS|AUBIO|IPEM] [--midi_in 1]");
 		System.out.println("");
 		System.out.println("-----------------------");
 		System.out.println("");

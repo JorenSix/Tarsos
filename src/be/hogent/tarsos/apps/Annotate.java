@@ -9,6 +9,7 @@ import be.hogent.tarsos.pitch.AubioPitchDetection;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
+import be.hogent.tarsos.pitch.YinPitchDetection;
 import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
@@ -39,7 +40,7 @@ public class Annotate {
 		Getopt g = new Getopt("annotate", args, "-i:d:h", longopts);
 
 		String inputFile = null;
-		String detector = "IPEM";
+		String detector = "TARSOS";
 
 		int c;
 		while ((c = g.getopt()) != -1) {
@@ -86,9 +87,13 @@ public class Annotate {
 		Configuration.createRequiredDirectories();
 		AudioFile audioFile = new AudioFile(inputFile);
 
-		PitchDetector pitchDetector = detector.equals("AUBIO") ?
-				new AubioPitchDetection(audioFile, AubioPitchDetectionMode.YIN) :
-				new IPEMPitchDetection(audioFile);
+		PitchDetector pitchDetector =  new YinPitchDetection(audioFile);
+		if(detector.equals("AUBIO"))
+			pitchDetector = new AubioPitchDetection(audioFile, AubioPitchDetectionMode.YIN);
+		else if(detector.equals("IPEM"))
+			pitchDetector = new IPEMPitchDetection(audioFile);
+
+
 
 		pitchDetector.executePitchDetection();
 		String baseName = audioFile.basename();
