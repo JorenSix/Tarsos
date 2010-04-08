@@ -68,11 +68,4 @@ public class DifferenceScore implements PeakScore{
 		return scores[index];
 	}
 
-	public double derivative(Histogram originalHistogram, int index, int windowSize){
-		long valueBefore = originalHistogram.getCountForClass(index - windowSize);
-		long current  =  originalHistogram.getCountForClass(index);
-		return valueBefore - current;
-	}
-
-
 }
