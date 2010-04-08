@@ -19,7 +19,7 @@ import javax.sound.midi.SysexMessage;
  * <a href="https://gervill.dev.java.net/source/browse/gervill/src.demos/">
  * Gervill source code</a>
  *
- * @author Joren Six
+ * @author Karl Helgason
  *
  */
 public class MidiUtils {
