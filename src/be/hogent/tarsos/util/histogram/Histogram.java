@@ -492,6 +492,23 @@ public class Histogram {
 		return entropy;
 	}
 
+
+	/**
+	 * Calculates the mean count of each bin.
+	 * It iterates over each bin, stores the bin count temporarily
+	 * and returns the mean bin count. It does not cache the result.
+	 * @return the mean bin count.
+	 */
+	public double getMean() {
+		double[] binCounts = new double[this.getNumberOfClasses() + 1];
+		int i = 0;
+		for(double key : this.keySet()){
+			binCounts[i] =  this.getCount(key);
+			i++;
+		}
+		return StatUtils.mean(binCounts);
+	}
+
 	/**
 	 * Return a string representation of this histogram
 	 *
