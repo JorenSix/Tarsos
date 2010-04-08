@@ -18,7 +18,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
 import be.hogent.tarsos.pitch.PitchFunctions;
-import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SignalPowerExtractor;
 
@@ -228,10 +227,6 @@ public class ToneSequenceBuilder {
 
 		public AubioCSVHandler(){
 			extractor = null;
-		}
-
-		public AubioCSVHandler(String orignalFileName){
-			extractor = new SignalPowerExtractor(new AudioFile(orignalFileName));
 		}
 
 		@Override
