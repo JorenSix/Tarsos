@@ -145,9 +145,11 @@ public class Configuration {
 		if(userPreferences==null){
 			userPreferences=Preferences.userNodeForPackage(Configuration.class);
 			for(ConfKey configKey : ConfKey.values()){
-				String defaultConfigValue = defaultConfigurationProperties.getProperty(configKey.name());
 				//If there is no configuration for this user, write the default configuration
-				set(configKey,defaultConfigValue);
+				if(userPreferences.get(configKey.name(), null) == null){
+					String defaultConfigValue = defaultConfigurationProperties.getProperty(configKey.name());
+					set(configKey,defaultConfigValue);
+				}
 			}
 		}
 		String configuredValue = userPreferences.get(key, defaultValue);
