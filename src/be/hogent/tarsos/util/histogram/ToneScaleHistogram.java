@@ -171,4 +171,26 @@ public class ToneScaleHistogram extends Histogram {
 		return toneScaleHistogram;
 	}
 
+
+	/**
+	 * Checks if the tone scale is "melodic": it has one or more clearly defined peaks.
+	 * Talking people, noise or other random sounds are not melodic.
+	 * @return true if the tone scale has clearly defined peaks, false otherwise.
+	 */
+	public boolean isMelodic(){
+		//1 calculate a fitting function
+		//1a smooth the original histogram for better peak detection
+		ToneScaleHistogram smoothed = (ToneScaleHistogram) (new ToneScaleHistogram()).add(this).gaussianSmooth(1.0);;
+		//1b detect peaks
+		List<Peak> peaks = PeakDetector.detect(smoothed, 20, 0.8);
+		Histogram fittingHistogram =  PeakDetector.newPeakDetection(peaks);
+		//2 calculate difference between original histogram and fitting histogram
+		//  using the intersection measure. The result is a measure for peakiness of
+		//  the original histogram
+		double peakiness = fittingHistogram.correlation(this, CorrelationMeasure.INTERSECTION);
+		//if more than 80% of the fitting histogram and the original histogram overlap
+		//   the original is peaky or melodic
+		return peakiness > 0.5;
+	}
+
 }
