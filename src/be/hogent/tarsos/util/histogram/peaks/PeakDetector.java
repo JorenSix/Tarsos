@@ -35,17 +35,30 @@ public class PeakDetector {
 		return ToneScaleHistogram.createToneScale(peakPositionsDouble, peakHeights, peakWidths, peakStandardDeviations);
 	}
 
+	/**
+	 * Detects peaks in a histogram. The peaks are positioned at places where
+	 * DifferenceScore != 0 and HeigthScore is bigger than a certain threshold
+	 * value.
+	 *
+	 * @param histogram
+	 * @param windowSize in number of bins
+	 * @param meanFactorThreshold
+	 * @return
+	 */
 	public static List<Peak> detect(Histogram histogram, int windowSize, double meanFactorThreshold){
 		double peakFunctionValues[] = new double[histogram.getNumberOfClasses()];
 		PeakScore differenceScore = new DifferenceScore(histogram,windowSize);
 		PeakScore localHeightScore = new LocalHeightScore();
 		for(int i = 0 ; i < histogram.getNumberOfClasses(); i++){
 			double score = differenceScore.score(histogram,i, 1);
-			peakFunctionValues[i] = score == 0.0 ? 0.0 : localHeightScore.score(histogram,i, windowSize);
+			//If the peak is a real peak according to the difference score,
+			//then set the height score value.
+			if(score != 0) {
+				peakFunctionValues[i] = localHeightScore.score(histogram,i, windowSize);
+			}
 		}
 
-		//double mean = StatUtils.mean(peakFunctionValues);
-		//double standardDeviation = Math.pow(StatUtils.variance(peakFunctionValues,mean),0.5);
+		//add the peaks to a list if the value is bigger than a threshold value.
 		List<Integer> peakPositions = new ArrayList<Integer>();
 		for(int i = 0;i<histogram.getNumberOfClasses();i++){
 			if(peakFunctionValues[i]>meanFactorThreshold){
@@ -53,8 +66,12 @@ public class PeakDetector {
 			}
 		}
 
+		//Sort the peaks on position.
 		Collections.sort(peakPositions);
 
+		//Remove peaks that are to close to each other.
+		//If peaks are closer than the window size they are too close.
+		//The one with the smallest value is removed.
 		List<Integer> elementsToRemove = new ArrayList<Integer>();
 		for(int i=0 ; i < peakPositions.size();i++){
 			int firstPeakIndex = peakPositions.get(i);
@@ -64,12 +81,9 @@ public class PeakDetector {
 						peakPositions.get((i+1) % peakPositions.size()):
 						peakPositions.get(i));
 		}
-
 		peakPositions.removeAll(elementsToRemove);
 
-		StringBuilder sb = new StringBuilder();
-		sb.append(peakPositions.size()).append(";");
-
+		//wrap the peaks in objects.
 		List<Peak> peaks = new ArrayList<Peak>();
 		for(int i=0 ; i < peakPositions.size();i++){
 			double position = histogram.getKeyForClass(peakPositions.get(i));
