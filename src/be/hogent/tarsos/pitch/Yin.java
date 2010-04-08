@@ -52,7 +52,7 @@ public class Yin {
 
 	private Yin(float sampleRate){
 		this.sampleRate = sampleRate;
-		bufferSize = 2048;
+		bufferSize = 1024;
 		overlapSize = bufferSize/2;//half of the buffer overlaps
 		running = true;
 		inputBuffer = new float[bufferSize];
@@ -138,7 +138,9 @@ public class Yin {
 		s0 = yinBuffer[x0];
 		s1 = yinBuffer[tauEstimate];
 		s2 = yinBuffer[x2];
-		return tauEstimate + 0.5f * (s2 - s0 ) / (s2 - 2.0f * s1 + s0);
+		//fixed AUBIO implementation, thanks to Karl Helgason:
+		//(2.0f * s1 - s2 - s0) was incorrectly multiplied with -1
+		return tauEstimate + 0.5f * (s2 - s0 ) / (2.0f * s1 - s2 - s0);
 	}
 
 	/**
