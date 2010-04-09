@@ -9,7 +9,5 @@
 	<classpathentry kind="lib" path="lib/java-getopt-1.0.13.jar"/>
 	<classpathentry kind="lib" path="lib/gervill.jar" sourcepath="lib/gervill-src.zip"/>
 	<classpathentry kind="lib" path="lib/jass.jar" sourcepath="lib/jass-src.zip"/>
-	<classpathentry kind="lib" path="lib/pitch_detector_fast.jar"/>
-	<classpathentry kind="lib" path="lib/pitch_detector_comp.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
