@@ -29,6 +29,9 @@ public class Yin {
 	 */
 	private static Yin yinInstance;
 
+	/**
+	 * The YIN threshold value (see paper)
+	 */
 	private final double threshold = 0.15;
 
 	private final int bufferSize;
@@ -41,14 +44,15 @@ public class Yin {
 	private volatile boolean running;
 
 	/**
+	 * The original input buffer
+	 */
+	private final float[] inputBuffer;
+
+	/**
 	 * The buffer that stores the calculated values.
 	 * It is exactly half the size of the input buffer.
 	 */
 	private final float[] yinBuffer;
-	/**
-	 * The original input buffer
-	 */
-	private final float[] inputBuffer;
 
 	private Yin(float sampleRate){
 		this.sampleRate = sampleRate;
@@ -109,7 +113,8 @@ public class Yin {
 		//than the AUBIO implementation
 		for(int tau = 1;tau<yinBuffer.length;tau++){
 			if(yinBuffer[tau] < threshold){
-				while(tau+1 < yinBuffer.length && yinBuffer[tau+1] < yinBuffer[tau])
+				while(tau+1 < yinBuffer.length &&
+					  yinBuffer[tau+1] < yinBuffer[tau])
 					tau++;
 				return tau;
 			}
@@ -165,15 +170,16 @@ public class Yin {
 		//step 5
 		if(tauEstimate != -1){
 			 float betterTau = parabolicInterpolation(tauEstimate);
+
+			//step 6
+			//TODO Implement optimization for the YIN algorithm.
+			//0.77% => 0.5% error rate,
+			//using the data of the YIN paper
+			//bestLocalEstimate()
+
 			//conversion to Hz
 			pitchInHertz = sampleRate/betterTau;
 		}
-
-		//step 6
-		//TODO Implement optimization for the YIN algorithm.
-		//0.77% => 0.5% error rate,
-		//using the data of the YIN paper
-		//bestLocalEstimate()
 
 		return pitchInHertz;
 	}

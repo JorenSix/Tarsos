@@ -58,7 +58,7 @@ public class YinTests {
 			public void handleDetectedPitch(float time, float pitch) {
 				if(time < 1.0)
 					assertEquals(220.0,pitch,0.5);
-				else if(time > 1.0 && time <= 2.0)
+				else if(time > 1.1 && time <= 2.0)
 					assertEquals(-1,pitch,0.1);
 				else if(time > 2.05 )
 					assertEquals(440,pitch,1.0);
