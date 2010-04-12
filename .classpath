@@ -4,7 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/plot.jar"/>
-	<classpathentry kind="lib" path="lib/commons-math-2.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-math-2.0.jar" sourcepath="lib/commons-math-2.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jave-1.0.2.jar"/>
 	<classpathentry kind="lib" path="lib/java-getopt-1.0.13.jar"/>
 	<classpathentry kind="lib" path="lib/gervill.jar" sourcepath="lib/gervill-src.zip"/>
