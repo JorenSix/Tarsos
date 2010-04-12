@@ -12,6 +12,7 @@ import org.apache.commons.math.complex.Complex;
 import org.apache.commons.math.transform.FastFourierTransformer;
 
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SimplePlot;
 
 import com.sun.media.sound.AudioFloatInputStream;
@@ -19,11 +20,11 @@ import com.sun.media.sound.AudioFloatInputStream;
 public class FFTTest {
 
 	public static void main(String... args) throws UnsupportedAudioFileException, IOException{
-		AudioFile audioFile = new AudioFile("src\\be\\hogent\\tarsos\\test\\data\\95-100Hz.wav");
+		AudioFile audioFile = new AudioFile(FileUtils.combine("src","be","hogent","tarsos","test","data","power_test.wav"));
 		AudioInputStream stream = AudioSystem.getAudioInputStream(new File(audioFile.path()));
 		AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(stream);
 
-		int readAmount = 2048;
+		int readAmount = 16384/2;
 		float buffer[] = new float[readAmount];
 		double bufferD[] = new double[readAmount];
 		SimplePlot plot = new SimplePlot();
@@ -64,6 +65,7 @@ public class FFTTest {
 		SimplePlot spectrumPlot = new SimplePlot();
 		for(int i =0 ; i<buffer.length / 2 ; i++)
 			spectrumPlot.addData(i*sampleRate/readAmount,spectrum[i]);
+		spectrumPlot.setXRange(0,880);
 		spectrumPlot.save();
 	}
 }

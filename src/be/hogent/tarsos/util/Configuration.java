@@ -112,6 +112,8 @@ public class Configuration {
 	 * @param value the value
 	 */
 	public static void set(ConfKey key,String value){
+		if(value==null)
+			return;
 		try {
 			value = sanitizeConfiguredValue(key.name(), value);
 			userPreferences.put(key.name(), value);
@@ -167,11 +169,13 @@ public class Configuration {
 	 * correct directory separator for the current operating system.
 	 */
 	private static String sanitizeConfiguredValue(String key, String configuredValue){
-		//removes trailing and leading whitespace
-		//limitation: whitespace can not be configured!
-		configuredValue = configuredValue.trim();
-		//depending on the operating system: use the correct path separators!
-		configuredValue = handleConfiguredDirectory(key,configuredValue);
+		if(configuredValue != null){
+			//removes trailing and leading whitespace
+			//limitation: whitespace can not be configured!
+			configuredValue = configuredValue.trim();
+			//depending on the operating system: use the correct path separators!
+			configuredValue = handleConfiguredDirectory(key,configuredValue);
+		}
 		return configuredValue;
 	}
 
