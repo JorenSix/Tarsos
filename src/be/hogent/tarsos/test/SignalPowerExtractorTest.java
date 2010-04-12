@@ -25,17 +25,17 @@ public class SignalPowerExtractorTest {
 	public void testPowerExtraction(){
 		AudioFile audioFile = testAudioFile();
 		SignalPowerExtractor spex = new SignalPowerExtractor(audioFile);
-		assertEquals(0.0, spex.powerAt(1.5),0.01);
-		assertEquals(0.61, spex.powerAt(0.5),0.01);//220Hz only top at 0.8 => 0.61
-		assertEquals(1.0, spex.powerAt(2.5),0.05);//440Hz only top at 1.0 => 0.95
+		assertEquals(0.0, spex.powerAt(1.5,true),0.01);
+		assertEquals(0.61, spex.powerAt(0.5,true),0.01);//220Hz only top at 0.8 => 0.61
+		assertEquals(1.0, spex.powerAt(2.5,true),0.05);//440Hz only top at 1.0 => 0.95
 	}
 
 	@Test(expected= IndexOutOfBoundsException.class)
 	public void testInvalidPowerExtraction(){
 		AudioFile audioFile = testAudioFile();
 		SignalPowerExtractor spex = new SignalPowerExtractor(audioFile);
-		spex.powerAt(0.5);
-		spex.powerAt(8.5);
+		spex.powerAt(0.5,true);
+		spex.powerAt(8.5,true);
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class SignalPowerExtractorTest {
 		AudioFile audioFile = testAudioFile();
 		SignalPowerExtractor spex = new SignalPowerExtractor(audioFile);
 		String powerPlotFileName = FileUtils.combine("data","tests","power_plot.png");
-		spex.savePowerPlot(powerPlotFileName);
+		spex.savePowerPlot(powerPlotFileName,0.70);
 		assertTrue(FileUtils.exists(powerPlotFileName));
 	}
 
