@@ -236,7 +236,7 @@ public class ToneSequenceBuilder {
 			if(extractor == null)
 				builder.addTone(frequency,realTime);
 			else
-				builder.addTone(frequency, realTime, extractor.powerAt(realTime));
+				builder.addTone(frequency, realTime, extractor.powerAt(realTime,true));
 		}
 
 		@Override

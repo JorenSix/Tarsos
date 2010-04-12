@@ -582,7 +582,7 @@ public class Histogram {
 	public Histogram normalize(){
 		List<Long> normalizedCounts = new ArrayList<Long>();
 		for(double key : freqTable.keySet()){
-			normalizedCounts.add((long)(getPct(key) * 1000));
+			normalizedCounts.add((long)(getPct(key) * 10000));
 		}
 		int index = 0;
 		for(double key : freqTable.keySet()){

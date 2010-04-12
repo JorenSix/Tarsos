@@ -20,7 +20,7 @@ public class YinPitchDetection implements PitchDetector {
 	public YinPitchDetection(AudioFile audioFile){
 		this.file = audioFile;
 		this.samples = new ArrayList<Sample>();
-		this.name = "java_yin";
+		this.name = "tarsos_yin";
 	}
 
 	@Override
