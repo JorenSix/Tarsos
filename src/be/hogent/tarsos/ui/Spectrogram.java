@@ -6,7 +6,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,13 +24,17 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.apache.commons.math.complex.Complex;
-import org.apache.commons.math.transform.FastFourierTransformer;
-
 import be.hogent.tarsos.pitch.Yin;
+import be.hogent.tarsos.util.FFT;
 
 import com.sun.media.sound.AudioFloatInputStream;
 
+/**
+ * @author Joren Six
+ * Implementation based on the sliding buffered images idea
+ * from <a href="http://forums.sun.com/thread.jspa?threadID=5284602">this thread.</a>
+ *
+ */
 public class Spectrogram extends JComponent {
 
 	private static final long serialVersionUID = -7760501261506593771L;
@@ -60,21 +66,22 @@ public class Spectrogram extends JComponent {
 	int readAmount = 1024;
 	AudioFloatInputStream afis;
 	double sampleRate;
+	private final FFT fft;
 
-	public Spectrogram() throws UnsupportedAudioFileException, IOException,
+	public Spectrogram(int mixerIndex) throws UnsupportedAudioFileException, IOException,
 			LineUnavailableException {
 
 		// the image shown on even runs trough the x axis
-		imageEven = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
+		imageEven = new BufferedImage(W, H / 2, BufferedImage.TYPE_INT_RGB);
 		imageEvenGraphics = imageEven.createGraphics();
 
 		// the image shown on odd runs trough the x axis
-		imageOdd = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
+		imageOdd = new BufferedImage(W, H / 2, BufferedImage.TYPE_INT_RGB);
 		imageOddGraphics = imageOdd.createGraphics();
 
 		currentGraphics = imageEvenGraphics;
 
-		buffer = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
+		buffer = new BufferedImage(W, H / 2, BufferedImage.TYPE_INT_RGB);
 		bufferGraphics = buffer.createGraphics();
 		bufferGraphics.setColor(Color.BLACK);
 		bufferGraphics.clearRect(0, 0, W, H);
@@ -84,7 +91,7 @@ public class Spectrogram extends JComponent {
 			colors[i] = new Color(i, i, i); // grayscale
 		}
 
-		javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[5];
+		javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[mixerIndex];
 		Mixer mixer = AudioSystem.getMixer(selected);
 		AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
 		DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,
@@ -115,6 +122,8 @@ public class Spectrogram extends JComponent {
 				step();
 			}
 		}, 0, REFRESH_INTERVAL);
+
+		fft = new FFT(readAmount/2,-1);
 	}
 
 	@Override
@@ -134,25 +143,19 @@ public class Spectrogram extends JComponent {
 		int pitchIndex = -1;
 		try {
 			float buffer[] = new float[readAmount];
-			double bufferD[] = new double[readAmount];
 			if (afis.read(buffer, 0, readAmount) != -1) {
 
 				float pitch = Yin.processBuffer(buffer, (float) sampleRate);
 				if (pitch != -1)
 					;
-				pitchIndex = (int) (pitch * readAmount / sampleRate);
+				pitchIndex = (int) (pitch * readAmount / sampleRate * 2 );
 
-				for (int i = 0; i < buffer.length; i++)
-					bufferD[i] = buffer[i];
-
-				Complex[] data = new FastFourierTransformer()
-						.transform(bufferD);
+				fft.transform(buffer);
 
 				double maxAmplitude = 0;
-				for (int j = 0; j < data.length / 2; j++) {
-					double amplitude = data[j].getReal() * data[j].getReal()
-							+ data[j].getImaginary() * data[j].getImaginary();
-					amplitude = Math.pow(amplitude, 0.5) / data.length;
+				for (int j = 0; j < buffer.length / 2; j++) {
+					double amplitude = buffer[j] * buffer[j] + buffer[j + buffer.length/2] * buffer[j+ buffer.length/2];
+					amplitude = Math.pow(amplitude, 0.5);
 					colorIndexes[j] = amplitude;
 					maxAmplitude = Math.max(amplitude, maxAmplitude);
 				}
@@ -178,8 +181,9 @@ public class Spectrogram extends JComponent {
 				currentGraphics.setColor(pitchColor);
 			else
 				currentGraphics.setColor(colors[(int) (255 - colorIndexes[i])]);
-			currentGraphics.fillRect(position, (H / STEP) - i * STEP * 2, STEP,
-					STEP * 2);
+
+			currentGraphics.fillRect(position, (H / STEP /2) - i * STEP , STEP,
+					STEP);
 		}
 
 		if (currentGraphics == imageEvenGraphics) {
@@ -198,14 +202,40 @@ public class Spectrogram extends JComponent {
 			throws UnsupportedAudioFileException, IOException,
 			LineUnavailableException {
 		final JPanel panel = new JPanel(new BorderLayout());
-		Spectrogram spectogram = new Spectrogram();
-		spectogram.setPreferredSize(new Dimension(W, H));
+
+		Spectrogram spectogram = new Spectrogram(chooseDevice());
+		spectogram.setPreferredSize(new Dimension(W, H/2));
 		panel.add(spectogram, BorderLayout.CENTER);
-		final JFrame frame = new JFrame("Scroller");
+		final JFrame frame = new JFrame("Spectrogram");
 		frame.getContentPane().add(panel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
+	}
+
+	/**
+	 * Choose a Mixer device using CLI.
+	 */
+	public static int chooseDevice(){
+		try {
+			javax.sound.sampled.Mixer.Info mixers[] = AudioSystem.getMixerInfo();
+			for (int i = 0; i < mixers.length; i++) {
+				javax.sound.sampled.Mixer.Info mixerinfo = mixers[i];
+				if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0)
+					System.out.println(i + " " + mixerinfo.toString());
+			}
+			//choose MIDI input device
+			System.out.print("Choose the Mixer device: ");
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			int deviceIndex = Integer.parseInt(br.readLine());
+			return deviceIndex;
+		} catch (NumberFormatException e) {
+			System.out.println("Invalid number, please try again");
+			return chooseDevice();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 }
