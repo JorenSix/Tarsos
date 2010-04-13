@@ -30,7 +30,7 @@ public class Yin {
 	private static Yin yinInstance;
 
 	/**
-	 * The YIN threshold value (see paper)
+	 * The YIN threshold value
 	 */
 	private final double threshold = 0.15;
 
@@ -44,7 +44,9 @@ public class Yin {
 	private volatile boolean running;
 
 	/**
-	 * The original input buffer
+	 * The buffer with audio information. The information in
+	 * the buffer is not modified so it can be (re)used
+	 * for e.g. FFT analysis.
 	 */
 	private final float[] inputBuffer;
 
@@ -261,6 +263,27 @@ public class Yin {
 			hasMoreBytes = afis.read(yinInstance.inputBuffer,yinInstance.overlapSize,bufferStepSize) != -1;
 			floatsProcessed += bufferStepSize;
 		}
+	}
+
+	/**
+	 * Process one and only one buffer and return the pitch.
+	 * Useful for applications where multiple actions are taken on the
+	 * same buffer.
+	 * @param buffer The audio information.
+	 * @return a pitch in Hz or -1 if no pitch is found.
+	 * @exception Error when the buffer has an incorrect length.
+	 */
+	public static float processBuffer(float[] buffer,float sampleRate){
+		if(yinInstance == null)
+			yinInstance = new Yin(sampleRate);
+
+		if(buffer.length != yinInstance.inputBuffer.length)
+			throw new Error("Buffer and yin buffer should have the same length!");
+
+		for(int i = 0 ; i < buffer.length ; i ++)
+			yinInstance.inputBuffer[i] = buffer[i];
+
+		return yinInstance.getPitch();
 	}
 
 	/**
