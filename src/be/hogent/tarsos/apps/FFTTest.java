@@ -37,12 +37,17 @@ public class FFTTest {
 		double[] spectrum = new double[readAmount];
 
 		while(afis.read(buffer,0, readAmount) != -1) {
-			for(int i =0 ; i<buffer.length ; i++) bufferD[i] = buffer[i];
+
+
+
+			for(int i =0 ; i<buffer.length ; i++)
+				bufferD[i] = buffer[i];
+
 			int numberOfFilledBins = 0;
 			Complex[] data = new FastFourierTransformer().transform(bufferD);
 			double maxAmplitude = -1;
 			double indexOfMostEnergyRichFrequencyBin = -1;
-			for(int j = 0 ; j < data.length ; j++){
+			for(int j = 0 ; j < data.length / 2 ; j++){
 				double amplitude = data[j].getReal() * data[j].getReal() + data[j].getImaginary() * data[j].getImaginary();
 				amplitude = Math.pow(amplitude,0.5) / data.length;
 				if(amplitude > maxAmplitude){
