@@ -39,8 +39,8 @@ public class Spectrogram extends JComponent {
 
 	private static final long serialVersionUID = -7760501261506593771L;
 
-	private static final int W = 640;
-	private static final int H = 512;
+	private static final int W = 800;
+	private static final int H = 1024;
 
 	private static final int STEP = 1; // pixel
 
@@ -63,7 +63,7 @@ public class Spectrogram extends JComponent {
 	private final Color pitchColor = Color.RED;
 
 	private final Timer timer;
-	int readAmount = 1024;
+	int readAmount = 2048;
 	AudioFloatInputStream afis;
 	double sampleRate;
 	private final FFT fft;
@@ -143,28 +143,31 @@ public class Spectrogram extends JComponent {
 		int pitchIndex = -1;
 		try {
 			float buffer[] = new float[readAmount];
-			if (afis.read(buffer, 0, readAmount) != -1) {
+			for(int i=0; i < buffer.length / 2 ; i++){
+				buffer[i+buffer.length / 2] = buffer[i];
+			}
+			if (afis.read(buffer, 0, readAmount / 2) != -1) {
 
 				float pitch = Yin.processBuffer(buffer, (float) sampleRate);
 				if (pitch != -1)
-					;
-				pitchIndex = (int) (pitch * readAmount / sampleRate * 2 );
+					pitchIndex = (int) (pitch * readAmount / sampleRate * 2 );
 
 				fft.transform(buffer);
 
 				double maxAmplitude = 0;
 				for (int j = 0; j < buffer.length / 2; j++) {
 					double amplitude = buffer[j] * buffer[j] + buffer[j + buffer.length/2] * buffer[j+ buffer.length/2];
-					amplitude = Math.pow(amplitude, 0.5);
+					amplitude = 20.0 * Math.log1p(amplitude);
 					colorIndexes[j] = amplitude;
 					maxAmplitude = Math.max(amplitude, maxAmplitude);
 				}
 
 				for (int i = 0; i < colorIndexes.length; i++) {
-					if (maxAmplitude == 0)
+					if (maxAmplitude == 0){
 						colorIndexes[i] = 0;
-					else
+					}else{
 						colorIndexes[i] = colorIndexes[i] / maxAmplitude * 255;
+					}
 				}
 			} else {
 				System.out.println("STOP");
