@@ -56,9 +56,9 @@ public class Yin {
 	 */
 	private final float[] yinBuffer;
 
-	private Yin(float sampleRate){
+	private Yin(float sampleRate,int bufferSize){
 		this.sampleRate = sampleRate;
-		bufferSize = 1024;
+		this.bufferSize = bufferSize;
 		overlapSize = bufferSize/2;//half of the buffer overlaps
 		running = true;
 		inputBuffer = new float[bufferSize];
@@ -246,7 +246,7 @@ public class Yin {
 		//Seems to be correct but a float uses 4 bytes: confused programmer is confused.
 		float timeCalculationDivider = (float) (frameSize * frameRate / 2);
 		long floatsProcessed = 0;
-		yinInstance = new Yin(sampleRate);
+		yinInstance = new Yin(sampleRate,1024);
 		int bufferStepSize = yinInstance.bufferSize - yinInstance.overlapSize;
 
 		//read full buffer
@@ -275,7 +275,7 @@ public class Yin {
 	 */
 	public static float processBuffer(float[] buffer,float sampleRate){
 		if(yinInstance == null)
-			yinInstance = new Yin(sampleRate);
+			yinInstance = new Yin(sampleRate,buffer.length);
 
 		if(buffer.length != yinInstance.inputBuffer.length)
 			throw new Error("Buffer and yin buffer should have the same length!");
