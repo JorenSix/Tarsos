@@ -98,7 +98,7 @@ public class AmbitusHistogram extends Histogram{
 	 * @return the ambitus folded to one octave (1200 cents)
 	 */
 	public ToneScaleHistogram toneScaleHistogram() {
-	ToneScaleHistogram summedToneScaleHistogram = new ToneScaleHistogram();
+		ToneScaleHistogram summedToneScaleHistogram = new ToneScaleHistogram();
 		for(ToneScaleHistogram histogram: toneScaleHistogramPerOctave){
 			summedToneScaleHistogram.add(histogram);
 		}
