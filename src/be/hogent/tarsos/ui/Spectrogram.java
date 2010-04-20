@@ -12,6 +12,10 @@ import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.ShortMessage;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -24,6 +28,8 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import be.hogent.tarsos.apps.PlayAlong;
+import be.hogent.tarsos.pitch.PitchFunctions;
 import be.hogent.tarsos.pitch.Yin;
 import be.hogent.tarsos.util.FFT;
 
@@ -67,9 +73,48 @@ public class Spectrogram extends JComponent {
 	AudioFloatInputStream afis;
 	double sampleRate;
 	private final FFT fft;
+	private final MidiDevice outputDevice;
+	final boolean keyDown[];
+	private int currentKeyDown;
+
+	/**
+	 * Sends a NOTE_ON or NOTE_OFF message on the requested key.
+	 * @param midiKey The midi key to send the message for [0,VirtualKeyboard.NUMBER_OF_MIDI_KEYS[
+	 * @param sendOnMessage <code>true</code> for NOTE_ON messages, <code>false</code> for NOTE_OFF
+	 */
+	protected void sendNoteMessage(int midiKey, boolean sendOnMessage){
+		//do not send note on messages to pressed keys
+		if(sendOnMessage && keyDown[midiKey])
+			return;
+		//do not send note off messages to keys that are not pressed
+		if(!sendOnMessage && !keyDown[midiKey])
+			return;
+
+        try {
+        	ShortMessage sm = new ShortMessage();
+        	int command = sendOnMessage ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
+        	int velocity = sendOnMessage ? VirtualKeyboard.VELOCITY : 0;
+            sm.setMessage(command, VirtualKeyboard.CHANNEL,midiKey, velocity);
+            outputDevice.getReceiver().send(sm,-1);
+        } catch (InvalidMidiDataException e1) {
+            e1.printStackTrace();
+        } catch (MidiUnavailableException e) {
+			e.printStackTrace();
+		}
+        //mark key correctly
+        keyDown[midiKey] = sendOnMessage;
+	}
+
 
 	public Spectrogram(int mixerIndex) throws UnsupportedAudioFileException, IOException,
 			LineUnavailableException {
+		keyDown = new boolean[128];
+		outputDevice = PlayAlong.chooseDevice(false, true);
+		try {
+			outputDevice.open();
+		} catch (MidiUnavailableException e) {
+			//Unable to open midi device
+		}
 
 		// the image shown on even runs trough the x axis
 		imageEven = new BufferedImage(W, H / 2, BufferedImage.TYPE_INT_RGB);
@@ -149,8 +194,18 @@ public class Spectrogram extends JComponent {
 			if (afis.read(buffer, 0, readAmount / 2) != -1) {
 
 				float pitch = Yin.processBuffer(buffer, (float) sampleRate);
-				if (pitch != -1)
+				if (pitch != -1){
 					pitchIndex = (int) (pitch * readAmount / sampleRate * 2 );
+					double midiCentValue = PitchFunctions.convertHertzToMidiCent((double) pitch);
+					if(midiCentValue - (int) midiCentValue < 0.2  && midiCentValue < 128){
+						int newKeyDown = (int) midiCentValue;
+						if(currentKeyDown != newKeyDown){
+							sendNoteMessage(currentKeyDown, false);
+							sendNoteMessage(newKeyDown, true);
+							currentKeyDown = newKeyDown;
+						}
+					}
+				}
 
 				fft.transform(buffer);
 
