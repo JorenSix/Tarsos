@@ -13,9 +13,9 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
-import be.hogent.tarsos.pitch.Yin;
 import be.hogent.tarsos.util.FFT;
 
+import com.sun.media.sound.AudioFloatConverter;
 import com.sun.media.sound.AudioFloatInputStream;
 
 public class AutoTune {
@@ -49,89 +49,46 @@ public class AutoTune {
 		new Thread(new AudioProcessor(chooseDevice())).start();
 	}
 
-	private static class Speaker implements Runnable{
-
-		    Mixer mixer;
-			SourceDataLine line;
-			static int sr = 44100;
-			static float floatSr = 44100;
-			static int channels = 1;
-			static int bits = 16;
-			static int bufferSize = 4096*4;
-			AudioFormat format = new AudioFormat(floatSr,bits,channels,true,false);
-		        //AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, floatSr, bits, channels, 2, floatSr, false); //2
-			private Speaker() {
-				DataLine.Info info = new DataLine.Info(SourceDataLine.class, format); // format is an AudioFormat object
-				if (!AudioSystem.isLineSupported(info)) {
-					System.exit(0);
-			    	}
-
-			    // Obtain and open the line.
-				try {
-				    line = (SourceDataLine) AudioSystem.getLine(info);
-			   	 bufferSize = (int) format.getSampleRate() * format.getFrameSize();
-				    //line.open(format,bufferSize);
-				    line.open(format);
-			            line.start();
 
 
-				} catch (LineUnavailableException ex) {
-					System.out.println("WTF open error");
-					System.exit(0);
-				}
+	private static class Speaker{
+		private final float sampleRate = 44100;
+		private final int channels = 1;
+		private final int bits = 16;
+
+		private final AudioFormat format = new AudioFormat(sampleRate, bits,channels, true, false);
+		private final AudioFloatConverter converter = AudioFloatConverter.getConverter(format);
+
+		private SourceDataLine line;
+
+		private Speaker() {
+			DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+			if (!AudioSystem.isLineSupported(info)) {
+				throw new Error("Line not supported");
 			}
-			void out_realtime(int [] b) {
-				int length  = 2*b.length;
-				if (length <= 0) {
-					return ;
-				}
-				byte [] out = new byte[length];
-				int tmp;
-				for (int i = 0; i < b.length; i++) {
-					tmp = b[i];
-					tmp = tmp << 24;
-					tmp = tmp >> 24;
-					out[2*i+0]  = (byte)tmp;
 
-					tmp = b[i];
-					tmp = tmp << 16;
-					tmp = tmp >> 24;
-					out[2*i+1] = (byte)tmp;
-				}
+			// Obtain and open the line.
+			try {
+				line = (SourceDataLine) AudioSystem.getLine(info);
+				line.open(format);
+				line.start();
+			} catch (LineUnavailableException ex) {
+				System.out.println("Line not available.");
 			}
-			public void out_realtime(float [] data) {
-				out_realtime(data,0,data.length);
-			}
-			public void out_realtime(float [] data,int start, int end) {
-				try {
-				int hi = 0;
-				byte [] buffer = new byte[data.length*2];
-				for (int i = start; i < end; i++) {
-					hi = (int)data[i];
-					//low = hi;
-					//hi <<= 16;
-					//hi >>= 24;
-					//low <<= 24;
-					//low >>= 24;
-					//buffer[0+count] = (byte)low;
-					//buffer[1+count] = (byte)hi;
-					//buffer[1+2*i] = (byte)low; 	//little endian
-					//buffer[0+2*i] = (byte)hi;
-					buffer[2*i + 0] = (byte) (hi & 0xFF);
-		                        buffer[2*i + 1] = (byte) ((hi >>> 8) & 0xFF);
-				}
-				line.write(buffer,0,buffer.length);
-				} catch (Exception e) {
-					System.err.println(e + "WTF");
-				}
-				//fileOut.close();
-			}
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
+		}
 
-			}
+		public void write(float[] data) {
+			write(data, 0, data.length);
+		}
+
+
+		public void write(float[] originalData, int start, int end) {
+			byte[] convertedData = new byte[originalData.length * 2];
+			converter.toByteArray(originalData, convertedData);
+			line.write(convertedData,start,end-start);
+		}
 	}
+
 	private static class AudioProcessor implements Runnable{
 
 		AudioFloatInputStream afis;
@@ -168,15 +125,16 @@ public class AutoTune {
 				boolean hasMoreBytes = afis.read(audioBuffer,0,audioBuffer.length) != -1;
 				while(hasMoreBytes){
 
-					float pitch = Yin.processBuffer(audioBuffer, sampleRate);
+				//	float pitch = Yin.processBuffer(audioBuffer, sampleRate);
 
-					if(pitch > 440 && pitch <  3520){
-						System.out.println(pitch);
+					//if(pitch > 440 && pitch <  3520){
+					//	System.out.println(pitch);
 
 						//calculate fft
 						fft.transform(audioBuffer);
 
 						//scale pitch
+						/*
 						int originalBin = (int) (pitch * audioBuffer.length / sampleRate);
 						int newBin = (int) (1760 * audioBuffer.length / sampleRate);
 						int diff = newBin - originalBin;
@@ -189,12 +147,13 @@ public class AutoTune {
 							for(int i = 0; i < audioBuffer.length ; i++){
 								 audioBuffer[i] = i-diff < audioBuffer.length ? audioBuffer[i-diff] : 0;
 							}
+							*/
 						//inverse fft
 						ifft.transform(audioBuffer);
 
 						//play resulting audio
-						speaker.out_realtime(audioBuffer);
-					}
+						speaker.write(audioBuffer,0,1024);
+				//	}
 
 
 
