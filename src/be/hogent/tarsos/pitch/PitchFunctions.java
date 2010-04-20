@@ -71,6 +71,14 @@ public class PitchFunctions {
 		return pitchValueInAbsoluteCent;
 	}
 
+	// (12 × log2 (f / 440)) + 69
+	public static double convertHertzToMidiCent(Double hertzValue){
+		double pitchValueInMidiCent = 0.0;
+		if(hertzValue != 0)
+			pitchValueInMidiCent = (12 * Math.log(hertzValue/440) / log_two ) + 69;
+		return pitchValueInMidiCent;
+	}
+
 	/**
 	 * Folds the pitch values to one octave.
 	 * E.g. 1203 becomes 3 and 956 remains 956
