@@ -9,5 +9,7 @@
 	<classpathentry kind="lib" path="lib/java-getopt-1.0.13.jar"/>
 	<classpathentry kind="lib" path="lib/gervill.jar" sourcepath="lib/gervill-src.zip"/>
 	<classpathentry kind="lib" path="lib/jass.jar" sourcepath="lib/jass-src.zip"/>
+	<classpathentry kind="lib" path="lib/jtransforms-2.3.jar" sourcepath="lib/jtransforms-2.3-src.zip"/>
+	<classpathentry kind="lib" path="lib/spectro-edit_0.4.jar" sourcepath="lib/spectro-edit_0.4_src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
