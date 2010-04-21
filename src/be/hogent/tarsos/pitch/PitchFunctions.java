@@ -15,22 +15,23 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import ptolemy.plot.Plot;
 import be.hogent.tarsos.pitch.Sample.PitchUnit;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
 
 /**
+ * Utility class for pitch conversions
+ * See <a href="http://www.lenmus.org/sw/page.php?pid=docs&doc=hacking_guide&pag=pitch-representation&lang=en">pitch-representatio</a>
+ * for some background.
  *
  * @author Joren Six
- *
  */
 public class PitchFunctions {
 	private PitchFunctions(){}
 
 	/**
-	 * Converts the Hertz values to cent.
-	 * The reference frequency is 32.7032 Hz.
-	 * This is C1 on a piano keyboard with A4 tuned to 440 Hz.
-	 * This means that 0 cents is C1; 1200 is C2; 2400 is C3; ... also -1200 cents is C0
+	 * Converts pitches in Hertz to the requested unit.
 	 * @param pitchValuesInHertz the pitch values in Hertz
 	 * @return the values converted to the requested unit. The original list remains unchanged.
 	 */
@@ -44,7 +45,9 @@ public class PitchFunctions {
 			convertHertzToRelativeCent(convertedValues);
 			break;
 		case MIDI_KEY:
-			throw new Error("Currently not Implemented");
+			convertHertzToMidiKey(convertedValues);
+		case MIDI_CENT:
+			convertHertzToMidiCent(convertedValues);
 		case HERTZ:
 			break;
 		default:
@@ -53,6 +56,20 @@ public class PitchFunctions {
 		return convertedValues;
 	}
 
+	public static String noteName(double hertzValue){
+		String name ="";
+		String[] noteNames = {"Cx","C#x/Dbx","Dx","D#x/Ebx","Ex","Fx","F#x/Gbx","Gx","G#x/Abx","Ax","A#x/Bbx","Bx"};
+		int midiKey = convertHertzToMidiKey(hertzValue);
+		int noteIndex = (midiKey) % 12;
+		int x = (midiKey / 12) - 1;
+		name = noteNames[noteIndex].replace("x","" + x);
+		return name;
+	}
+
+	/**
+	 * Converts a list of pitches in Hertz to absolute cents.
+	 * @param convertedValues
+	 */
 	private static void convertHertzToAbsoluteCent(List<Double> convertedValues){
 		for(int i=0;i<convertedValues.size();i++){
 			Double valueInHertz = convertedValues.get(i);
@@ -60,10 +77,15 @@ public class PitchFunctions {
 		}
 	}
 
-	//the reference frequency of 32.7032... Hz
-	//27.5 Hz is A0 (440, 220, 110, 55, 27.5)
-	private static final double reference_frequency = 27.5 * Math.pow(2.0,0.25)/2;//32.7 Hz
+	private static final double reference_frequency = Configuration.getDouble(ConfKey.absolute_cents_reference_frequency);//C-1 = 16.35 Hz
 	private static final double log_two = Math.log(2.0);
+	/**
+	 * The reference frequency is configured.
+	 * This is 16.35Hz is C0 on a piano keyboard with A4 tuned to 440 Hz.
+	 * This means that 0 cents is C0; 1200 is C1; 2400 is C2; ... also -1200 cents is C-1
+	 * @param hertzValue
+	 * @return the converted value using the configured reference frequency
+	 */
 	public static double convertHertzToAbsoluteCent(Double hertzValue){
 		double pitchValueInAbsoluteCent = 0.0;
 		if(hertzValue != 0)
@@ -71,12 +93,46 @@ public class PitchFunctions {
 		return pitchValueInAbsoluteCent;
 	}
 
-	// (12 × log2 (f / 440)) + 69
+
+
+	/**
+	 * Converts a frequency in Hz to a MIDI CENT value using
+	 * <code>(12 × log2 (f / 440)) + 69</code>
+	 * <br>
+	 * E.g.<br>
+	 * <code>69.168 MIDI CENTS = MIDI NOTE 69  + 16,8 cents</code><br>
+	 * <code>69.168 MIDI CENTS = 440Hz + x Hz</code>
+	 * @param hertzValue the pitch in Hertz
+	 * @return the pitch in midi cents
+	 */
 	public static double convertHertzToMidiCent(Double hertzValue){
 		double pitchValueInMidiCent = 0.0;
 		if(hertzValue != 0)
 			pitchValueInMidiCent = (12 * Math.log(hertzValue/440) / log_two ) + 69;
 		return pitchValueInMidiCent;
+	}
+
+	private static void convertHertzToMidiCent(List<Double> convertedValues){
+		for(int i=0;i<convertedValues.size();i++){
+			Double valueInHertz = convertedValues.get(i);
+			convertedValues.set(i, convertHertzToMidiCent(valueInHertz));
+		}
+	}
+
+	public static int convertHertzToMidiKey(Double hertzValue){
+		int midiKey = (int) Math.round(convertHertzToMidiCent(hertzValue));
+		if(midiKey > 127)
+			midiKey = 127;
+		else if(midiKey < 0)
+			midiKey = 0;
+		return midiKey;
+	}
+
+	private static void convertHertzToMidiKey(List<Double> convertedValues){
+		for(int i=0;i<convertedValues.size();i++){
+			Double valueInHertz = convertedValues.get(i);
+			convertedValues.set(i, (double) convertHertzToMidiKey(valueInHertz));
+		}
 	}
 
 	/**
@@ -190,6 +246,12 @@ public class PitchFunctions {
 		return filteredList;
 	}
 
+	/**
+	 * Smooths a list of doubles using a gaussian.
+	 * @param listToSmooth the list to smooth
+	 * @param standardDeviation the standard deviation, 0 means return the original list, below zero is invalid.
+	 * @return
+	 */
 	public static  List<Double> getGaussianSmoothed(List<Double> listToSmooth , double standardDeviation){
         if(standardDeviation < 0.0) {
             throw new IllegalArgumentException("standardDeviation invalid");
