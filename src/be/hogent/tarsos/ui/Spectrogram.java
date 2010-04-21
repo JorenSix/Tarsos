@@ -45,12 +45,11 @@ public class Spectrogram extends JComponent {
 
 	private static final long serialVersionUID = -7760501261506593771L;
 
-	private static final int W = 800;
-	private static final int H = 1024;
+	private static final int W = 640;//(int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+	private static final int H = 480;//(int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 
 	private static final int STEP = 1; // pixel
 
-	private final int REFRESH_INTERVAL; // ms
 
 	private int position = -1;
 
@@ -60,21 +59,19 @@ public class Spectrogram extends JComponent {
 	private final BufferedImage imageEven;
 	private final Graphics2D imageEvenGraphics;
 
-	private final BufferedImage imageOdd;
-	private final Graphics2D imageOddGraphics;
-
-	private Graphics2D currentGraphics;
-
-	private final Color[] colors;
 	private final Color pitchColor = Color.RED;
 
 	private final Timer timer;
-	int readAmount = 2048;
+
+	private final int fftSize = 32768;
+	private final int readStepSize = 1024;
+	private final float audioDataBuffer[] = new float[fftSize];
+
 	AudioFloatInputStream afis;
 	double sampleRate;
 	private final FFT fft;
 	private final MidiDevice outputDevice;
-	final boolean keyDown[];
+
 	private int currentKeyDown;
 
 	/**
@@ -82,19 +79,19 @@ public class Spectrogram extends JComponent {
 	 * @param midiKey The midi key to send the message for [0,VirtualKeyboard.NUMBER_OF_MIDI_KEYS[
 	 * @param sendOnMessage <code>true</code> for NOTE_ON messages, <code>false</code> for NOTE_OFF
 	 */
-	protected void sendNoteMessage(int midiKey, boolean sendOnMessage){
+	private void sendNoteMessage(int midiKey, boolean sendOnMessage){
 		//do not send note on messages to pressed keys
-		if(sendOnMessage && keyDown[midiKey])
+		if(sendOnMessage && currentKeyDown == midiKey)
 			return;
 		//do not send note off messages to keys that are not pressed
-		if(!sendOnMessage && !keyDown[midiKey])
+		if(!sendOnMessage && currentKeyDown != midiKey)
 			return;
 
         try {
         	ShortMessage sm = new ShortMessage();
         	int command = sendOnMessage ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
         	int velocity = sendOnMessage ? VirtualKeyboard.VELOCITY : 0;
-            sm.setMessage(command, VirtualKeyboard.CHANNEL,midiKey, velocity);
+            sm.setMessage(command, VirtualKeyboard.CHANNEL ,midiKey, velocity);
             outputDevice.getReceiver().send(sm,-1);
         } catch (InvalidMidiDataException e1) {
             e1.printStackTrace();
@@ -102,39 +99,54 @@ public class Spectrogram extends JComponent {
 			e.printStackTrace();
 		}
         //mark key correctly
-        keyDown[midiKey] = sendOnMessage;
+        currentKeyDown =  sendOnMessage ? midiKey : -1;
+	}
+
+	private void pitchToMidiOut(double pitch){
+		double midiCentValue = PitchFunctions.convertHertzToMidiCent(pitch);
+		int newKeyDown = -1;
+		//'musical' pitch detected ?
+		if( Math.abs(midiCentValue - (int) midiCentValue) < 0.2  && midiCentValue < 128){
+			 newKeyDown = (int) midiCentValue;
+		}
+		//if no pitch detected
+		//send note off
+		if(newKeyDown == -1 && currentKeyDown != -1){
+			sendNoteMessage(currentKeyDown, false);
+		} else if(currentKeyDown != newKeyDown){
+			//if different pitch than previous detected send note off and on
+			if(currentKeyDown != -1)
+				sendNoteMessage(currentKeyDown, false);
+			sendNoteMessage(newKeyDown, true);
+			currentKeyDown = newKeyDown;
+		}
 	}
 
 
 	public Spectrogram(int mixerIndex) throws UnsupportedAudioFileException, IOException,
 			LineUnavailableException {
-		keyDown = new boolean[128];
+
 		outputDevice = PlayAlong.chooseDevice(false, true);
 		try {
 			outputDevice.open();
+			ShortMessage sm = new ShortMessage();
+            sm.setMessage(ShortMessage.PROGRAM_CHANGE,VirtualKeyboard.CHANNEL,72,0);
+            outputDevice.getReceiver().send(sm,-1);
 		} catch (MidiUnavailableException e) {
 			//Unable to open midi device
+		} catch (InvalidMidiDataException e) {
+			e.printStackTrace();
 		}
 
 		// the image shown on even runs trough the x axis
-		imageEven = new BufferedImage(W, H / 2, BufferedImage.TYPE_INT_RGB);
+		imageEven = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
 		imageEvenGraphics = imageEven.createGraphics();
 
-		// the image shown on odd runs trough the x axis
-		imageOdd = new BufferedImage(W, H / 2, BufferedImage.TYPE_INT_RGB);
-		imageOddGraphics = imageOdd.createGraphics();
 
-		currentGraphics = imageEvenGraphics;
-
-		buffer = new BufferedImage(W, H / 2, BufferedImage.TYPE_INT_RGB);
+		buffer = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
 		bufferGraphics = buffer.createGraphics();
 		bufferGraphics.setColor(Color.BLACK);
 		bufferGraphics.clearRect(0, 0, W, H);
-
-		colors = new Color[256];
-		for (int i = 0; i < colors.length; i++) {
-			colors[i] = new Color(i, i, i); // grayscale
-		}
 
 		javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[mixerIndex];
 		Mixer mixer = AudioSystem.getMixer(selected);
@@ -156,19 +168,24 @@ public class Spectrogram extends JComponent {
 		 */
 
 		afis = AudioFloatInputStream.getInputStream(stream);
+		//read first full buffer
+		afis.read(audioDataBuffer, 0, fftSize);
 
 		sampleRate = format.getSampleRate();
-		REFRESH_INTERVAL = (int) (readAmount / sampleRate * 1000);
 
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				step();
+				try {
+					step();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
-		}, 0, REFRESH_INTERVAL);
+		}, 0, 25);
 
-		fft = new FFT(readAmount/2,-1);
+		fft = new FFT(fftSize);
 	}
 
 	@Override
@@ -177,84 +194,64 @@ public class Spectrogram extends JComponent {
 	}
 
 	// executes on the timer thread
-	public void step() {
+	public void step() throws IOException {
 		position = (position + STEP) % W;
-		if (position == W - STEP) {
-			currentGraphics = (currentGraphics == imageEvenGraphics) ? imageOddGraphics
-					: imageEvenGraphics;
-		}
 
-		double[] colorIndexes = new double[H];
+		Color[] colors = new Color[H];
 		int pitchIndex = -1;
-		try {
-			float buffer[] = new float[readAmount];
-			for(int i=0; i < buffer.length / 2 ; i++){
-				buffer[i+buffer.length / 2] = buffer[i];
-			}
-			if (afis.read(buffer, 0, readAmount / 2) != -1) {
 
-				float pitch = Yin.processBuffer(buffer, (float) sampleRate);
-				if (pitch != -1){
-					pitchIndex = (int) (pitch * readAmount / sampleRate * 2 );
-					double midiCentValue = PitchFunctions.convertHertzToMidiCent((double) pitch);
-					if(midiCentValue - (int) midiCentValue < 0.2  && midiCentValue < 128){
-						int newKeyDown = (int) midiCentValue;
-						if(currentKeyDown != newKeyDown){
-							sendNoteMessage(currentKeyDown, false);
-							sendNoteMessage(newKeyDown, true);
-							currentKeyDown = newKeyDown;
-						}
-					}
-				}
-
-				fft.transform(buffer);
-
-				double maxAmplitude = 0;
-				for (int j = 0; j < buffer.length / 2; j++) {
-					double amplitude = buffer[j] * buffer[j] + buffer[j + buffer.length/2] * buffer[j+ buffer.length/2];
-					amplitude = 20.0 * Math.log1p(amplitude);
-					colorIndexes[j] = amplitude;
-					maxAmplitude = Math.max(amplitude, maxAmplitude);
-				}
-
-				for (int i = 0; i < colorIndexes.length; i++) {
-					if (maxAmplitude == 0){
-						colorIndexes[i] = 0;
-					}else{
-						colorIndexes[i] = colorIndexes[i] / maxAmplitude * 255;
-					}
-				}
-			} else {
-				System.out.println("STOP");
-				timer.cancel();
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
+		// slide buffer
+		int slideSize = audioDataBuffer.length - readStepSize;
+		for (int i = 0; i < readStepSize; i++) {
+			audioDataBuffer[i + slideSize] = audioDataBuffer[i];
 		}
 
-		// no need to clear since everything is covered with opaque color
-		for (int i = 0; i < H / STEP / 2; i++) {
-			if (i == pitchIndex)
-				currentGraphics.setColor(pitchColor);
-			else
-				currentGraphics.setColor(colors[(int) (255 - colorIndexes[i])]);
+		if (afis.read(audioDataBuffer, 0, readStepSize) != -1) {
 
-			currentGraphics.fillRect(position, (H / STEP /2) - i * STEP , STEP,
-					STEP);
-		}
+			float yinBuffer[] = new float[readStepSize];
+			for (int i = 0; i < readStepSize; i++)
+				yinBuffer[i] = audioDataBuffer[i];
 
-		if (currentGraphics == imageEvenGraphics) {
-			bufferGraphics.drawImage(imageEven, 0, 0, null);
-			bufferGraphics.drawImage(imageOdd, position, 0, null);
+			float pitch = Yin.processBuffer(yinBuffer, (float) sampleRate);
+			if (pitch != -1) {
+				pitchIndex = (int) (pitch * audioDataBuffer.length / sampleRate * 2);
+			}
+
+			fft.forwardTransform(audioDataBuffer);
+
+			double divisor = H / fftSize;
+			for (int j = 0; j < audioDataBuffer.length / 2; j += 2) {
+				double amplitude = audioDataBuffer[j] * audioDataBuffer[j] + audioDataBuffer[j + 1] * audioDataBuffer[j + 1];
+				amplitude  = Math.pow(amplitude,0.5);
+				colors[(int)(divisor * j)] = colorFor(amplitude);
+			}
 		} else {
-			bufferGraphics.drawImage(imageOdd, 0, 0, null);
-			bufferGraphics.drawImage(imageEven, position, 0, null);
+			timer.cancel();
 		}
+		// no need to clear since everything is covered with opaque color
+		for (int i = 0; i < H / STEP; i++) {
+			Color color = i == pitchIndex ? pitchColor :colors[i];
+			imageEvenGraphics.setColor(color);
+			imageEvenGraphics.fillRect(position,H / STEP - i * STEP, STEP,STEP);
+		}
+
+		bufferGraphics.drawImage(imageEven, 0, 0, null);
 
 		// paintComponent will be called on the EDT (Event Dispatch Thread)
 		repaint();
 	}
+
+	public Color colorFor(double val) {
+		double brightness = 50;
+		double contrast = 800;
+		double preMult = 500000;
+
+        int greyVal = (int) (brightness + (contrast * Math.log1p(Math.abs(preMult * val))));
+        System.out.println(greyVal);
+        greyVal = Math.min(255, Math.max(0, greyVal));
+        System.out.println(greyVal);
+        return new Color(greyVal,greyVal,greyVal);
+    }
 
 	public static void main(String[] args)
 			throws UnsupportedAudioFileException, IOException,
@@ -267,7 +264,9 @@ public class Spectrogram extends JComponent {
 		final JFrame frame = new JFrame("Spectrogram");
 		frame.getContentPane().add(panel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.pack();
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		frame.setUndecorated(true);
+		//frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
