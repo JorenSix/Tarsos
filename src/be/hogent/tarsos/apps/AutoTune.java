@@ -94,7 +94,6 @@ public class AutoTune {
 		AudioFloatInputStream afis;
 		float[] audioBuffer;
 		FFT fft;
-		FFT ifft;
 		Speaker speaker;
 
 		float sampleRate = 44100;
@@ -114,8 +113,7 @@ public class AutoTune {
 			afis = AudioFloatInputStream.getInputStream(stream);
 
 			audioBuffer = new float[2048];
-			fft = new FFT(1024,-1);
-			ifft = new FFT(1024,1);
+			fft = new FFT(1024);
 		}
 
 		@Override
@@ -131,7 +129,7 @@ public class AutoTune {
 					//	System.out.println(pitch);
 
 						//calculate fft
-						fft.transform(audioBuffer);
+						fft.forwardTransform(audioBuffer);
 
 						//scale pitch
 						/*
@@ -149,7 +147,7 @@ public class AutoTune {
 							}
 							*/
 						//inverse fft
-						ifft.transform(audioBuffer);
+						fft.inverseFFT(audioBuffer);
 
 						//play resulting audio
 						speaker.write(audioBuffer,0,1024);
