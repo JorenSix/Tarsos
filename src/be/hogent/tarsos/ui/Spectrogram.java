@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,8 +46,8 @@ public class Spectrogram extends JComponent {
 
 	private static final long serialVersionUID = -7760501261506593771L;
 
-	private static final int W = 640;//(int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-	private static final int H = 480;//(int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+	private static final int W = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+	private static final int H = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 
 	private static final int STEP = 1; // pixel
 
@@ -63,7 +64,7 @@ public class Spectrogram extends JComponent {
 
 	private final Timer timer;
 
-	private final int fftSize = 32768;
+	private final int fftSize = 16384;
 	private final int readStepSize = 1024;
 	private final float audioDataBuffer[] = new float[fftSize];
 
@@ -90,8 +91,7 @@ public class Spectrogram extends JComponent {
         try {
         	ShortMessage sm = new ShortMessage();
         	int command = sendOnMessage ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
-        	int velocity = sendOnMessage ? VirtualKeyboard.VELOCITY : 0;
-            sm.setMessage(command, VirtualKeyboard.CHANNEL ,midiKey, velocity);
+        	sm.setMessage(command, VirtualKeyboard.CHANNEL ,midiKey, 125);
             outputDevice.getReceiver().send(sm,-1);
         } catch (InvalidMidiDataException e1) {
             e1.printStackTrace();
@@ -106,8 +106,9 @@ public class Spectrogram extends JComponent {
 		double midiCentValue = PitchFunctions.convertHertzToMidiCent(pitch);
 		int newKeyDown = -1;
 		//'musical' pitch detected ?
-		if( Math.abs(midiCentValue - (int) midiCentValue) < 0.2  && midiCentValue < 128){
+		if( Math.abs(midiCentValue - (int) midiCentValue) < 0.25  && midiCentValue < 128 && midiCentValue >= 0){
 			 newKeyDown = (int) midiCentValue;
+			 lastDetectedNote = "Name: " + PitchFunctions.noteName(pitch) + "\nFrequency: " + ((int) pitch) + "Hz \t" + " MIDI note:" + PitchFunctions.convertHertzToMidiCent(pitch);
 		}
 		//if no pitch detected
 		//send note off
@@ -121,6 +122,7 @@ public class Spectrogram extends JComponent {
 			currentKeyDown = newKeyDown;
 		}
 	}
+
 
 
 	public Spectrogram(int mixerIndex) throws UnsupportedAudioFileException, IOException,
@@ -151,8 +153,7 @@ public class Spectrogram extends JComponent {
 		javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[mixerIndex];
 		Mixer mixer = AudioSystem.getMixer(selected);
 		AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
-		DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,
-				format);
+		DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,format);
 		TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
 		int numberOfSamples = (int) (0.1 * 44100);
 		line.open(format, numberOfSamples);
@@ -193,11 +194,20 @@ public class Spectrogram extends JComponent {
 		g.drawImage(buffer, 0, 0, null);
 	}
 
+	double[] amplitudes = new double[H];
+	String lastDetectedNote = "";
+
+	private int frequencyToBin(double frequency){
+		if(frequency == 0.0)
+			return 0;
+		int bin = H - 1 - (int) (frequency * H / sampleRate);
+		return bin;
+	}
+
 	// executes on the timer thread
 	public void step() throws IOException {
 		position = (position + STEP) % W;
-
-		Color[] colors = new Color[H];
+		double maxAmplitude = 0.0;
 		int pitchIndex = -1;
 
 		// slide buffer
@@ -208,50 +218,64 @@ public class Spectrogram extends JComponent {
 
 		if (afis.read(audioDataBuffer, 0, readStepSize) != -1) {
 
-			float yinBuffer[] = new float[readStepSize];
-			for (int i = 0; i < readStepSize; i++)
-				yinBuffer[i] = audioDataBuffer[i];
-
-			float pitch = Yin.processBuffer(yinBuffer, (float) sampleRate);
+			float pitch = detectPitch();
 			if (pitch != -1) {
-				pitchIndex = (int) (pitch * audioDataBuffer.length / sampleRate * 2);
+				pitchIndex = frequencyToBin(pitch);
+				pitchToMidiOut(pitch);
 			}
 
-			fft.forwardTransform(audioDataBuffer);
+			double[] transformBuffer = new double[fftSize*2];
+			for (int i = 0; i < fftSize; i++)
+				transformBuffer[i] = audioDataBuffer[i];
 
-			double divisor = H / fftSize;
-			for (int j = 0; j < audioDataBuffer.length / 2; j += 2) {
-				double amplitude = audioDataBuffer[j] * audioDataBuffer[j] + audioDataBuffer[j + 1] * audioDataBuffer[j + 1];
-				amplitude  = Math.pow(amplitude,0.5);
-				colors[(int)(divisor * j)] = colorFor(amplitude);
+			new com.sun.media.sound.FFT(audioDataBuffer.length,-1).transform(transformBuffer);
+
+			for (int j = 0; j < audioDataBuffer.length / 2 ; j ++ ) {
+				double amplitude = transformBuffer[j] * transformBuffer[j] + transformBuffer[j + audioDataBuffer.length/2] * transformBuffer[j + audioDataBuffer.length/2];
+				amplitude = 20.0 * Math.log1p(amplitude);
+				double pitchCurrentBin = j * sampleRate / fftSize /2 ;
+				int pixelBin =  frequencyToBin(pitchCurrentBin);
+				amplitudes[pixelBin] = amplitudes[pixelBin] == 0 ? amplitude : (amplitudes[pixelBin] + amplitude) / 2 ;
+				maxAmplitude = Math.max(amplitudes[pixelBin],maxAmplitude);
 			}
+
+			Color colors[] = new Color[H];
+			for(int i = 0; i < amplitudes.length; i++) {
+				 if (maxAmplitude == 0){
+					 colors[i] = Color.black;
+				 }else{
+					 int greyValue = (int) (amplitudes[i] / maxAmplitude * 255);
+					 colors[i] = new Color(greyValue,greyValue,greyValue);
+				 }
+			}
+
+			//no need to clear since everything is covered with opaque color
+			for (int i = 0  ; i < H ; i++) {
+				Color color = i == pitchIndex ? pitchColor :colors[i];
+				imageEvenGraphics.setColor(color);
+				imageEvenGraphics.fillRect(position,i, 1,1);
+			}
+
+			bufferGraphics.drawImage(imageEven, 0, 0, null);
+
+			bufferGraphics.setColor(Color.WHITE);
+
+			bufferGraphics.drawString((new StringBuilder("Current detected frequency: ")).append(((int)pitch)).append("Hz").toString(), 20, 20);
+			bufferGraphics.drawString((new StringBuilder("Last detected note: ").append(lastDetectedNote).toString()), 20, 40);
 		} else {
 			timer.cancel();
 		}
-		// no need to clear since everything is covered with opaque color
-		for (int i = 0; i < H / STEP; i++) {
-			Color color = i == pitchIndex ? pitchColor :colors[i];
-			imageEvenGraphics.setColor(color);
-			imageEvenGraphics.fillRect(position,H / STEP - i * STEP, STEP,STEP);
-		}
-
-		bufferGraphics.drawImage(imageEven, 0, 0, null);
 
 		// paintComponent will be called on the EDT (Event Dispatch Thread)
 		repaint();
 	}
 
-	public Color colorFor(double val) {
-		double brightness = 50;
-		double contrast = 800;
-		double preMult = 500000;
-
-        int greyVal = (int) (brightness + (contrast * Math.log1p(Math.abs(preMult * val))));
-        System.out.println(greyVal);
-        greyVal = Math.min(255, Math.max(0, greyVal));
-        System.out.println(greyVal);
-        return new Color(greyVal,greyVal,greyVal);
-    }
+	private final float yinBuffer[] = new float[readStepSize];
+	private float detectPitch(){
+		for (int i = 0; i < readStepSize; i++)
+			yinBuffer[i] = audioDataBuffer[i];
+		return Yin.processBuffer(yinBuffer, (float) sampleRate);
+	}
 
 	public static void main(String[] args)
 			throws UnsupportedAudioFileException, IOException,

@@ -147,7 +147,7 @@ public class AutoTune {
 							}
 							*/
 						//inverse fft
-						fft.inverseFFT(audioBuffer);
+						fft.backwardsTransform(audioBuffer);
 
 						//play resulting audio
 						speaker.write(audioBuffer,0,1024);
