@@ -257,9 +257,13 @@ public class Yin {
 			time = floatsProcessed / timeCalculationDivider;
 			if(detectedPitchHandler!=null)
 				detectedPitchHandler.handleDetectedPitch(time,pitch);
+
 			//slide buffer with predefined overlap
+			//is this correct: chronological last bytes first???
+			//seems wrong...??
 			for(int i = 0 ; i < bufferStepSize ; i++)
 				yinInstance.inputBuffer[i]=yinInstance.inputBuffer[i+yinInstance.overlapSize];
+
 			hasMoreBytes = afis.read(yinInstance.inputBuffer,yinInstance.overlapSize,bufferStepSize) != -1;
 			floatsProcessed += bufferStepSize;
 		}
