@@ -59,7 +59,8 @@ public class Yin {
 	private Yin(float sampleRate,int bufferSize){
 		this.sampleRate = sampleRate;
 		this.bufferSize = bufferSize;
-		overlapSize = bufferSize/2;//half of the buffer overlaps
+		//half of each buffer overlaps
+		overlapSize = bufferSize/2;
 		running = true;
 		inputBuffer = new float[bufferSize];
 		yinBuffer = new float[bufferSize/2];
@@ -259,14 +260,55 @@ public class Yin {
 				detectedPitchHandler.handleDetectedPitch(time,pitch);
 
 			//slide buffer with predefined overlap
-			//is this correct: chronological last bytes first???
-			//seems wrong...??
-			for(int i = 0 ; i < bufferStepSize ; i++)
-				yinInstance.inputBuffer[i]=yinInstance.inputBuffer[i+yinInstance.overlapSize];
+			Yin.slideBuffer(afis, yinInstance.inputBuffer, yinInstance.overlapSize);
 
-			hasMoreBytes = afis.read(yinInstance.inputBuffer,yinInstance.overlapSize,bufferStepSize) != -1;
 			floatsProcessed += bufferStepSize;
 		}
+	}
+
+	/**
+	 * Slides a buffer with an overlap and reads new data from the stream. to
+	 * the correct place in the buffer.
+	 * E.g. with a buffer size of 9 and overlap of 3.
+	 * <pre>
+	 *      | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+	 *                        |
+	 *                Slide (9 - 3 = 6)
+	 *                        |
+	 *                        v
+	 *      | _ | _ | _ | _ | _ | _ | 8 | 7 | 6 |
+	 *                        |
+	 *        Fill from 0 to 9 - 3 = 6 exclusive
+	 *                        |
+	 *                        v
+	 *      | 14| 13| 12| 11| 10| 9 | 8 | 7 | 6 |
+	 *
+	 * </pre>
+	 *
+	 * @param audioFloatInputStream
+	 *            The stream to read audio data from.
+	 * @param audioBuffer
+	 *            The buffer to read audio data to.
+	 * @param overlap
+	 *            The overlap: the number of elements that remain in the buffer
+	 *            after this method is finished.
+	 *
+	 * @return True if the stream can deliver more data, false otherwise.
+	 * @throws IOException
+	 *             When something goes wrong while reading the stream.
+	 *             In particular, an IOException is thrown if the input stream has been closed.
+	 */
+	public static boolean slideBuffer(AudioFloatInputStream audioFloatInputStream,float audioBuffer[], int overlap) throws IOException{
+		assert overlap < audioBuffer.length;
+
+		int slideSize = audioBuffer.length - overlap;
+
+		for(int i = 0 ; i < slideSize ; i++){
+			audioBuffer[i + overlap]= audioBuffer[i];
+		}
+
+		boolean hasMoreBytes = audioFloatInputStream.read(audioBuffer,0,slideSize) != -1;
+		return hasMoreBytes;
 	}
 
 	/**

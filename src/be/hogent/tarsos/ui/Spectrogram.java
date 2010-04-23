@@ -49,9 +49,6 @@ public class Spectrogram extends JComponent {
 	private static final int W = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
 	private static final int H = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 
-	private static final int STEP = 1; // pixel
-
-
 	private int position = -1;
 
 	private final BufferedImage buffer;
@@ -64,16 +61,167 @@ public class Spectrogram extends JComponent {
 
 	private final Timer timer;
 
-	private final int fftSize = 16384;
-	private final int readStepSize = 1024;
+	private final int fftSize = 16384/2;
 	private final float audioDataBuffer[] = new float[fftSize];
 
 	AudioFloatInputStream afis;
 	double sampleRate;
 	private final FFT fft;
 	private final MidiDevice outputDevice;
+	int currentKeyDown;
+	double[] amplitudes = new double[H];
+	String lastDetectedNote = "";
 
-	private int currentKeyDown;
+
+	public Spectrogram(int mixerIndex) throws UnsupportedAudioFileException, IOException,
+			LineUnavailableException {
+
+		outputDevice = PlayAlong.chooseDevice(false, true);
+		try {
+			outputDevice.open();
+			ShortMessage sm = new ShortMessage();
+            sm.setMessage(ShortMessage.PROGRAM_CHANGE,VirtualKeyboard.CHANNEL,72,0);
+            outputDevice.getReceiver().send(sm,-1);
+		} catch (MidiUnavailableException e) {
+			//Unable to open midi device
+		} catch (InvalidMidiDataException e) {
+			e.printStackTrace();
+		}
+
+		// the image shown on even runs trough the x axis
+		imageEven = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
+		imageEvenGraphics = imageEven.createGraphics();
+
+
+		buffer = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
+		bufferGraphics = buffer.createGraphics();
+		bufferGraphics.setColor(Color.BLACK);
+		bufferGraphics.clearRect(0, 0, W, H);
+
+		sampleRate = 44100;
+
+		javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[mixerIndex];
+		Mixer mixer = AudioSystem.getMixer(selected);
+		AudioFormat format = new AudioFormat((float) sampleRate, 16, 1, true, false);
+		DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,format);
+		TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
+		int numberOfSamples = (int) (0.1 * sampleRate);
+		line.open(format, numberOfSamples);
+		line.start();
+		AudioInputStream stream = new AudioInputStream(line);
+
+		//AudioFile audioFile = new AudioFile(FileUtils.combine("data","transcoded_audio" ,"flute.novib.mf.C5B5.wav"));
+		//stream = AudioSystem.getAudioInputStream(new File(audioFile.path()));
+
+
+		afis = AudioFloatInputStream.getInputStream(stream);
+		//read first full buffer
+		afis.read(audioDataBuffer, 0, fftSize);
+
+		fft = new FFT(fftSize);
+
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					step();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}, 0, 25);
+
+
+	}
+
+	@Override
+	public void paintComponent(Graphics g) {
+		g.drawImage(buffer, 0, 0, null);
+	}
+
+
+
+	private int frequencyToBin(double frequency){
+		double minFrequency = 100; //Hz
+		double maxFrequency = 20000;//Hz
+		int bin = 0;
+		boolean logaritmic = true;
+		if(frequency != 0 && frequency > minFrequency && frequency < maxFrequency ){
+			double binEstimate = 0;
+			if(logaritmic){
+				minFrequency = PitchFunctions.convertHertzToAbsoluteCent(minFrequency);
+				maxFrequency = PitchFunctions.convertHertzToAbsoluteCent(maxFrequency);
+				frequency = PitchFunctions.convertHertzToAbsoluteCent(frequency*2);
+				binEstimate = (frequency - minFrequency) / maxFrequency  * H;
+			} else {
+				binEstimate = (frequency - minFrequency) / maxFrequency * H;
+			}
+			if(binEstimate > 700)
+				System.out.println(binEstimate);
+
+			bin = H - 1 - (int) binEstimate;
+		}
+
+		return bin;
+	}
+
+	// executes on the timer thread
+	public void step() throws IOException {
+		position = (1 + position) % W;
+		double maxAmplitude = 0.0;
+		int pitchIndex = -1;
+
+		boolean bufferRead = Yin.slideBuffer(afis, audioDataBuffer, audioDataBuffer.length - 1024 );
+		if (bufferRead) {
+
+
+			float pitch = detectPitch();
+			if (pitch != -1) {
+				pitchIndex = frequencyToBin(pitch);
+				pitchToMidiOut(pitch);
+			}
+
+			float[] transformBuffer = new float[audioDataBuffer.length * 2];
+			for(int i=0;i<audioDataBuffer.length;i++){
+				transformBuffer[i] = audioDataBuffer[i];
+			}
+
+			fft.forwardTransform(transformBuffer);
+
+			for (int j = 0; j < audioDataBuffer.length  ; j ++ ) {
+				double amplitude = fft.modulus(transformBuffer,j);
+				amplitude = 20 * Math.log1p(amplitude);
+				double pitchCurrentBin = j * sampleRate / fftSize / 4;
+				int pixelBin =  frequencyToBin(pitchCurrentBin);
+				amplitudes[pixelBin] = amplitudes[pixelBin] == 0 ? amplitude : (amplitudes[pixelBin] + amplitude) / 2 ;
+				maxAmplitude = Math.max(amplitudes[pixelBin],maxAmplitude);
+			}
+
+			for(int i = 0; i < amplitudes.length; i++) {
+				Color color = Color.black;
+				if(i == pitchIndex){
+					color =pitchColor;
+				} else if (maxAmplitude != 0){
+				  int greyValue = (int) (amplitudes[i] / maxAmplitude * 255);
+				  color = new Color(greyValue,greyValue,greyValue);
+				}
+				imageEvenGraphics.setColor(color);
+				imageEvenGraphics.fillRect(position,i, 1,1);
+			}
+
+
+			bufferGraphics.drawImage(imageEven, 0, 0, null);
+			bufferGraphics.setColor(Color.WHITE);
+			bufferGraphics.drawString((new StringBuilder("Current frequency: ")).append(((int)pitch)).append("Hz").toString(), 20, 20);
+			bufferGraphics.drawString((new StringBuilder("Last detected note: ").append(lastDetectedNote).toString()), 20, 45);
+		} else {
+			timer.cancel();
+		}
+
+		// paintComponent will be called on the EDT (Event Dispatch Thread)
+		repaint();
+	}
 
 	/**
 	 * Sends a NOTE_ON or NOTE_OFF message on the requested key.
@@ -106,7 +254,7 @@ public class Spectrogram extends JComponent {
 		double midiCentValue = PitchFunctions.convertHertzToMidiCent(pitch);
 		int newKeyDown = -1;
 		//'musical' pitch detected ?
-		if( Math.abs(midiCentValue - (int) midiCentValue) < 0.25  && midiCentValue < 128 && midiCentValue >= 0){
+		if( Math.abs(midiCentValue - (int) midiCentValue) < 0.3  && midiCentValue < 128 && midiCentValue >= 0){
 			 newKeyDown = (int) midiCentValue;
 			 lastDetectedNote = "Name: " + PitchFunctions.noteName(pitch) + "\nFrequency: " + ((int) pitch) + "Hz \t" + " MIDI note:" + PitchFunctions.convertHertzToMidiCent(pitch);
 		}
@@ -123,156 +271,9 @@ public class Spectrogram extends JComponent {
 		}
 	}
 
-
-
-	public Spectrogram(int mixerIndex) throws UnsupportedAudioFileException, IOException,
-			LineUnavailableException {
-
-		outputDevice = PlayAlong.chooseDevice(false, true);
-		try {
-			outputDevice.open();
-			ShortMessage sm = new ShortMessage();
-            sm.setMessage(ShortMessage.PROGRAM_CHANGE,VirtualKeyboard.CHANNEL,72,0);
-            outputDevice.getReceiver().send(sm,-1);
-		} catch (MidiUnavailableException e) {
-			//Unable to open midi device
-		} catch (InvalidMidiDataException e) {
-			e.printStackTrace();
-		}
-
-		// the image shown on even runs trough the x axis
-		imageEven = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
-		imageEvenGraphics = imageEven.createGraphics();
-
-
-		buffer = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
-		bufferGraphics = buffer.createGraphics();
-		bufferGraphics.setColor(Color.BLACK);
-		bufferGraphics.clearRect(0, 0, W, H);
-
-		javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[mixerIndex];
-		Mixer mixer = AudioSystem.getMixer(selected);
-		AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
-		DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,format);
-		TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
-		int numberOfSamples = (int) (0.1 * 44100);
-		line.open(format, numberOfSamples);
-		line.start();
-		AudioInputStream stream = new AudioInputStream(line);
-
-		/*
-		 * AudioFile audioFile = new
-		 * AudioFile(FileUtils.combine("data","transcoded_audio"
-		 * ,"flute.novib.mf.C5B5.wav")); AudioInputStream stream =
-		 * AudioSystem.getAudioInputStream(new File(audioFile.path()));
-		 * AudioFormat format = stream.getFormat();
-		 */
-
-		afis = AudioFloatInputStream.getInputStream(stream);
-		//read first full buffer
-		afis.read(audioDataBuffer, 0, fftSize);
-
-		sampleRate = format.getSampleRate();
-
-		timer = new Timer();
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				try {
-					step();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}, 0, 25);
-
-		fft = new FFT(fftSize);
-	}
-
-	@Override
-	public void paintComponent(Graphics g) {
-		g.drawImage(buffer, 0, 0, null);
-	}
-
-	double[] amplitudes = new double[H];
-	String lastDetectedNote = "";
-
-	private int frequencyToBin(double frequency){
-		if(frequency == 0.0)
-			return 0;
-		int bin = H - 1 - (int) (frequency * H / sampleRate);
-		return bin;
-	}
-
-	// executes on the timer thread
-	public void step() throws IOException {
-		position = (position + STEP) % W;
-		double maxAmplitude = 0.0;
-		int pitchIndex = -1;
-
-		// slide buffer
-		int slideSize = audioDataBuffer.length - readStepSize;
-		for (int i = 0; i < readStepSize; i++) {
-			audioDataBuffer[i + slideSize] = audioDataBuffer[i];
-		}
-
-		if (afis.read(audioDataBuffer, 0, readStepSize) != -1) {
-
-			float pitch = detectPitch();
-			if (pitch != -1) {
-				pitchIndex = frequencyToBin(pitch);
-				pitchToMidiOut(pitch);
-			}
-
-			double[] transformBuffer = new double[fftSize*2];
-			for (int i = 0; i < fftSize; i++)
-				transformBuffer[i] = audioDataBuffer[i];
-
-			new com.sun.media.sound.FFT(audioDataBuffer.length,-1).transform(transformBuffer);
-
-			for (int j = 0; j < audioDataBuffer.length / 2 ; j ++ ) {
-				double amplitude = transformBuffer[j] * transformBuffer[j] + transformBuffer[j + audioDataBuffer.length/2] * transformBuffer[j + audioDataBuffer.length/2];
-				amplitude = 20.0 * Math.log1p(amplitude);
-				double pitchCurrentBin = j * sampleRate / fftSize /2 ;
-				int pixelBin =  frequencyToBin(pitchCurrentBin);
-				amplitudes[pixelBin] = amplitudes[pixelBin] == 0 ? amplitude : (amplitudes[pixelBin] + amplitude) / 2 ;
-				maxAmplitude = Math.max(amplitudes[pixelBin],maxAmplitude);
-			}
-
-			Color colors[] = new Color[H];
-			for(int i = 0; i < amplitudes.length; i++) {
-				 if (maxAmplitude == 0){
-					 colors[i] = Color.black;
-				 }else{
-					 int greyValue = (int) (amplitudes[i] / maxAmplitude * 255);
-					 colors[i] = new Color(greyValue,greyValue,greyValue);
-				 }
-			}
-
-			//no need to clear since everything is covered with opaque color
-			for (int i = 0  ; i < H ; i++) {
-				Color color = i == pitchIndex ? pitchColor :colors[i];
-				imageEvenGraphics.setColor(color);
-				imageEvenGraphics.fillRect(position,i, 1,1);
-			}
-
-			bufferGraphics.drawImage(imageEven, 0, 0, null);
-
-			bufferGraphics.setColor(Color.WHITE);
-
-			bufferGraphics.drawString((new StringBuilder("Current detected frequency: ")).append(((int)pitch)).append("Hz").toString(), 20, 20);
-			bufferGraphics.drawString((new StringBuilder("Last detected note: ").append(lastDetectedNote).toString()), 20, 40);
-		} else {
-			timer.cancel();
-		}
-
-		// paintComponent will be called on the EDT (Event Dispatch Thread)
-		repaint();
-	}
-
-	private final float yinBuffer[] = new float[readStepSize];
+	private final float yinBuffer[] = new float[1024];
 	private float detectPitch(){
-		for (int i = 0; i < readStepSize; i++)
+		for (int i = 0; i < 1024; i++)
 			yinBuffer[i] = audioDataBuffer[i];
 		return Yin.processBuffer(yinBuffer, (float) sampleRate);
 	}
