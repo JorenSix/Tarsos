@@ -46,7 +46,7 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
  * </pre>
  * The <a href="http://www.huygens-fokker.org/scala/downloads.html#scales">
  * scala scale archive</a> is a collection of 3772 scales; 424 of which do not
- * end on an octave (mostly ambitus descriptions).
+ * end on an octave (mostly ambitus descriptions of an instrument).
  *
  */
 public class ToneScaleHistogram extends Histogram {
@@ -76,8 +76,7 @@ public class ToneScaleHistogram extends Histogram {
 	}
 
 	/**
-	 * Saves
-	 * the scale in the
+	 * Saves the scale in the
 	 * <a href="http://www.huygens-fokker.org/scala/scl_format.html">
 	 * Scala scale file format</a>: <i>This file format for musical tunings
 	 * is becoming a standard for exchange of scales, owing to the size of
