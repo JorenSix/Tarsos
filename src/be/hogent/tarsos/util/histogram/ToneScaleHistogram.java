@@ -110,10 +110,10 @@ public class ToneScaleHistogram extends Histogram {
 	}
 
 	/**
-	 * Creates a theoretical tone scale using a mixture of gaussian functions
+	 * Creates a theoretical tone scale using a mixture of Gaussian functions
 	 * See <a href="http://www.informaworld.com/smpp/content~content=a901755973~db=all~jumptype=rss">
-	 * an automatic pitch analysis method for turkish maqam music</a>. The theoretic scale
-	 * can be used to search for similar tone scales using a histogram correlation.
+	 * an automatic pitch analysis method for Turkish maqam music</a>. The theoretic scale
+	 * can be used to search for similar tone scales using histogram correlation.
 	 * <br>
 	 * @param peaks the position of the peaks. The position is defined in cents.
 	 * @param heights the heights of the peaks. If null the heights for all peaks is 200.
@@ -155,7 +155,9 @@ public class ToneScaleHistogram extends Histogram {
 			double currentValue = 0.0;
 			for(int i=0;i<peaks.length;i++){
 				double difference = key - peaks[i];
-				//do not calculate 0 values
+				//do not calculate values that are
+				//(very) nearly zero.
+				//Skip elements at width x 10.
 				if(Math.abs(difference) > 10 * widths[i] )
 					continue;
 				double power = Math.pow(difference/(widths[i]/2 * standardDeviations[i]),2.0);
@@ -165,7 +167,6 @@ public class ToneScaleHistogram extends Histogram {
 			long currentCount = toneScaleHistogram.getCount(key);
 			long newCount =  currentCount + Math.round(currentValue);
 			toneScaleHistogram.setCount(key, newCount);
-
 		}
 		return toneScaleHistogram;
 	}
@@ -187,7 +188,7 @@ public class ToneScaleHistogram extends Histogram {
 		//  using the intersection measure. The result is a measure for peakiness of
 		//  the original histogram
 		double peakiness = fittingHistogram.correlation(this, CorrelationMeasure.INTERSECTION);
-		//if more than 80% of the fitting histogram and the original histogram overlap
+		//if more than 50% of the fitting histogram and the original histogram overlap
 		//   the original is peaky or melodic
 		return peakiness > 0.5;
 	}
