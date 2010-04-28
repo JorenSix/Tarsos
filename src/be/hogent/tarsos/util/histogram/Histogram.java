@@ -658,6 +658,38 @@ public class Histogram {
 	}
 
 	/**
+	 * Subtracts two histograms. The value for each bin of other is removed
+	 * to the corresponding bin of this histogram.
+	 * The other histogram must have the same start, stop
+	 * and binWidth otherwise subtracting histograms makes no sense!
+	 * <p>
+	 * Changes the current histogram and returns it so it is possible
+	 * to chain modifications. E.g.<code>histo.normalize().addToEachBin(10)</code>
+	 * </p>
+	 * @param other The other histogram
+	 * @return the changed histogram with less (or the same) number of items in the bins.
+	 */
+	public Histogram subtract(Histogram other) {
+		this.invert();
+		this.add(other);
+		return this;
+	}
+
+	/**
+	 * Inverts this histograms. The value for each bin
+	 * is multiplied with -1.
+	 * <p>
+	 * Changes the current histogram and returns it so it is possible
+	 * to chain modifications. E.g.<code>histo.normalize().addToEachBin(10)</code>
+	 * </p>
+	 * @return the changed histogram with each bin multiplied with.
+	 */
+	public Histogram invert(){
+		this.multiply(-1.0);
+		return this;
+	}
+
+	/**
 	 * Multiplies each class (bin) count with a factor.
 	 * <p>
 	 * Changes the current histogram and returns it so it is possible
