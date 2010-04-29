@@ -431,7 +431,8 @@ public class Histogram {
 
 	/**
 	 * Returns the sum of all frequencies (bin counts).
-	 *
+	 * If there are negative bin counts the sum is smaller
+	 * than <code>getAbsoluteSumFreq()</code>
 	 * @return the total frequency count.
 	 */
 	public long getSumFreq() {
@@ -439,6 +440,21 @@ public class Histogram {
 		Iterator<Long> iterator = freqTable.values().iterator();
 		while (iterator.hasNext())  {
 			result += iterator.next().longValue();
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the sum of all frequencies.
+	 * The absolute values of the bin counts are used.
+	 *
+	 * @return the total frequency count.
+	 */
+	public long getAbsoluteSumFreq() {
+		long result = 0;
+		Iterator<Long> iterator = freqTable.values().iterator();
+		while (iterator.hasNext())  {
+			result += Math.abs(iterator.next().longValue());
 		}
 		return result;
 	}
