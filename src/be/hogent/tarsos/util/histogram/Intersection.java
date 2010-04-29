@@ -41,7 +41,9 @@ public class Intersection implements HistogramCorrelation{
 		double biggestHistogramArea = Math.max(thisHistogram.getSumFreq(),otherHistogram.getSumFreq());
 
 		double correlation = 0.0;
-		if(matchingArea != 0.0) //avoids division by 0
+		
+		//avoid the dreaded division by 0
+		if(matchingArea != 0.0)
 			correlation = matchingArea / biggestHistogramArea;
 		return correlation;
 	}
