@@ -247,7 +247,7 @@ public class Yin {
 		//Seems to be correct but a float uses 4 bytes: confused programmer is confused.
 		float timeCalculationDivider = (float) (frameSize * frameRate / 2);
 		long floatsProcessed = 0;
-		yinInstance = new Yin(sampleRate,1024);
+		yinInstance = new Yin(sampleRate,2048);
 		int bufferStepSize = yinInstance.bufferSize - yinInstance.overlapSize;
 
 		//read full buffer
@@ -260,7 +260,7 @@ public class Yin {
 				detectedPitchHandler.handleDetectedPitch(time,pitch);
 
 			//slide buffer with predefined overlap
-			Yin.slideBuffer(afis, yinInstance.inputBuffer, yinInstance.overlapSize);
+			hasMoreBytes = Yin.slideBuffer(afis, yinInstance.inputBuffer, yinInstance.overlapSize);
 
 			floatsProcessed += bufferStepSize;
 		}
