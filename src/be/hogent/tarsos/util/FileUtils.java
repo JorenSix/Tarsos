@@ -307,23 +307,32 @@ public class FileUtils {
 			}
 		}
 
-		/**
-		 * <p>
-		 * Return a list of files in directory that satisfy pattern.
-		 * Pattern should be a valid regular expression not a 'unix
-		 * glob pattern' so in stead of <code>*.wav</code> you could
-		 * use <code>.*\.wav</code>
-		 * </p>
-		 * <p>
-		 * E.g. in a directory <code>home</code> with the files
-		 * <code>test.txt</code>, <code>blaat.wav</code>
-		 * and <code>foobar.wav</code> the pattern <code>.*\.wav</code>
-		 * matches <code>blaat.wav</code> and <code>foobar.wav</code>
-		 * </p>
-		 * @param directory
-		 * @param pattern
-		 * @return
-		 */
+	/**
+	 * <p>
+	 * Return a list of files in directory that satisfy pattern. Pattern should
+	 * be a valid regular expression not a 'unix glob pattern' so in stead of
+	 * <code>*.wav</code> you could use <code>.*\.wav</code>
+	 * </p>
+	 * <p>
+	 * E.g. in a directory <code>home</code> with the files
+	 * <code>test.txt</code>, <code>blaat.wav</code> and <code>foobar.wav</code>
+	 * the pattern <code>.*\.wav</code> matches <code>blaat.wav</code> and
+	 * <code>foobar.wav</code>
+	 * </p>
+	 *
+	 * @param directory
+	 *            a readable directory.
+	 * @param pattern
+	 *            a valid regular expression.
+	 * @return a list of filenames matching the pattern for directory.
+	 * @exception Error
+	 *                an error is thrown if the directory is not ... a
+	 *                directory.
+	 * @exception java.util.regex.PatternSyntaxException
+	 *                Unchecked exception thrown to indicate a syntax error in a
+	 *                regular-expression pattern.
+	 *
+	 */
 		public static List<String> glob(String directory, String pattern){
 			File dir = new File(directory);
 			Pattern p = Pattern.compile(pattern);
