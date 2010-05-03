@@ -26,10 +26,10 @@ import be.hogent.tarsos.midi.ReceiverSink;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetector;
-import be.hogent.tarsos.pitch.PitchFunctions;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.YinPitchDetection;
 import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
+import be.hogent.tarsos.pitch.Pitch.PitchConverter;
 import be.hogent.tarsos.pitch.Sample.PitchUnit;
 import be.hogent.tarsos.ui.PianoTestFrame;
 import be.hogent.tarsos.ui.VirtualKeyboard;
@@ -152,7 +152,7 @@ public class PlayAlong {
 
 
 		//align tuning to MIDI note 57, A3 or 220Hz.
-		Double referenceNote = PitchFunctions.convertHertzToAbsoluteCent(220.0);
+		Double referenceNote = PitchConverter.hertzToAbsoluteCent(220.0);
 		int referenceNoteMidiNumber = 57;
 
 		int midiNoteClosestToReference = -1;

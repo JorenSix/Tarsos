@@ -1,6 +1,8 @@
 package be.hogent.tarsos.apps;
 
-import be.hogent.tarsos.pitch.PitchFunctions;
+import be.hogent.tarsos.pitch.Pitch;
+import be.hogent.tarsos.pitch.Pitch.PitchConverter;
+import be.hogent.tarsos.pitch.Sample.PitchUnit;
 
 public class PitchTable {
 
@@ -11,13 +13,14 @@ public class PitchTable {
 		System.out.printf("%4s %10s %17s %14s %15s %10s\n","MIDI","NAME","FREQUENCY","ABS CENTS","REL CENTS","OCTAVE");
 		System.out.println("---------------------------------------------------------------------------");
 		for(int i = 0 ; i < 128 ; i++){
-			double frequency = 440 * Math.pow(2, (i - 69) / 12d );
-			double absoluteCents = PitchFunctions.convertHertzToAbsoluteCent(frequency);
-			double relativeCents = PitchFunctions.convertHertzToRelativeCent(frequency);
-			int octaveIndex = PitchFunctions.octaveIndex(frequency);
+			Pitch p = Pitch.getInstance(PitchUnit.MIDI_KEY, i);
+			double frequency = p.getPitch(PitchUnit.HERTZ);
+			double absoluteCents = p.getPitch(PitchUnit.ABSOLUTE_CENTS);
+			double relativeCents = p.getPitch(PitchUnit.RELATIVE_CENTS);
+			int octaveIndex = p.octaveIndex();
 			//sanity check
-			assert i == PitchFunctions.convertHertzToMidiKey(frequency);
-			System.out.printf("%4d %10s %14.4f Hz %14.0f  %14.0f %10d\n",i,PitchFunctions.noteName(frequency), frequency,absoluteCents,relativeCents,octaveIndex);
+			assert i == PitchConverter.hertzToMidiKey(frequency);
+			System.out.printf("%4d %10s %14.4f Hz %14.0f  %14.0f %10d\n",i,p.noteName(), frequency,absoluteCents,relativeCents,octaveIndex);
 		}
 	}
 }

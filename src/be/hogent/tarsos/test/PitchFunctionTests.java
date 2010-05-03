@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.junit.Test;
 
@@ -14,6 +13,7 @@ import be.hogent.tarsos.pitch.PitchFunctions;
 
 public class PitchFunctionTests {
 
+	/*
 	@Test
 	public void testConvertHertzToMidiCent(){
 		assertEquals(69, PitchFunctions.convertHertzToMidiCent(440.0),0.00000001);
@@ -34,7 +34,9 @@ public class PitchFunctionTests {
 			assertEquals(actual, expected,0.00000001);
 		}
 	}
+	*/
 
+	/*
 	@Test
 	public void testNoteNames(){
 		assertEquals("A-1",PitchFunctions.noteName(13.75));
@@ -52,6 +54,7 @@ public class PitchFunctionTests {
 		assertEquals("G9",PitchFunctions.noteName(80000));
 		assertEquals("D#4/Eb4",PitchFunctions.noteName(311.13));
 	}
+	*/
 
 	@Test
 	public void testConvertHertzToCent() {

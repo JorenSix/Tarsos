@@ -14,9 +14,8 @@ import org.apache.commons.math.stat.StatUtils;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import ptolemy.plot.Plot;
+import be.hogent.tarsos.pitch.Pitch.PitchConverter;
 import be.hogent.tarsos.pitch.Sample.PitchUnit;
-import be.hogent.tarsos.util.ConfKey;
-import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
 
@@ -61,29 +60,9 @@ public class PitchFunctions {
 		return convertedValues;
 	}
 
-	/**
-	 * Returns the name of the MIDI key corresponding to the given hertzValue.
-	 * The MIDI key is the key returned by the convertHertzToMidiKey method.
-	 *
-	 * @param hertzValue
-	 *            The pitch in Hz.
-	 * @return A note name like C3 or A4.
-	 */
-	public static String noteName(double hertzValue) {
-		String name = "";
-		String[] noteNames = { "Cx", "C#x/Dbx", "Dx", "D#x/Ebx", "Ex", "Fx",
-				"F#x/Gbx", "Gx", "G#x/Abx", "Ax", "A#x/Bbx", "Bx" };
-		int midiKey = convertHertzToMidiKey(hertzValue);
-		int noteIndex = (midiKey) % 12;
-		int x = (midiKey / 12) - 1;
-		name = noteNames[noteIndex].replace("x", "" + x);
-		return name;
-	}
 
-	public static int octaveIndex(double hertzValue) {
-		int midiKey = convertHertzToMidiKey(hertzValue);
-		return (midiKey / 12) - 1;
-	}
+
+
 
 	/**
 	 * Converts a list of pitches in Hertz to absolute cents.
@@ -93,74 +72,28 @@ public class PitchFunctions {
 	private static void convertHertzToAbsoluteCent(List<Double> convertedValues) {
 		for (int i = 0; i < convertedValues.size(); i++) {
 			Double valueInHertz = convertedValues.get(i);
-			convertedValues.set(i, convertHertzToAbsoluteCent(valueInHertz));
+			convertedValues.set(i, PitchConverter.hertzToAbsoluteCent(valueInHertz));
 		}
 	}
 
-	private static final double reference_frequency = Configuration
-			.getDouble(ConfKey.absolute_cents_reference_frequency);// C-1 =
-																	// 16.35 Hz
-	private static final double log_two = Math.log(2.0);
 
-	/**
-	 * The reference frequency is configured. This is 16.35Hz is C0 on a piano
-	 * keyboard with A4 tuned to 440 Hz. This means that 0 cents is C0; 1200 is
-	 * C1; 2400 is C2; ... also -1200 cents is C-1
-	 *
-	 * @param hertzValue
-	 * @return the converted value using the configured reference frequency
-	 */
-	public static double convertHertzToAbsoluteCent(Double hertzValue) {
-		double pitchValueInAbsoluteCent = 0.0;
-		if (hertzValue != 0)
-			pitchValueInAbsoluteCent = 1200
-					* Math.log(hertzValue / reference_frequency) / log_two;
-		return pitchValueInAbsoluteCent;
-	}
 
-	/**
-	 * Converts a frequency in Hz to a MIDI CENT value using
-	 * <code>(12 × log2 (f / 440)) + 69</code> <br>
-	 * E.g.<br>
-	 * <code>69.168 MIDI CENTS = MIDI NOTE 69  + 16,8 cents</code><br>
-	 * <code>69.168 MIDI CENTS = 440Hz + x Hz</code>
-	 *
-	 * @param hertzValue
-	 *            the pitch in Hertz
-	 * @return the pitch in midi cents
-	 */
-	public static double convertHertzToMidiCent(Double hertzValue) {
-		double pitchValueInMidiCent = 0.0;
-		if (hertzValue != 0)
-			pitchValueInMidiCent = (12 * Math.log(hertzValue / 440) / log_two) + 69;
-		return pitchValueInMidiCent;
-	}
+
 
 	private static void convertHertzToMidiCent(List<Double> convertedValues) {
 		for (int i = 0; i < convertedValues.size(); i++) {
 			Double valueInHertz = convertedValues.get(i);
-			convertedValues.set(i, convertHertzToMidiCent(valueInHertz));
+			convertedValues.set(i, PitchConverter.hertzToMidiCent(valueInHertz));
 		}
 	}
 
-	/**
-	 * @param hertzValue
-	 * @return
-	 */
-	public static int convertHertzToMidiKey(Double hertzValue) {
-		int midiKey = (int) Math.round(convertHertzToMidiCent(hertzValue));
-		if (midiKey > 127)
-			midiKey = 127;
-		else if (midiKey < 0)
-			midiKey = 0;
-		return midiKey;
-	}
+
 
 	private static void convertHertzToMidiKey(List<Double> convertedValues) {
 		for (int i = 0; i < convertedValues.size(); i++) {
 			Double valueInHertz = convertedValues.get(i);
 			convertedValues
-					.set(i, (double) convertHertzToMidiKey(valueInHertz));
+					.set(i, (double) PitchConverter.hertzToMidiKey(valueInHertz));
 		}
 	}
 
@@ -174,26 +107,12 @@ public class PitchFunctions {
 	private static void convertHertzToRelativeCent(List<Double> convertedValues) {
 		for (int i = 0; i < convertedValues.size(); i++) {
 			Double hertzValue = convertedValues.get(i);
-			Double pitchValueInCentFoldedToOneOctave = convertHertzToRelativeCent(hertzValue);
+			Double pitchValueInCentFoldedToOneOctave = PitchConverter.hertzToRelativeCent(hertzValue);
 			convertedValues.set(i, pitchValueInCentFoldedToOneOctave);
 		}
 	}
 
-	/**
-	 * Folds the pitch values to one octave. E.g. 1203 becomes 3 and 956 remains
-	 * 956
-	 *
-	 * @param pitchValuesInCent
-	 *            a list of double values in cent
-	 */
-	public static double convertHertzToRelativeCent(double hertzValue) {
-		double absoluteCentValue = convertHertzToAbsoluteCent(hertzValue);
-		// make absoluteCentValue positive
-		absoluteCentValue = absoluteCentValue >= 0 ? absoluteCentValue : Math
-				.abs(1200 + absoluteCentValue);
-		// so it can be folded to one octave
-		return absoluteCentValue % 1200.0;
-	}
+
 
 	/**
 	 * Removes all frequencies that are not in the specified band. The remaining

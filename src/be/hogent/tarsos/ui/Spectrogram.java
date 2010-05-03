@@ -30,8 +30,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import be.hogent.tarsos.apps.PlayAlong;
-import be.hogent.tarsos.pitch.PitchFunctions;
+import be.hogent.tarsos.pitch.Pitch;
 import be.hogent.tarsos.pitch.Yin;
+import be.hogent.tarsos.pitch.Pitch.PitchConverter;
+import be.hogent.tarsos.pitch.Sample.PitchUnit;
 import be.hogent.tarsos.util.FFT;
 
 import com.sun.media.sound.AudioFloatInputStream;
@@ -150,9 +152,9 @@ public class Spectrogram extends JComponent {
 		if(frequency != 0 && frequency > minFrequency && frequency < maxFrequency ){
 			double binEstimate = 0;
 			if(logaritmic){
-				minFrequency = PitchFunctions.convertHertzToAbsoluteCent(minFrequency);
-				maxFrequency = PitchFunctions.convertHertzToAbsoluteCent(maxFrequency);
-				frequency = PitchFunctions.convertHertzToAbsoluteCent(frequency*2);
+				minFrequency = PitchConverter.hertzToAbsoluteCent(minFrequency);
+				maxFrequency = PitchConverter.hertzToAbsoluteCent(maxFrequency);
+				frequency = PitchConverter.hertzToAbsoluteCent(frequency*2);
 				binEstimate = (frequency - minFrequency) / maxFrequency  * H;
 			} else {
 				binEstimate = (frequency - minFrequency) / maxFrequency * H;
@@ -251,12 +253,12 @@ public class Spectrogram extends JComponent {
 	}
 
 	private void pitchToMidiOut(double pitch){
-		double midiCentValue = PitchFunctions.convertHertzToMidiCent(pitch);
+		double midiCentValue = PitchConverter.hertzToMidiCent(pitch);
 		int newKeyDown = -1;
 		//'musical' pitch detected ?
 		if( Math.abs(midiCentValue - (int) midiCentValue) < 0.3  && midiCentValue < 128 && midiCentValue >= 0){
 			 newKeyDown = (int) midiCentValue;
-			 lastDetectedNote = "Name: " + PitchFunctions.noteName(pitch) + "\nFrequency: " + ((int) pitch) + "Hz \t" + " MIDI note:" + PitchFunctions.convertHertzToMidiCent(pitch);
+			 lastDetectedNote = "Name: " + Pitch.getInstance(PitchUnit.HERTZ,pitch).noteName() + "\nFrequency: " + ((int) pitch) + "Hz \t" + " MIDI note:" + PitchConverter.hertzToMidiCent(pitch);
 		}
 		//if no pitch detected
 		//send note off
