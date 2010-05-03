@@ -219,6 +219,8 @@ public class Histogram {
 			assert count != null: "All key values should be initialized, " + key + " is not.";
 			if(count != null)
 				freqTable.put(key, Long.valueOf(count.longValue() + 1));
+		}else{
+			log.warning("Using values below zero in is not tested, it can yield unexpected results. Values below zero are ignored!");
 		}
 		return this;
 	}
