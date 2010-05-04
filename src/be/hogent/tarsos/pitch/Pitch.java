@@ -1,6 +1,5 @@
 package be.hogent.tarsos.pitch;
 
-import be.hogent.tarsos.pitch.Sample.PitchUnit;
 
 /**
  * A class representing pitch. Can be used to convert pitch units or to base
