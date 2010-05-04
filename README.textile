@@ -3,7 +3,9 @@ h1. Tarsos
 Currently Tarsos is a collection of Java classes to create, compare
 and process pitch-frequency data using histograms. A Pure JAVA 
 pitch tracker (YIN) is also included. The histogram class and histogram
-correlation classes are also reusable.  
+correlation classes are also reusable.
+
+More information can be found on the "Tarsos website":http://tarsos.0110.be  
 
 h2. Credits
 
