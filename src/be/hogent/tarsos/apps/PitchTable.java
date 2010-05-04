@@ -20,7 +20,7 @@ public class PitchTable {
 			int octaveIndex = p.octaveIndex();
 			//sanity check
 			assert i == PitchConverter.hertzToMidiKey(frequency);
-			System.out.printf("%4d %10s %14.4f Hz %14.0f  %14.0f %10d\n",i,p.noteName(), frequency,absoluteCents,relativeCents,octaveIndex);
+			System.out.printf("%4d %10s %14.5f Hz %14.0f  %14.0f %10d\n",i,p.noteName(), frequency,absoluteCents,relativeCents,octaveIndex);
 		}
 	}
 }
