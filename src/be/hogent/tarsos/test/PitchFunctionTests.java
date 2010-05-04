@@ -12,29 +12,6 @@ import be.hogent.tarsos.pitch.PitchFunctions;
 
 
 public class PitchFunctionTests {
-
-	/*
-	@Test
-	public void testNoteNames(){
-		assertEquals("A-1",PitchFunctions.noteName(13.75));
-		assertEquals("A0",PitchFunctions.noteName(27.5));
-		assertEquals("A1",PitchFunctions.noteName(55.0));
-		assertEquals("A2",PitchFunctions.noteName(110.0));
-		assertEquals("A3",PitchFunctions.noteName(220.0));
-		assertEquals("A4",PitchFunctions.noteName(440.0));
-		assertEquals("A4",PitchFunctions.noteName(435.0));
-		assertEquals("A4",PitchFunctions.noteName(441.0));
-		assertEquals("A5",PitchFunctions.noteName(880.0));
-		assertEquals("A6",PitchFunctions.noteName(1760.0));
-		assertEquals("C-1",PitchFunctions.noteName(0.05));
-		assertEquals("C-1",PitchFunctions.noteName(8.1785));
-		assertEquals("G9",PitchFunctions.noteName(80000));
-		assertEquals("D#4/Eb4",PitchFunctions.noteName(311.13));
-	}
-	*/
-
-
-
 	@Test
 	public void testFoldPitchValuesInCentToOneOctave() {
 		List<Double> pitchValuesInCent = new ArrayList<Double>();

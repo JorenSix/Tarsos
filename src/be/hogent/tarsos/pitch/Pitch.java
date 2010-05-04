@@ -81,6 +81,7 @@ public class Pitch {
 	 */
 	public String noteName() {
 		String name = "";
+		//The x is replaced by the octave index
 		String[] noteNames = { "Cx", "C#x/Dbx", "Dx", "D#x/Ebx", "Ex", "Fx",
 				"F#x/Gbx", "Gx", "G#x/Abx", "Ax", "A#x/Bbx", "Bx" };
 		int midiKey = PitchConverter.hertzToMidiKey(pitchInHertz);
@@ -88,6 +89,18 @@ public class Pitch {
 		int octaveIndex = octaveIndex();
 		name = noteNames[noteIndex].replace("x", "" + octaveIndex);
 		return name;
+	}
+
+	/**
+	 * A pitch is seen as a western musical pitch if it is less than
+	 * 20 cents removed from the 'correct' pitch. The correct pitch
+	 * is tuned using A4 = 440Hz.
+	 * @return True if the pitch is western and musical, false otherwise.
+	 */
+	public boolean isWesternMusicalPitch(){
+		double midiCent = getPitch(PitchUnit.MIDI_CENT);
+		double midiKey = getPitch(PitchUnit.MIDI_KEY);
+		return Math.abs(midiCent - (int) midiKey) < 0.2;
 	}
 
 	/**
@@ -125,5 +138,7 @@ public class Pitch {
 		}
 		return new Pitch(hertzValue);
 	}
+
+
 
 }
