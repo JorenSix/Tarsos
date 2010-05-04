@@ -15,29 +15,6 @@ public class PitchFunctionTests {
 
 	/*
 	@Test
-	public void testConvertHertzToMidiCent(){
-		assertEquals(69, PitchFunctions.convertHertzToMidiCent(440.0),0.00000001);
-		assertEquals(81, PitchFunctions.convertHertzToMidiCent(880.0),0.00000001);
-		Random r = new Random();
-		for(int i=0 ; i < 10000 ; i++){
-			//random test and reference pitch +- between 20 and 20kHz
-			double referencePitch = r.nextDouble() * 20000 + 20;
-			double testPitch = r.nextDouble() * 20000 + 20;
-			//calculate the difference in cents between the pitches
-			double absoluteCentValueReference = PitchFunctions.convertHertzToAbsoluteCent(referencePitch);
-			double absoluteCentValueTest = PitchFunctions.convertHertzToAbsoluteCent(testPitch);
-			double differenceInCents = absoluteCentValueTest - absoluteCentValueReference;
-			//calculate the actual and expected value
-			//The reference pitch converted to midicents added to the difference is expected
-			double expected = PitchFunctions.convertHertzToMidiCent(referencePitch) + differenceInCents / 100;
-			double actual = PitchFunctions.convertHertzToMidiCent(testPitch);
-			assertEquals(actual, expected,0.00000001);
-		}
-	}
-	*/
-
-	/*
-	@Test
 	public void testNoteNames(){
 		assertEquals("A-1",PitchFunctions.noteName(13.75));
 		assertEquals("A0",PitchFunctions.noteName(27.5));
@@ -56,23 +33,7 @@ public class PitchFunctionTests {
 	}
 	*/
 
-	@Test
-	public void testConvertHertzToCent() {
-		double reference_frequency = 27.5 * Math.pow(2.0,0.25);	//C1
-		List<Double> pitchValuesInHertz = new ArrayList<Double>();
-		pitchValuesInHertz.add(reference_frequency);
-		pitchValuesInHertz.add(reference_frequency - 10);
-		pitchValuesInHertz.add(reference_frequency + 10);
-		pitchValuesInHertz.add(261.626); //C4
 
-		//List<Double> pitchValuesInCent = PitchFunctions.convertHertzToCent(pitchValuesInHertz);
-		/*
-		assertEquals(0, pitchValuesInCent.get(0),0.01);
-		assertTrue(0 > pitchValuesInCent.get(1));
-		assertTrue(0 < pitchValuesInCent.get(2));
-		assertEquals(0, pitchValuesInCent.get(3) % 1200,0.01);
-		*/
-	}
 
 	@Test
 	public void testFoldPitchValuesInCentToOneOctave() {
