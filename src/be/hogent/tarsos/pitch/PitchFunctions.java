@@ -14,7 +14,6 @@ import org.apache.commons.math.stat.StatUtils;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import ptolemy.plot.Plot;
-import be.hogent.tarsos.pitch.Pitch.PitchConverter;
 import be.hogent.tarsos.pitch.Sample.PitchUnit;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.Histogram;

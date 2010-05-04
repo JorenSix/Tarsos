@@ -1,7 +1,7 @@
 package be.hogent.tarsos.apps;
 
 import be.hogent.tarsos.pitch.Pitch;
-import be.hogent.tarsos.pitch.Pitch.PitchConverter;
+import be.hogent.tarsos.pitch.PitchConverter;
 import be.hogent.tarsos.pitch.Sample.PitchUnit;
 
 public class PitchTable {
