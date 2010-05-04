@@ -233,6 +233,8 @@ public class Histogram {
 	 * Limits the use of the histogram class for values (class widths) smaller
 	 * than 1 / {@link Histogram#PRECISION_FACTOR}
 	 * XXX This is dangerous. Alternatives to using doubles: casting to BigDecimal internally?
+	 * BigDecimal has ordering problems in a map. See
+	 * http://java.sun.com/j2se/1.5.0/docs/api/java/math/BigDecimal.html.
 	 * @param value to prevent errors for.
 	 * @return a rounded value to
 	 */
