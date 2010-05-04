@@ -25,6 +25,8 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 public class ToneScaleMatcher {
 
+	private ToneScaleMatcher(){}
+
 	public static void main(String... args){
 		LongOpt[] longopts = new LongOpt[3];
 		longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');

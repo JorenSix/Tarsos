@@ -14,6 +14,7 @@ import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
  */
 public class PeakDetector {
 
+	private PeakDetector(){}
 
 	/**
 	 * Create a histogram with peak information. Instead of triangular peaks it creates a histogram (with the

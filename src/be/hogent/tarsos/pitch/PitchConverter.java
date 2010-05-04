@@ -9,6 +9,9 @@ import be.hogent.tarsos.util.Configuration;
  * @author Joren Six
  */
 public class PitchConverter {
+
+	private PitchConverter(){}
+
 	/**
 	 * C-1 = 16.35 Hz
 	 */

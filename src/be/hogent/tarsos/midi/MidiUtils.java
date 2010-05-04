@@ -24,6 +24,8 @@ import javax.sound.midi.SysexMessage;
  */
 public class MidiUtils {
 
+	private MidiUtils(){}
+
 	/**
 	 * Enables a tuning preset
 	 *
@@ -102,6 +104,7 @@ public class MidiUtils {
 	private static final byte[] EOX = new byte[] { (byte) 0xF7 };
 
 	public static class GeneralMidiMessages {
+		private GeneralMidiMessages(){}
 
 		private static final byte[] GENERAL_MIDI_MESSAGES = new byte[] { (byte) 0x09 };
 

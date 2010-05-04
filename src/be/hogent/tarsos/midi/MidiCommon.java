@@ -49,6 +49,7 @@ import javax.sound.midi.MidiUnavailableException;
 */
 public class MidiCommon
 {
+	private MidiCommon(){}
 
 	public static void listDevices(boolean bForInput,
 					      boolean bForOutput)
