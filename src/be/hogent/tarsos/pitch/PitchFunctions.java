@@ -135,8 +135,9 @@ public class PitchFunctions {
      */
     public static Double median(List<Double> list) {
         int size = list.size();
-        if (list == null || size == 0)
+        if (list == null || size == 0) {
             throw new Error("Mean of an empty list is undefined");
+        }
 
         Collections.sort(list);
         double median = 0.0;
@@ -179,8 +180,9 @@ public class PitchFunctions {
      */
     public static List<Double> medianFilter(List<Double> listToFilter, int n) {
 
-        if (n % 2 == 0)
+        if (n % 2 == 0) {
             throw new Error("Medianfilter not implemented for even n values");
+        }
 
         List<Double> filteredList = new ArrayList<Double>();
 
@@ -242,7 +244,8 @@ public class PitchFunctions {
         double exp = -1.0 / (2.0 * var);
         for (int i = m; i < numWeights; i++) {
             double del = i - m;
-            weights[i] = weights[numWeights - 1 - i] = gain * Math.exp(exp * del * del);
+            weights[i] = gain * Math.exp(exp * del * del);
+            weights[numWeights - 1 - i] = weights[i];
         }
 
         // Clear the band total count for the smoothed histogram.
@@ -306,8 +309,9 @@ public class PitchFunctions {
         // double firstFactor = Math.pow(parameter/Math.PI, 0.5) *
         // Math.pow(Math.E, -1 * parameter);
 
-        for (int j = 0; j < windowSize / 2; j++)
+        for (int j = 0; j < windowSize / 2; j++) {
             filteredList.add(0.0);
+        }
 
         for (int i = windowSize / 2; i < listToFilter.size() - windowSize / 2; i++) {
             double sumValues = 0;
@@ -324,8 +328,9 @@ public class PitchFunctions {
             filteredList.add(newValue);
         }
 
-        for (int j = 0; j < windowSize / 2; j++)
+        for (int j = 0; j < windowSize / 2; j++) {
             filteredList.add(0.0);
+        }
 
         return filteredList;
     }
@@ -383,7 +388,7 @@ public class PitchFunctions {
     public static void exportFrequencyTable(Histogram histogram, String fileName, double start, double stop) {
         StringBuilder sb = new StringBuilder();
         for (double current = start + histogram.getClassWidth() / 2; current <= stop; current += histogram
-                .getClassWidth()) {
+        .getClassWidth()) {
             double count = histogram.getCount(current);
             long cumFreq = histogram.getCumFreq(current);
             double derivative = (current + histogram.getClassWidth() > stop) ? 0 : (histogram
@@ -415,7 +420,7 @@ public class PitchFunctions {
         double[] values = new double[histogram.getNumberOfClasses()];
         int i = 0;
         for (double current = start + histogram.getClassWidth() / 2; current <= stop; current += histogram
-                .getClassWidth()) {
+        .getClassWidth()) {
 
             h.addPoint(0, current, histogram.getCount(current), !first);
             values[i] = histogram.getCount(current);

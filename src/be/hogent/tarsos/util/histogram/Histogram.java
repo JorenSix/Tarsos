@@ -113,9 +113,10 @@ public class Histogram implements Cloneable {
      */
     public Histogram(double start, double stop, int numberOfClasses, boolean wraps,
             boolean ignoreValuesOutsideRange) {
-        if (stop <= start)
+        if (stop <= start) {
             throw new IllegalArgumentException("The stopping value (" + stop
                     + ") should be bigger than the starting value (" + start + ") .");
+        }
 
         this.classWidth = preventRoundingErrors((stop - start) / numberOfClasses);
         this.start = start;
@@ -127,8 +128,9 @@ public class Histogram implements Cloneable {
         double lastKey = stop - getClassWidth() / 2;
 
         for (double current = start + getClassWidth() / 2; wraps ? current < lastKey : current <= lastKey; current = preventRoundingErrors(current
-                + getClassWidth()))
+                + getClassWidth())) {
             freqTable.put(current, 0l);
+        }
 
         this.numberOfClasses = freqTable.keySet().size();
     }
@@ -264,11 +266,12 @@ public class Histogram implements Cloneable {
             double key = valueToKey(value);
             Long count = freqTable.get(key);
             assert count != null : "All key values should be initialized, " + key + " is not.";
-            if (count != null)
+            if (count != null) {
                 freqTable.put(key, Long.valueOf(count.longValue() + 1));
+            }
         } else {
             log
-                    .warning("Using values below zero in is not tested, it can yield unexpected results. Values below zero are ignored!");
+            .warning("Using values below zero in is not tested, it can yield unexpected results. Values below zero are ignored!");
         }
         return this;
     }
@@ -303,13 +306,15 @@ public class Histogram implements Cloneable {
     private double valueToKey(double value) {
         // TODO remove the value below zero limitation
         // by changing the wraps modulo calculation and test
-        if (value < 0)
+        if (value < 0) {
             throw new IllegalArgumentException("Currently no values below zero are accepted");
+        }
 
         if (wraps) {
             double interval = stop - start;
-            while (value < freqTable.firstKey())
+            while (value < freqTable.firstKey()) {
                 value = preventRoundingErrors(value + interval);
+            }
             value = preventRoundingErrors(start + ((value - start) % interval));
         }
 
@@ -451,12 +456,14 @@ public class Histogram implements Cloneable {
         }
 
         // v is less than first value
-        if (v.compareTo(freqTable.firstKey()) < 0)
+        if (v.compareTo(freqTable.firstKey()) < 0) {
             return 0;
+        }
 
         // v is greater than the last key
-        if (v.compareTo(freqTable.lastKey()) >= 0)
+        if (v.compareTo(freqTable.lastKey()) >= 0) {
             return getSumFreq();
+        }
 
         // the frequency of this key
         long result = 0;
@@ -629,8 +636,9 @@ public class Histogram implements Cloneable {
             while (iter.hasNext()) {
                 Double value = iter.next();
                 outBuffer.append(value).append("\t").append("\t|");
-                for (int i = 0; i < getPct(value) * 100; i++)
+                for (int i = 0; i < getPct(value) * 100; i++) {
                     outBuffer.append('x');
+                }
                 outBuffer.append('\n');
             }
             outBuffer.append('\n');
@@ -727,8 +735,9 @@ public class Histogram implements Cloneable {
      */
     public Histogram baselineHistogram() {
         long smallestValue = Long.MAX_VALUE;
-        for (double key : freqTable.keySet())
+        for (double key : freqTable.keySet()) {
             smallestValue = Math.min(getCount(key), smallestValue);
+        }
         long valueToAdd = (long) -1.0 * smallestValue;
         return addToEachBin(valueToAdd);
     }
@@ -752,8 +761,9 @@ public class Histogram implements Cloneable {
         assert freqTable.keySet().size() == other.keySet().size();
         assert start == other.start;
         assert stop == other.stop;
-        for (double key : freqTable.keySet())
+        for (double key : freqTable.keySet()) {
             this.setCount(key, this.getCount(key) + other.getCount(key));
+        }
         return this;
     }
 
@@ -804,8 +814,9 @@ public class Histogram implements Cloneable {
      * @return histogram with each bin value multiplied by the factor.
      */
     public Histogram multiply(double factor) {
-        for (double key : this.freqTable.keySet())
+        for (double key : this.freqTable.keySet()) {
             this.setCount(key, Math.round(this.getCount(key) * factor));
+        }
         return this;
     }
 
@@ -821,8 +832,9 @@ public class Histogram implements Cloneable {
      * @return Histogram with each bin count raised with exponent.
      */
     public Histogram raise(double exponent) {
-        for (double key : this.freqTable.keySet())
+        for (double key : this.freqTable.keySet()) {
             this.setCount(key, Math.round(Math.pow(this.getCount(key), exponent)));
+        }
         return this;
     }
 
@@ -834,8 +846,9 @@ public class Histogram implements Cloneable {
     @Override
     public Histogram clone() {
         Histogram clone = new Histogram(this);
-        for (double key : this.freqTable.keySet())
+        for (double key : this.freqTable.keySet()) {
             clone.setCount(key, this.getCount(key));
+        }
         return clone;
     }
 
@@ -1052,7 +1065,8 @@ public class Histogram implements Cloneable {
         double exp = -1.0 / (2.0 * var);
         for (int i = m; i < numWeights; i++) {
             double del = i - m;
-            weights[i] = weights[numWeights - 1 - i] = gain * Math.exp(exp * del * del);
+            weights[i] = gain * Math.exp(exp * del * del);
+            weights[numWeights - 1 - i] = weights[i];
         }
 
         // Clear the band total count for the smoothed histogram.
@@ -1123,9 +1137,10 @@ public class Histogram implements Cloneable {
      * @return the correlation between this histogram with another histogram.
      */
     public double correlation(Histogram otherHistogram, CorrelationMeasure correlationMeasure) {
-        if (otherHistogram.classWidth != classWidth)
+        if (otherHistogram.classWidth != classWidth) {
             throw new IllegalArgumentException(
-                    "Computation of correlation only correct when the classwidth of both histograms are the same");
+            "Computation of correlation only correct when the classwidth of both histograms are the same");
+        }
         return correlationWithDisplacement(0, otherHistogram, correlationMeasure);
 
     }
@@ -1158,8 +1173,9 @@ public class Histogram implements Cloneable {
                 optimalDisplacement = currentDisplacement;
             }
         }
-        if (optimalDisplacement > getNumberOfClasses() / 2.0)
+        if (optimalDisplacement > getNumberOfClasses() / 2.0) {
             optimalDisplacement = optimalDisplacement - getNumberOfClasses();
+        }
 
         return optimalDisplacement;
     }
@@ -1203,8 +1219,9 @@ public class Histogram implements Cloneable {
     public void export(String fileName) {
         StringBuilder sb = new StringBuilder();
         sb.append("key;value\n");
-        for (double key : keySet())
+        for (double key : keySet()) {
             sb.append(key).append(";").append(getCount(key)).append("\n");
+        }
         FileUtils.writeFile(sb.toString(), fileName);
     }
 }
