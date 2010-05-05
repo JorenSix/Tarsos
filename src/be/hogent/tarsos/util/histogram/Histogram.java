@@ -35,7 +35,7 @@ import be.hogent.tarsos.util.SimplePlot;
  * </p>
  * @author Joren Six
  */
-public class Histogram {
+public class Histogram implements Cloneable {
 	private static final Logger log = Logger.getLogger(Histogram.class.getName());
 
 	/**
