@@ -79,8 +79,9 @@ public class MidiSequenceBuilder {
         int bendFactorInMidi = 0;
         // 16384 values for 400 cents
         bendFactorInMidi = new Float((deviationInCents * (16384.0 / 400.0))).intValue();
-        if (bendFactorInMidi < -8191)
+        if (bendFactorInMidi < -8191) {
             bendFactorInMidi = -8191;
+        }
         return createPitchBendEvent(bendFactorInMidi, (long) startTick);
     }
 
@@ -187,8 +188,9 @@ public class MidiSequenceBuilder {
 
         // -8191 <= bendfactor <= +8192
         bendFactor += 8191;
-        if (0 > bendFactor || bendFactor >= 16384)
+        if (0 > bendFactor || bendFactor >= 16384) {
             throw new IllegalArgumentException("bendFactor invalid:  -8191 <= bendFactor <= +8192");
+        }
 
         String binary = toBinaryString(bendFactor);
         int msb = Integer.parseInt(binary.substring(0, 7), 2);
@@ -205,8 +207,9 @@ public class MidiSequenceBuilder {
 
     private static String toBinaryString(int i) {
         String binary = Integer.toBinaryString(i);
-        while (binary.length() < 14)
+        while (binary.length() < 14) {
             binary = "0" + binary;
+        }
         return binary;
     }
 
@@ -217,7 +220,6 @@ public class MidiSequenceBuilder {
                     nKey, nVelocity);
         } catch (InvalidMidiDataException e) {
             e.printStackTrace();
-            System.exit(1);
         }
         MidiEvent event = new MidiEvent(message, lTick);
         return event;
