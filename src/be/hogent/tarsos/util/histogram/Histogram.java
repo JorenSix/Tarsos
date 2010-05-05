@@ -129,7 +129,7 @@ public class Histogram implements Cloneable {
 
         for (double current = start + getClassWidth() / 2; wraps ? current < lastKey : current <= lastKey; current = preventRoundingErrors(current
                 + getClassWidth())) {
-            freqTable.put(current, 0l);
+            freqTable.put(current, 0L);
         }
 
         this.numberOfClasses = freqTable.keySet().size();

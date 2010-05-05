@@ -39,7 +39,7 @@ public class AmbitusHistogram extends Histogram {
 
         // initialize the list of tone scales
         for (int value = Configuration.getInt(ConfKey.ambitus_start); value < Configuration
-                .getInt(ConfKey.ambitus_stop); value += 1200) {
+        .getInt(ConfKey.ambitus_stop); value += 1200) {
             toneScaleHistogramPerOctave.add(new ToneScaleHistogram());
         }
 
@@ -50,8 +50,9 @@ public class AmbitusHistogram extends Histogram {
         super.add(value);
         // keep a histogram for each octave
         int octaveIndex = (int) (value / 1200);
-        if (toneScaleHistogramPerOctave.size() > octaveIndex && octaveIndex >= 0)
+        if (toneScaleHistogramPerOctave.size() > octaveIndex && octaveIndex >= 0) {
             toneScaleHistogramPerOctave.get(octaveIndex).add(value);
+        }
         return this;
     }
 
@@ -79,8 +80,9 @@ public class AmbitusHistogram extends Histogram {
     private List<Integer> octavesOrderedByEnergy() {
         List<Integer> octaves = new ArrayList<Integer>();
 
-        for (int i = 0; i < toneScaleHistogramPerOctave.size(); i++)
+        for (int i = 0; i < toneScaleHistogramPerOctave.size(); i++) {
             octaves.add(i);
+        }
 
         Collections.sort(octaves, new Comparator<Integer>() {
             @Override
@@ -151,8 +153,9 @@ public class AmbitusHistogram extends Histogram {
                 ToneScaleHistogram currentToneScaleHistogram = toneScaleHistogramPerOctave.get(dataset);
                 for (double key : currentToneScaleHistogram.keySet()) {
                     long count = currentToneScaleHistogram.getCount(key);
-                    for (int i = 0; i < dataset; i++)
+                    for (int i = 0; i < dataset; i++) {
                         count += toneScaleHistogramPerOctave.get(i).getCount(key);
+                    }
                     h.addPoint(dataset, key, count, true);
                 }
             }
@@ -187,17 +190,21 @@ public class AmbitusHistogram extends Histogram {
         boolean valuesStarted = false;
         for (double key : keySet()) {
             long count = getCount(key);
-            if (count != 0l)
+            if (count != 0l) {
                 stoppingValue = key;
-            if (!valuesStarted && count != 0l)
+            }
+            if (!valuesStarted && count != 0L) {
                 valuesStarted = true;
-            if (!valuesStarted)
+            }
+            if (!valuesStarted) {
                 startingValue = key;
+            }
         }
         plot.setXRange(startingValue, stoppingValue);
         for (double current : keySet()) {
-            if (current >= startingValue && current <= stoppingValue)
+            if (current >= startingValue && current <= stoppingValue) {
                 plot.addData(0, current, getCount(current));
+            }
         }
         plot.save(fileName);
     }
