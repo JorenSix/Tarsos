@@ -96,7 +96,7 @@ public class AubioPitchDetection implements PitchDetector {
 
         if (!FileUtils.exists(csvFileName)) {
             String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.parameterName
-                    + "  -s -70  -i " + file.transcodedPath();
+            + "  -s -70  -i " + file.transcodedPath();
             Execute.command(command, csvFileName);
         }
 
@@ -120,6 +120,8 @@ public class AubioPitchDetection implements PitchDetector {
                 break;
             case SCHMITT:
                 sample.source = SampleSource.AUBIO_SCHMITT;
+                break;
+            default:
                 break;
             }
             samples.add(sample);

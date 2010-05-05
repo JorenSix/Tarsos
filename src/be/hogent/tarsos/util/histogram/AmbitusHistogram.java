@@ -190,7 +190,7 @@ public class AmbitusHistogram extends Histogram {
         boolean valuesStarted = false;
         for (double key : keySet()) {
             long count = getCount(key);
-            if (count != 0l) {
+            if (count != 0L) {
                 stoppingValue = key;
             }
             if (!valuesStarted && count != 0L) {

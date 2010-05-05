@@ -21,8 +21,8 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
     private static final long serialVersionUID = 3155583325975723313L;
 
     /**
-	 *
-	 */
+     *
+     */
     public VirtualKeyboard19() {
         super(19, 19 * 5); // 19*5 = 95
         mappedKeys = "qézs\"edrf(tg§yhèujikçolàp";
@@ -38,18 +38,24 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
         int oct = wn / 7;
         int n = oct * 19;
         int nb = wn % 7;
-        if (nb == 1)
+        if (nb == 1) {
             n += 3;
-        if (nb == 2)
+        }
+        if (nb == 2) {
             n += 6;
-        if (nb == 3)
+        }
+        if (nb == 3) {
             n += 8;
-        if (nb == 4)
+        }
+        if (nb == 4) {
             n += 11;
-        if (nb == 5)
+        }
+        if (nb == 5) {
             n += 14;
-        if (nb == 6)
+        }
+        if (nb == 6) {
             n += 17;
+        }
         if (y < h * 4.0 / 7.0) {
             int xb = x - (int) (oct * 7 * nw);
             float cx = 0;
@@ -71,18 +77,21 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
                         if (xb > cstart && xb < cend) {
                             if (y > (h * 4.0 / 7.0) / 2.0) {
                                 return oct * 19 + b + 1;
-                            } else
+                            } else {
                                 return oct * 19 + b;
+                            }
                         }
                     }
                 }
             }
 
         }
-        if (n < 0)
+        if (n < 0) {
             n = 0;
-        if (n > 127)
+        }
+        if (n > 127) {
             n = 127;
+        }
         return n;
     }
 
@@ -104,15 +113,16 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
             boolean a = !(b == 0 || b == 3 || b == 6 || b == 8 || b == 11 || b == 14 || b == 17);
             if (!a) {
                 rect.setRect(cx, 0, nw, h);
-                if (isKeyDown(i))
+                if (isKeyDown(i)) {
                     g2.setColor(new Color(0.8f, 0.8f, 0.95f));
-                else
+                } else {
                     g2.setColor(Color.WHITE);
+                }
                 g2.fill(rect);
                 g2.setColor(Color.BLACK);
                 g2.draw(rect);
 
-                if (hasFocus() && (i >= lowestAssignedKey))
+                if (hasFocus() && (i >= lowestAssignedKey)) {
                     if (i >= lowestAssignedKey) {
                         if (i - lowestAssignedKey < mappedKeys.length()) {
                             g2.setColor(Color.GRAY);
@@ -120,6 +130,7 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
                             g2.drawString("" + k, cx + 2, h - 4);
                         }
                     }
+                }
 
                 cx += nw;
             }
@@ -138,15 +149,16 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
 
                 if (b == 7 || b == 18) {
                     rect.setRect(cx - (black_note_width / 2), 0, black_note_width, h * 4.0 / 7.0);
-                    if (isKeyDown(i))
+                    if (isKeyDown(i)) {
                         g2.setColor(new Color(0.8f, 0.8f, 0.95f));
-                    else
+                    } else {
                         g2.setColor(Color.BLACK);
+                    }
                     g2.fill(rect);
                     g2.setColor(Color.BLACK);
                     g2.draw(rect);
 
-                    if (hasFocus() && (i >= lowestAssignedKey))
+                    if (hasFocus() && (i >= lowestAssignedKey)) {
                         if (i >= lowestAssignedKey) {
                             if (i - lowestAssignedKey < mappedKeys.length()) {
                                 g2.setColor(Color.LIGHT_GRAY);
@@ -154,35 +166,38 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
                                 g2.drawString("" + k, cx - (black_note_width / 2) + 1, (h * 4.0f / 7.0f) - 3);
                             }
                         }
+                    }
                 } else {
                     if (black_note_pos == 0) {
                         rect.setRect(cx - (black_note_width / 2), 0, black_note_width, h * 4.0 / 7.0 / 2 - 2);
-                        if (isKeyDown(i))
+                        if (isKeyDown(i)) {
                             g2.setColor(new Color(0.8f, 0.8f, 0.95f));
-                        else
+                        } else {
                             g2.setColor(Color.BLACK);
+                        }
                         g2.fill(rect);
                         g2.setColor(Color.BLACK);
                         g2.draw(rect);
 
-                        if (hasFocus() && (i >= lowestAssignedKey))
-                            if (i >= lowestAssignedKey) {
-                                if (i - lowestAssignedKey < mappedKeys.length()) {
-                                    g2.setColor(Color.LIGHT_GRAY);
-                                    char k = mappedKeys.charAt(i - lowestAssignedKey);
-                                    g2.drawString("" + k, cx - (black_note_width / 2) + 1,
-                                            (h * 2.0f / 7.0f) - 5);
-                                }
+                        if (hasFocus() && (i >= lowestAssignedKey)) {
+                            if (i - lowestAssignedKey < mappedKeys.length()) {
+                                g2.setColor(Color.LIGHT_GRAY);
+                                char k = mappedKeys.charAt(i - lowestAssignedKey);
+                                g2.drawString("" + k, cx - (black_note_width / 2) + 1,
+                                        (h * 2.0f / 7.0f) - 5);
                             }
+                        }
+
                     }
 
                     if (black_note_pos == 1) {
                         rect.setRect(cx - (black_note_width / 2), h * 4.0 / 7.0 / 2 + 1, black_note_width, h
                                 * 4.0 / 7.0 / 2 - 1);
-                        if (isKeyDown(i))
+                        if (isKeyDown(i)) {
                             g2.setColor(new Color(0.8f, 0.8f, 0.95f));
-                        else
+                        } else {
                             g2.setColor(Color.BLACK);
+                        }
                         g2.fill(rect);
                         g2.setColor(Color.BLACK);
                         g2.draw(rect);
