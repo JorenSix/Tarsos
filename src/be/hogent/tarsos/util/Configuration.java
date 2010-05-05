@@ -30,9 +30,11 @@ public class Configuration {
      * configuration values and creates the ones marked as required directory.
      */
     public static void createRequiredDirectories() {
-        for (ConfKey confKey : ConfKey.values())
-            if (confKey.isRequiredDirectory && FileUtils.mkdirs(get(confKey)))
+        for (ConfKey confKey : ConfKey.values()) {
+            if (confKey.isRequiredDirectory && FileUtils.mkdirs(get(confKey))) {
                 log.info("Created directory: " + get(confKey));
+            }
+        }
     }
 
     /**
@@ -63,7 +65,7 @@ public class Configuration {
      * @exception if the configured value can not be parsed to an integer a
      *            NumberFormatException is thrown.
      */
-    public static int getInt(ConfKey key) throws NumberFormatException {
+    public static int getInt(ConfKey key) {
         return Integer.parseInt(get(key.name()));
     }
 
@@ -80,7 +82,7 @@ public class Configuration {
      * @exception if the configured value can not be parsed to a double a
      *            NumberFormatException is thrown..
      */
-    public static double getDouble(ConfKey key) throws NumberFormatException {
+    public static double getDouble(ConfKey key) {
         return Double.parseDouble(get(key.name()));
     }
 
@@ -116,8 +118,9 @@ public class Configuration {
      *            the value
      */
     public static void set(ConfKey key, String value) {
-        if (value == null)
+        if (value == null) {
             return;
+        }
         try {
             value = sanitizeConfiguredValue(key.name(), value);
             userPreferences.put(key.name(), value);
@@ -141,7 +144,7 @@ public class Configuration {
         if (defaultConfigurationProperties == null) {
             defaultConfigurationProperties = new Properties();
             InputStream propertiesStream = Configuration.class
-                    .getResourceAsStream("configuration.properties");
+            .getResourceAsStream("configuration.properties");
             try {
                 defaultConfigurationProperties.load(propertiesStream);
             } catch (IOException e) {

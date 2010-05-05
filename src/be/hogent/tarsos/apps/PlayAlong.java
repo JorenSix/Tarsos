@@ -87,8 +87,7 @@ public class PlayAlong {
         return null;
     }
 
-    public static void main(String args[]) throws MidiUnavailableException, InterruptedException,
-            NumberFormatException, IOException {
+    public static void main(String args[]) throws MidiUnavailableException, InterruptedException, IOException {
         LongOpt[] longopts = new LongOpt[4];
         longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
         longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
@@ -127,10 +126,11 @@ public class PlayAlong {
 
         AudioFile fileToPlayAlongWith = new AudioFile(fileName);
         PitchDetector detector = new YinPitchDetection(fileToPlayAlongWith);
-        if (detectorString.equals("AUBIO"))
+        if (detectorString.equals("AUBIO")) {
             detector = new AubioPitchDetection(fileToPlayAlongWith, AubioPitchDetectionMode.YIN);
-        else if (detectorString.equals("IPEM"))
+        } else if (detectorString.equals("IPEM")) {
             detector = new IPEMPitchDetection(fileToPlayAlongWith);
+        }
 
         detector.executePitchDetection();
         final List<Sample> samples = detector.getSamples();
@@ -246,7 +246,7 @@ public class PlayAlong {
         System.out.println("-----------------------");
         System.out.println("");
         System.out
-                .println("java -jar playalong.jar --in file.wav [--detector TARSOS|AUBIO|IPEM] [--midi_in 1]");
+        .println("java -jar playalong.jar --in file.wav [--detector TARSOS|AUBIO|IPEM] [--midi_in 1]");
         System.out.println("");
         System.out.println("-----------------------");
         System.out.println("");
