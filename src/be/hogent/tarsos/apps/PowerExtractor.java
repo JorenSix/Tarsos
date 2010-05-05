@@ -6,6 +6,9 @@ import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.SignalPowerExtractor;
 
 public class PowerExtractor {
+
+	private PowerExtractor(){}
+
 	/**
 	 * Extracts power features from some files.
 	 * @param args
