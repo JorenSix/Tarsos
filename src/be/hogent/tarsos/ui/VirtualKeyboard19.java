@@ -159,12 +159,10 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
                     g2.draw(rect);
 
                     if (hasFocus() && (i >= lowestAssignedKey)) {
-                        if (i >= lowestAssignedKey) {
-                            if (i - lowestAssignedKey < mappedKeys.length()) {
-                                g2.setColor(Color.LIGHT_GRAY);
-                                char k = mappedKeys.charAt(i - lowestAssignedKey);
-                                g2.drawString("" + k, cx - (black_note_width / 2) + 1, (h * 4.0f / 7.0f) - 3);
-                            }
+                        if (i - lowestAssignedKey < mappedKeys.length()) {
+                            g2.setColor(Color.LIGHT_GRAY);
+                            char k = mappedKeys.charAt(i - lowestAssignedKey);
+                            g2.drawString("" + k, cx - (black_note_width / 2) + 1, (h * 4.0f / 7.0f) - 3);
                         }
                     }
                 } else {

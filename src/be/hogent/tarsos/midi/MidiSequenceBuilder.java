@@ -78,7 +78,7 @@ public class MidiSequenceBuilder {
     private MidiEvent createPitchBendEvent(double deviationInCents, int startTick) {
         int bendFactorInMidi = 0;
         // 16384 values for 400 cents
-        bendFactorInMidi = new Float((deviationInCents * (16384.0 / 400.0))).intValue();
+        bendFactorInMidi = (int) (deviationInCents * (16384.0 / 400.0));
         if (bendFactorInMidi < -8191) {
             bendFactorInMidi = -8191;
         }
