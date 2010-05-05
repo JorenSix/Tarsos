@@ -22,7 +22,7 @@ public class ReceiverSink implements Receiver {
 
     /**
      * @param receivers
-     *            the list of <code>Receiver<code>s to send messages to
+     *            the list of <code>Receiver</code>s to send messages to
      */
     public ReceiverSink(boolean ignoreTiming, Receiver... receivers) {
         this.receivers = receivers;

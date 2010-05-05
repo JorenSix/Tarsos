@@ -82,7 +82,7 @@ public enum ConfKey {
     /**
      * The Ambitus (range) stop value in cents: <br>
      * The default value is <br>
-     * <code>1200 * 8 = 9600 cents = C8 = 4186.01 Hz<code>
+     * <code>1200 * 8 = 9600 cents = C8 = 4186.01 Hz</code>
      */
     ambitus_stop,
 
