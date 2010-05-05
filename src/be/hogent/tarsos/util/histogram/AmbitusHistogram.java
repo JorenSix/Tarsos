@@ -32,8 +32,8 @@ public class AmbitusHistogram extends Histogram {
     public AmbitusHistogram() {
         super(Configuration.getInt(ConfKey.ambitus_start), Configuration.getInt(ConfKey.ambitus_stop),
                 1200 / Configuration.getInt(ConfKey.histogram_bin_width), false,// does
-                                                                                // not
-                                                                                // wrap
+                // not
+                // wrap
                 true// ignore values outside human hearing range
         );
 

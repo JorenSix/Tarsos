@@ -7,17 +7,17 @@ import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 
 /**
- *
+ * 
  * A normal keyboard with 12 tones.
- *
+ * 
  * Uses refactored code from the Gervill package licensed under the GPL with the
  * classpath exception.
- *
+ * 
  * <a href="https://gervill.dev.java.net/source/browse/gervill/src.demos/">
  * Gervill source code</a>
- *
+ * 
  * @author Joren Six
- *
+ * 
  */
 public class VirtualKeyboard12 extends VirtualKeyboard {
 
@@ -103,9 +103,7 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
                 g2.setColor(Color.BLACK);
                 g2.draw(rect);
 
-                if (hasFocus()
-                        && (i >= lowestAssignedKey)
-                        && i - lowestAssignedKey < mappedKeys.length()) {
+                if (hasFocus() && (i >= lowestAssignedKey) && i - lowestAssignedKey < mappedKeys.length()) {
                     g2.setColor(Color.GRAY);
                     char k = mappedKeys.charAt(i - lowestAssignedKey);
                     g2.drawString("" + k, cx + 2, h - 4);

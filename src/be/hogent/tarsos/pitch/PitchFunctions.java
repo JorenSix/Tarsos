@@ -20,8 +20,8 @@ import be.hogent.tarsos.util.histogram.Histogram;
 /**
  * Utility class for pitch conversions See <a href="http://www.lenmus.org/sw/page.php?pid=docs&doc=hacking_guide&pag=pitch-representation&lang=en"
  * >pitch-representatio</a> for some background.
- *
- *
+ * 
+ * 
  * @author Joren Six
  */
 public class PitchFunctions {
@@ -30,7 +30,7 @@ public class PitchFunctions {
 
     /**
      * Converts pitches in Hertz to the requested unit.
-     *
+     * 
      * @param pitchValuesInHertz
      *            the pitch values in Hertz
      * @return the values converted to the requested unit. The original list
@@ -61,7 +61,7 @@ public class PitchFunctions {
 
     /**
      * Converts a list of pitches in Hertz to absolute cents.
-     *
+     * 
      * @param convertedValues
      */
     private static void convertHertzToAbsoluteCent(List<Double> convertedValues) {
@@ -88,7 +88,7 @@ public class PitchFunctions {
     /**
      * Folds the pitch values to one octave. E.g. 1203 becomes 3 and 956 remains
      * 956
-     *
+     * 
      * @param pitchValuesInCent
      *            a list of double values in cent
      */
@@ -104,7 +104,7 @@ public class PitchFunctions {
      * Removes all frequencies that are not in the specified band. The remaining
      * band consists only of frequencies between minValueInHertz and
      * maxValueInHertz (inclusive).
-     *
+     * 
      * @param pitchValuesInHertz
      *            the values to filter.
      * @param minValueInHertz
@@ -125,7 +125,7 @@ public class PitchFunctions {
 
     /**
      * Calculates the median for a list of doubles. The list is sorted in-place.
-     *
+     * 
      * @param list
      *            The list.
      * @return The median.
@@ -161,14 +161,14 @@ public class PitchFunctions {
      * n must be odd! The function is defined as:<br>
      * f(i) = median( list(i-n/2) .. list(i+n/2) )<br>
      * </p>
-     *
+     * 
      * <pre>
      *  So for n = 3 and list to filter:
      *    [3 7 4]
      *  0 [3 7 4] 0
      *    [3 4 7]
      * </pre>
-     *
+     * 
      * @param listToFilter
      *            the list to filter
      * @param n
@@ -210,7 +210,7 @@ public class PitchFunctions {
 
     /**
      * Smooths a list of doubles using a gaussian.
-     *
+     * 
      * @param listToSmooth
      *            the list to smooth
      * @param standardDeviation
@@ -292,7 +292,7 @@ public class PitchFunctions {
     /**
      * Applies a Gaussian filter to the list to filter. The parameter is
      * arbitrary and can be 1/(2*standard deviation^2).
-     *
+     * 
      * @param listToFilter
      *            the list to filter
      * @param parameter
@@ -333,7 +333,7 @@ public class PitchFunctions {
     /**
      * Applies a Gaussian filter to the list to filter. The parameter is
      * 1/(2*standard deviation^2).
-     *
+     * 
      * @param listToFilter
      *            the list to filter
      * @return An order n one-dimensional median filtered list.
@@ -354,7 +354,7 @@ public class PitchFunctions {
      * Classes are defined by the limit and resolution. E.g. for a limit of 1200
      * with a resolution of 400 there are 3 classes: [0-400[, [400-800[ and
      * [800-1200[.
-     *
+     * 
      * @param values
      *            the data to distribute over the bins/classes.
      * @param classWidth
@@ -448,16 +448,16 @@ public class PitchFunctions {
             /*
              * h.addXTick("Fifth", reference - 700); h.addXTick("Fifth",
              * reference + 700);
-             *
+             * 
              * h.addXTick("Tritonus", reference - 600); h.addXTick("Tritonus",
              * reference + 600);
-             *
+             * 
              * h.addXTick("Kleine terts",reference + 300);
              * h.addXTick("Kleine terts",reference - 300);
-             *
+             * 
              * h.addXTick("Grote terts",reference + 400);
              * h.addXTick("Grote terts",reference - 400);
-             *
+             * 
              * h.setWrap(true);
              */
 
@@ -488,11 +488,11 @@ public class PitchFunctions {
     /**
      * Reads a frequency table (histogram) from disk. The source file is
      * expected to be a CSV-file in the format:
-     *
+     * 
      * <code>value;frequency[;other data; is discarded;...]</code>
-     *
+     * 
      * The lowest value is on the first row, the highest on the last!
-     *
+     * 
      * @param fileName
      * @return a frequencytable
      */
