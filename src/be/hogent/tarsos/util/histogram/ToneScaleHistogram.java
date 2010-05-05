@@ -142,20 +142,23 @@ public class ToneScaleHistogram extends Histogram {
 
         if (heights == null) {
             heights = new double[peaks.length];
-            for (int i = 0; i < peaks.length; i++)
+            for (int i = 0; i < peaks.length; i++) {
                 heights[i] = 200.0;
+            }
         }
 
         if (standardDeviations == null) {
             standardDeviations = new double[peaks.length];
-            for (int i = 0; i < peaks.length; i++)
+            for (int i = 0; i < peaks.length; i++) {
                 standardDeviations[i] = 1;
+            }
         }
 
         if (widths == null) {
             widths = new double[peaks.length];
-            for (int i = 0; i < peaks.length; i++)
+            for (int i = 0; i < peaks.length; i++) {
                 widths[i] = 25;
+            }
         }
 
         for (Double key : unWrappedHistogram.keySet()) {
@@ -165,8 +168,9 @@ public class ToneScaleHistogram extends Histogram {
                 // do not calculate values that are
                 // (very) nearly zero.
                 // Skip elements at width x 10.
-                if (Math.abs(difference) > 10 * widths[i])
+                if (Math.abs(difference) > 10 * widths[i]) {
                     continue;
+                }
                 double power = Math.pow(difference / (widths[i] / 2 * standardDeviations[i]), 2.0);
                 currentValue += heights[i] * Math.pow(Math.E, -0.5 * power);
             }
@@ -189,8 +193,8 @@ public class ToneScaleHistogram extends Histogram {
         // 1 calculate a fitting function
         // 1a smooth the original histogram for better peak detection
         ToneScaleHistogram smoothed = (ToneScaleHistogram) (new ToneScaleHistogram()).add(this)
-                .gaussianSmooth(1.0);
-        ;
+        .gaussianSmooth(1.0);
+
         // 1b detect peaks
         List<Peak> peaks = PeakDetector.detect(smoothed, 20, 0.8);
         Histogram fittingHistogram = PeakDetector.newPeakDetection(peaks);

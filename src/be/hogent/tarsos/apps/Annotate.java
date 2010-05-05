@@ -29,12 +29,12 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
  * 
  * @author Joren Six
  */
-public class Annotate {
+public final class Annotate {
 
     private Annotate() {
     }
 
-    public static void main(String... args) {
+    public static void main(final String... args) {
         LongOpt[] longopts = new LongOpt[3];
         longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
         longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
@@ -58,6 +58,8 @@ public class Annotate {
             case 'h':
                 printHelp();
                 return;
+            default:
+                break;
             }
         }
 
@@ -78,9 +80,9 @@ public class Annotate {
 
     private static void printHelp() {
         System.out
-                .println("Annotate can be used to annotate audio files. It transcodes audio to an understandable"
-                        + "format, detects pitch and stores information about the files. It uses the defined files with the in "
-                        + "option or all the audiofiles in the audio directory.");
+        .println("Annotate can be used to annotate audio files. It transcodes audio to an understandable"
+                + "format, detects pitch and stores information about the files. It uses the defined files with the in "
+                + "option or all the audiofiles in the audio directory.");
         System.out.println("");
         System.out.println("java -jar annotate.jar [--in in.wav] [--detector AUBIO|IPEM]");
         System.exit(0);
@@ -91,10 +93,11 @@ public class Annotate {
         AudioFile audioFile = new AudioFile(inputFile);
 
         PitchDetector pitchDetector = new YinPitchDetection(audioFile);
-        if (detector.equals("AUBIO"))
+        if (detector.equals("AUBIO")) {
             pitchDetector = new AubioPitchDetection(audioFile, AubioPitchDetectionMode.YIN);
-        else if (detector.equals("IPEM"))
+        } else if (detector.equals("IPEM")) {
             pitchDetector = new IPEMPitchDetection(audioFile);
+        }
 
         pitchDetector.executePitchDetection();
         String baseName = audioFile.basename();

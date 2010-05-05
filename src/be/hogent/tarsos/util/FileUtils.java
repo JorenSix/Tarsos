@@ -45,8 +45,9 @@ public class FileUtils {
 
     public static String temporaryDirectory() {
         String tempDir = System.getProperty("java.io.tmpdir");
-        if (tempDir.contains(" "))
+        if (tempDir.contains(" ")) {
             log.warning("Temporary directory (" + tempDir + ") contains whitespace");
+        }
         return tempDir;
 
     }
@@ -146,13 +147,15 @@ public class FileUtils {
         StringBuilder contents = new StringBuilder();
         try {
             File file = new File(name);
-            if (!file.exists())
+            if (!file.exists()) {
                 throw new Error("File " + name + " does not exist");
+            }
             fileReader = new FileReader(file);
             BufferedReader in = new BufferedReader(fileReader);
             String inputLine;
-            while ((inputLine = in.readLine()) != null)
+            while ((inputLine = in.readLine()) != null) {
                 contents.append(inputLine).append("\n");
+            }
             in.close();
         } catch (IOException i1) {
             log.severe("Can't open file:" + name);
@@ -176,8 +179,9 @@ public class FileUtils {
             connection = url.openConnection();
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine;
-            while ((inputLine = in.readLine()) != null)
+            while ((inputLine = in.readLine()) != null) {
                 contents.append(new String(inputLine.getBytes(), "UTF-8")).append("\n");
+            }
             in.close();
         } catch (IOException e) {
             log.severe("Error while reading file " + path + " from jar: " + e.getMessage());
@@ -190,12 +194,10 @@ public class FileUtils {
     }
 
     /**
-     * Reads the contents of a file in a jar.
+     * Copy a file from a jar.
      * 
-     * @param path
-     *            the path to read e.g. /package/name/here/help.html
-     * @return the contents of the file when successful, an empty string
-     *         otherwise.
+     * @param source
+     *            The path to read e.g. /package/name/here/help.html
      */
     public static void copyFileFromJar(String source, String target) {
         try {
@@ -239,8 +241,9 @@ public class FileUtils {
 
         try {
             File file = new File(fileName);
-            if (!file.exists())
+            if (!file.exists()) {
                 throw new Error("File '" + fileName + "' does not exist");
+            }
             fileReader = new FileReader(file);
             BufferedReader in = new BufferedReader(fileReader);
             String inputLine;
@@ -248,12 +251,13 @@ public class FileUtils {
             while ((inputLine = in.readLine()) != null) {
                 lineNumber++;
                 String[] row = inputLine.split(separator);
-                if (expectedNumberOfColumns == -1 || expectedNumberOfColumns == row.length)
+                if (expectedNumberOfColumns == -1 || expectedNumberOfColumns == row.length) {
                     data.add(row);
-                else
+                } else {
                     throw new Error("Unexpected row length (line " + lineNumber + " ). " + "Expected:"
                             + expectedNumberOfColumns + " real " + row.length
                             + ". CVS-file incorrectly formatted?");
+                }
             }
             in.close();
         } catch (IOException i1) {
@@ -277,8 +281,9 @@ public class FileUtils {
         filter = filter == null ? ACCEPT_ALL_ROWFILTER : filter;
         List<String> columnData = new ArrayList<String>();
         for (String[] row : data) {
-            if (filter.acceptRow(row))
+            if (filter.acceptRow(row)) {
                 columnData.add(row[columnIndex]);
+            }
         }
         return columnData;
     }
@@ -315,10 +320,11 @@ public class FileUtils {
                     Object valueObject = row[column];
                     String value = valueObject == null ? "" : valueObject.toString();
                     if (valueObject != null) {
-                        if (valueObject instanceof Double)
+                        if (valueObject instanceof Double) {
                             value = exportDecimalFormat.format(valueObject);
-                        else if (valueObject instanceof Date)
+                        } else if (valueObject instanceof Date) {
                             value = exportDateFormatter.format(valueObject);
+                        }
                     }
                     value = value.replace(separator, "");
                     output.print(value + separator);
@@ -362,8 +368,9 @@ public class FileUtils {
         File dir = new File(directory);
         Pattern p = Pattern.compile(pattern);
         List<String> matchingFiles = new ArrayList<String>();
-        if (!dir.isDirectory())
+        if (!dir.isDirectory()) {
             throw new Error(directory + " is not a directory");
+        }
         for (String file : dir.list()) {
             if (!new File(file).isDirectory() && p.matcher(file).matches() && file != null) {
                 matchingFiles.add(FileUtils.combine(directory, file));
@@ -395,10 +402,12 @@ public class FileUtils {
     public static String basename(String fileName) {
         int dot = fileName.lastIndexOf(extensionSeparator);
         int sep = fileName.lastIndexOf(pathSeparator);
-        if (sep == -1)
+        if (sep == -1) {
             sep = fileName.lastIndexOf('\\');
-        if (dot == -1)
+        }
+        if (dot == -1) {
             dot = fileName.length();
+        }
         return fileName.substring(sep + 1, dot);
     }
 
@@ -507,10 +516,12 @@ public class FileUtils {
             log.severe("Error while copying " + source + " to " + target + " : " + e.getMessage());
         } finally {
             try {
-                if (inChannel != null)
+                if (inChannel != null) {
                     inChannel.close();
-                if (outChannel != null)
+                }
+                if (outChannel != null) {
                     outChannel.close();
+                }
             } catch (IOException e) {
                 // ignore
             }
