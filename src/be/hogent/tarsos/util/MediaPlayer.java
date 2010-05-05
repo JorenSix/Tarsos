@@ -11,41 +11,37 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-public class MediaPlayer implements Runnable { 
+public class MediaPlayer implements Runnable {
 	File file;
 	AudioInputStream in;
 	SourceDataLine line;
 	int frameSize;
-	byte[] buffer = new byte [32 * 1024]; // 32k is arbitrary
+	byte[] buffer = new byte[32 * 1024]; // 32k is arbitrary
 	Thread playThread;
 	boolean playing;
 	boolean notYetEOF;
 
-	public MediaPlayer (String fileName)
-		throws IOException,
-			UnsupportedAudioFileException,
-			LineUnavailableException {
+	public MediaPlayer(String fileName) throws IOException, UnsupportedAudioFileException, LineUnavailableException {
 		file = new File(fileName);
-		in = AudioSystem.getAudioInputStream (file);
+		in = AudioSystem.getAudioInputStream(file);
 		AudioFormat format = in.getFormat();
 		AudioFormat.Encoding formatEncoding = format.getEncoding();
-		if (! (formatEncoding.equals (AudioFormat.Encoding.PCM_SIGNED) ||
-			   formatEncoding.equals (AudioFormat.Encoding.PCM_UNSIGNED))) 
-		   throw new UnsupportedAudioFileException (
-                              file.getName() + " is not PCM audio");
-       System.out.println ("got PCM format");        
-	   frameSize = format.getFrameSize(); 
-	   DataLine.Info info = new DataLine.Info(SourceDataLine.class, format); 
-	   System.out.println ("got info"); 
-	   line = (SourceDataLine) AudioSystem.getLine (info); 
-	   System.out.println ("got line");        
-	   line.open(); 
-	   System.out.println ("opened line"); 
-	   playThread = new Thread (this); 
-	   playing = false; 
-	   notYetEOF = true;        
-	   playThread.start();
+		if (!(formatEncoding.equals(AudioFormat.Encoding.PCM_SIGNED) || formatEncoding.equals(AudioFormat.Encoding.PCM_UNSIGNED)))
+			throw new UnsupportedAudioFileException(file.getName() + " is not PCM audio");
+		System.out.println("got PCM format");
+		frameSize = format.getFrameSize();
+		DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+		System.out.println("got info");
+		line = (SourceDataLine) AudioSystem.getLine(info);
+		System.out.println("got line");
+		line.open();
+		System.out.println("opened line");
+		playThread = new Thread(this);
+		playing = false;
+		notYetEOF = true;
+		playThread.start();
 	}
+
 	public void run() {
 		int readPoint = 0;
 		int bytesRead = 0;
@@ -53,31 +49,29 @@ public class MediaPlayer implements Runnable {
 		try {
 			while (notYetEOF) {
 				if (playing) {
-				bytesRead = in.read (buffer, 
-							 readPoint, 
-							 buffer.length - readPoint);
-                   if (bytesRead == -1) { 
-				notYetEOF = false; 
-				break;
-				}
-				// how many frames did we get,
-				// and how many are left over?
-				int leftover = bytesRead % frameSize;
-				// send to line
-				line.write (buffer, readPoint, bytesRead-leftover);
-				// save the leftover bytes
-				System.arraycopy (buffer, bytesRead,
-						  buffer, 0, 
-						  leftover); 
-                    readPoint = leftover;
-				} else { 
-				// if not playing                   
-				// Thread.yield(); 
-				try { Thread.sleep (10);} 
-				catch (InterruptedException ie) {}
+					bytesRead = in.read(buffer, readPoint, buffer.length - readPoint);
+					if (bytesRead == -1) {
+						notYetEOF = false;
+						break;
+					}
+					// how many frames did we get,
+					// and how many are left over?
+					int leftover = bytesRead % frameSize;
+					// send to line
+					line.write(buffer, readPoint, bytesRead - leftover);
+					// save the leftover bytes
+					System.arraycopy(buffer, bytesRead, buffer, 0, leftover);
+					readPoint = leftover;
+				} else {
+					// if not playing
+					// Thread.yield();
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException ie) {
+					}
 				}
 			} // while notYetEOF
-			System.out.println ("reached eof");
+			System.out.println("reached eof");
 			line.drain();
 			line.stop();
 		} catch (IOException ioe) {
@@ -89,7 +83,7 @@ public class MediaPlayer implements Runnable {
 
 	public void start() {
 		playing = true;
-		if (! playThread.isAlive())
+		if (!playThread.isAlive())
 			playThread.start();
 		line.start();
 	}
@@ -98,13 +92,12 @@ public class MediaPlayer implements Runnable {
 		playing = false;
 		line.stop();
 	}
-   
+
 	public SourceDataLine getLine() {
 		return line;
 	}
 
-	public File getFile() {		
-		return file; 
-	} 
+	public File getFile() {
+		return file;
+	}
 }
-

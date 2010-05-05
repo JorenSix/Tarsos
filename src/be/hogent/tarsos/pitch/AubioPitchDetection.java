@@ -10,36 +10,36 @@ import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.Execute;
 import be.hogent.tarsos.util.FileUtils;
 
-
 /**
- *
- * Calls aubio (http://aubio.org/) to execute pitch detection.
- *  Aubio should be installed correctly and available in PATH.
- *  This command is called when executing pitch detection:
- * <code>
+ * 
+ * Calls aubio (http://aubio.org/) to execute pitch detection. Aubio should be
+ * installed correctly and available in PATH. This command is called when
+ * executing pitch detection: <code>
  * aubiopitch  -u freq --mode yin -s -70 -i in.wav
  * </code>
- *
- * The output uses the frequency (Hz) unit. The algorithm used is yin.
- * The default silence threshold of -70 is used. The file that is annoted is in.wav
- *
- * For more information see the <a href="http//aubio.org">aubio</a> man pages or website.
- *
+ * 
+ * The output uses the frequency (Hz) unit. The algorithm used is yin. The
+ * default silence threshold of -70 is used. The file that is annoted is in.wav
+ * 
+ * For more information see the <a href="http//aubio.org">aubio</a> man pages or
+ * website.
+ * 
  * The pitch detection algorithm is defined by {@link AubioPitchDetectionMode}.
- *
- * See http://www.elec.qmul.ac.uk/research/thesis/Brossier07-phdthesis.pdf for more info.
- *
+ * 
+ * See http://www.elec.qmul.ac.uk/research/thesis/Brossier07-phdthesis.pdf for
+ * more info.
+ * 
  * @author Joren Six
  */
-public class AubioPitchDetection implements PitchDetector{
+public class AubioPitchDetection implements PitchDetector {
 
 	/**
-	 *
+	 * 
 	 * The pitch detection mode defines which algorithm is used to detect pitch.
-	 *
+	 * 
 	 * @author Joren Six
 	 */
-	public enum AubioPitchDetectionMode{
+	public enum AubioPitchDetectionMode {
 		/**
 		 * The YIN algorithm
 		 */
@@ -63,14 +63,15 @@ public class AubioPitchDetection implements PitchDetector{
 		SCHMITT("schmitt");
 
 		private final String parameterName;
-		private AubioPitchDetectionMode(String parameterName){
-			this.parameterName=parameterName;
+
+		private AubioPitchDetectionMode(String parameterName) {
+			this.parameterName = parameterName;
 		}
 
 		/**
-		 * @return  The name used in the aubio command.
+		 * @return The name used in the aubio command.
 		 */
-		public String getParametername(){
+		public String getParametername() {
 			return this.parameterName;
 		}
 	}
@@ -80,7 +81,7 @@ public class AubioPitchDetection implements PitchDetector{
 	private final List<Sample> samples;
 	private final String name;
 
-	public AubioPitchDetection(AudioFile file,AubioPitchDetectionMode pitchDetectionMode){
+	public AubioPitchDetection(AudioFile file, AubioPitchDetectionMode pitchDetectionMode) {
 		this.file = file;
 		this.pitchDetectionMode = pitchDetectionMode;
 		this.samples = new ArrayList<Sample>();
@@ -90,20 +91,20 @@ public class AubioPitchDetection implements PitchDetector{
 	@Override
 	public void executePitchDetection() {
 		String annotationsDirectory = Configuration.get(ConfKey.raw_aubio_annotations_directory);
-		String csvFileName = FileUtils.combine(annotationsDirectory,this.name + "_" + file.basename() + ".txt");
+		String csvFileName = FileUtils.combine(annotationsDirectory, this.name + "_" + file.basename() + ".txt");
 
-
-		if(! FileUtils.exists(csvFileName)){
-			String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.parameterName + "  -s -70  -i " + file.transcodedPath();
-			Execute.command(command,csvFileName);
+		if (!FileUtils.exists(csvFileName)) {
+			String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.parameterName + "  -s -70  -i "
+					+ file.transcodedPath();
+			Execute.command(command, csvFileName);
 		}
 
-		List<String[]> csvData = FileUtils.readCSVFile(csvFileName,"\t", 2);
-		for(String[] row : csvData){
+		List<String[]> csvData = FileUtils.readCSVFile(csvFileName, "\t", 2);
+		for (String[] row : csvData) {
 			long start = (long) (Double.parseDouble(row[0]) * 1000);
 			Double pitch = Double.parseDouble(row[1]);
-			Sample sample = pitch == -1 ? new Sample(start) : new Sample(start,pitch);
-			switch(pitchDetectionMode){
+			Sample sample = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
+			switch (pitchDetectionMode) {
 			case YIN:
 				sample.source = SampleSource.AUBIO_YIN;
 				break;

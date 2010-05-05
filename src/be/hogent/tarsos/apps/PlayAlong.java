@@ -39,20 +39,23 @@ import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
-
 public class PlayAlong {
 
 	/**
-	 * Choose a MIDI device using a CLI. If an invalid device number is given the
-	 * user is requested to choose another one.
-	 * @param inputDevice is the MIDI device needed for input of events? E.G. a keyboard
-	 * @param outputDevice is the MIDI device needed to send events to? E.g. a (software) synthesizer.
+	 * Choose a MIDI device using a CLI. If an invalid device number is given
+	 * the user is requested to choose another one.
+	 * 
+	 * @param inputDevice
+	 *            is the MIDI device needed for input of events? E.G. a keyboard
+	 * @param outputDevice
+	 *            is the MIDI device needed to send events to? E.g. a (software)
+	 *            synthesizer.
 	 * @return the chosen MIDI device
 	 */
-	public static MidiDevice chooseDevice(boolean inputDevice,boolean outputDevice){
+	public static MidiDevice chooseDevice(boolean inputDevice, boolean outputDevice) {
 		try {
-			//choose MIDI input device
-			MidiCommon.listDevices(inputDevice,outputDevice);
+			// choose MIDI input device
+			MidiCommon.listDevices(inputDevice, outputDevice);
 			String deviceType = (inputDevice ? " IN " : "") + (outputDevice ? " OUT " : "");
 			System.out.print("Choose the MIDI" + deviceType + "device: ");
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -61,7 +64,7 @@ public class PlayAlong {
 			Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[deviceIndex];
 
 			MidiDevice device = MidiSystem.getMidiDevice(midiDeviceInfo);
-			if( (device.getMaxTransmitters() == 0 == inputDevice) && (device.getMaxReceivers() == 0 == outputDevice) ){
+			if ((device.getMaxTransmitters() == 0 == inputDevice) && (device.getMaxReceivers() == 0 == outputDevice)) {
 				System.out.println("Invalid choise, please try again");
 				return chooseDevice(inputDevice, outputDevice);
 			} else {
@@ -75,15 +78,14 @@ public class PlayAlong {
 		} catch (MidiUnavailableException e) {
 			System.out.println("The device is not available ( " + e.getMessage() + " ), please choose another device.");
 			return chooseDevice(inputDevice, outputDevice);
-		} catch (ArrayIndexOutOfBoundsException e){
+		} catch (ArrayIndexOutOfBoundsException e) {
 			System.out.println("Number out of bounds, please try again");
 			return chooseDevice(inputDevice, outputDevice);
 		}
 		return null;
 	}
 
-
-	public static void main(String args[]) throws MidiUnavailableException, InterruptedException, NumberFormatException, IOException{
+	public static void main(String args[]) throws MidiUnavailableException, InterruptedException, NumberFormatException, IOException {
 		LongOpt[] longopts = new LongOpt[4];
 		longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
 		longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
@@ -96,11 +98,9 @@ public class PlayAlong {
 		String fileName = null;
 
 		int c;
-		while ((c = g.getopt()) != -1)
-		{
+		while ((c = g.getopt()) != -1) {
 			String arg = g.getOptarg();
-			switch(c)
-			{
+			switch (c) {
 			case 'i':
 				fileName = arg;
 				break;
@@ -117,17 +117,16 @@ public class PlayAlong {
 			}
 		}
 
-		if(fileName == null || !FileUtils.exists(fileName)){
+		if (fileName == null || !FileUtils.exists(fileName)) {
 			printHelp();
 			System.exit(-1);
 		}
 
-
 		AudioFile fileToPlayAlongWith = new AudioFile(fileName);
-		PitchDetector detector =  new YinPitchDetection(fileToPlayAlongWith);
-		if(detectorString.equals("AUBIO"))
+		PitchDetector detector = new YinPitchDetection(fileToPlayAlongWith);
+		if (detectorString.equals("AUBIO"))
 			detector = new AubioPitchDetection(fileToPlayAlongWith, AubioPitchDetectionMode.YIN);
-		else if(detectorString.equals("IPEM"))
+		else if (detectorString.equals("IPEM"))
 			detector = new IPEMPitchDetection(fileToPlayAlongWith);
 
 		detector.executePitchDetection();
@@ -137,64 +136,64 @@ public class PlayAlong {
 		FileUtils.mkdirs("data/octave/" + baseName);
 		FileUtils.mkdirs("data/range/" + baseName);
 
-		//String toneScalefileName = baseName + '/' + baseName + "_" + detector.getName() +  "_octave.txt";
+		// String toneScalefileName = baseName + '/' + baseName + "_" +
+		// detector.getName() + "_octave.txt";
 		Histogram octaveHistogram = Sample.ambitusHistogram(samples).toneScaleHistogram();
 		List<Peak> peaks = PeakDetector.detect(octaveHistogram, 15, 0.5);
 
 		System.out.println(peaks.size() + " peaks found in: " + FileUtils.basename(fileName));
 		System.out.println("");
-		for(Peak p:peaks){
+		for (Peak p : peaks) {
 			System.out.println(p.getPosition());
 		}
 		System.out.println("");
 
-		final double tuning[] = new double [128];
+		final double tuning[] = new double[128];
 
-
-		//align tuning to MIDI note 57, A3 or 220Hz.
+		// align tuning to MIDI note 57, A3 or 220Hz.
 		Double referenceNote = PitchConverter.hertzToAbsoluteCent(220.0);
 		int referenceNoteMidiNumber = 57;
 
 		int midiNoteClosestToReference = -1;
 		double closestDistance = Double.MAX_VALUE;
-		for(int i = 0 ; i < tuning.length ;i++){
-			int octave = i / peaks.size() ;
+		for (int i = 0; i < tuning.length; i++) {
+			int octave = i / peaks.size();
 			double centOffset = peaks.get(i % peaks.size()).getPosition();
 			tuning[i] = octave * 1200 + centOffset;
-			double distanceToReferenceNote = Math.abs(tuning[i] - referenceNote); //cents
-			if(distanceToReferenceNote < closestDistance ){
+			double distanceToReferenceNote = Math.abs(tuning[i] - referenceNote); // cents
+			if (distanceToReferenceNote < closestDistance) {
 				closestDistance = distanceToReferenceNote;
 				midiNoteClosestToReference = i;
 			}
 		}
 
-		System.out.println("Closest to midi key 57 (220Hz," + referenceNote + " cents) is the tuned midi key " + midiNoteClosestToReference + " at " + tuning[midiNoteClosestToReference] +" cents");
+		System.out.println("Closest to midi key 57 (220Hz," + referenceNote + " cents) is the tuned midi key " + midiNoteClosestToReference
+				+ " at " + tuning[midiNoteClosestToReference] + " cents");
 
-		double rebasedTuning[] = new double [128];
+		double rebasedTuning[] = new double[128];
 		int diff = referenceNoteMidiNumber - midiNoteClosestToReference;
-		for(int i = 0 ; i < tuning.length ;i++){
+		for (int i = 0; i < tuning.length; i++) {
 			rebasedTuning[i] = tuning[(i + diff) % 128];
 		}
 
 		final VirtualKeyboard keyboard = VirtualKeyboard.createVirtualKeyboard(peaks.size());
 
-
 		try {
-			MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("Gervill",true);
+			MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("Gervill", true);
 			MidiDevice synthDevice = null;
 			synthDevice = MidiSystem.getMidiDevice(synthInfo);
 			synthDevice.open();
 
 			Receiver recv;
-			recv = new ReceiverSink(true,synthDevice.getReceiver(),new DumpReceiver(System.out));
+			recv = new ReceiverSink(true, synthDevice.getReceiver(), new DumpReceiver(System.out));
 			keyboard.setReceiver(recv);
 
 			MidiDevice virtualMidiInputDevice;
-			if(device == -1) {
-				virtualMidiInputDevice = chooseDevice(true,false);
+			if (device == -1) {
+				virtualMidiInputDevice = chooseDevice(true, false);
 			} else {
 				Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[device];
-				virtualMidiInputDevice =  MidiSystem.getMidiDevice(midiDeviceInfo);
+				virtualMidiInputDevice = MidiSystem.getMidiDevice(midiDeviceInfo);
 			}
 			virtualMidiInputDevice.open();
 			Transmitter midiInputTransmitter = virtualMidiInputDevice.getTransmitter();
@@ -219,15 +218,15 @@ public class PlayAlong {
 		Iterator<Sample> sampleIterator = samples.iterator();
 		Sample currentSample = sampleIterator.next();
 		int currentMidiKey = 0;
-		while(sampleIterator.hasNext()){
+		while (sampleIterator.hasNext()) {
 			List<Double> currentPitches = currentSample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS);
-			if(currentPitches.size()==1){
-				//double pitch = currentPitches.get(0);
-				for(int midiKey = 0 ; midiKey < 128 ; midiKey ++){
+			if (currentPitches.size() == 1) {
+				// double pitch = currentPitches.get(0);
+				for (int midiKey = 0; midiKey < 128; midiKey++) {
 					/*
-					if(pitch > tuningMin[midiKey] && pitch < tuningMax[midiKey]){
-						currentMidiKey = midiKey;
-					}*/
+					 * if(pitch > tuningMin[midiKey] && pitch <
+					 * tuningMax[midiKey]){ currentMidiKey = midiKey; }
+					 */
 				}
 				midiKeysUnfiltered.add(currentMidiKey + 0.0);
 				time.add(currentSample.getStart());
@@ -235,7 +234,6 @@ public class PlayAlong {
 			currentSample = sampleIterator.next();
 		}
 	}
-
 
 	private static void printHelp() {
 		System.out.println("");

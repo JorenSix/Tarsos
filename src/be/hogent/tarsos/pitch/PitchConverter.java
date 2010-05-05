@@ -5,18 +5,18 @@ import be.hogent.tarsos.util.Configuration;
 
 /**
  * Converts pitch from one unit to another (and back (and back (and back ...))).
- *
+ * 
  * @author Joren Six
  */
 public class PitchConverter {
 
-	private PitchConverter(){}
+	private PitchConverter() {
+	}
 
 	/**
 	 * C-1 = 16.35 Hz
 	 */
-	private static final double reference_frequency = Configuration
-			.getDouble(ConfKey.absolute_cents_reference_frequency);
+	private static final double reference_frequency = Configuration.getDouble(ConfKey.absolute_cents_reference_frequency);
 
 	/**
 	 * Cache log 2 calculation.
@@ -27,55 +27,57 @@ public class PitchConverter {
 	 * A MIDI key is an integer between 0 and 127, inclusive. Within a certain
 	 * range every pitch is mapped to a MIDI key. If a value outside the range
 	 * is given an IllegalArugmentException is thrown.
-	 *
+	 * 
 	 * @param hertzValue
 	 *            The pitch in Hertz.
 	 * @return An integer representing the closest midi key.
-	 * @exception IllegalArgumentException if the hertzValue does not fall within
-	 * the range of valid MIDI key frequencies.
+	 * @exception IllegalArgumentException
+	 *                if the hertzValue does not fall within the range of valid
+	 *                MIDI key frequencies.
 	 */
 	public static int hertzToMidiKey(Double hertzValue) {
 		int midiKey = (int) Math.round(hertzToMidiCent(hertzValue));
 		if (midiKey < 0 || midiKey > 127)
-			throw new IllegalArgumentException("MIDI is only defined between ["
-					+ midiKeyToHertz(0) + "," + midiKeyToHertz(127) + "] "
+			throw new IllegalArgumentException("MIDI is only defined between [" + midiKeyToHertz(0) + "," + midiKeyToHertz(127) + "] "
 					+ hertzValue + "does not map to a MIDI key.");
 		return midiKey;
 	}
 
 	/**
 	 * Calculates the frequency (Hz) for a MIDI key.
-	 * @param midiKey The MIDI key.  A MIDI key is an integer between 0 and 127, inclusive.
+	 * 
+	 * @param midiKey
+	 *            The MIDI key. A MIDI key is an integer between 0 and 127,
+	 *            inclusive.
 	 * @return A frequency in Hz corresponding to the MIDI key.
-	 * @exception IllegalArgumentException If midiKey is not in the valid range between 0 and 127, inclusive.
+	 * @exception IllegalArgumentException
+	 *                If midiKey is not in the valid range between 0 and 127,
+	 *                inclusive.
 	 */
 	public static double midiKeyToHertz(int midiKey) {
 		if (midiKey < 0 || midiKey > 127)
-			throw new IllegalArgumentException(
-					"MIDI keys are values from 0 to 127, inclusive " + midiKey
-							+ " is invalid.");
+			throw new IllegalArgumentException("MIDI keys are values from 0 to 127, inclusive " + midiKey + " is invalid.");
 		return midiCentToHertz(midiKey);
 	}
 
 	/**
 	 * Folds the pitch values to one octave. E.g. 1203 becomes 3 and 956 remains
 	 * 956, -3 is 1197
-	 *
+	 * 
 	 * @param hertzValue
 	 *            a list of double values in cent
 	 */
 	public static double hertzToRelativeCent(double hertzValue) {
 		double absoluteCentValue = hertzToAbsoluteCent(hertzValue);
 		// make absoluteCentValue positive
-		absoluteCentValue = absoluteCentValue >= 0 ? absoluteCentValue : Math
-				.abs(1200 + absoluteCentValue);
+		absoluteCentValue = absoluteCentValue >= 0 ? absoluteCentValue : Math.abs(1200 + absoluteCentValue);
 		// so it can be folded to one octave
 		return absoluteCentValue % 1200.0;
 	}
 
 	/**
 	 * This method is not really practical. Maybe I will need it someday.
-	 *
+	 * 
 	 * @param relativeCent
 	 * @return public static double relativeCentToHertz(double relativeCent){ if
 	 *         (relativeCent < 0 || relativeCent >= 1200) throw new
@@ -88,25 +90,28 @@ public class PitchConverter {
 
 	/**
 	 * The reference frequency is configured. The default reference frequency is
-	 * 16.35Hz. This is C0 on a piano keyboard with A4 tuned to 440 Hz.
-	 * This means that 0 cents is C0; 1200 is C1; 2400 is C2; ... also -1200 cents is C-1
-	 *
+	 * 16.35Hz. This is C0 on a piano keyboard with A4 tuned to 440 Hz. This
+	 * means that 0 cents is C0; 1200 is C1; 2400 is C2; ... also -1200 cents is
+	 * C-1
+	 * 
 	 * @param hertzValue
-	 * The pitch in Hertz.
-	 * @return The value in absolute cents using the configured reference frequency
+	 *            The pitch in Hertz.
+	 * @return The value in absolute cents using the configured reference
+	 *         frequency
 	 */
 	public static double hertzToAbsoluteCent(double hertzValue) {
 		double pitchValueInAbsoluteCent = 0.0;
 		if (hertzValue != 0)
-			pitchValueInAbsoluteCent = 1200
-					* Math.log(hertzValue / reference_frequency) / log_two;
+			pitchValueInAbsoluteCent = 1200 * Math.log(hertzValue / reference_frequency) / log_two;
 		return pitchValueInAbsoluteCent;
 	}
 
 	/**
-	 * Returns the frequency (Hz) of an absolute cent value.
-	 * This calculation uses a configured reference frequency.
-	 * @param absoluteCent The pitch in absolute cent.
+	 * Returns the frequency (Hz) of an absolute cent value. This calculation
+	 * uses a configured reference frequency.
+	 * 
+	 * @param absoluteCent
+	 *            The pitch in absolute cent.
 	 * @return A pitch in Hz.
 	 */
 	public static double absoluteCentToHertz(double absoluteCent) {
@@ -119,7 +124,7 @@ public class PitchConverter {
 	 * E.g.<br>
 	 * <code>69.168 MIDI CENTS = MIDI NOTE 69  + 16,8 cents</code><br>
 	 * <code>69.168 MIDI CENTS = 440Hz + x Hz</code>
-	 *
+	 * 
 	 * @param hertzValue
 	 *            The pitch in Hertz.
 	 * @return The pitch in MIDI cent.
@@ -133,7 +138,7 @@ public class PitchConverter {
 
 	/**
 	 * Converts a MIDI CENT frequency to a frequency in Hz.
-	 *
+	 * 
 	 * @param midiCent
 	 * @return
 	 */

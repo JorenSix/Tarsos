@@ -6,7 +6,7 @@ public class IPEMPitchDetectionTests {
 
 	@Test
 	public void testExecutePitchDetection() {
-		
+
 	}
 
 }

@@ -23,7 +23,7 @@ public class AutoTune {
 	/**
 	 * Choose a Mixer device using CLI.
 	 */
-	public static int chooseDevice(){
+	public static int chooseDevice() {
 		try {
 			javax.sound.sampled.Mixer.Info mixers[] = AudioSystem.getMixerInfo();
 			for (int i = 0; i < mixers.length; i++) {
@@ -31,7 +31,7 @@ public class AutoTune {
 				if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0)
 					System.out.println(i + " " + mixerinfo.toString());
 			}
-			//choose MIDI input device
+			// choose MIDI input device
 			System.out.print("Choose the Mixer device: ");
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 			int deviceIndex = Integer.parseInt(br.readLine());
@@ -45,18 +45,16 @@ public class AutoTune {
 		return -1;
 	}
 
-	public static void main(String... args) throws LineUnavailableException{
+	public static void main(String... args) throws LineUnavailableException {
 		new Thread(new AudioProcessor(chooseDevice())).start();
 	}
 
-
-
-	private static class Speaker{
+	private static class Speaker {
 		private final float sampleRate = 44100;
 		private final int channels = 1;
 		private final int bits = 16;
 
-		private final AudioFormat format = new AudioFormat(sampleRate, bits,channels, true, false);
+		private final AudioFormat format = new AudioFormat(sampleRate, bits, channels, true, false);
 		private final AudioFloatConverter converter = AudioFloatConverter.getConverter(format);
 
 		private SourceDataLine line;
@@ -81,15 +79,14 @@ public class AutoTune {
 			write(data, 0, data.length);
 		}
 
-
 		public void write(float[] originalData, int start, int end) {
 			byte[] convertedData = new byte[originalData.length * 2];
 			converter.toByteArray(originalData, convertedData);
-			line.write(convertedData,start,end-start);
+			line.write(convertedData, start, end - start);
 		}
 	}
 
-	private static class AudioProcessor implements Runnable{
+	private static class AudioProcessor implements Runnable {
 
 		AudioFloatInputStream afis;
 		float[] audioBuffer;
@@ -98,13 +95,12 @@ public class AutoTune {
 
 		float sampleRate = 44100;
 
-		private AudioProcessor(int inputDevice) throws LineUnavailableException{
+		private AudioProcessor(int inputDevice) throws LineUnavailableException {
 			speaker = new Speaker();
 			javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[inputDevice];
 			Mixer mixer = AudioSystem.getMixer(selected);
 			AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, false);
-			DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,
-					format);
+			DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
 			TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
 			int numberOfSamples = (int) (0.1 * sampleRate);
 			line.open(format, numberOfSamples);
@@ -120,44 +116,40 @@ public class AutoTune {
 		public void run() {
 
 			try {
-				boolean hasMoreBytes = afis.read(audioBuffer,0,audioBuffer.length) != -1;
-				while(hasMoreBytes){
+				boolean hasMoreBytes = afis.read(audioBuffer, 0, audioBuffer.length) != -1;
+				while (hasMoreBytes) {
 
-				//	float pitch = Yin.processBuffer(audioBuffer, sampleRate);
+					// float pitch = Yin.processBuffer(audioBuffer, sampleRate);
 
-					//if(pitch > 440 && pitch <  3520){
-					//	System.out.println(pitch);
+					// if(pitch > 440 && pitch < 3520){
+					// System.out.println(pitch);
 
-						//calculate fft
-						fft.forwardTransform(audioBuffer);
+					// calculate fft
+					fft.forwardTransform(audioBuffer);
 
-						//scale pitch
-						/*
-						int originalBin = (int) (pitch * audioBuffer.length / sampleRate);
-						int newBin = (int) (1760 * audioBuffer.length / sampleRate);
-						int diff = newBin - originalBin;
+					// scale pitch
+					/*
+					 * int originalBin = (int) (pitch * audioBuffer.length /
+					 * sampleRate); int newBin = (int) (1760 *
+					 * audioBuffer.length / sampleRate); int diff = newBin -
+					 * originalBin;
+					 * 
+					 * if(diff > 0) for(int i = audioBuffer.length - 1; i >= 0 ;
+					 * i--){ audioBuffer[i] = i - diff >= 0 ?
+					 * audioBuffer[i-diff] : 0; } else for(int i = 0; i <
+					 * audioBuffer.length ; i++){ audioBuffer[i] = i-diff <
+					 * audioBuffer.length ? audioBuffer[i-diff] : 0; }
+					 */
+					// inverse fft
+					fft.backwardsTransform(audioBuffer);
 
-						if(diff > 0)
-							for(int i = audioBuffer.length - 1; i >= 0 ; i--){
-								 audioBuffer[i] = i - diff >= 0 ? audioBuffer[i-diff] : 0;
-							}
-						else
-							for(int i = 0; i < audioBuffer.length ; i++){
-								 audioBuffer[i] = i-diff < audioBuffer.length ? audioBuffer[i-diff] : 0;
-							}
-							*/
-						//inverse fft
-						fft.backwardsTransform(audioBuffer);
+					// play resulting audio
+					speaker.write(audioBuffer, 0, 1024);
+					// }
 
-						//play resulting audio
-						speaker.write(audioBuffer,0,1024);
-				//	}
-
-
-
-					for(int i = 0 ; i < 1024 ; i++)
-						audioBuffer[i]=audioBuffer[1024+i];
-					hasMoreBytes = afis.read(audioBuffer,audioBuffer.length-1024,1024) != -1;
+					for (int i = 0; i < 1024; i++)
+						audioBuffer[i] = audioBuffer[1024 + i];
+					hasMoreBytes = afis.read(audioBuffer, audioBuffer.length - 1024, 1024) != -1;
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

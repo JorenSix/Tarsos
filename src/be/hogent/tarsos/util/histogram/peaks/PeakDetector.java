@@ -9,7 +9,7 @@ import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
 /**
  * @author Joren Six
- *
+ * 
  */
 public class PeakDetector {
 
@@ -20,7 +20,7 @@ public class PeakDetector {
 	 * Create a histogram with peak information. Instead of triangular peaks it
 	 * creates a histogram (with the same resolution (bin widths) as the
 	 * original) with peaks in the form of gaussian curves.
-	 *
+	 * 
 	 * @param histogram
 	 *            the histogram to detect peaks for
 	 * @param windowSize
@@ -39,23 +39,21 @@ public class PeakDetector {
 			peakPositionsDouble[i] = peaks.get(i).getPosition();
 			peakHeights[i] = peaks.get(i).getHeight();
 		}
-		return ToneScaleHistogram.createToneScale(peakPositionsDouble,
-				peakHeights, peakWidths, peakStandardDeviations);
+		return ToneScaleHistogram.createToneScale(peakPositionsDouble, peakHeights, peakWidths, peakStandardDeviations);
 	}
 
 	/**
 	 * Detects peaks in a histogram. The peaks are positioned at places where
 	 * DifferenceScore != 0 and HeigthScore is bigger than a certain threshold
 	 * value.
-	 *
+	 * 
 	 * @param histogram
 	 * @param windowSize
 	 *            in number of bins
 	 * @param meanFactorThreshold
 	 * @return
 	 */
-	public static List<Peak> detect(Histogram histogram, int windowSize,
-			double meanFactorThreshold) {
+	public static List<Peak> detect(Histogram histogram, int windowSize, double meanFactorThreshold) {
 		double peakFunctionValues[] = new double[histogram.getNumberOfClasses()];
 		PeakScore differenceScore = new DifferenceScore(histogram, windowSize);
 		PeakScore localHeightScore = new LocalHeightScore();
@@ -64,8 +62,7 @@ public class PeakDetector {
 			// If the peak is a real peak according to the difference score,
 			// then set the height score value.
 			if (score != 0) {
-				peakFunctionValues[i] = localHeightScore.score(histogram, i,
-						windowSize);
+				peakFunctionValues[i] = localHeightScore.score(histogram, i, windowSize);
 			}
 		}
 
@@ -87,14 +84,10 @@ public class PeakDetector {
 		List<Integer> elementsToRemove = new ArrayList<Integer>();
 		for (int i = 0; i < peakPositions.size(); i++) {
 			int firstPeakIndex = peakPositions.get(i);
-			int secndPeakIndex = peakPositions.get(((i + 1) % peakPositions
-					.size()));
+			int secndPeakIndex = peakPositions.get(((i + 1) % peakPositions.size()));
 			if (Math.abs(secndPeakIndex - firstPeakIndex) <= windowSize)
-				elementsToRemove
-						.add(histogram.getCount(firstPeakIndex) > histogram
-								.getCount(secndPeakIndex) ? peakPositions
-								.get((i + 1) % peakPositions.size())
-								: peakPositions.get(i));
+				elementsToRemove.add(histogram.getCount(firstPeakIndex) > histogram.getCount(secndPeakIndex) ? peakPositions.get((i + 1)
+						% peakPositions.size()) : peakPositions.get(i));
 		}
 		peakPositions.removeAll(elementsToRemove);
 

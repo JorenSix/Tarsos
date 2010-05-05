@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import be.hogent.tarsos.pitch.PitchFunctions;
 
-
 public class PitchFunctionTests {
 	@Test
 	public void testFoldPitchValuesInCentToOneOctave() {
@@ -20,14 +19,14 @@ public class PitchFunctionTests {
 		pitchValuesInCent.add(1800.0);
 		pitchValuesInCent.add(-200.0);
 		pitchValuesInCent.add(1249.87);
-		//PitchFunctions.foldPitchValuesInCentToOneOctave(pitchValuesInCent);
+		// PitchFunctions.foldPitchValuesInCentToOneOctave(pitchValuesInCent);
 		/*
-		assertTrue(4.0 == (double) pitchValuesInCent.get(0));
-		assertTrue(4.0 == (double) pitchValuesInCent.get(1));
-		assertTrue(600.0   == (double) pitchValuesInCent.get(2));
-		assertTrue(1000.0  == (double) pitchValuesInCent.get(3));
-		assertEquals(49.87, pitchValuesInCent.get(4),0.01);
-		*/
+		 * assertTrue(4.0 == (double) pitchValuesInCent.get(0)); assertTrue(4.0
+		 * == (double) pitchValuesInCent.get(1)); assertTrue(600.0 == (double)
+		 * pitchValuesInCent.get(2)); assertTrue(1000.0 == (double)
+		 * pitchValuesInCent.get(3)); assertEquals(49.87,
+		 * pitchValuesInCent.get(4),0.01);
+		 */
 	}
 
 	@Test
@@ -38,10 +37,10 @@ public class PitchFunctionTests {
 		pitchValuesInCent.add(-200.0);
 		pitchValuesInCent.add(1249.87);
 
-		// -200   1204  1249.87 1800 => (1204 + 1249.87)/2
+		// -200 1204 1249.87 1800 => (1204 + 1249.87)/2
 		double actual = PitchFunctions.median(pitchValuesInCent);
 		double expected = 1226.935;
-		assertEquals(expected,actual,0.01);
+		assertEquals(expected, actual, 0.01);
 	}
 
 	@Test
@@ -51,10 +50,10 @@ public class PitchFunctionTests {
 		pitchValuesInCent.add(9.0);
 		pitchValuesInCent.add(7.0);
 
-		pitchValuesInCent = PitchFunctions.medianFilter(pitchValuesInCent,3);
-		assertEquals(3.0, pitchValuesInCent.get(0),0.01);
-		assertEquals(7.0, pitchValuesInCent.get(1),0.01);
-		assertEquals(7.0, pitchValuesInCent.get(2),0.01);
+		pitchValuesInCent = PitchFunctions.medianFilter(pitchValuesInCent, 3);
+		assertEquals(3.0, pitchValuesInCent.get(0), 0.01);
+		assertEquals(7.0, pitchValuesInCent.get(1), 0.01);
+		assertEquals(7.0, pitchValuesInCent.get(2), 0.01);
 	}
 
 	@Test
@@ -65,11 +64,10 @@ public class PitchFunctionTests {
 		pitchValuesInCent.add(7.0);
 
 		PitchFunctions.gaussianFilter(pitchValuesInCent);
-		//assertEquals(3.0, pitchValuesInCent.get(0),0.01);
-		//assertEquals(7.0, pitchValuesInCent.get(1),0.01);
-		//assertEquals(7.0, pitchValuesInCent.get(2),0.01);
+		// assertEquals(3.0, pitchValuesInCent.get(0),0.01);
+		// assertEquals(7.0, pitchValuesInCent.get(1),0.01);
+		// assertEquals(7.0, pitchValuesInCent.get(2),0.01);
 	}
-
 
 	@Test
 	public void testBandwithFilter() {
@@ -79,35 +77,36 @@ public class PitchFunctionTests {
 		pitchValuesInCent.add(7.0);
 
 		PitchFunctions.bandwithFilter(pitchValuesInCent, 4, 8);
-		assertTrue(pitchValuesInCent.size()==1);
-		assertTrue(pitchValuesInCent.get(0)==7);
+		assertTrue(pitchValuesInCent.size() == 1);
+		assertTrue(pitchValuesInCent.get(0) == 7);
 	}
 
 	@Test
 	public void testCreateFrequencyTable() {
-//		List<Double> values = new ArrayList<Double>();
-//		values.add(-3.0);
-//		values.add(3.0);
-//		values.add(7.0);
-//		values.add(7.2);
-//		double classWidth = 5;
-//		HashMap<Double,Double> hashMap = PitchFunctions.createFrequencyTable(values, classWidth);
-//		assertTrue(hashMap.get(-2.5) == 1);
-//		assertTrue(hashMap.get(2.5) == 1);
-//		assertTrue(hashMap.get(7.5) == 2);
-//
-//		classWidth = 1.0;
-//		hashMap = PitchFunctions.createFrequencyTable(values, classWidth);
-//		assertTrue(hashMap.get(-2.5) == 1);
-//		assertTrue(hashMap.get(3.5) == 1);
-//		assertTrue(hashMap.get(7.5) == 2);
-//
-//		classWidth = 2.0;
-//		hashMap = PitchFunctions.createFrequencyTable(values, classWidth);
-//		assertTrue(hashMap.get(-3.0) == 1);
-//		assertTrue(hashMap.get(1.0) == 0);
-//		assertTrue(hashMap.get(3.0) == 1);
-//		assertTrue(hashMap.get(7.0) == 2);
+		// List<Double> values = new ArrayList<Double>();
+		// values.add(-3.0);
+		// values.add(3.0);
+		// values.add(7.0);
+		// values.add(7.2);
+		// double classWidth = 5;
+		// HashMap<Double,Double> hashMap =
+		// PitchFunctions.createFrequencyTable(values, classWidth);
+		// assertTrue(hashMap.get(-2.5) == 1);
+		// assertTrue(hashMap.get(2.5) == 1);
+		// assertTrue(hashMap.get(7.5) == 2);
+		//
+		// classWidth = 1.0;
+		// hashMap = PitchFunctions.createFrequencyTable(values, classWidth);
+		// assertTrue(hashMap.get(-2.5) == 1);
+		// assertTrue(hashMap.get(3.5) == 1);
+		// assertTrue(hashMap.get(7.5) == 2);
+		//
+		// classWidth = 2.0;
+		// hashMap = PitchFunctions.createFrequencyTable(values, classWidth);
+		// assertTrue(hashMap.get(-3.0) == 1);
+		// assertTrue(hashMap.get(1.0) == 0);
+		// assertTrue(hashMap.get(3.0) == 1);
+		// assertTrue(hashMap.get(7.0) == 2);
 	}
 
 }

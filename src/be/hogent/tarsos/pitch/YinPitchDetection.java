@@ -17,7 +17,7 @@ public class YinPitchDetection implements PitchDetector {
 	private final List<Sample> samples;
 	private final String name;
 
-	public YinPitchDetection(AudioFile audioFile){
+	public YinPitchDetection(AudioFile audioFile) {
 		this.file = audioFile;
 		this.samples = new ArrayList<Sample>();
 		this.name = "tarsos_yin";
@@ -30,7 +30,7 @@ public class YinPitchDetection implements PitchDetector {
 				@Override
 				public void handleDetectedPitch(float time, float pitch) {
 					long start = (long) time * 1000;
-					Sample s = pitch == -1 ? new Sample(start) : new Sample(start,pitch);
+					Sample s = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
 					samples.add(s);
 				}
 			});

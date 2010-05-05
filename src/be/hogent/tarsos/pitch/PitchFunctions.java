@@ -20,8 +20,8 @@ import be.hogent.tarsos.util.histogram.Histogram;
 /**
  * Utility class for pitch conversions See <a href="http://www.lenmus.org/sw/page.php?pid=docs&doc=hacking_guide&pag=pitch-representation&lang=en"
  * >pitch-representatio</a> for some background.
- *
- *
+ * 
+ * 
  * @author Joren Six
  */
 public class PitchFunctions {
@@ -30,14 +30,13 @@ public class PitchFunctions {
 
 	/**
 	 * Converts pitches in Hertz to the requested unit.
-	 *
+	 * 
 	 * @param pitchValuesInHertz
 	 *            the pitch values in Hertz
 	 * @return the values converted to the requested unit. The original list
 	 *         remains unchanged.
 	 */
-	public static List<Double> convertHertzTo(PitchUnit unit,
-			List<Double> pitchValuesInHertz) {
+	public static List<Double> convertHertzTo(PitchUnit unit, List<Double> pitchValuesInHertz) {
 		List<Double> convertedValues = new ArrayList<Double>(pitchValuesInHertz);
 		switch (unit) {
 		case ABSOLUTE_CENTS:
@@ -58,13 +57,9 @@ public class PitchFunctions {
 		return convertedValues;
 	}
 
-
-
-
-
 	/**
 	 * Converts a list of pitches in Hertz to absolute cents.
-	 *
+	 * 
 	 * @param convertedValues
 	 */
 	private static void convertHertzToAbsoluteCent(List<Double> convertedValues) {
@@ -74,10 +69,6 @@ public class PitchFunctions {
 		}
 	}
 
-
-
-
-
 	private static void convertHertzToMidiCent(List<Double> convertedValues) {
 		for (int i = 0; i < convertedValues.size(); i++) {
 			Double valueInHertz = convertedValues.get(i);
@@ -85,20 +76,17 @@ public class PitchFunctions {
 		}
 	}
 
-
-
 	private static void convertHertzToMidiKey(List<Double> convertedValues) {
 		for (int i = 0; i < convertedValues.size(); i++) {
 			Double valueInHertz = convertedValues.get(i);
-			convertedValues
-					.set(i, (double) PitchConverter.hertzToMidiKey(valueInHertz));
+			convertedValues.set(i, (double) PitchConverter.hertzToMidiKey(valueInHertz));
 		}
 	}
 
 	/**
 	 * Folds the pitch values to one octave. E.g. 1203 becomes 3 and 956 remains
 	 * 956
-	 *
+	 * 
 	 * @param pitchValuesInCent
 	 *            a list of double values in cent
 	 */
@@ -110,13 +98,11 @@ public class PitchFunctions {
 		}
 	}
 
-
-
 	/**
 	 * Removes all frequencies that are not in the specified band. The remaining
 	 * band consists only of frequencies between minValueInHertz and
 	 * maxValueInHertz (inclusive).
-	 *
+	 * 
 	 * @param pitchValuesInHertz
 	 *            the values to filter.
 	 * @param minValueInHertz
@@ -124,8 +110,7 @@ public class PitchFunctions {
 	 * @param maxValueInHertz
 	 *            the maximum frequency in Hertz.
 	 */
-	public static void bandwithFilter(List<Double> pitchValuesInHertz,
-			double minValueInHertz, double maxValueInHertz) {
+	public static void bandwithFilter(List<Double> pitchValuesInHertz, double minValueInHertz, double maxValueInHertz) {
 		Iterator<Double> it = pitchValuesInHertz.iterator();
 		while (it.hasNext()) {
 			double value = it.next();
@@ -137,7 +122,7 @@ public class PitchFunctions {
 
 	/**
 	 * Calculates the median for a list of doubles. The list is sorted in-place.
-	 *
+	 * 
 	 * @param list
 	 *            The list.
 	 * @return The median.
@@ -173,14 +158,14 @@ public class PitchFunctions {
 	 * n must be odd! The function is defined as:<br>
 	 * f(i) = median( list(i-n/2) .. list(i+n/2) )<br>
 	 * </p>
-	 *
+	 * 
 	 * <pre>
 	 *  So for n = 3 and list to filter:
 	 *    [3 7 4]
 	 *  0 [3 7 4] 0
 	 *    [3 4 7]
 	 * </pre>
-	 *
+	 * 
 	 * @param listToFilter
 	 *            the list to filter
 	 * @param n
@@ -206,10 +191,8 @@ public class PitchFunctions {
 			listToFilter.add(0.0);
 		}
 
-		for (int i = numberOfZeroesToAddBefore; i < listToFilter.size()
-				- numberOfZeroesToAddAfter; i++) {
-			double median = median(new ArrayList<Double>(listToFilter.subList(i
-					- (n / 2), i + (n / 2) + 1)));
+		for (int i = numberOfZeroesToAddBefore; i < listToFilter.size() - numberOfZeroesToAddAfter; i++) {
+			double median = median(new ArrayList<Double>(listToFilter.subList(i - (n / 2), i + (n / 2) + 1)));
 			filteredList.add(median);
 		}
 
@@ -224,7 +207,7 @@ public class PitchFunctions {
 
 	/**
 	 * Smooths a list of doubles using a gaussian.
-	 *
+	 * 
 	 * @param listToSmooth
 	 *            the list to smooth
 	 * @param standardDeviation
@@ -232,8 +215,7 @@ public class PitchFunctions {
 	 *            below zero is invalid.
 	 * @return
 	 */
-	public static List<Double> getGaussianSmoothed(List<Double> listToSmooth,
-			double standardDeviation) {
+	public static List<Double> getGaussianSmoothed(List<Double> listToSmooth, double standardDeviation) {
 		if (standardDeviation < 0.0) {
 			throw new IllegalArgumentException("standardDeviation invalid");
 		} else if (standardDeviation == 0.0) {
@@ -257,8 +239,7 @@ public class PitchFunctions {
 		double exp = -1.0 / (2.0 * var);
 		for (int i = m; i < numWeights; i++) {
 			double del = i - m;
-			weights[i] = weights[numWeights - 1 - i] = gain
-					* Math.exp(exp * del * del);
+			weights[i] = weights[numWeights - 1 - i] = gain * Math.exp(exp * del * del);
 		}
 
 		// Clear the band total count for the smoothed histogram.
@@ -308,15 +289,14 @@ public class PitchFunctions {
 	/**
 	 * Applies a Gaussian filter to the list to filter. The parameter is
 	 * arbitrary and can be 1/(2*standard deviation^2).
-	 *
+	 * 
 	 * @param listToFilter
 	 *            the list to filter
 	 * @param parameter
 	 *            the parameter defining the impulse response of the filter.
 	 * @return a Gaussian filtered list
 	 */
-	public static List<Double> gaussianFilter(List<Double> listToFilter,
-			double parameter) {
+	public static List<Double> gaussianFilter(List<Double> listToFilter, double parameter) {
 		int windowSize = 7;
 		List<Double> filteredList = new ArrayList<Double>();
 
@@ -330,8 +310,7 @@ public class PitchFunctions {
 			double sumValues = 0;
 			double sumWeight = 0;
 			for (int j = 0; j < windowSize; j++) {
-				double weight = Math.pow(Math.E, -1 * (j - windowSize / 2)
-						* (j - windowSize / 2) / 2 * parameter);
+				double weight = Math.pow(Math.E, -1 * (j - windowSize / 2) * (j - windowSize / 2) / 2 * parameter);
 
 				sumWeight += weight;
 				sumValues += weight * listToFilter.get(i);
@@ -350,7 +329,7 @@ public class PitchFunctions {
 	/**
 	 * Applies a Gaussian filter to the list to filter. The parameter is
 	 * 1/(2*standard deviation^2).
-	 *
+	 * 
 	 * @param listToFilter
 	 *            the list to filter
 	 * @return An order n one-dimensional median filtered list.
@@ -371,7 +350,7 @@ public class PitchFunctions {
 	 * Classes are defined by the limit and resolution. E.g. for a limit of 1200
 	 * with a resolution of 400 there are 3 classes: [0-400[, [400-800[ and
 	 * [800-1200[.
-	 *
+	 * 
 	 * @param values
 	 *            the data to distribute over the bins/classes.
 	 * @param classWidth
@@ -382,10 +361,8 @@ public class PitchFunctions {
 	 *            the stopping value
 	 * @return The number of items in each class
 	 */
-	public static Histogram createFrequencyTable(List<Double> values,
-			double classWidth, double start, double stop) {
-		Histogram histogram = new Histogram(start, stop,
-				(int) ((stop - start) / classWidth));
+	public static Histogram createFrequencyTable(List<Double> values, double classWidth, double start, double stop) {
+		Histogram histogram = new Histogram(start, stop, (int) ((stop - start) / classWidth));
 		for (Double value : values) {
 			histogram.add(value);
 		}
@@ -398,23 +375,18 @@ public class PitchFunctions {
 		HISTOGRAM_PNG, HISTOGRAM_CSV, TONE_SCALE_MIDI, PEAKS_PNG, PEAKS_CSV
 	}
 
-	public static void exportFrequencyTable(Histogram histogram,
-			String fileName, double start, double stop) {
+	public static void exportFrequencyTable(Histogram histogram, String fileName, double start, double stop) {
 		StringBuilder sb = new StringBuilder();
-		for (double current = start + histogram.getClassWidth() / 2; current <= stop; current += histogram
-				.getClassWidth()) {
+		for (double current = start + histogram.getClassWidth() / 2; current <= stop; current += histogram.getClassWidth()) {
 			double count = histogram.getCount(current);
 			long cumFreq = histogram.getCumFreq(current);
-			double derivative = (current + histogram.getClassWidth() > stop) ? 0
-					: (histogram.getCount(current) - histogram.getCount(current
-							+ histogram.getClassWidth()))
-							/ histogram.getClassWidth();
+			double derivative = (current + histogram.getClassWidth() > stop) ? 0 : (histogram.getCount(current) - histogram
+					.getCount(current + histogram.getClassWidth()))
+					/ histogram.getClassWidth();
 
 			double psd = 0.0;
 			if (current + 2 * histogram.getClassWidth() <= stop) {
-				psd = (histogram.getCount(current + 2
-						* histogram.getClassWidth()) - histogram
-						.getCount(current))
+				psd = (histogram.getCount(current + 2 * histogram.getClassWidth()) - histogram.getCount(current))
 						/ (2 * histogram.getClassWidth());
 			}
 			// double derivative = (current + frequencyTable.getClassWidth() <=
@@ -422,9 +394,8 @@ public class PitchFunctions {
 			// frequencyTable.getClassWidth()) -
 			// frequencyTable.getCount(current))
 			// /frequencyTable.getClassWidth();
-			sb.append(current).append(";").append(count).append(";").append(
-					cumFreq).append(";").append(derivative).append(";").append(
-					psd).append("\n");
+			sb.append(current).append(";").append(count).append(";").append(cumFreq).append(";").append(derivative).append(";").append(psd)
+					.append("\n");
 		}
 		FileUtils.writeFile(sb.toString(), fileName);
 
@@ -436,8 +407,7 @@ public class PitchFunctions {
 		double highWaterMark = 0;
 		double[] values = new double[histogram.getNumberOfClasses()];
 		int i = 0;
-		for (double current = start + histogram.getClassWidth() / 2; current <= stop; current += histogram
-				.getClassWidth()) {
+		for (double current = start + histogram.getClassWidth() / 2; current <= stop; current += histogram.getClassWidth()) {
 
 			h.addPoint(0, current, histogram.getCount(current), !first);
 			values[i] = histogram.getCount(current);
@@ -470,21 +440,20 @@ public class PitchFunctions {
 			/*
 			 * h.addXTick("Fifth", reference - 700); h.addXTick("Fifth",
 			 * reference + 700);
-			 *
+			 * 
 			 * h.addXTick("Tritonus", reference - 600); h.addXTick("Tritonus",
 			 * reference + 600);
-			 *
+			 * 
 			 * h.addXTick("Kleine terts",reference + 300);
 			 * h.addXTick("Kleine terts",reference - 300);
-			 *
+			 * 
 			 * h.addXTick("Grote terts",reference + 400);
 			 * h.addXTick("Grote terts",reference - 400);
-			 *
+			 * 
 			 * h.setWrap(true);
 			 */
 
-			h.addYTick("Gem", histogram.getSumFreq()
-					/ histogram.getNumberOfClasses());
+			h.addYTick("Gem", histogram.getSumFreq() / histogram.getNumberOfClasses());
 			h.addYTick("Med", StatUtils.percentile(values, 0.5));
 			h.setXRange(43, 1147);
 		}
@@ -496,9 +465,7 @@ public class PitchFunctions {
 		try {
 			Thread.sleep(60);
 			BufferedImage image = h.exportImage();
-			ImageIO.write(image, "png", new File(fileName.substring(0, fileName
-					.length() - 4)
-					+ ".png"));
+			ImageIO.write(image, "png", new File(fileName.substring(0, fileName.length() - 4) + ".png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e1) {
@@ -507,32 +474,28 @@ public class PitchFunctions {
 	}
 
 	public static void exportFrequencyTable(Histogram histogram, String fileName) {
-		exportFrequencyTable(histogram, fileName, histogram.getStart(),
-				histogram.getStop());
+		exportFrequencyTable(histogram, fileName, histogram.getStart(), histogram.getStop());
 	}
 
 	/**
 	 * Reads a frequency table (histogram) from disk. The source file is
 	 * expected to be a CSV-file in the format:
-	 *
+	 * 
 	 * <code>value;frequency[;other data; is discarded;...]</code>
-	 *
+	 * 
 	 * The lowest value is on the first row, the highest on the last!
-	 *
+	 * 
 	 * @param fileName
 	 * @return a frequencytable
 	 */
 	public static Histogram readFrequencyTable(String fileName) {
 		List<String[]> data = FileUtils.readCSVFile(fileName, ";", -1);
 
-		double classWidth = Double.parseDouble(data.get(1)[0])
-				- Double.parseDouble(data.get(0)[0]);
+		double classWidth = Double.parseDouble(data.get(1)[0]) - Double.parseDouble(data.get(0)[0]);
 		double start = Double.parseDouble(data.get(0)[0]) - classWidth / 2.0;
-		double stop = Double.parseDouble(data.get(data.size() - 1)[0])
-				+ classWidth / 2.0;
+		double stop = Double.parseDouble(data.get(data.size() - 1)[0]) + classWidth / 2.0;
 
-		Histogram table = new Histogram(start, stop,
-				(int) ((stop - start) / classWidth));
+		Histogram table = new Histogram(start, stop, (int) ((stop - start) / classWidth));
 		for (String[] row : data) {
 			int frequency = (int) Double.parseDouble(row[1]);
 			double value = Double.parseDouble(row[0]);

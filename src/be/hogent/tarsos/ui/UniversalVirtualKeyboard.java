@@ -6,26 +6,26 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 
-
 /**
- *
+ * 
  * <p>
  * Represents a keyboard with an arbitrary number of (white) keys per octave.
  * Every octave is marked.
  * </p>
  * <p>
- * Uses refactored code from the gervill package licensed under the GPL
- * with the classpath exception.
+ * Uses refactored code from the gervill package licensed under the GPL with the
+ * classpath exception.
  * </p>
- * <a href="https://gervill.dev.java.net/source/browse/gervill/src.demos/">Gervill source code</a>
- *
+ * <a href="https://gervill.dev.java.net/source/browse/gervill/src.demos/">
+ * Gervill source code</a>
+ * 
  * @author Joren Six
  */
-public class UniversalVirtualKeyboard  extends VirtualKeyboard {
+public class UniversalVirtualKeyboard extends VirtualKeyboard {
 
 	private static final long serialVersionUID = -3017076399911747736L;
 
-	public UniversalVirtualKeyboard(int numberOfKeysPerOctave){
+	public UniversalVirtualKeyboard(int numberOfKeysPerOctave) {
 		super(numberOfKeysPerOctave);
 	}
 
@@ -47,10 +47,8 @@ public class UniversalVirtualKeyboard  extends VirtualKeyboard {
 	public void paint(Graphics g) {
 		super.paint(g);
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
 		int w = getWidth();
 		int h = getHeight();
@@ -72,13 +70,13 @@ public class UniversalVirtualKeyboard  extends VirtualKeyboard {
 			if (i % this.numberOfKeysPerOctave == 0)
 				g2.drawString("_", cx + 2, 12);
 
-			if(i >= lowestAssignedKey){
-                if(i - lowestAssignedKey < VirtualKeyboard.mappedKeys.length()){
-                    g2.setColor(Color.GRAY);
-                    char keyChar = VirtualKeyboard.mappedKeys.charAt(i - lowestAssignedKey);
-                    g2.drawString("" + keyChar, cx + 2, h - 4);
-                }
-            }
+			if (i >= lowestAssignedKey) {
+				if (i - lowestAssignedKey < VirtualKeyboard.mappedKeys.length()) {
+					g2.setColor(Color.GRAY);
+					char keyChar = VirtualKeyboard.mappedKeys.charAt(i - lowestAssignedKey);
+					g2.drawString("" + keyChar, cx + 2, h - 4);
+				}
+			}
 			cx += nw;
 		}
 	}
