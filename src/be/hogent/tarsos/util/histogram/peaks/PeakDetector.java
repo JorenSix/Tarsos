@@ -31,10 +31,10 @@ public class PeakDetector {
      *         other histograms (files)
      */
     public static Histogram newPeakDetection(List<Peak> peaks) {
-        double peakPositionsDouble[] = new double[peaks.size()];
-        double peakWidths[] = null;
-        double peakHeights[] = new double[peaks.size()];
-        double peakStandardDeviations[] = null;
+        double[] peakPositionsDouble = new double[peaks.size()];
+        double[] peakWidths = null;
+        double[] peakHeights = new double[peaks.size()];
+        double[] peakStandardDeviations = null;
         for (int i = 0; i < peaks.size(); i++) {
             peakPositionsDouble[i] = peaks.get(i).getPosition();
             peakHeights[i] = peaks.get(i).getHeight();
@@ -86,11 +86,12 @@ public class PeakDetector {
         for (int i = 0; i < peakPositions.size(); i++) {
             int firstPeakIndex = peakPositions.get(i);
             int secndPeakIndex = peakPositions.get(((i + 1) % peakPositions.size()));
-            if (Math.abs(secndPeakIndex - firstPeakIndex) <= windowSize)
+            if (Math.abs(secndPeakIndex - firstPeakIndex) <= windowSize) {
                 elementsToRemove
-                        .add(histogram.getCount(firstPeakIndex) > histogram.getCount(secndPeakIndex) ? peakPositions
-                                .get((i + 1) % peakPositions.size())
-                                : peakPositions.get(i));
+                .add(histogram.getCount(firstPeakIndex) > histogram.getCount(secndPeakIndex) ? peakPositions
+                        .get((i + 1) % peakPositions.size())
+                        : peakPositions.get(i));
+            }
         }
         peakPositions.removeAll(elementsToRemove);
 

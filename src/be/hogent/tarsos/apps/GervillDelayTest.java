@@ -26,7 +26,7 @@ public class GervillDelayTest {
 
         ShortMessage msg = new ShortMessage();
 
-        double tunings[] = new double[128];
+        double[] tunings = new double[128];
         for (int i = 1; i < 128; i++) {
             tunings[i] = tunings[i - 1] + 240;
         }

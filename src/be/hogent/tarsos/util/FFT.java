@@ -29,7 +29,7 @@ public class FFT {
      * @param data
      *            data to transform
      */
-    public void forwardTransform(float data[]) {
+    public void forwardTransform(float[] data) {
         ffft.transform(data);
     }
 
@@ -39,7 +39,7 @@ public class FFT {
      * @param data
      *            data to transform
      */
-    public void backwardsTransform(float data[]) {
+    public void backwardsTransform(float[] data) {
         ifft.transform(data);
     }
 
@@ -55,7 +55,7 @@ public class FFT {
      * @return The modulus, magnitude or absolute value of the element at index
      *         i
      */
-    public float modulus(float data[], int i) {
+    public float modulus(float[] data, int i) {
         float modulus = data[i] * data[i] + data[i + data.length / 2] * data[i + data.length / 2];
         modulus = (float) Math.pow(modulus, 0.5);
         return modulus;
@@ -120,8 +120,9 @@ public class FFT {
                 int j;
                 int bitm;
                 for (bitm = 2, j = 0; bitm < fftFrameSize2; bitm <<= 1) {
-                    if ((i & bitm) != 0)
+                    if ((i & bitm) != 0) {
                         j++;
+                    }
                     j <<= 1;
                 }
                 bitm_array[i] = j;
@@ -194,13 +195,15 @@ public class FFT {
 
             int nstep = 2;
 
-            if (nstep >= fftFrameSize2)
+            if (nstep >= fftFrameSize2) {
                 return;
+            }
             int i = nstep - 2;
-            if (sign == -1)
+            if (sign == -1) {
                 calcF4F(fftFrameSize, data, i, nstep, w);
-            else
+            } else {
                 calcF4I(fftFrameSize, data, i, nstep, w);
+            }
 
         }
 
@@ -746,8 +749,9 @@ public class FFT {
         }
 
         private final void bitreversal(float[] data) {
-            if (fftFrameSize < 4)
+            if (fftFrameSize < 4) {
                 return;
+            }
 
             int inverse = fftFrameSize2 - 2;
             for (int i = 0; i < fftFrameSize; i += 4) {

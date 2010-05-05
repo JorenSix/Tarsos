@@ -40,7 +40,7 @@ public class MidiUtils {
      *             if something goes awry.
      */
     public static void sendTuningChange(Receiver recv, int channel, int tuningpreset)
-            throws InvalidMidiDataException {
+    throws InvalidMidiDataException {
         // Data Entry
         ShortMessage sm1 = new ShortMessage();
         sm1.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x64, 03);
@@ -77,7 +77,7 @@ public class MidiUtils {
      * @throws InvalidMidiDataException
      */
     public static void sendTunings(Receiver recv, int bank, int preset, String name, double[] tunings)
-            throws IOException, InvalidMidiDataException {
+    throws IOException, InvalidMidiDataException {
         assert tunings.length == 128;
         int[] itunings = new int[128];
         for (int i = 0; i < itunings.length; i++) {
@@ -112,7 +112,7 @@ public class MidiUtils {
         private static final byte GENERAL_MIDI_2_ON = 0x03;
 
         private static SysexMessage setGeneralMidiMessage(int targetDevice, byte type) throws IOException,
-                InvalidMidiDataException {
+        InvalidMidiDataException {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_NON_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
@@ -158,7 +158,7 @@ public class MidiUtils {
         private static final byte[] GLOBAL_PARAMETER_CONTROL = new byte[] { (byte) 0x05 };
 
         private static SysexMessage setDeviceControl(int targetDevice, int control, int value)
-                throws IOException, InvalidMidiDataException {
+        throws IOException, InvalidMidiDataException {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
@@ -175,22 +175,22 @@ public class MidiUtils {
         }
 
         public static SysexMessage setMasterVolume(int targetDevice, int value) throws IOException,
-                InvalidMidiDataException {
+        InvalidMidiDataException {
             return setDeviceControl(targetDevice, MASTER_VOLUME, value);
         }
 
         public static SysexMessage setMasterBalance(int targetDevice, int value) throws IOException,
-                InvalidMidiDataException {
+        InvalidMidiDataException {
             return setDeviceControl(targetDevice, MASTER_BALANCE, value);
         }
 
         public static SysexMessage setMasterFineTuning(int targetDevice, int value) throws IOException,
-                InvalidMidiDataException {
+        InvalidMidiDataException {
             return setDeviceControl(targetDevice, MASTER_FINE_TUNING, value);
         }
 
         public static SysexMessage setMasterCoarseTuning(int targetDevice, int value) throws IOException,
-                InvalidMidiDataException {
+        InvalidMidiDataException {
             return setDeviceControl(targetDevice, MASTER_COARSE_TUNING, value);
         }
 
@@ -244,12 +244,12 @@ public class MidiUtils {
             private static final byte[] REVERB_TIME = new byte[] { (byte) 0x01 };
 
             public static SysexMessage setReverbType(int targetDevice, int reverbType) throws IOException,
-                    InvalidMidiDataException {
+            InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_REVERB, REVERB_TYPE, reverbType);
             }
 
             public static SysexMessage setReverbTime(int targetDevice, int reverbTime) throws IOException,
-                    InvalidMidiDataException {
+            InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_REVERB, REVERB_TIME, reverbTime);
             }
         }
@@ -281,27 +281,27 @@ public class MidiUtils {
             private static final byte[] CHORUS_SEND_TO_REVERB = new byte[] { (byte) 0x04 };
 
             public static SysexMessage setChorusType(int targetDevice, int reverbType) throws IOException,
-                    InvalidMidiDataException {
+            InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_CHORUS, CHORUS_TYPE, reverbType);
             }
 
             public static SysexMessage setChorusModRate(int targetDevice, int reverbType) throws IOException,
-                    InvalidMidiDataException {
+            InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_CHORUS, CHORUS_MOD_RATE, reverbType);
             }
 
             public static SysexMessage setChorusModDepth(int targetDevice, int reverbType)
-                    throws IOException, InvalidMidiDataException {
+            throws IOException, InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_CHORUS, CHORUS_MOD_DEPTH, reverbType);
             }
 
             public static SysexMessage setChorusFeedback(int targetDevice, int reverbType)
-                    throws IOException, InvalidMidiDataException {
+            throws IOException, InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_CHORUS, CHORUS_FEEDBACK, reverbType);
             }
 
             public static SysexMessage setChorusSendToReverb(int targetDevice, int reverbType)
-                    throws IOException, InvalidMidiDataException {
+            throws IOException, InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_CHORUS, CHORUS_SEND_TO_REVERB,
                         reverbType);
             }
@@ -444,31 +444,35 @@ public class MidiUtils {
         private static final byte[] SCALE_OCTAVE_TUNING_2BYTE_FORM = new byte[] { (byte) 0x09 };
 
         public static SysexMessage scaleOctaveTuning1ByteForm(int targetDevice, boolean realtime,
-                boolean channels[], int[] tuning) throws IOException, InvalidMidiDataException {
+                boolean[] channels, int[] tuning) throws IOException, InvalidMidiDataException {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            if (realtime)
+            if (realtime) {
                 baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
-            else
+            } else {
                 baos.write(UNIVERSAL_NON_REALTIME_SYSEX_HEADER);
+            }
             baos.write((byte) targetDevice);
             baos.write(MIDI_TUNING_STANDARD);
             baos.write(SCALE_OCTAVE_TUNING_1BYTE_FORM);
             int channelmask = 0;
             for (int i = 0; i < 2; i++) {
-                if (channels[i + 14])
+                if (channels[i + 14]) {
                     channelmask += 1 << i;
+                }
             }
             baos.write((byte) channelmask);
             channelmask = 0;
             for (int i = 0; i < 7; i++) {
-                if (channels[i + 7])
+                if (channels[i + 7]) {
                     channelmask += 1 << i;
+                }
             }
             baos.write((byte) channelmask);
             channelmask = 0;
             for (int i = 0; i < 7; i++) {
-                if (channels[i])
+                if (channels[i]) {
                     channelmask += 1 << i;
+                }
             }
             baos.write((byte) channelmask);
             for (int i = 0; i < 12; i++) {
@@ -482,31 +486,35 @@ public class MidiUtils {
         }
 
         public static SysexMessage scaleOctaveTuning2ByteForm(int targetDevice, boolean realtime,
-                boolean channels[], int[] tuning) throws IOException, InvalidMidiDataException {
+                boolean[] channels, int[] tuning) throws IOException, InvalidMidiDataException {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            if (realtime)
+            if (realtime) {
                 baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
-            else
+            } else {
                 baos.write(UNIVERSAL_NON_REALTIME_SYSEX_HEADER);
+            }
             baos.write((byte) targetDevice);
             baos.write(MIDI_TUNING_STANDARD);
             baos.write(SCALE_OCTAVE_TUNING_2BYTE_FORM);
             int channelmask = 0;
             for (int i = 0; i < 2; i++) {
-                if (channels[i + 14])
+                if (channels[i + 14]) {
                     channelmask += 1 << i;
+                }
             }
             baos.write((byte) channelmask);
             channelmask = 0;
             for (int i = 0; i < 7; i++) {
-                if (channels[i + 7])
+                if (channels[i + 7]) {
                     channelmask += 1 << i;
+                }
             }
             baos.write((byte) channelmask);
             channelmask = 0;
             for (int i = 0; i < 7; i++) {
-                if (channels[i])
+                if (channels[i]) {
                     channelmask += 1 << i;
+                }
             }
             baos.write((byte) channelmask);
             for (int i = 0; i < 12; i++) {
@@ -523,8 +531,9 @@ public class MidiUtils {
 
         private static void setTuningChecksum(byte[] data) {
             int x = data[1] & 0xFF;
-            for (int i = 2; i < data.length - 2; i++)
+            for (int i = 2; i < data.length - 2; i++) {
                 x = x ^ (data[i] & 0xFF);
+            }
             data[data.length - 2] = (byte) (x & 127);
         }
 
@@ -537,13 +546,15 @@ public class MidiUtils {
             baos.write(SCALE_OCTAVE_TUNING_DUMP_1BYTE_FORM);
             baos.write((byte) bank);
             baos.write((byte) preset);
-            if (name.length() > 16)
+            if (name.length() > 16) {
                 name = name.substring(0, 16);
+            }
             byte[] namebytes = name.getBytes("ASCII");
             baos.write(namebytes);
             byte space_char = " ".getBytes()[0];
-            for (int i = namebytes.length; i < 16; i++)
+            for (int i = namebytes.length; i < 16; i++) {
                 baos.write(space_char);
+            }
             for (int i = 0; i < 12; i++) {
                 baos.write((byte) (tuning[i] + 64));
             }
@@ -565,13 +576,15 @@ public class MidiUtils {
             baos.write(SCALE_OCTAVE_TUNING_DUMP_2BYTE_FORM);
             baos.write((byte) bank);
             baos.write((byte) preset);
-            if (name.length() > 16)
+            if (name.length() > 16) {
                 name = name.substring(0, 16);
+            }
             byte[] namebytes = name.getBytes("ASCII");
             baos.write(namebytes);
             byte space_char = " ".getBytes()[0];
-            for (int i = namebytes.length; i < 16; i++)
+            for (int i = namebytes.length; i < 16; i++) {
                 baos.write(space_char);
+            }
             for (int i = 0; i < 12; i++) {
                 int t = tuning[i] + 8192;
                 baos.write((byte) (t / 128));
@@ -590,10 +603,11 @@ public class MidiUtils {
                 int preset, int[] key_numbers, int[] key_tunings) throws IOException,
                 InvalidMidiDataException {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            if (realtime)
+            if (realtime) {
                 baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
-            else
+            } else {
                 baos.write(UNIVERSAL_NON_REALTIME_SYSEX_HEADER);
+            }
             baos.write((byte) targetDevice);
             baos.write(MIDI_TUNING_STANDARD);
             baos.write(SINGLE_NOTE_TUNING_CHANGE_BANK);
@@ -642,20 +656,22 @@ public class MidiUtils {
         }
 
         public static SysexMessage keyBasedTuningDump(int targetDevice, int preset, String name, int[] tunings)
-                throws IOException, InvalidMidiDataException {
+        throws IOException, InvalidMidiDataException {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_NON_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(MIDI_TUNING_STANDARD);
             baos.write(BULK_TUNING_DUMP);
             baos.write((byte) preset);
-            if (name.length() > 16)
+            if (name.length() > 16) {
                 name = name.substring(0, 16);
+            }
             byte[] namebytes = name.getBytes("ASCII");
             baos.write(namebytes);
             byte space_char = " ".getBytes()[0];
-            for (int i = namebytes.length; i < 16; i++)
+            for (int i = namebytes.length; i < 16; i++) {
                 baos.write(space_char);
+            }
             for (int i = 0; i < 128; i++) {
                 int t = tunings[i];
                 baos.write((byte) ((t / 16384) % 128));
@@ -680,13 +696,15 @@ public class MidiUtils {
             baos.write(KEY_BASED_TUNING_DUMP);
             baos.write((byte) bank);
             baos.write((byte) preset);
-            if (name.length() > 16)
+            if (name.length() > 16) {
                 name = name.substring(0, 16);
+            }
             byte[] namebytes = name.getBytes("ASCII");
             baos.write(namebytes);
             byte space_char = " ".getBytes()[0];
-            for (int i = namebytes.length; i < 16; i++)
+            for (int i = namebytes.length; i < 16; i++) {
                 baos.write(space_char);
+            }
             for (int i = 0; i < 128; i++) {
                 int t = tunings[i];
                 baos.write((byte) ((t / 16384) % 128));

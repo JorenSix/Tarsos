@@ -48,8 +48,9 @@ public class SignalPowerExtractor {
      *                end of the song.
      */
     public double powerAt(double seconds, boolean relative) {
-        if (linearPowerArray == null)
+        if (linearPowerArray == null) {
             extractPower();
+        }
         double power = linearPowerArray[secondsToIndex(seconds)];
         if (relative) {
             double powerDifference = maxLinearPower - minLinearPower;
@@ -86,7 +87,7 @@ public class SignalPowerExtractor {
 
             linearPowerArray = new double[secondsToIndex(audioFileLengtInSeconds) + 1];
             int readAmount = (int) (readWindow * sampleRate);
-            float buffer[] = new float[readAmount];
+            float[] buffer = new float[readAmount];
 
             int index = 0;
             while (afis.read(buffer, 0, readAmount) != -1) {
@@ -153,8 +154,9 @@ public class SignalPowerExtractor {
      *            where to save the text file?
      */
     public void saveTextFile(String textFileName) {
-        if (linearPowerArray == null)
+        if (linearPowerArray == null) {
             extractPower();
+        }
 
         StringBuilder sb = new StringBuilder("Time (in seconds);Power\n");
         for (int index = 0; index < linearPowerArray.length; index++) {
@@ -170,8 +172,9 @@ public class SignalPowerExtractor {
      *            where to save the plot.
      */
     public void savePowerPlot(String powerPlotFileName, double silenceTreshold) {
-        if (linearPowerArray == null)
+        if (linearPowerArray == null) {
             extractPower();
+        }
 
         SimplePlot plot = new SimplePlot("Powerplot for " + audioFile.basename());
         for (int index = 0; index < linearPowerArray.length; index++) {
@@ -192,10 +195,11 @@ public class SignalPowerExtractor {
      *            The audio buffer.
      * @return The local (linear) energy of an audio buffer.
      */
-    public static double localEnergy(float buffer[]) {
+    public static double localEnergy(final float[] buffer) {
         double power = 0.0D;
-        for (int i = 0; i < buffer.length; i++)
+        for (int i = 0; i < buffer.length; i++) {
             power += buffer[i] * buffer[i];
+        }
         return power;
     }
 
@@ -206,7 +210,7 @@ public class SignalPowerExtractor {
      *            The buffer with audio information.
      * @return The dBSPL level for the buffer.
      */
-    public static double soundPressureLevel(float buffer[]) {
+    public static double soundPressureLevel(final float[] buffer) {
         double value = Math.pow(localEnergy(buffer), 0.5);
         value = value / buffer.length;
         return linearToDecibel(value);
@@ -232,7 +236,7 @@ public class SignalPowerExtractor {
      *            The threshold in dBSPL
      * @return
      */
-    public static boolean isSilence(float buffer[], double silenceThreshold) {
+    public static boolean isSilence(final float[] buffer, double silenceThreshold) {
         return (soundPressureLevel(buffer) < silenceThreshold);
     }
 }

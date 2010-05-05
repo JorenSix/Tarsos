@@ -87,8 +87,8 @@ public class Yin {
      * The cumulative mean normalized difference function as described in step 3
      * of the YIN paper <br>
      * <code>
-	 * yinBuffer[0] == yinBuffer[1] = 1
-	 * </code>
+     * yinBuffer[0] == yinBuffer[1] = 1
+     * </code>
      * 
      */
     private void cumulativeMeanNormalizedDifference() {
@@ -115,8 +115,9 @@ public class Yin {
         // than the AUBIO implementation
         for (int tau = 1; tau < yinBuffer.length; tau++) {
             if (yinBuffer[tau] < threshold) {
-                while (tau + 1 < yinBuffer.length && yinBuffer[tau + 1] < yinBuffer[tau])
+                while (tau + 1 < yinBuffer.length && yinBuffer[tau + 1] < yinBuffer[tau]) {
                     tau++;
+                }
                 return tau;
             }
         }
@@ -137,10 +138,12 @@ public class Yin {
         float s0, s1, s2;
         int x0 = (tauEstimate < 1) ? tauEstimate : tauEstimate - 1;
         int x2 = (tauEstimate + 1 < yinBuffer.length) ? tauEstimate + 1 : tauEstimate;
-        if (x0 == tauEstimate)
+        if (x0 == tauEstimate) {
             return (yinBuffer[tauEstimate] <= yinBuffer[x2]) ? tauEstimate : x2;
-        if (x2 == tauEstimate)
+        }
+        if (x2 == tauEstimate) {
             return (yinBuffer[tauEstimate] <= yinBuffer[x0]) ? tauEstimate : x0;
+        }
         s0 = yinBuffer[x0];
         s1 = yinBuffer[tauEstimate];
         s2 = yinBuffer[x2];
@@ -219,7 +222,7 @@ public class Yin {
      *             If there is an error reading the file.
      */
     public static void processFile(String fileName, DetectedPitchHandler detectedPitchHandler)
-            throws UnsupportedAudioFileException, IOException {
+    throws UnsupportedAudioFileException, IOException {
         AudioInputStream ais = AudioSystem.getAudioInputStream(new File(fileName));
         AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
         Yin.processStream(afis, detectedPitchHandler);
@@ -239,7 +242,7 @@ public class Yin {
      *             If there is an error reading the stream.
      */
     public static void processStream(AudioFloatInputStream afis, DetectedPitchHandler detectedPitchHandler)
-            throws UnsupportedAudioFileException, IOException {
+    throws UnsupportedAudioFileException, IOException {
         AudioFormat format = afis.getFormat();
         float sampleRate = format.getSampleRate();
         double frameSize = format.getFrameSize();
@@ -260,8 +263,9 @@ public class Yin {
         while (hasMoreBytes && yinInstance.running) {
             float pitch = yinInstance.getPitch();
             time = floatsProcessed / timeCalculationDivider;
-            if (detectedPitchHandler != null)
+            if (detectedPitchHandler != null) {
                 detectedPitchHandler.handleDetectedPitch(time, pitch);
+            }
 
             // slide buffer with predefined overlap
             hasMoreBytes = Yin.slideBuffer(afis, yinInstance.inputBuffer, yinInstance.overlapSize);
@@ -304,7 +308,7 @@ public class Yin {
      *             particular, an IOException is thrown if the input stream has
      *             been closed.
      */
-    public static boolean slideBuffer(AudioFloatInputStream audioFloatInputStream, float audioBuffer[],
+    public static boolean slideBuffer(final AudioFloatInputStream audioFloatInputStream, float[] audioBuffer,
             int overlap) throws IOException {
         assert overlap < audioBuffer.length;
 
@@ -329,14 +333,17 @@ public class Yin {
      *                when the buffer has an incorrect length.
      */
     public static float processBuffer(float[] buffer, float sampleRate) {
-        if (yinInstance == null)
+        if (yinInstance == null) {
             yinInstance = new Yin(sampleRate, buffer.length);
+        }
 
-        if (buffer.length != yinInstance.inputBuffer.length)
+        if (buffer.length != yinInstance.inputBuffer.length) {
             throw new Error("Buffer and yin buffer should have the same length!");
+        }
 
-        for (int i = 0; i < buffer.length; i++)
+        for (int i = 0; i < buffer.length; i++) {
             yinInstance.inputBuffer[i] = buffer[i];
+        }
 
         return yinInstance.getPitch();
     }
@@ -345,8 +352,9 @@ public class Yin {
      * Stops real time annotation.
      */
     public static void stop() {
-        if (yinInstance != null)
+        if (yinInstance != null) {
             yinInstance.running = false;
+        }
     }
 
     public static void main(String... args) throws UnsupportedAudioFileException, IOException {
@@ -355,8 +363,9 @@ public class Yin {
             @Override
             public void handleDetectedPitch(float time, float pitch) {
                 System.out.println(time + "\t" + pitch);
-                if (pitch == -1)
+                if (pitch == -1) {
                     pitch = 0;
+                }
                 p.addData(time, pitch);
             }
         });

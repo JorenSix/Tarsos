@@ -65,7 +65,7 @@ public class Spectrogram extends JComponent {
     private final Timer timer;
 
     private final int fftSize = 16384 / 2;
-    private final float audioDataBuffer[] = new float[fftSize];
+    private final float[] audioDataBuffer = new float[fftSize];
 
     AudioFloatInputStream afis;
     double sampleRate;
@@ -76,7 +76,7 @@ public class Spectrogram extends JComponent {
     String lastDetectedNote = "";
 
     public Spectrogram(int mixerIndex) throws UnsupportedAudioFileException, IOException,
-            LineUnavailableException {
+    LineUnavailableException {
 
         outputDevice = PlayAlong.chooseDevice(false, true);
         try {
@@ -156,8 +156,9 @@ public class Spectrogram extends JComponent {
             } else {
                 binEstimate = (frequency - minFrequency) / maxFrequency * H;
             }
-            if (binEstimate > 700)
+            if (binEstimate > 700) {
                 System.out.println(binEstimate);
+            }
 
             bin = H - 1 - (int) binEstimate;
         }
@@ -235,11 +236,13 @@ public class Spectrogram extends JComponent {
      */
     private void sendNoteMessage(int midiKey, boolean sendOnMessage) {
         // do not send note on messages to pressed keys
-        if (sendOnMessage && currentKeyDown == midiKey)
+        if (sendOnMessage && currentKeyDown == midiKey) {
             return;
+        }
         // do not send note off messages to keys that are not pressed
-        if (!sendOnMessage && currentKeyDown != midiKey)
+        if (!sendOnMessage && currentKeyDown != midiKey) {
             return;
+        }
 
         try {
             ShortMessage sm = new ShortMessage();
@@ -262,8 +265,8 @@ public class Spectrogram extends JComponent {
         if (Math.abs(midiCentValue - (int) midiCentValue) < 0.3 && midiCentValue < 128 && midiCentValue >= 0) {
             newKeyDown = (int) midiCentValue;
             lastDetectedNote = "Name: " + Pitch.getInstance(PitchUnit.HERTZ, pitch).noteName()
-                    + "\nFrequency: " + ((int) pitch) + "Hz \t" + " MIDI note:"
-                    + PitchConverter.hertzToMidiCent(pitch);
+            + "\nFrequency: " + ((int) pitch) + "Hz \t" + " MIDI note:"
+            + PitchConverter.hertzToMidiCent(pitch);
         }
         // if no pitch detected
         // send note off
@@ -271,23 +274,25 @@ public class Spectrogram extends JComponent {
             sendNoteMessage(currentKeyDown, false);
         } else if (currentKeyDown != newKeyDown) {
             // if different pitch than previous detected send note off and on
-            if (currentKeyDown != -1)
+            if (currentKeyDown != -1) {
                 sendNoteMessage(currentKeyDown, false);
+            }
             sendNoteMessage(newKeyDown, true);
             currentKeyDown = newKeyDown;
         }
     }
 
-    private final float yinBuffer[] = new float[1024];
+    private final float[] yinBuffer = new float[1024];
 
     private float detectPitch() {
-        for (int i = 0; i < 1024; i++)
+        for (int i = 0; i < 1024; i++) {
             yinBuffer[i] = audioDataBuffer[i];
+        }
         return Yin.processBuffer(yinBuffer, (float) sampleRate);
     }
 
     public static void main(String[] args) throws UnsupportedAudioFileException, IOException,
-            LineUnavailableException {
+    LineUnavailableException {
         final JPanel panel = new JPanel(new BorderLayout());
 
         Spectrogram spectogram = new Spectrogram(chooseDevice());
@@ -308,11 +313,12 @@ public class Spectrogram extends JComponent {
      */
     public static int chooseDevice() {
         try {
-            javax.sound.sampled.Mixer.Info mixers[] = AudioSystem.getMixerInfo();
+            javax.sound.sampled.Mixer.Info[] mixers = AudioSystem.getMixerInfo();
             for (int i = 0; i < mixers.length; i++) {
                 javax.sound.sampled.Mixer.Info mixerinfo = mixers[i];
-                if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0)
+                if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0) {
                     System.out.println(i + " " + mixerinfo.toString());
+                }
             }
             // choose MIDI input device
             System.out.print("Choose the Mixer device: ");

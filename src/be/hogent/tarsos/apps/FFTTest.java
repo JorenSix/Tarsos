@@ -26,8 +26,8 @@ public class FFTTest {
         AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(stream);
 
         int readAmount = 16384 / 2;
-        float buffer[] = new float[readAmount];
-        double bufferD[] = new double[readAmount];
+        float[] buffer = new float[readAmount];
+        double[] bufferD = new double[readAmount];
         SimplePlot plot = new SimplePlot();
         AudioFormat format = stream.getFormat();
 
@@ -39,8 +39,9 @@ public class FFTTest {
 
         while (afis.read(buffer, 0, readAmount) != -1) {
 
-            for (int i = 0; i < buffer.length; i++)
+            for (int i = 0; i < buffer.length; i++) {
                 bufferD[i] = buffer[i];
+            }
 
             int numberOfFilledBins = 0;
             Complex[] data = new FastFourierTransformer().transform(bufferD);
@@ -48,18 +49,20 @@ public class FFTTest {
             double indexOfMostEnergyRichFrequencyBin = -1;
             for (int j = 0; j < data.length / 2; j++) {
                 double amplitude = data[j].getReal() * data[j].getReal() + data[j].getImaginary()
-                        * data[j].getImaginary();
+                * data[j].getImaginary();
                 amplitude = Math.pow(amplitude, 0.5) / data.length;
                 if (amplitude > maxAmplitude) {
                     maxAmplitude = amplitude;
                     indexOfMostEnergyRichFrequencyBin = j;
                 }
                 spectrum[j] = +amplitude;
-                if (amplitude > 0.001)
+                if (amplitude > 0.001) {
                     numberOfFilledBins++;
+                }
             }
-            if (numberOfFilledBins > data.length / 3)
+            if (numberOfFilledBins > data.length / 3) {
                 System.out.println(index + " Is percussive");
+            }
 
             double mostEnergyRichPitch = indexOfMostEnergyRichFrequencyBin * sampleRate / readAmount; // in
             // Hz
@@ -69,8 +72,9 @@ public class FFTTest {
         plot.save();
 
         SimplePlot spectrumPlot = new SimplePlot();
-        for (int i = 0; i < buffer.length / 2; i++)
+        for (int i = 0; i < buffer.length / 2; i++) {
             spectrumPlot.addData(i * sampleRate / readAmount, spectrum[i]);
+        }
         spectrumPlot.setXRange(0, 880);
         spectrumPlot.save();
     }

@@ -87,7 +87,8 @@ public class PlayAlong {
         return null;
     }
 
-    public static void main(String args[]) throws MidiUnavailableException, InterruptedException, IOException {
+    public static void main(final String[] args) throws MidiUnavailableException, InterruptedException,
+    IOException {
         LongOpt[] longopts = new LongOpt[4];
         longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
         longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
@@ -151,7 +152,7 @@ public class PlayAlong {
         }
         System.out.println("");
 
-        final double tuning[] = new double[128];
+        final double[] tuning = new double[128];
 
         // align tuning to MIDI note 57, A3 or 220Hz.
         Double referenceNote = PitchConverter.hertzToAbsoluteCent(220.0);
@@ -174,7 +175,7 @@ public class PlayAlong {
                 + " cents) is the tuned midi key " + midiNoteClosestToReference + " at "
                 + tuning[midiNoteClosestToReference] + " cents");
 
-        double rebasedTuning[] = new double[128];
+        double[] rebasedTuning = new double[128];
         int diff = referenceNoteMidiNumber - midiNoteClosestToReference;
         for (int i = 0; i < tuning.length; i++) {
             rebasedTuning[i] = tuning[(i + diff) % 128];
