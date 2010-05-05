@@ -64,7 +64,7 @@ public class PitchFunctionTests {
 		pitchValuesInCent.add(9.0);
 		pitchValuesInCent.add(7.0);
 
-		pitchValuesInCent = PitchFunctions.gaussianFilter(pitchValuesInCent);
+		PitchFunctions.gaussianFilter(pitchValuesInCent);
 		//assertEquals(3.0, pitchValuesInCent.get(0),0.01);
 		//assertEquals(7.0, pitchValuesInCent.get(1),0.01);
 		//assertEquals(7.0, pitchValuesInCent.get(2),0.01);
