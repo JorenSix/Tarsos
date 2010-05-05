@@ -288,7 +288,7 @@ public class FileUtils {
         return columnData;
     }
 
-    public static void Export(String filename, String[] header, List<Object[]> data) {
+    public static void export(String filename, String[] header, List<Object[]> data) {
 
         String dateFormat = "yyyy-MM-dd hh:mm:ss";
         String numberFormat = "#0.000";
