@@ -12,68 +12,70 @@ import java.util.List;
  */
 public class AudioFile {
 
-	/**
-	 * Where to save the transcoded files
-	 */
-	public static final String TRANSCODED_AUDIO_DIRECTORY = Configuration.get(ConfKey.transcoded_audio_directory);
-	private static final String ORIGINAL_AUDIO_DIRECTORY = Configuration.get(ConfKey.audio_directory);
+    /**
+     * Where to save the transcoded files
+     */
+    public static final String TRANSCODED_AUDIO_DIRECTORY = Configuration
+            .get(ConfKey.transcoded_audio_directory);
+    private static final String ORIGINAL_AUDIO_DIRECTORY = Configuration.get(ConfKey.audio_directory);
 
-	private final String path;
+    private final String path;
 
-	/**
-	 * Create and transcode an audio file.
-	 * 
-	 * @param path
-	 *            the path for the audio file
-	 */
-	public AudioFile(String path) {
-		this.path = path;
-		if (AudioTranscoder.transcodingRequired(transcodedPath()))
-			AudioTranscoder.transcode(path, transcodedPath());
-	}
+    /**
+     * Create and transcode an audio file.
+     * 
+     * @param path
+     *            the path for the audio file
+     */
+    public AudioFile(String path) {
+        this.path = path;
+        if (AudioTranscoder.transcodingRequired(transcodedPath()))
+            AudioTranscoder.transcode(path, transcodedPath());
+    }
 
-	/**
-	 * @return the path of the transcoded audio file.
-	 */
-	public String transcodedPath() {
-		String baseName = FileUtils.basename(FileUtils.sanitizedFileName(path));
-		String fileName = baseName + "." + Configuration.get(ConfKey.transcoded_audio_format);
-		return FileUtils.combine(TRANSCODED_AUDIO_DIRECTORY, fileName);
-	}
+    /**
+     * @return the path of the transcoded audio file.
+     */
+    public String transcodedPath() {
+        String baseName = FileUtils.basename(FileUtils.sanitizedFileName(path));
+        String fileName = baseName + "." + Configuration.get(ConfKey.transcoded_audio_format);
+        return FileUtils.combine(TRANSCODED_AUDIO_DIRECTORY, fileName);
+    }
 
-	/**
-	 * @return the path of the original file
-	 */
-	public String path() {
-		return this.path;
-	}
+    /**
+     * @return the path of the original file
+     */
+    public String path() {
+        return this.path;
+    }
 
-	@Override
-	public String toString() {
-		return FileUtils.basename(path);
-	}
+    @Override
+    public String toString() {
+        return FileUtils.basename(path);
+    }
 
-	/**
-	 * @return the name of the file (without extension)
-	 */
-	public String basename() {
-		return this.toString();
-	}
+    /**
+     * @return the name of the file (without extension)
+     */
+    public String basename() {
+        return this.toString();
+    }
 
-	/**
-	 * Returns a list of AudioFiles included in one or more datasets. Datasets
-	 * are sub folders of the audio directory.
-	 * 
-	 * @param datasets
-	 *            the datasets to find AudioFiles for
-	 * @return a list of AudioFiles
-	 */
-	public static List<AudioFile> audioFiles(String... datasets) {
-		List<AudioFile> files = new ArrayList<AudioFile>();
-		for (String dataset : datasets)
-			for (String originalFile : FileUtils.glob(FileUtils.combine(ORIGINAL_AUDIO_DIRECTORY, dataset), ".*\\..*"))
-				files.add(new AudioFile(originalFile));
-		return files;
-	}
+    /**
+     * Returns a list of AudioFiles included in one or more datasets. Datasets
+     * are sub folders of the audio directory.
+     * 
+     * @param datasets
+     *            the datasets to find AudioFiles for
+     * @return a list of AudioFiles
+     */
+    public static List<AudioFile> audioFiles(String... datasets) {
+        List<AudioFile> files = new ArrayList<AudioFile>();
+        for (String dataset : datasets)
+            for (String originalFile : FileUtils.glob(FileUtils.combine(ORIGINAL_AUDIO_DIRECTORY, dataset),
+                    ".*\\..*"))
+                files.add(new AudioFile(originalFile));
+        return files;
+    }
 
 }

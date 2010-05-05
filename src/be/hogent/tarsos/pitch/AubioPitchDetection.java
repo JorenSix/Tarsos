@@ -33,106 +33,107 @@ import be.hogent.tarsos.util.FileUtils;
  */
 public class AubioPitchDetection implements PitchDetector {
 
-	/**
-	 * 
-	 * The pitch detection mode defines which algorithm is used to detect pitch.
-	 * 
-	 * @author Joren Six
-	 */
-	public enum AubioPitchDetectionMode {
-		/**
-		 * The YIN algorithm
-		 */
-		YIN("yin"),
-		/**
-		 * A faster version of YIN: spectral YIN. It should yield very similar
-		 * results as YIN, only faster.
-		 */
-		YINFFT("yinfft"),
-		/**
-		 * Fast spectral comb
-		 */
-		FCOMB("fcomb"),
-		/**
-		 * Multi comb with spectral smoothing
-		 */
-		MCOMB("mcomb"),
-		/**
-		 * Schmitt trigger
-		 */
-		SCHMITT("schmitt");
+    /**
+     * 
+     * The pitch detection mode defines which algorithm is used to detect pitch.
+     * 
+     * @author Joren Six
+     */
+    public enum AubioPitchDetectionMode {
+        /**
+         * The YIN algorithm
+         */
+        YIN("yin"),
+        /**
+         * A faster version of YIN: spectral YIN. It should yield very similar
+         * results as YIN, only faster.
+         */
+        YINFFT("yinfft"),
+        /**
+         * Fast spectral comb
+         */
+        FCOMB("fcomb"),
+        /**
+         * Multi comb with spectral smoothing
+         */
+        MCOMB("mcomb"),
+        /**
+         * Schmitt trigger
+         */
+        SCHMITT("schmitt");
 
-		private final String parameterName;
+        private final String parameterName;
 
-		private AubioPitchDetectionMode(String parameterName) {
-			this.parameterName = parameterName;
-		}
+        private AubioPitchDetectionMode(String parameterName) {
+            this.parameterName = parameterName;
+        }
 
-		/**
-		 * @return The name used in the aubio command.
-		 */
-		public String getParametername() {
-			return this.parameterName;
-		}
-	}
+        /**
+         * @return The name used in the aubio command.
+         */
+        public String getParametername() {
+            return this.parameterName;
+        }
+    }
 
-	private final AudioFile file;
-	private final AubioPitchDetectionMode pitchDetectionMode;
-	private final List<Sample> samples;
-	private final String name;
+    private final AudioFile file;
+    private final AubioPitchDetectionMode pitchDetectionMode;
+    private final List<Sample> samples;
+    private final String name;
 
-	public AubioPitchDetection(AudioFile file, AubioPitchDetectionMode pitchDetectionMode) {
-		this.file = file;
-		this.pitchDetectionMode = pitchDetectionMode;
-		this.samples = new ArrayList<Sample>();
-		this.name = "aubio_" + pitchDetectionMode.getParametername();
-	}
+    public AubioPitchDetection(AudioFile file, AubioPitchDetectionMode pitchDetectionMode) {
+        this.file = file;
+        this.pitchDetectionMode = pitchDetectionMode;
+        this.samples = new ArrayList<Sample>();
+        this.name = "aubio_" + pitchDetectionMode.getParametername();
+    }
 
-	@Override
-	public void executePitchDetection() {
-		String annotationsDirectory = Configuration.get(ConfKey.raw_aubio_annotations_directory);
-		String csvFileName = FileUtils.combine(annotationsDirectory, this.name + "_" + file.basename() + ".txt");
+    @Override
+    public void executePitchDetection() {
+        String annotationsDirectory = Configuration.get(ConfKey.raw_aubio_annotations_directory);
+        String csvFileName = FileUtils.combine(annotationsDirectory, this.name + "_" + file.basename()
+                + ".txt");
 
-		if (!FileUtils.exists(csvFileName)) {
-			String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.parameterName + "  -s -70  -i "
-					+ file.transcodedPath();
-			Execute.command(command, csvFileName);
-		}
+        if (!FileUtils.exists(csvFileName)) {
+            String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.parameterName
+                    + "  -s -70  -i " + file.transcodedPath();
+            Execute.command(command, csvFileName);
+        }
 
-		List<String[]> csvData = FileUtils.readCSVFile(csvFileName, "\t", 2);
-		for (String[] row : csvData) {
-			long start = (long) (Double.parseDouble(row[0]) * 1000);
-			Double pitch = Double.parseDouble(row[1]);
-			Sample sample = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
-			switch (pitchDetectionMode) {
-			case YIN:
-				sample.source = SampleSource.AUBIO_YIN;
-				break;
-			case YINFFT:
-				sample.source = SampleSource.AUBIO_YINFFT;
-				break;
-			case MCOMB:
-				sample.source = SampleSource.AUBIO_MCOMB;
-				break;
-			case FCOMB:
-				sample.source = SampleSource.AUBIO_FCOMB;
-				break;
-			case SCHMITT:
-				sample.source = SampleSource.AUBIO_SCHMITT;
-				break;
-			}
-			samples.add(sample);
-		}
-	}
+        List<String[]> csvData = FileUtils.readCSVFile(csvFileName, "\t", 2);
+        for (String[] row : csvData) {
+            long start = (long) (Double.parseDouble(row[0]) * 1000);
+            Double pitch = Double.parseDouble(row[1]);
+            Sample sample = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
+            switch (pitchDetectionMode) {
+            case YIN:
+                sample.source = SampleSource.AUBIO_YIN;
+                break;
+            case YINFFT:
+                sample.source = SampleSource.AUBIO_YINFFT;
+                break;
+            case MCOMB:
+                sample.source = SampleSource.AUBIO_MCOMB;
+                break;
+            case FCOMB:
+                sample.source = SampleSource.AUBIO_FCOMB;
+                break;
+            case SCHMITT:
+                sample.source = SampleSource.AUBIO_SCHMITT;
+                break;
+            }
+            samples.add(sample);
+        }
+    }
 
-	@Override
-	public String getName() {
-		return this.name;
-	}
+    @Override
+    public String getName() {
+        return this.name;
+    }
 
-	@Override
-	public List<Sample> getSamples() {
-		return this.samples;
-	}
+    @Override
+    public List<Sample> getSamples() {
+        return this.samples;
+    }
 
 }

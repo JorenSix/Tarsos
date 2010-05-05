@@ -9,17 +9,17 @@ import java.util.Date;
  * @author Joren Six
  */
 public class StopWatch {
-	private final long ticks;
+    private final long ticks;
 
-	public StopWatch() {
-		ticks = new Date().getTime();
-	}
+    public StopWatch() {
+        ticks = new Date().getTime();
+    }
 
-	/**
-	 * @return The number of ticks passed between initialization and the call to
-	 *         <code>ticksPassed</code>
-	 */
-	public long ticksPassed() {
-		return new Date().getTime() - ticks;
-	}
+    /**
+     * @return The number of ticks passed between initialization and the call to
+     *         <code>ticksPassed</code>
+     */
+    public long ticksPassed() {
+        return new Date().getTime() - ticks;
+    }
 }

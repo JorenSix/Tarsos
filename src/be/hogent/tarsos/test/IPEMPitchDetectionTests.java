@@ -4,9 +4,9 @@ import org.junit.Test;
 
 public class IPEMPitchDetectionTests {
 
-	@Test
-	public void testExecutePitchDetection() {
+    @Test
+    public void testExecutePitchDetection() {
 
-	}
+    }
 
 }
