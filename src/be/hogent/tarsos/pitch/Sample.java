@@ -115,8 +115,9 @@ public class Sample implements Comparable<Sample> {
      */
     public List<Double> getPitchesWithoutHarmonicsIn(PitchUnit unit, double errorPercentage) {
 
-        if (pitches.size() == 1)
+        if (pitches.size() == 1) {
             return pitches;
+        }
 
         int numberOfHarmonicsToRemove = 5;
         List<Double> pitches = new ArrayList<Double>(this.pitches);
@@ -138,8 +139,9 @@ public class Sample implements Comparable<Sample> {
                     }
                 }
             }
-            if (!pitchIsHarmonic)
+            if (!pitchIsHarmonic) {
                 pitchesWithoutHarmonics.add(pitch);
+            }
         }
         return PitchFunctions.convertHertzTo(unit, pitchesWithoutHarmonics);
     }
@@ -195,8 +197,9 @@ public class Sample implements Comparable<Sample> {
     }
 
     public double returnMatchingPitch(Sample other, double errorPercentage) {
-        if (pitches.size() == 0)
+        if (pitches.size() == 0) {
             return Double.NEGATIVE_INFINITY;
+        }
 
         Double thisPitch = pitches.get(0);
         Double deviation = thisPitch * errorPercentage;
@@ -225,7 +228,7 @@ public class Sample implements Comparable<Sample> {
     @Override
     public int compareTo(Sample o) {
         // starttime first
-        int startCompare = new Long(start).compareTo(new Long(o.start));
+        int startCompare = Long.valueOf(start).compareTo(Long.valueOf(o.start));
         // then order by source name
         return startCompare == 0 ? source.toString().compareTo(o.source.toString()) : startCompare;
     }
