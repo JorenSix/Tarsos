@@ -134,11 +134,10 @@ public class PitchFunctions {
      *                error is thrown.
      */
     public static Double median(List<Double> list) {
-        int size = list.size();
-        if (list == null || size == 0) {
+        if (list == null || list.size() == 0) {
             throw new Error("Mean of an empty list is undefined");
         }
-
+        int size = list.size();
         Collections.sort(list);
         double median = 0.0;
         if (size % 2 == 0) {
