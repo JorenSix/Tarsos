@@ -227,12 +227,14 @@ public class PlayAlong {
             List<Double> currentPitches = currentSample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS);
             if (currentPitches.size() == 1) {
                 // double pitch = currentPitches.get(0);
-                for (int midiKey = 0; midiKey < 128; midiKey++) {
-                    /*
-                     * if(pitch > tuningMin[midiKey] && pitch <
-                     * tuningMax[midiKey]){ currentMidiKey = midiKey; }
-                     */
-                }
+                /*
+                 * for (int midiKey = 0; midiKey < 128; midiKey++) {
+                 * 
+                 * if(pitch > tuningMin[midiKey] && pitch < tuningMax[midiKey]){
+                 * currentMidiKey = midiKey; }
+                 * 
+                 * }
+                 */
                 midiKeysUnfiltered.add(currentMidiKey + 0.0);
                 time.add(currentSample.getStart());
             }

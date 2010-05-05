@@ -524,6 +524,7 @@ public class FileUtils {
                 }
             } catch (IOException e) {
                 // ignore
+                e.printStackTrace();
             }
         }
     }

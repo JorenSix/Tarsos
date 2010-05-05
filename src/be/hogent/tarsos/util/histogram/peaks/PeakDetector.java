@@ -55,7 +55,7 @@ public class PeakDetector {
      * @return
      */
     public static List<Peak> detect(Histogram histogram, int windowSize, double meanFactorThreshold) {
-        double peakFunctionValues[] = new double[histogram.getNumberOfClasses()];
+        double[] peakFunctionValues = new double[histogram.getNumberOfClasses()];
         PeakScore differenceScore = new DifferenceScore(histogram, windowSize);
         PeakScore localHeightScore = new LocalHeightScore();
         for (int i = 0; i < histogram.getNumberOfClasses(); i++) {

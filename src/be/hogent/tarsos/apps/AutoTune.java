@@ -25,11 +25,12 @@ public class AutoTune {
      */
     public static int chooseDevice() {
         try {
-            javax.sound.sampled.Mixer.Info mixers[] = AudioSystem.getMixerInfo();
+            javax.sound.sampled.Mixer.Info[] mixers = AudioSystem.getMixerInfo();
             for (int i = 0; i < mixers.length; i++) {
                 javax.sound.sampled.Mixer.Info mixerinfo = mixers[i];
-                if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0)
+                if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0) {
                     System.out.println(i + " " + mixerinfo.toString());
+                }
             }
             // choose MIDI input device
             System.out.print("Choose the Mixer device: ");
@@ -147,8 +148,9 @@ public class AutoTune {
                     speaker.write(audioBuffer, 0, 1024);
                     // }
 
-                    for (int i = 0; i < 1024; i++)
+                    for (int i = 0; i < 1024; i++) {
                         audioBuffer[i] = audioBuffer[1024 + i];
+                    }
                     hasMoreBytes = afis.read(audioBuffer, audioBuffer.length - 1024, 1024) != -1;
                 }
             } catch (IOException e) {

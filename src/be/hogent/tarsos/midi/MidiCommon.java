@@ -78,6 +78,7 @@ public class MidiCommon {
                     }
                 }
             } catch (MidiUnavailableException e) {
+                e.printStackTrace();
                 // device is obviously not available...
                 // out(e);
             }
@@ -116,7 +117,7 @@ public class MidiCommon {
                         return aInfos[i];
                     }
                 } catch (MidiUnavailableException e) {
-
+                    e.printStackTrace();
                 }
             }
         }

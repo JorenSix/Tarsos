@@ -53,7 +53,7 @@ public class IPEMPitchDetection implements PitchDetector {
         this.samples = new ArrayList<Sample>();
 
         // check files and copy them if needed
-        String files[] = { "ipem_pitch_detection.sh", "libsndfile.dll", "pitchdetection.exe" };
+        String[] files = { "ipem_pitch_detection.sh", "libsndfile.dll", "pitchdetection.exe" };
         for (String ipemFile : files) {
             String target = FileUtils.combine(FileUtils.getRuntimePath(), ipemFile);
             if (!FileUtils.exists(target)) {
@@ -88,7 +88,7 @@ public class IPEMPitchDetection implements PitchDetector {
             audioDirectory = audioDirectory.replace("//\\\\", "//");
             outputDirectory = outputDirectory.replace("//\\\\", "//");
             command = FileUtils.getRuntimePath() + "/ipem_pitch_detection.sh \"" + audioDirectory + "\" \""
-                    + outputDirectory + "\"";
+            + outputDirectory + "\"";
         }
 
         if (!FileUtils.exists(csvFileName)) {
@@ -117,8 +117,9 @@ public class IPEMPitchDetection implements PitchDetector {
                 // bigger values are probably annotated incorrectly
                 // With the ipem pitchdetector this happens sometimes, on wine
                 // a big value is
-                if (pitch > 25000)
+                if (pitch > 25000) {
                     pitch = 0.0;
+                }
 
                 // Do not store 0 Hz values
                 if (pitch != 0.0) {

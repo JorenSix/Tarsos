@@ -86,6 +86,7 @@ public class Spectrogram extends JComponent {
             outputDevice.getReceiver().send(sm, -1);
         } catch (MidiUnavailableException e) {
             // Unable to open midi device
+            e.printStackTrace();
         } catch (InvalidMidiDataException e) {
             e.printStackTrace();
         }

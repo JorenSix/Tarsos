@@ -322,7 +322,7 @@ public class DumpReceiver implements Receiver {
         return 60000000.0f / value;
     }
 
-    private static char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+    private static char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
         'E', 'F' };
 
     public static String getHexString(byte[] aByte) {

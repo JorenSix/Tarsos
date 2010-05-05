@@ -22,14 +22,15 @@ public class MediaPlayer implements Runnable {
     boolean notYetEOF;
 
     public MediaPlayer(String fileName) throws IOException, UnsupportedAudioFileException,
-            LineUnavailableException {
+    LineUnavailableException {
         file = new File(fileName);
         in = AudioSystem.getAudioInputStream(file);
         AudioFormat format = in.getFormat();
         AudioFormat.Encoding formatEncoding = format.getEncoding();
         if (!(formatEncoding.equals(AudioFormat.Encoding.PCM_SIGNED) || formatEncoding
-                .equals(AudioFormat.Encoding.PCM_UNSIGNED)))
+                .equals(AudioFormat.Encoding.PCM_UNSIGNED))) {
             throw new UnsupportedAudioFileException(file.getName() + " is not PCM audio");
+        }
         System.out.println("got PCM format");
         frameSize = format.getFrameSize();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -70,6 +71,7 @@ public class MediaPlayer implements Runnable {
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException ie) {
+                        ie.printStackTrace();
                     }
                 }
             } // while notYetEOF
@@ -78,15 +80,14 @@ public class MediaPlayer implements Runnable {
             line.stop();
         } catch (IOException ioe) {
             ioe.printStackTrace();
-        } finally {
-            // line.close();
         }
     } // run
 
     public void start() {
         playing = true;
-        if (!playThread.isAlive())
+        if (!playThread.isAlive()) {
             playThread.start();
+        }
         line.start();
     }
 

@@ -12,8 +12,8 @@ import be.hogent.tarsos.util.StopWatch;
 public class PlotThread extends Thread {
 
     // private String title;
-    private List<Sample> samples;
-    private StopWatch watch;
+    private final List<Sample> samples;
+    private final StopWatch watch;
 
     public PlotThread(String title, List<Sample> samples, StopWatch watch) {
         // this.title = title;
@@ -56,11 +56,13 @@ public class PlotThread extends Thread {
 
                 livePlot.repaint();
                 numberOfTicksToSleep = (int) (currentTick - watch.ticksPassed());
-                if (numberOfTicksToSleep > 0)
+                if (numberOfTicksToSleep > 0) {
                     try {
                         Thread.sleep(numberOfTicksToSleep);
                     } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
+                }
             }
         }
     }
