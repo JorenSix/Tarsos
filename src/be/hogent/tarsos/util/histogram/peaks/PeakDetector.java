@@ -21,12 +21,8 @@ public class PeakDetector {
      * creates a histogram (with the same resolution (bin widths) as the
      * original) with peaks in the form of gaussian curves.
      * 
-     * @param histogram
-     *            the histogram to detect peaks for
-     * @param windowSize
-     *            the windows to detect peaks in.
-     * @param meanFactorThreshold
-     *            the threshold when peaks are accepted.
+     * @param peaks
+     *            A list With Peaks
      * @return a histogram with peak information. Can be used to match with
      *         other histograms (files)
      */

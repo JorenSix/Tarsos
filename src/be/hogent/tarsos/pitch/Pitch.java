@@ -72,8 +72,6 @@ public class Pitch {
      * Returns the name of the MIDI key corresponding to the given hertzValue.
      * The MIDI key is the key returned by the convertHertzToMidiKey method.
      * 
-     * @param hertzValue
-     *            The pitch in Hz.
      * @return A note name like C3, A4 or A3#/B3b.
      * @exception IllegalArgumentException
      *                When the hertzValue is outside the valid MIDI key range.

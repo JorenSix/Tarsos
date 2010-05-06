@@ -234,13 +234,19 @@ public class Sample implements Comparable<Sample> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(final Object o) {
         boolean isEqual = false;
+
         if (o != null && o instanceof Sample) {
             Sample sample = (Sample) o;
             isEqual = start == sample.start && source.equals(sample.source);
         }
         return isEqual;
+    }
+
+    @Override
+    public final int hashCode() {
+        return new Long(start).hashCode() + source.hashCode();
     }
 
 }

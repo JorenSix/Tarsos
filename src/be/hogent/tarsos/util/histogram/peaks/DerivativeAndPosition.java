@@ -15,3 +15,4 @@ class DerivativeAndPosition implements Comparable<DerivativeAndPosition> {
         return derivative.compareTo(arg0.derivative);
     }
 }
+

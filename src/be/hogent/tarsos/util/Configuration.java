@@ -62,8 +62,9 @@ public class Configuration {
      *            the configuration key
      * @return if the key is configured, the configured value. Otherwise the
      *         default value is returned.
-     * @exception if the configured value can not be parsed to an integer a
-     *            NumberFormatException is thrown.
+     * @exception NumberFormatException
+     *                If the configured value can not be parsed to an integer a
+     *                is thrown.
      */
     public static int getInt(ConfKey key) {
         return Integer.parseInt(get(key.name()));

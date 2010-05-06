@@ -20,8 +20,9 @@ public class CrossCorrelation implements HistogramCorrelation {
         double classWidth = thisHistogam.getClassWidth();
 
         // make displacement positive
-        if (displacement < 0)
+        if (displacement < 0) {
             displacement = ((displacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
+        }
 
         double distance = 0.0;
 

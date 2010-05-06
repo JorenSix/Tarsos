@@ -45,9 +45,9 @@ public class PeakExtractor {
         double[] threshold = { 0.5, 0.8, 1.0, 1.5 };
 
         FileUtils
-                .writeFile(
-                        "file;detector;windowsize;threshold;gaussian smoothing factor;number of peaks;peakx;heightx\n",
-                        "peaks.csv");
+        .writeFile(
+                "file;detector;windowsize;threshold;gaussian smoothing factor;number of peaks;peakx;heightx\n",
+        "peaks.csv");
 
         for (AudioFile file : files) {
 
@@ -93,15 +93,16 @@ public class PeakExtractor {
                     toneScaleHistogram.plot(toneScalePNGFileName, "Tone scale " + baseName + " "
                             + detector.getName());
                     toneScaleHistogram.gaussianSmooth(gaussians[i]);
-                    for (int j = 0; j < windowsize.length; j++)
+
+                    for (int j = 0; j < windowsize.length; j++) {
                         for (int k = 0; k < threshold.length; k++) {
                             FileUtils.appendFile(baseName + ";" + detector.getName() + ";" + threshold[k]
-                                    + ";" + windowsize[j] + ";" + gaussians[i] + ";", "peaks.csv");
+                                                                                                       + ";" + windowsize[j] + ";" + gaussians[i] + ";", "peaks.csv");
                             List<Peak> peaks = PeakDetector.detect(toneScaleHistogram, windowsize[j],
                                     threshold[k]);
                             Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
                             String peaksTitle = detector.getName() + "_" + baseName + "_peaks_"
-                                    + gaussians[i] + "_" + windowsize[j] + "_" + threshold[k];
+                            + gaussians[i] + "_" + windowsize[j] + "_" + threshold[k];
                             SimplePlot p = new SimplePlot(peaksTitle);
                             appendFile(peaks);
                             p.addData(0, toneScaleHistogram);
@@ -110,6 +111,7 @@ public class PeakExtractor {
                             ToneScaleHistogram.exportPeaksToScalaFileFormat(FileUtils.combine(peaksDirectory,
                                     peaksTitle + ".scl"), peaksTitle, peaks);
                         }
+                    }
                 }
                 samples.clear();
             }

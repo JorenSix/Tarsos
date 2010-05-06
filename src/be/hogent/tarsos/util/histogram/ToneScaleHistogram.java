@@ -81,7 +81,6 @@ public class ToneScaleHistogram extends Histogram {
      * file format</a>: <i>This file format for musical tunings is becoming a
      * standard for exchange of scales, owing to the size of the scale archive
      * of over 3700+ scales and the popularity of the Scala program.</i>
-     * 
      * @param fileName
      * @param toneScaleName
      * @param peaks

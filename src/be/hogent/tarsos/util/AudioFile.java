@@ -29,8 +29,9 @@ public class AudioFile {
      */
     public AudioFile(String path) {
         this.path = path;
-        if (AudioTranscoder.transcodingRequired(transcodedPath()))
+        if (AudioTranscoder.transcodingRequired(transcodedPath())) {
             AudioTranscoder.transcode(path, transcodedPath());
+        }
     }
 
     /**
@@ -71,11 +72,12 @@ public class AudioFile {
      */
     public static List<AudioFile> audioFiles(String... datasets) {
         List<AudioFile> files = new ArrayList<AudioFile>();
-        for (String dataset : datasets)
+        for (String dataset : datasets) {
             for (String originalFile : FileUtils.glob(FileUtils.combine(ORIGINAL_AUDIO_DIRECTORY, dataset),
-                    ".*\\..*"))
+                    ".*\\..*")) {
                 files.add(new AudioFile(originalFile));
+            }
+        }
         return files;
     }
-
 }

@@ -161,20 +161,23 @@ public class ToneSequenceBuilder {
         player.addSource(mixer);
         mixer.addSource(tone);
         tone.setSpeed(0f / baseFreqWavFile);
-        if (fileName == null)
+        if (fileName == null) {
             player.start();
+        }
 
         for (int i = 0; i < frequencies.size(); i++) {
             double freq = frequencies.get(i) == -1.0 ? 0.0 : frequencies.get(i);
             tone.setSpeed((float) freq / baseFreqWavFile);
             mixer.setGain(0, (float) (1.41421 * Math.log(powers.get(i).floatValue()) / Math.log(1.6)));
             if (fileName == null) {
-                if (i > 0)
+                if (i > 0) {
                     Thread.sleep(Math.round((realTimes.get(i) - realTimes.get(i - 1)) * 1000));
+                }
             } else {
                 player.advanceTime(realTimes.get(i));
             }
         }
+
 
         if (fileName != null) {
             String rawFileName = fileName + ".raw";
@@ -230,9 +233,9 @@ public class ToneSequenceBuilder {
     }
 
     /**
-	 *
-	 *
-	 */
+     *
+     *
+     */
     public interface CSVFileHandler {
         void handleRow(ToneSequenceBuilder builder, String[] row);
 
@@ -254,10 +257,11 @@ public class ToneSequenceBuilder {
         public void handleRow(ToneSequenceBuilder builder, String[] row) {
             double realTime = Double.parseDouble(row[0]);
             double frequency = Double.parseDouble(row[1]);
-            if (extractor == null)
+            if (extractor == null) {
                 builder.addTone(frequency, realTime);
-            else
+            } else {
                 builder.addTone(frequency, realTime, extractor.powerAt(realTime, true));
+            }
         }
 
         @Override

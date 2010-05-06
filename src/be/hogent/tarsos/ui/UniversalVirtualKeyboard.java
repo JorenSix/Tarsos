@@ -36,10 +36,12 @@ public class UniversalVirtualKeyboard extends VirtualKeyboard {
         int wn = (int) (x / nw);
         int oct = wn / numberOfKeysPerOctave;
         int n = oct * numberOfKeysPerOctave + wn % numberOfKeysPerOctave;
-        if (n < 0)
+        if (n < 0) {
             n = 0;
-        if (n > numberOfKeys - 1)
+        }
+        if (n > numberOfKeys - 1) {
             n = numberOfKeys - 1;
+        }
         return n;
     }
 
@@ -59,16 +61,18 @@ public class UniversalVirtualKeyboard extends VirtualKeyboard {
         for (int i = 0; i < numberOfKeys; i++) {
 
             rect.setRect(cx, 0, nw, h);
-            if (isKeyDown(i))
+            if (isKeyDown(i)) {
                 g2.setColor(new Color(0.8f, 0.8f, 0.95f));
-            else
+            } else {
                 g2.setColor(Color.WHITE);
+            }
             g2.fill(rect);
             g2.setColor(Color.BLACK);
             g2.draw(rect);
 
-            if (i % this.numberOfKeysPerOctave == 0)
+            if (i % this.numberOfKeysPerOctave == 0) {
                 g2.drawString("_", cx + 2, 12);
+            }
 
             if (i >= lowestAssignedKey) {
                 if (i - lowestAssignedKey < VirtualKeyboard.mappedKeys.length()) {

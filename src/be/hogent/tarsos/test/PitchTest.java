@@ -15,16 +15,18 @@ public class PitchTest {
     public void testIsWesternMusicalPitch() {
         Pitch[] invalid = { Pitch.getInstance(PitchUnit.MIDI_CENT, 69.5),
                 Pitch.getInstance(PitchUnit.MIDI_CENT, 69.2), Pitch.getInstance(PitchUnit.MIDI_CENT, 68.8) };
-        for (Pitch p : invalid)
+        for (Pitch p : invalid) {
             assertFalse(p.isWesternMusicalPitch());
+        }
 
         Pitch[] valid = { Pitch.getInstance(PitchUnit.MIDI_CENT, 69),
                 Pitch.getInstance(PitchUnit.MIDI_CENT, 70.1), Pitch.getInstance(PitchUnit.MIDI_CENT, 0.1),
                 Pitch.getInstance(PitchUnit.MIDI_CENT, 112.1999),
                 Pitch.getInstance(PitchUnit.MIDI_CENT, 111.9056), };
 
-        for (Pitch p : valid)
+        for (Pitch p : valid) {
             assertTrue(p.isWesternMusicalPitch());
+        }
 
     }
 

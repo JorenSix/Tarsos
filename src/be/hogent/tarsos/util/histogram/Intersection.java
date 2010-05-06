@@ -25,8 +25,9 @@ public class Intersection implements HistogramCorrelation {
         double classWidth = thisHistogram.getClassWidth();
 
         // make displacement positive
-        if (displacement < 0)
+        if (displacement < 0) {
             displacement = ((displacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
+        }
 
         // matching area, displaced
         double matchingArea = 0.0;
@@ -34,7 +35,7 @@ public class Intersection implements HistogramCorrelation {
         for (double current = start + classWidth / 2; current <= stop; current += classWidth) {
             double displacedValue = (current + displacement * classWidth) % (numberOfClasses * classWidth);
             matchingArea += Math
-                    .min(thisHistogram.getCount(current), otherHistogram.getCount(displacedValue));
+            .min(thisHistogram.getCount(current), otherHistogram.getCount(displacedValue));
         }
 
         // the biggest area under the curve
@@ -43,8 +44,9 @@ public class Intersection implements HistogramCorrelation {
         double correlation = 0.0;
 
         // avoid the dreaded division by 0
-        if (matchingArea != 0.0)
+        if (matchingArea != 0.0) {
             correlation = matchingArea / biggestHistogramArea;
+        }
         return correlation;
     }
 
@@ -59,8 +61,9 @@ public class Intersection implements HistogramCorrelation {
         double classWidth = thisHistogram.getClassWidth();
 
         // make displacement positive
-        if (displacement < 0)
+        if (displacement < 0) {
             displacement = ((displacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
+        }
 
         // matching area, displaced
         double matchingArea = 0.0;

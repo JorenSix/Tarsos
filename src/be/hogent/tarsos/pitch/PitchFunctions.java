@@ -89,8 +89,8 @@ public class PitchFunctions {
      * Folds the pitch values to one octave. E.g. 1203 becomes 3 and 956 remains
      * 956
      * 
-     * @param pitchValuesInCent
-     *            a list of double values in cent
+     * @param convertedValues
+     *            A list of double values in cent.
      */
     private static void convertHertzToRelativeCent(List<Double> convertedValues) {
         for (int i = 0; i < convertedValues.size(); i++) {

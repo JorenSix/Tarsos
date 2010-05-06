@@ -22,8 +22,8 @@ import java.awt.geom.Rectangle2D;
 public class VirtualKeyboard12 extends VirtualKeyboard {
 
     /**
-	 *
-	 */
+     *
+     */
     private static final long serialVersionUID = -2901538187056239209L;
 
     public VirtualKeyboard12() {
@@ -40,18 +40,24 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
         int oct = wn / 7;
         int n = oct * 12;
         int nb = wn % 7;
-        if (nb == 1)
+        if (nb == 1) {
             n += 2;
-        if (nb == 2)
+        }
+        if (nb == 2) {
             n += 4;
-        if (nb == 3)
+        }
+        if (nb == 3) {
             n += 5;
-        if (nb == 4)
+        }
+        if (nb == 4) {
             n += 7;
-        if (nb == 5)
+        }
+        if (nb == 5) {
             n += 9;
-        if (nb == 6)
+        }
+        if (nb == 6) {
             n += 11;
+        }
         if (y < h * 4.0 / 7.0) {
             int xb = x - (int) (oct * 7 * nw);
             float cx = 0;
@@ -70,11 +76,14 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
             }
 
         }
-        if (n < 0)
+        if (n < 0) {
             n = 0;
-        if (n > 127)
+        }
+        if (n > 127) {
             n = 127;
+        }
         return n;
+
     }
 
     @Override
@@ -95,10 +104,11 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
             boolean a = (b == 1 || b == 3 | b == 6 | b == 8 | b == 10);
             if (!a) {
                 rect.setRect(cx, 0, nw, h);
-                if (isKeyDown(i))
+                if (isKeyDown(i)) {
                     g2.setColor(new Color(0.8f, 0.8f, 0.95f));
-                else
+                } else {
                     g2.setColor(Color.WHITE);
+                }
                 g2.fill(rect);
                 g2.setColor(Color.BLACK);
                 g2.draw(rect);
@@ -120,10 +130,11 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
                 cx += nw;
             } else {
                 rect.setRect(cx - (black_note_width / 2), 0, black_note_width, h * 4.0 / 7.0);
-                if (isKeyDown(i))
+                if (isKeyDown(i)) {
                     g2.setColor(new Color(0.8f, 0.8f, 0.95f));
-                else
+                } else {
                     g2.setColor(Color.BLACK);
+                }
                 g2.fill(rect);
                 g2.setColor(Color.BLACK);
                 g2.draw(rect);

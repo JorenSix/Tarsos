@@ -31,8 +31,8 @@ import javax.swing.JComponent;
  */
 public abstract class VirtualKeyboard extends JComponent implements Transmitter, Receiver {
     /**
-	 *
-	 */
+     *
+     */
     private static final long serialVersionUID = -8109877572069108012L;
     /**
      * Channel to send MIDI events to
@@ -158,8 +158,9 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
                 for (int i = 0; i < VirtualKeyboard.mappedKeys.length(); i++) {
                     if (VirtualKeyboard.mappedKeys.charAt(i) == pressedKeyChar) {
                         int midiKey = i + lowestAssignedKey;
-                        if (keyDown[midiKey])
+                        if (keyDown[midiKey]) {
                             sendNoteMessage(midiKey, false);
+                        }
                         return;
                     }
                 }
@@ -168,14 +169,16 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == '-') {
                     lowestAssignedKey -= VirtualKeyboard.this.numberOfKeysPerOctave;
-                    if (lowestAssignedKey < 0)
+                    if (lowestAssignedKey < 0) {
                         lowestAssignedKey = 0;
+                    }
                     repaint();
                 }
                 if (e.getKeyChar() == '+') {
                     lowestAssignedKey += VirtualKeyboard.this.numberOfKeysPerOctave;
-                    if (lowestAssignedKey > 127)
+                    if (lowestAssignedKey > 127) {
                         lowestAssignedKey -= VirtualKeyboard.this.numberOfKeysPerOctave;
+                    }
                     repaint();
                 }
             }
@@ -184,8 +187,9 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 
     protected boolean isKeyDown(int midiKey) {
         // midikey should be smaller than 128
-        if (midiKey >= VirtualKeyboard.NUMBER_OF_MIDI_KEYS)
+        if (midiKey >= VirtualKeyboard.NUMBER_OF_MIDI_KEYS) {
             throw new Error("Requested invalid midi key: " + midiKey);
+        }
 
         return keyDown[midiKey];
     }
@@ -202,11 +206,13 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
      */
     protected void sendNoteMessage(int midiKey, boolean sendOnMessage) {
         // do not send note on messages to pressed keys
-        if (sendOnMessage && keyDown[midiKey])
+        if (sendOnMessage && keyDown[midiKey]) {
             return;
+        }
         // do not send note off messages to keys that are not pressed
-        if (!sendOnMessage && !keyDown[midiKey])
+        if (!sendOnMessage && !keyDown[midiKey]) {
             return;
+        }
 
         try {
             ShortMessage sm = new ShortMessage();
@@ -234,9 +240,11 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
     protected abstract int getMidiNote(int x, int y);
 
     protected void allKeysOff() {
-        for (int midiKey = 0; midiKey < VirtualKeyboard.NUMBER_OF_MIDI_KEYS; midiKey++)
+        for (int midiKey = 0; midiKey < VirtualKeyboard.NUMBER_OF_MIDI_KEYS; midiKey++) {
             sendNoteMessage(midiKey, false);
+        }
     }
+
 
     @Override
     public void setReceiver(Receiver receiver) {
@@ -255,15 +263,16 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
     @Override
     public void send(MidiMessage message, long timeStamp) {
         // acts as a "MIDI cable" sends the received messages trough
-        if (recveiver != null)
+        if (recveiver != null) {
             recveiver.send(message, timeStamp);
+        }
 
         // implements Receiver send: makes sure the right keys are marked
         if (message instanceof ShortMessage) {
             ShortMessage sm = (ShortMessage) message;
             boolean correctChannel = sm.getChannel() == VirtualKeyboard.CHANNEL;
             boolean noteOnOrOff = sm.getCommand() == ShortMessage.NOTE_ON
-                    || sm.getCommand() == ShortMessage.NOTE_OFF;
+            || sm.getCommand() == ShortMessage.NOTE_OFF;
             if (correctChannel && noteOnOrOff) {
                 keyDown[sm.getData1()] = (sm.getCommand() == ShortMessage.NOTE_ON) && (sm.getData2() != 0);
                 repaint();

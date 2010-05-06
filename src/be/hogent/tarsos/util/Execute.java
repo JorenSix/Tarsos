@@ -32,8 +32,9 @@ public class Execute {
             Process proc = rt.exec(cmd);
             BufferedReader stdout = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             String line = null;
-            while ((line = stdout.readLine()) != null)
+            while ((line = stdout.readLine()) != null) {
                 System.out.println(line);
+            }
             exitValue = proc.waitFor();
         } catch (IOException e) {
             log.severe("Error while communicating with process");
@@ -42,8 +43,9 @@ public class Execute {
             log.severe("Process interuppted");
             e.printStackTrace();
         }
-        if (exitValue != 0)
+        if (exitValue != 0) {
             log.warning("Process stopped with exit value: " + exitValue);
+        }
         return exitValue;
     }
 
@@ -76,8 +78,9 @@ public class Execute {
         } else {
             commandNotFoundExitCode = Configuration.getInt(ConfKey.unix_shell_executable_not_found_exit_code);
         }
-        if (exitValue != commandNotFoundExitCode)
+        if (exitValue != commandNotFoundExitCode) {
             executableIsInPath = true;
+        }
         return executableIsInPath;
     }
 
@@ -93,7 +96,7 @@ public class Execute {
 
     private static String[] buildWindowsCommand(String command, String redirectOutputToFile) {
         redirectOutputToFile = redirectOutputToFile == null || redirectOutputToFile.equals("") ? "" : " > "
-                + redirectOutputToFile;
+            + redirectOutputToFile;
         String[] cmd = new String[3];
         cmd[0] = Configuration.get(ConfKey.win_shell_executable);
         cmd[1] = Configuration.get(ConfKey.win_shell_executable_option);

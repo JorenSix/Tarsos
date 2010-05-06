@@ -52,8 +52,9 @@ public class PitchDetectionMix implements PitchDetector {
     public void executePitchDetection() {
 
         for (PitchDetector detector : detectors) {
-            if (detector.getSamples().size() == 0)
+            if (detector.getSamples().size() == 0) {
                 detector.executePitchDetection();
+            }
         }
 
         List<Sample> allSamples = new ArrayList<Sample>();
@@ -71,8 +72,9 @@ public class PitchDetectionMix implements PitchDetector {
             if (currentSample.source != nextSample.source) {
                 double pitch = currentSample.returnMatchingPitch(nextSample, pitchDeviation);
 
-                if (pitch > 0)
+                if (pitch > 0) {
                     samples.add(new Sample((nextSample.getStart() + nextSample.getStart()) / 2, pitch));
+                }
             }
         }
     }

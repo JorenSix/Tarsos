@@ -248,9 +248,9 @@ public class Histogram implements Cloneable {
      * automatically.
      * 
      * @param value
-     *            the value to add.
-     * @exception throws a null pointer exception when the value is not in the
-     *            range of the histogram
+     *            The value to add.
+     * @throws IllegalArgumentException
+     *             when the value is not in the range of the histogram.
      */
     public Histogram add(double value) {
 
@@ -1225,3 +1225,4 @@ public class Histogram implements Cloneable {
         FileUtils.writeFile(sb.toString(), fileName);
     }
 }
+

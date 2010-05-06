@@ -42,13 +42,13 @@ public class AudioTranscoder {
      * default is set to 44.1kHz
      */
     private static final Integer DEFAULT_SAMPLING_RATE = Configuration
-            .getInt(ConfKey.transcoded_audio_sampling_rate);// Hertz
+    .getInt(ConfKey.transcoded_audio_sampling_rate);// Hertz
 
     /**
      * The number of channels used int he transcoded file.
      */
     private static final Integer DEFAULT_NUMBER_OF_CHANNELS = Configuration
-            .getInt(ConfKey.transcoded_audio_number_of_channels);// Mono
+    .getInt(ConfKey.transcoded_audio_number_of_channels);// Mono
 
     /**
      * Transcode the source file to target using the requested number of
@@ -90,14 +90,18 @@ public class AudioTranscoder {
     public static void transcode(String source, String target, Integer channels, Integer samplingRate) {
         File sourceFile = new File(source);
         File targetFile = new File(target);
+
         // sanity checks
-        if (!sourceFile.exists())
+        if (!sourceFile.exists()) {
             throw new IllegalArgumentException(source + " does not exist. It should be a readable audiofile.");
-        if (sourceFile.isDirectory())
+        }
+        if (sourceFile.isDirectory()) {
             throw new IllegalArgumentException(source + " is a directory. It should be a readable audiofile.");
-        if (!sourceFile.canRead())
+        }
+        if (!sourceFile.canRead()) {
             throw new IllegalArgumentException(source
                     + " can not be read, check file permissions. It should be a readable audiofile.");
+        }
         // if transcoding is enabled transcode
         if (Configuration.getBoolean(ConfKey.transcode_audio)) {
             try {
