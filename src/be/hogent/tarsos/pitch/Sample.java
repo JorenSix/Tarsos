@@ -233,10 +233,12 @@ public class Sample implements Comparable<Sample> {
         return startCompare == 0 ? source.toString().compareTo(o.source.toString()) : startCompare;
     }
 
-    public boolean equals(Sample o) {
+    @Override
+    public boolean equals(Object o) {
         boolean isEqual = false;
-        if (o != null) {
-            isEqual = start == o.start && source.equals(o.source);
+        if (o != null && o instanceof Sample) {
+            Sample sample = (Sample) o;
+            isEqual = start == sample.start && source.equals(sample.source);
         }
         return isEqual;
     }
