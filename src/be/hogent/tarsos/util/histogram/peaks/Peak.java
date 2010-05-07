@@ -1,7 +1,7 @@
 package be.hogent.tarsos.util.histogram.peaks;
 
 /**
- *Defines a Peak in a histogram
+ *Defines a Peak in a histogram.
  * 
  * @author Joren Six
  * 
@@ -11,7 +11,7 @@ public class Peak {
     private final double height;
 
     /**
-     * Creates a new peak
+     * Creates a new peak.
      * 
      * @param position
      *            the position in cents
@@ -24,7 +24,7 @@ public class Peak {
     }
 
     /**
-     * The height of the peak (number of occurrences)
+     * The height of the peak (number of occurrences).
      * 
      * @return the height of the peak
      */
@@ -33,7 +33,7 @@ public class Peak {
     }
 
     /**
-     * The position of the peak in cents
+     * The position of the peak in cents.
      * 
      * @return The position of the peak in cents
      */

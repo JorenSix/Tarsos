@@ -14,7 +14,7 @@ public class PitchConverter {
     }
 
     /**
-     * C-1 = 16.35 Hz
+     * C-1 = 16.35 Hz.
      */
     private static final double reference_frequency = Configuration
     .getDouble(ConfKey.absolute_cents_reference_frequency);
@@ -44,7 +44,6 @@ public class PitchConverter {
         }
         return midiKey;
     }
-
 
     /**
      * Calculates the frequency (Hz) for a MIDI key.

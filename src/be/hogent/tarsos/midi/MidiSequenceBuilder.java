@@ -236,7 +236,9 @@ public class MidiSequenceBuilder {
         builder.addNoteByDeviationInCents(62, 3, 700);
 
         try {
+            builder.export("test.midi");
             builder.play();
+
         } catch (MidiUnavailableException e) {
             e.printStackTrace();
         } catch (InvalidMidiDataException e) {

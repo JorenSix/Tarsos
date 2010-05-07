@@ -107,7 +107,7 @@ public class AmbitusHistogram extends Histogram {
     }
 
     /**
-     * Plot the complete ambitus
+     * Plot the complete ambitus.
      * 
      * @param fileName
      */
@@ -116,7 +116,7 @@ public class AmbitusHistogram extends Histogram {
     }
 
     /**
-     * Plot the ambitus but use only values between start and stop (cents)
+     * Plot the ambitus but use only values between start and stop (cents).
      * 
      * @param fileName
      *            the plot is saved to this location.

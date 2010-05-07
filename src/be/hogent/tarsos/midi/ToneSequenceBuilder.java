@@ -32,17 +32,17 @@ import be.hogent.tarsos.util.SignalPowerExtractor;
 public class ToneSequenceBuilder {
 
     /**
-     * A list of frequencies
+     * A list of frequencies.
      */
     private List<Double> frequencies;
     /**
-     * A list of starting times, frequencies.size() == realTimes.size();
+     * A list of starting times, frequencies.size() == realTimes.size().
      */
     private final List<Double> realTimes;
 
     /**
      * Values between 0 and 1 that signify the strength of the signal
-     * <code>frequencies.size() == realTimes.size() == powers.size();</code>
+     * <code>frequencies.size() == realTimes.size() == powers.size();</code>.
      */
     private List<Double> powers;
 
@@ -177,7 +177,6 @@ public class ToneSequenceBuilder {
                 player.advanceTime(realTimes.get(i));
             }
         }
-
 
         if (fileName != null) {
             String rawFileName = fileName + ".raw";

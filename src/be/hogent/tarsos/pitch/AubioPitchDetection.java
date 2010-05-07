@@ -41,7 +41,7 @@ public class AubioPitchDetection implements PitchDetector {
      */
     public enum AubioPitchDetectionMode {
         /**
-         * The YIN algorithm
+         * The YIN algorithm.
          */
         YIN("yin"),
         /**
@@ -50,15 +50,15 @@ public class AubioPitchDetection implements PitchDetector {
          */
         YINFFT("yinfft"),
         /**
-         * Fast spectral comb
+         * Fast spectral comb.
          */
         FCOMB("fcomb"),
         /**
-         * Multi comb with spectral smoothing
+         * Multi comb with spectral smoothing.
          */
         MCOMB("mcomb"),
         /**
-         * Schmitt trigger
+         * Schmitt trigger.
          */
         SCHMITT("schmitt");
 

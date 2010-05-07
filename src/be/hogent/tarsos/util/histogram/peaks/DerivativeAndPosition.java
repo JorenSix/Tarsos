@@ -14,5 +14,20 @@ class DerivativeAndPosition implements Comparable<DerivativeAndPosition> {
     public int compareTo(DerivativeAndPosition arg0) {
         return derivative.compareTo(arg0.derivative);
     }
+
+    @Override
+    public boolean equals(final Object other) {
+        boolean isEqual = false;
+        if (other != null && other instanceof DerivativeAndPosition) {
+            DerivativeAndPosition otherD = (DerivativeAndPosition) other;
+            isEqual = derivative.equals(otherD.derivative);
+        }
+        return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        return derivative.hashCode();
+    }
 }
 

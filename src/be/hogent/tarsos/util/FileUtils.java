@@ -267,7 +267,7 @@ public class FileUtils {
     }
 
     public interface RowFilter {
-        public boolean acceptRow(String[] row);
+        boolean acceptRow(String[] row);
     }
 
     public static RowFilter ACCEPT_ALL_ROWFILTER = new RowFilter() {
@@ -394,7 +394,7 @@ public class FileUtils {
     }
 
     /**
-     * Returns the filename without path and without extension
+     * Returns the filename without path and without extension.
      * 
      * @param fileName
      * @return the file name without extension and path
@@ -427,7 +427,7 @@ public class FileUtils {
     }
 
     /**
-     * Checks if a file exists
+     * Checks if a file exists.
      * 
      * @param fileName
      *            the name of the file to check.
@@ -439,7 +439,7 @@ public class FileUtils {
     }
 
     /**
-     * Creates a directory and parent directories if needed
+     * Creates a directory and parent directories if needed.
      * 
      * @param path
      *            the path of the directory to create
@@ -530,7 +530,7 @@ public class FileUtils {
     }
 
     /**
-     * Removes a file from disk
+     * Removes a file from disk.
      * 
      * @param fileName
      *            the file to remove

@@ -30,7 +30,7 @@ public class Yin {
     private static Yin yinInstance;
 
     /**
-     * The YIN threshold value
+     * The YIN threshold value.
      */
     private final double threshold = 0.15;
 
@@ -67,7 +67,7 @@ public class Yin {
 
     /**
      * Implements the difference function as described in step 2 of the YIN
-     * paper
+     * paper.
      */
     private void difference() {
         int j, tau;
@@ -85,7 +85,7 @@ public class Yin {
 
     /**
      * The cumulative mean normalized difference function as described in step 3
-     * of the YIN paper <br>
+     * of the YIN paper. <br>
      * <code>
      * yinBuffer[0] == yinBuffer[1] = 1
      * </code>
@@ -108,7 +108,7 @@ public class Yin {
     }
 
     /**
-     * Implements step 4 of the YIN paper
+     * Implements step 4 of the YIN paper.
      */
     private int absoluteThreshold() {
         // Uses another loop construct
@@ -332,7 +332,7 @@ public class Yin {
      * @exception Error
      *                when the buffer has an incorrect length.
      */
-    public static float processBuffer(float[] buffer, float sampleRate) {
+    public static synchronized float processBuffer(final float[] buffer, float sampleRate) {
         if (yinInstance == null) {
             yinInstance = new Yin(sampleRate, buffer.length);
         }

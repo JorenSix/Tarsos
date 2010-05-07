@@ -90,7 +90,7 @@ public class YinTests {
         assertTrue(percentageCorrect > 0.50);
     }
 
-    private class CorrectPitchHandler implements DetectedPitchHandler {
+    private static class CorrectPitchHandler implements DetectedPitchHandler {
         Integer correct = 0;
         Integer total = 0;
         List<Double> frequencies;

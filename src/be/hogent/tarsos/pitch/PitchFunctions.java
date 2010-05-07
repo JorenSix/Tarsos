@@ -316,7 +316,7 @@ public class PitchFunctions {
             double sumValues = 0;
             double sumWeight = 0;
             for (int j = 0; j < windowSize; j++) {
-                double weight = Math.pow(Math.E, -1 * (j - windowSize / 2) * (j - windowSize / 2) / 2
+                double weight = Math.pow(Math.E, -1 * (j - windowSize / 2.0) * (j - windowSize / 2.0) / 2.0
                         * parameter);
 
                 sumWeight += weight;
@@ -465,7 +465,7 @@ public class PitchFunctions {
              * h.setWrap(true);
              */
 
-            h.addYTick("Gem", histogram.getSumFreq() / histogram.getNumberOfClasses());
+            h.addYTick("Gem", histogram.getSumFreq() / (float) histogram.getNumberOfClasses());
             h.addYTick("Med", StatUtils.percentile(values, 0.5));
             h.setXRange(43, 1147);
         }

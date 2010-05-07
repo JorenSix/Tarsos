@@ -2,13 +2,13 @@ package be.hogent.tarsos.util.histogram;
 
 /**
  * 
- * Defines an implementation of a histogram correlation or distance measure
+ * Defines an implementation of a histogram correlation or distance measure.
  * 
  * @author Joren Six
  */
 public interface HistogramCorrelation {
     /**
-     * The implementation of a histogram correlation or distance measure
+     * The implementation of a histogram correlation or distance measure.
      * 
      * @param thisHistogram
      *            the first histogram

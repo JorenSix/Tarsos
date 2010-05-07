@@ -2,7 +2,7 @@ package be.hogent.tarsos.util.histogram;
 
 /**
  * 
- * Bhattacharya histogram distance measure
+ * Bhattacharya histogram distance measure.
  * 
  * @author Joren Six
  */

@@ -10,79 +10,79 @@ public enum ConfKey {
 
     /**
      * The shell executable used to execute external commands on UNIX; The
-     * default is <code>/bin/bash</code>
+     * default is <code>/bin/bash</code>.
      */
     unix_shell_executable,
     /**
      * The shell executable option used to execute external commands on UNIX;
-     * The default is <code>-c</code>
+     * The default is <code>-c</code>.
      */
     unix_shell_executable_option,
     /**
      * The exit code of a "command not found" operation on UNIX The default is
-     * <code>9009</code>
+     * <code>9009</code>.
      */
     unix_shell_executable_not_found_exit_code,
     /**
      * The shell executable used to execute external commands on windows; The
-     * default is <code>cmd.exe</code>
+     * default is <code>cmd.exe</code>.
      */
     win_shell_executable,
     /**
      * The shell executable option used to execute external commands on windows;
-     * The default is <code>\c</code>
+     * The default is <code>\c</code>.
      */
     win_shell_executable_option,
     /**
      * The exit code of a "command not found" operation on windows The default
-     * is <code>9009</code>
+     * is <code>9009</code>.
      */
     win_shell_executable_not_found_exit_code,
     /**
-     * The histogram bin width in cents
+     * The histogram bin width in cents.
      */
     histogram_bin_width,
     /**
-     * The (relative) directory with audio files
+     * The (relative) directory with audio files.
      */
     audio_directory(true),
     /**
-     * The (relative) directory to save (text) data files
+     * The (relative) directory to save (text) data files.
      */
     data_directory(true),
 
     /**
-     * The (relative) directory to save generated audio
+     * The (relative) directory to save generated audio.
      */
     generated_audio_directory(true),
 
     /**
-     * The (relative) directory to save IPEM annotations
+     * The (relative) directory to save IPEM annotations.
      */
     raw_ipem_annotations_directory(true),
 
     /**
-     * The (relative) directory to save AUBIO annotations
+     * The (relative) directory to save AUBIO annotations.
      */
     raw_aubio_annotations_directory(true),
 
     /**
      * The reference frequency to base all absolute cent calculations on. <br>
      * The default value is the frequency of C0 with A4 tuned to 440Hz: <br>
-     * <code>440/32 * Math.pow(2.0,0.25) = 16.35 Hz</code>
+     * <code>440/32 * Math.pow(2.0,0.25) = 16.35 Hz</code>.
      */
     absolute_cents_reference_frequency,
 
     /**
      * The Ambitus (range) start value in cents: <br>
-     * The default value is 0 (from 16Hz)
+     * The default value is 0 (from 16Hz).
      */
     ambitus_start,
 
     /**
      * The Ambitus (range) stop value in cents: <br>
      * The default value is <br>
-     * <code>1200 * 8 = 9600 cents = C8 = 4186.01 Hz</code>
+     * <code>1200 * 8 = 9600 cents = C8 = 4186.01 Hz</code>.
      */
     ambitus_stop,
 

@@ -10,12 +10,12 @@ package be.hogent.tarsos.pitch;
 public class Pitch {
 
     /**
-     * The pitch in Hz
+     * The pitch in Hz.
      */
     private final double pitchInHertz;
 
     /**
-     * Create a new pitch object with a certain pitch
+     * Create a new pitch object with a certain pitch.
      * 
      * @param pitchInHertz
      */
@@ -121,7 +121,7 @@ public class Pitch {
             break;
         case RELATIVE_CENTS:
             throw new IllegalArgumentException(
-                    "Cannot convert relative cent value to absolute frequency. Pitch object creation failed.");
+            "Cannot convert relative cent value to absolute frequency. Pitch object creation failed.");
         case MIDI_KEY:
             hertzValue = PitchConverter.midiKeyToHertz((int) value);
             break;

@@ -18,7 +18,7 @@ public class PitchDetectionMix implements PitchDetector {
     private final double pitchDeviation;
 
     /**
-     * Create a new PitchdetectionMix
+     * Creates a new PitchdetectionMix.
      * 
      * @param detectors
      *            a list of initialized pitch detectors. For the moment only a

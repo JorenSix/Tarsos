@@ -17,7 +17,7 @@ package be.hogent.tarsos.util.histogram;
  */
 public enum CorrelationMeasure {
     /**
-     * Is a distance measure using city block distances
+     * Is a distance measure using city block distances.
      */
     CITY_BLOCK(new CityBlockDistance()),
     /**
@@ -37,7 +37,7 @@ public enum CorrelationMeasure {
     BHATTACHARYA(new BhattacharyaDistance()),
     /**
      * Another correlation measure, seems to work also, TODO Write better
-     * description
+     * description.
      */
     CROSSCORRELATION(new CrossCorrelation());
 

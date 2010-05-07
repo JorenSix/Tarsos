@@ -22,7 +22,7 @@ public class Sample implements Comparable<Sample> {
     // One probability per pitch.
 
     /**
-     * The source of the sample
+     * The source of the sample.
      */
     public SampleSource source;
 
@@ -35,7 +35,7 @@ public class Sample implements Comparable<Sample> {
     }
 
     /**
-     * Create a new sample
+     * Create a new sample.
      * 
      * @param start
      *            the starting time
@@ -49,7 +49,7 @@ public class Sample implements Comparable<Sample> {
     }
 
     /**
-     * Create a new sample
+     * Create a new sample.
      * 
      * @param start
      *            the starting time
@@ -147,7 +147,7 @@ public class Sample implements Comparable<Sample> {
     }
 
     /**
-     * Convert from the base unit (Hz) to another unit
+     * Convert from the base unit (Hz) to another unit.
      * 
      * @param unit
      *            the other unit
@@ -246,7 +246,7 @@ public class Sample implements Comparable<Sample> {
 
     @Override
     public final int hashCode() {
-        return new Long(start).hashCode() + source.hashCode();
+        return Long.valueOf(start).hashCode() + source.hashCode();
     }
 
 }

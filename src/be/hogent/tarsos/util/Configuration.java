@@ -141,7 +141,7 @@ public class Configuration {
      *            the name of the configuration parameter
      * @return a configured or default value
      */
-    private static String get(String key) {
+    private static synchronized String get(final String key) {
         if (defaultConfigurationProperties == null) {
             defaultConfigurationProperties = new Properties();
             InputStream propertiesStream = Configuration.class

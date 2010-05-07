@@ -32,7 +32,7 @@ public class FileUtilsTests {
     }
 
     /**
-     * Tests: write, append, exists, copy and remove
+     * Tests: write, append, exists, copy and remove.
      */
     @Test
     public void testWriteFile() {
@@ -40,13 +40,14 @@ public class FileUtilsTests {
 
         assertTrue("File shoud not exist", !FileUtils.exists(fileName));
 
-        double d1 = new Random().nextDouble();
+        Random rnd = new Random();
+        double d1 = rnd.nextDouble();
         String expectedContents = "test" + d1 + "\n";
         FileUtils.writeFile("test" + d1 + "\n", fileName);
 
         assertTrue("File shoud exist by now", FileUtils.exists(fileName));
 
-        double d2 = new Random().nextDouble();
+        double d2 = rnd.nextDouble();
         FileUtils.appendFile("test" + d2 + "\n", fileName);
         expectedContents += "test" + d2 + "\n";
 

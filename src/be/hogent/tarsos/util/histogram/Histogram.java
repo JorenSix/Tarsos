@@ -48,29 +48,29 @@ public class Histogram implements Cloneable {
      */
     private final double classWidth;
     /**
-     * The number of classes (or bins) in the histogram
+     * The number of classes (or bins) in the histogram.
      */
     private final int numberOfClasses;
     /**
      * A red black tree backing the frequency table, easy to iterate (in order)
      * TODO Optimization: serious optimization possible by using a plain array
-     * (or two)
+     * (or two).
      */
     private final TreeMap<Double, Long> freqTable;
     /**
      * The starting value != the first class middle start == the first class
-     * middle - classWidth / 2
+     * middle - classWidth / 2.
      */
     private final double start;// the starting value
     /**
      * The last value != the last class middle stop == the last class middle +
-     * classWidth / 2
+     * classWidth / 2.
      */
     private final double stop;// the stopping value
     /**
      * If the histogram wraps values outside the range
      * <code>]start - classWidht / 2, stop + classWidth / 2 [</code> are mapped
-     * to values inside the range using a modulo calculation. If wraps
+     * to values inside the range using a modulo calculation.
      */
     private final boolean wraps;
 
@@ -86,7 +86,7 @@ public class Histogram implements Cloneable {
      * Create a Histogram with a certain number of classes with values in the
      * range <code>]start - classWidht / 2, stop + classWidth / 2 [</code> if
      * the histogram wraps otherwise values outside the range are mapped to
-     * values inside using a modulo calculation
+     * values inside using a modulo calculation.
      * </p>
      * 
      * @param start
@@ -153,7 +153,7 @@ public class Histogram implements Cloneable {
      * Create a Histogram with a certain number of classes with values in the
      * range <code>]start - classWidht / 2, stop + classWidth / 2 [</code> if
      * the histogram wraps otherwise values outside the range are mapped to
-     * values inside using a modulo calculation
+     * values inside using a modulo calculation.
      * </p>
      * 
      * @param start
@@ -177,7 +177,7 @@ public class Histogram implements Cloneable {
      * Create a Histogram with a certain number of classes with values in the
      * range <code>]start - classWidht / 2, stop + classWidth / 2 [</code> if
      * the histogram wraps otherwise values outside the range are mapped to
-     * values inside using a modulo calculation
+     * values inside using a modulo calculation.
      * </p>
      * 
      * @param start
@@ -203,7 +203,7 @@ public class Histogram implements Cloneable {
     }
 
     /**
-     * Returns the key for class with index i
+     * Returns the key for class with index i.
      * 
      * @param i
      *            a class index. If i lays outside the interval
@@ -222,7 +222,7 @@ public class Histogram implements Cloneable {
     }
 
     /**
-     * Returns the number of items in class with index i
+     * Returns the number of items in class with index i.
      * 
      * @param i
      *            a class index. If i lays outside the interval
@@ -380,7 +380,7 @@ public class Histogram implements Cloneable {
      * @return the starting value
      */
     public double getStart() {
-        assert start == (freqTable.firstKey() - classWidth / 2.0);
+        assert Math.abs(start - freqTable.firstKey() - classWidth / 2.0) < 0.0001;
         return start;
     }
 
@@ -391,7 +391,7 @@ public class Histogram implements Cloneable {
      * @return the stop value
      */
     public double getStop() {
-        assert stop == (freqTable.lastKey() + classWidth / 2.0);
+        assert Math.abs(stop - freqTable.lastKey() + classWidth / 2.0) < 0.001;
         // stop is cached for performance reasons
         return stop;
     }
@@ -424,8 +424,8 @@ public class Histogram implements Cloneable {
     }
 
     /**
-     * c A valid value lays in the interval [{@link Histogram#firstValidValue()}
-     * ,{@link Histogram#lastValidValue()}]
+     * A valid value lays in the interval [{@link Histogram#firstValidValue()} ,
+     * {@link Histogram#lastValidValue()}].
      * 
      * @param value
      *            the value to check
@@ -605,7 +605,7 @@ public class Histogram implements Cloneable {
     }
 
     /**
-     * Return a string representation of this histogram
+     * Return a string representation of this histogram.
      * 
      * @return a string representation.
      */
@@ -615,7 +615,7 @@ public class Histogram implements Cloneable {
     }
 
     /**
-     * Returns a string representation of the histogram
+     * Returns a string representation of the histogram.
      * 
      * <p>
      * Uses code from <a href="http://commons.apache.org/math">Apache Commons
@@ -845,6 +845,11 @@ public class Histogram implements Cloneable {
      */
     @Override
     public Histogram clone() {
+        try {
+            super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
         Histogram clone = new Histogram(this);
         for (double key : this.freqTable.keySet()) {
             clone.setCount(key, this.getCount(key));

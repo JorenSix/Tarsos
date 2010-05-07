@@ -35,15 +35,15 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
      */
     private static final long serialVersionUID = -8109877572069108012L;
     /**
-     * Channel to send MIDI events to
+     * Channel to send MIDI events to.
      */
     public static final int CHANNEL = 0;// channel zero.. bad to the bone
     /**
-     * The velocity of NOTE_ON events
+     * The velocity of NOTE_ON events.
      */
     public static final int VELOCITY = 85;
     /**
-     * The number of MIDI keys in total
+     * The number of MIDI keys in total.
      */
     public static final int NUMBER_OF_MIDI_KEYS = 128;
 
@@ -54,24 +54,24 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
     private Receiver recveiver = null;
 
     /**
-     * The (one and only) MIDI key currently pressed using the mouse
+     * The (one and only) MIDI key currently pressed using the mouse.
      */
     private int currentlyPressedMidiNote;
 
     /**
-     * Lowest MIDI key assigned to a keyboard shortcut
+     * Lowest MIDI key assigned to a keyboard shortcut.
      */
     protected int lowestAssignedKey;
 
     /**
      * Number of keys used in the representation (smaller than
-     * NUMBER_OF_MIDI_KEYS)
+     * NUMBER_OF_MIDI_KEYS).
      */
     protected final int numberOfKeys;
 
     /**
      * Remember which of the keys are pressed (using the mouse, MIDI or
-     * keyboard)
+     * keyboard).
      */
     private final boolean[] keyDown;
 
@@ -229,7 +229,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
     }
 
     /**
-     * Converts x and y coordinate into a MIDI note number
+     * Converts x and y coordinate into a MIDI note number.
      * 
      * @param x
      *            the x coordinate

@@ -28,7 +28,7 @@ public class MidiUtils {
     }
 
     /**
-     * Enables a tuning preset
+     * Enables a tuning preset.
      * 
      * @param recv
      *            the receiver to send the message to
@@ -417,7 +417,7 @@ public class MidiUtils {
     /**
      * 
      * See: <a href="http://www.midi.org/techspecs/midituning.php">the MIDI
-     * Tuning Messages specification</a>
+     * Tuning Messages specification</a>.
      */
     public static class MidiTuningStandard {
 

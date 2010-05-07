@@ -1,9 +1,9 @@
 package be.hogent.tarsos.midi;
 
 /*
- *	DumpReceiver.java
+ * DumpReceiver.java
  *
- *	This file is part of jsresources.org
+ * This file is part of jsresources.org
  */
 
 /*

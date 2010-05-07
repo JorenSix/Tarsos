@@ -15,15 +15,15 @@ public interface PitchDetector {
      * annotations: e.g. execute the annotation process once per song, write a
      * CSV-file with annotations and read that file when needed
      */
-    public void executePitchDetection();
+    void executePitchDetection();
 
     /**
      * @return a list of annotated samples
      */
-    public List<Sample> getSamples();
+    List<Sample> getSamples();
 
     /**
      * @return the name of the detector possibly with parameters e.g. aubio_YIN
      */
-    public String getName();
+    String getName();
 }

@@ -123,12 +123,10 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
                 g2.draw(rect);
 
                 if (hasFocus() && (i >= lowestAssignedKey)) {
-                    if (i >= lowestAssignedKey) {
-                        if (i - lowestAssignedKey < mappedKeys.length()) {
-                            g2.setColor(Color.GRAY);
-                            char k = mappedKeys.charAt(i - lowestAssignedKey);
-                            g2.drawString("" + k, cx + 2, h - 4);
-                        }
+                    if (i - lowestAssignedKey < mappedKeys.length()) {
+                        g2.setColor(Color.GRAY);
+                        char k = mappedKeys.charAt(i - lowestAssignedKey);
+                        g2.drawString("" + k, cx + 2, h - 4);
                     }
                 }
 

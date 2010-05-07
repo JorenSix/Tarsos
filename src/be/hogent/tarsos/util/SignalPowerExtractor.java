@@ -27,7 +27,7 @@ public class SignalPowerExtractor {
     double minLinearPower = Double.MAX_VALUE;
 
     /**
-     * Create a new power extractor
+     * Create a new power extractor.
      * 
      * @param audioFile
      *            The audio file to extract power from.
@@ -62,7 +62,7 @@ public class SignalPowerExtractor {
     }
 
     /**
-     * Calculates an index value for the power array from a number of seconds
+     * Calculates an index value for the power array from a number of seconds.
      */
     private int secondsToIndex(double seconds) {
         return (int) (seconds / readWindow);

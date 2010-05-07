@@ -51,9 +51,9 @@ public class AutoTune {
     }
 
     private static class Speaker {
-        private final float sampleRate = 44100;
-        private final int channels = 1;
-        private final int bits = 16;
+        private static final float sampleRate = 44100;
+        private static final int channels = 1;
+        private static final int bits = 16;
 
         private final AudioFormat format = new AudioFormat(sampleRate, bits, channels, true, false);
         private final AudioFloatConverter converter = AudioFloatConverter.getConverter(format);

@@ -141,7 +141,7 @@ public class HistogramTests {
         // data = octave [0-1200]
         // classwidth = 6
         table = PitchFunctions
-                .readFrequencyTable("src/be/hogent/tarsos/test/data/african_octave_frequency_table.txt");
+        .readFrequencyTable("src/be/hogent/tarsos/test/data/african_octave_frequency_table.txt");
         otherTable = new Histogram(table);
 
         // create an other table with the same values but 30 cents higher
@@ -176,7 +176,7 @@ public class HistogramTests {
 
         table = PitchFunctions.readFrequencyTable("src/tarsos/test/data/african_octave_frequency_table.txt");
         otherTable = PitchFunctions
-                .readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
+        .readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
         table = table.normalize();
         otherTable = otherTable.normalize();
         displacement = table.displacementForOptimalCorrelation(otherTable);
@@ -184,9 +184,9 @@ public class HistogramTests {
         plot.addData(0, table);
 
         for (double current = otherTable.getStart() + otherTable.getClassWidth() / 2; current <= otherTable
-                .getStop(); current += otherTable.getClassWidth()) {
+        .getStop(); current += otherTable.getClassWidth()) {
             double displacedValue = (current + displacement * otherTable.getClassWidth())
-                    % (otherTable.getNumberOfClasses() * otherTable.getClassWidth());
+            % (otherTable.getNumberOfClasses() * otherTable.getClassWidth());
             plot.addData(1, current, otherTable.getCount(displacedValue));
         }
         plot.save();
@@ -194,7 +194,7 @@ public class HistogramTests {
 
     /**
      * Tests if the table assigns the values to the right bins and checks if the
-     * counts are valid
+     * counts are valid.
      */
     @Test
     public void testCorrectCount() {
@@ -228,7 +228,7 @@ public class HistogramTests {
     @Test
     public void testSmoothed() {
         Histogram table = PitchFunctions
-                .readFrequencyTable("src/be/hogent/tarsos/test/data/other_african_octave_frequency_table.txt");
+        .readFrequencyTable("src/be/hogent/tarsos/test/data/other_african_octave_frequency_table.txt");
         // table = table.normalize();
         Histogram smoothedWeighted = table.smooth(true, 2);
         Histogram smoothed = table.smooth(false, 2);
@@ -245,7 +245,7 @@ public class HistogramTests {
     @Test
     public void testGaussianFilter() {
         Histogram table = PitchFunctions
-                .readFrequencyTable("src/be/hogent/tarsos/test/data/other_african_octave_frequency_table.txt");
+        .readFrequencyTable("src/be/hogent/tarsos/test/data/other_african_octave_frequency_table.txt");
         Histogram gaussian = table.gaussianSmooth(1.0);
         Histogram doubleGaussian = gaussian.gaussianSmooth(1.0);
         SimplePlot p = new SimplePlot("histogram_gaussian");
@@ -343,7 +343,7 @@ public class HistogramTests {
     }
 
     /**
-     * Tests some cases with fractional class widths
+     * Tests some cases with fractional class widths.
      */
     @Test
     public void testHistogramDoubleKey() {

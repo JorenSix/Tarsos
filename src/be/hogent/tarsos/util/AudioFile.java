@@ -13,10 +13,10 @@ import java.util.List;
 public class AudioFile {
 
     /**
-     * Where to save the transcoded files
+     * Where to save the transcoded files.
      */
     public static final String TRANSCODED_AUDIO_DIRECTORY = Configuration
-            .get(ConfKey.transcoded_audio_directory);
+    .get(ConfKey.transcoded_audio_directory);
     private static final String ORIGINAL_AUDIO_DIRECTORY = Configuration.get(ConfKey.audio_directory);
 
     private final String path;
@@ -74,7 +74,7 @@ public class AudioFile {
         List<AudioFile> files = new ArrayList<AudioFile>();
         for (String dataset : datasets) {
             for (String originalFile : FileUtils.glob(FileUtils.combine(ORIGINAL_AUDIO_DIRECTORY, dataset),
-                    ".*\\..*")) {
+            ".*\\..*")) {
                 files.add(new AudioFile(originalFile));
             }
         }

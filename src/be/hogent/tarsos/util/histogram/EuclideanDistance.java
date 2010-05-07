@@ -2,7 +2,7 @@ package be.hogent.tarsos.util.histogram;
 
 /**
  * 
- * Euclidean Distance (L2 norm) for modulo type histograms
+ * Euclidean Distance (L2 norm) for modulo type histograms.
  * 
  * @author Joren Six
  */
