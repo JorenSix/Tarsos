@@ -79,8 +79,8 @@ public class Pitch {
     public String noteName() {
         String name = "";
         // The x is replaced by the octave index
-        String[] noteNames = { "Cx", "C#x/Dbx", "Dx", "D#x/Ebx", "Ex", "Fx", "F#x/Gbx", "Gx", "G#x/Abx",
-                "Ax", "A#x/Bbx", "Bx" };
+        String[] noteNames = { "Cx", "C#x/Dbx", "Dx", "D#x/Ebx", "Ex", "Fx",
+                "F#x/Gbx", "Gx", "G#x/Abx", "Ax", "A#x/Bbx", "Bx" };
         int midiKey = PitchConverter.hertzToMidiKey(pitchInHertz);
         int noteIndex = (midiKey) % 12;
         int octaveIndex = octaveIndex();
@@ -121,7 +121,7 @@ public class Pitch {
             break;
         case RELATIVE_CENTS:
             throw new IllegalArgumentException(
-            "Cannot convert relative cent value to absolute frequency. Pitch object creation failed.");
+                    "Cannot convert relative cent value to absolute frequency. Pitch object creation failed.");
         case MIDI_KEY:
             hertzValue = PitchConverter.midiKeyToHertz((int) value);
             break;

@@ -25,7 +25,8 @@ public class AutoTune {
      */
     public static int chooseDevice() {
         try {
-            javax.sound.sampled.Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+            javax.sound.sampled.Mixer.Info[] mixers = AudioSystem
+                    .getMixerInfo();
             for (int i = 0; i < mixers.length; i++) {
                 javax.sound.sampled.Mixer.Info mixerinfo = mixers[i];
                 if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0) {
@@ -34,7 +35,8 @@ public class AutoTune {
             }
             // choose MIDI input device
             System.out.print("Choose the Mixer device: ");
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    System.in));
             int deviceIndex = Integer.parseInt(br.readLine());
             return deviceIndex;
         } catch (NumberFormatException e) {
@@ -55,8 +57,10 @@ public class AutoTune {
         private static final int channels = 1;
         private static final int bits = 16;
 
-        private final AudioFormat format = new AudioFormat(sampleRate, bits, channels, true, false);
-        private final AudioFloatConverter converter = AudioFloatConverter.getConverter(format);
+        private final AudioFormat format = new AudioFormat(sampleRate, bits,
+                channels, true, false);
+        private final AudioFloatConverter converter = AudioFloatConverter
+                .getConverter(format);
 
         private SourceDataLine line;
 
@@ -98,10 +102,12 @@ public class AutoTune {
 
         private AudioProcessor(int inputDevice) throws LineUnavailableException {
             speaker = new Speaker();
-            javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[inputDevice];
+            javax.sound.sampled.Mixer.Info selected = AudioSystem
+                    .getMixerInfo()[inputDevice];
             Mixer mixer = AudioSystem.getMixer(selected);
             AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, false);
-            DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
+            DataLine.Info dataLineInfo = new DataLine.Info(
+                    TargetDataLine.class, format);
             TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
             int numberOfSamples = (int) (0.1 * sampleRate);
             line.open(format, numberOfSamples);
@@ -117,7 +123,8 @@ public class AutoTune {
         public void run() {
 
             try {
-                boolean hasMoreBytes = afis.read(audioBuffer, 0, audioBuffer.length) != -1;
+                boolean hasMoreBytes = afis.read(audioBuffer, 0,
+                        audioBuffer.length) != -1;
                 while (hasMoreBytes) {
 
                     // float pitch = Yin.processBuffer(audioBuffer, sampleRate);
@@ -151,7 +158,8 @@ public class AutoTune {
                     for (int i = 0; i < 1024; i++) {
                         audioBuffer[i] = audioBuffer[1024 + i];
                     }
-                    hasMoreBytes = afis.read(audioBuffer, audioBuffer.length - 1024, 1024) != -1;
+                    hasMoreBytes = afis.read(audioBuffer,
+                            audioBuffer.length - 1024, 1024) != -1;
                 }
             } catch (IOException e) {
                 e.printStackTrace();

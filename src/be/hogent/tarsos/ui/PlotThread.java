@@ -39,11 +39,13 @@ public class PlotThread extends Thread {
 
         new PlotApplication(livePlot);
 
-        for (long currentTick = 0; currentTick <= samples.get(samples.size() - 1).getStart(); currentTick += 100) {
+        for (long currentTick = 0; currentTick <= samples.get(
+                samples.size() - 1).getStart(); currentTick += 100) {
 
-            while (sampleIterator.hasNext() && currentSample.getStart() <= currentTick) {
-                for (Double pitch : currentSample
-                        .getPitchesWithoutHarmonicsIn(PitchUnit.ABSOLUTE_CENTS, 0.07)) {
+            while (sampleIterator.hasNext()
+                    && currentSample.getStart() <= currentTick) {
+                for (Double pitch : currentSample.getPitchesWithoutHarmonicsIn(
+                        PitchUnit.ABSOLUTE_CENTS, 0.07)) {
                     double yValue = pitch;
                     livePlot.addPoint(1, currentTick, yValue, false);
                 }
@@ -67,4 +69,3 @@ public class PlotThread extends Thread {
         }
     }
 }
-

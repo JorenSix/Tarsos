@@ -29,7 +29,8 @@ import javax.swing.JComponent;
  * 
  * @author Joren Six
  */
-public abstract class VirtualKeyboard extends JComponent implements Transmitter, Receiver {
+public abstract class VirtualKeyboard extends JComponent implements
+        Transmitter, Receiver {
     /**
      *
      */
@@ -145,7 +146,8 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
                 for (int i = 0; i < VirtualKeyboard.mappedKeys.length(); i++) {
                     if (VirtualKeyboard.mappedKeys.charAt(i) == pressedKeyChar) {
                         int midiKey = i + lowestAssignedKey;
-                        if (midiKey < VirtualKeyboard.this.numberOfKeys && !keyDown[midiKey]) {
+                        if (midiKey < VirtualKeyboard.this.numberOfKeys
+                                && !keyDown[midiKey]) {
                             sendNoteMessage(midiKey, true);
                         }
                         return;
@@ -216,7 +218,8 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 
         try {
             ShortMessage sm = new ShortMessage();
-            int command = sendOnMessage ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
+            int command = sendOnMessage ? ShortMessage.NOTE_ON
+                    : ShortMessage.NOTE_OFF;
             int velocity = sendOnMessage ? VirtualKeyboard.VELOCITY : 0;
             sm.setMessage(command, VirtualKeyboard.CHANNEL, midiKey, velocity);
 
@@ -245,7 +248,6 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
         }
     }
 
-
     @Override
     public void setReceiver(Receiver receiver) {
         this.recveiver = receiver;
@@ -272,9 +274,10 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
             ShortMessage sm = (ShortMessage) message;
             boolean correctChannel = sm.getChannel() == VirtualKeyboard.CHANNEL;
             boolean noteOnOrOff = sm.getCommand() == ShortMessage.NOTE_ON
-            || sm.getCommand() == ShortMessage.NOTE_OFF;
+                    || sm.getCommand() == ShortMessage.NOTE_OFF;
             if (correctChannel && noteOnOrOff) {
-                keyDown[sm.getData1()] = (sm.getCommand() == ShortMessage.NOTE_ON) && (sm.getData2() != 0);
+                keyDown[sm.getData1()] = (sm.getCommand() == ShortMessage.NOTE_ON)
+                        && (sm.getData2() != 0);
                 repaint();
             }
         }
@@ -291,7 +294,8 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
      * @return a <code>VirtualKeyboard</code> using the best representation
      *         available.
      */
-    public static VirtualKeyboard createVirtualKeyboard(int numberOfKeysPerOctave) {
+    public static VirtualKeyboard createVirtualKeyboard(
+            int numberOfKeysPerOctave) {
         VirtualKeyboard keyboard = null;
         switch (numberOfKeysPerOctave) {
         case 12:

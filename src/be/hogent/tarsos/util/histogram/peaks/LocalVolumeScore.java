@@ -19,7 +19,8 @@ public class LocalVolumeScore implements PeakScore {
         // initialize first volume
         for (int j = 0; j < windowSize; j++) {
             int before = -j - 1;
-            volumes[0] = volumes[0] + originalHistogram.getCountForClass(before);
+            volumes[0] = volumes[0]
+                    + originalHistogram.getCountForClass(before);
             int after = j + 1;
             volumes[0] = volumes[0] + originalHistogram.getCountForClass(after);
         }
@@ -30,7 +31,8 @@ public class LocalVolumeScore implements PeakScore {
         for (int i = 1; i < originalHistogram.getNumberOfClasses(); i++) {
             int after = i + windowSize;
             int before = i - windowSize - 1;
-            volumes[i] = volumes[i - 1] + originalHistogram.getCountForClass(after)
+            volumes[i] = volumes[i - 1]
+                    + originalHistogram.getCountForClass(after)
                     - originalHistogram.getCountForClass(before);
         }
     }
@@ -49,16 +51,20 @@ public class LocalVolumeScore implements PeakScore {
         for (int j = 0; j < windowSize; j++) {
             before--;
             after++;
-            volumeRange[volumeRangeIndex] = volumes[((index + before + originalHistogram.getNumberOfClasses()) % originalHistogram
+            volumeRange[volumeRangeIndex] = volumes[((index + before + originalHistogram
+                    .getNumberOfClasses()) % originalHistogram
                     .getNumberOfClasses())];
             volumeRangeIndex++;
-            volumeRange[volumeRangeIndex] = volumes[((index + after) % originalHistogram.getNumberOfClasses())];
+            volumeRange[volumeRangeIndex] = volumes[((index + after) % originalHistogram
+                    .getNumberOfClasses())];
             volumeRangeIndex++;
         }
         volumeRange[volumeRangeIndex] = volumes[index];
 
         double mean = StatUtils.mean(volumeRange);
-        double standardDeviation = Math.pow(StatUtils.variance(volumeRange, mean), 0.5);
-        return standardDeviation == 0.0 ? 0.0 : (volumes[index] - mean) / standardDeviation;
+        double standardDeviation = Math.pow(StatUtils.variance(volumeRange,
+                mean), 0.5);
+        return standardDeviation == 0.0 ? 0.0 : (volumes[index] - mean)
+                / standardDeviation;
     }
 }

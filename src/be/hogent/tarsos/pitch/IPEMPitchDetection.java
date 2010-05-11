@@ -53,11 +53,14 @@ public class IPEMPitchDetection implements PitchDetector {
         this.samples = new ArrayList<Sample>();
 
         // check files and copy them if needed
-        String[] files = { "ipem_pitch_detection.sh", "libsndfile.dll", "pitchdetection.exe" };
+        String[] files = { "ipem_pitch_detection.sh", "libsndfile.dll",
+                "pitchdetection.exe" };
         for (String ipemFile : files) {
-            String target = FileUtils.combine(FileUtils.getRuntimePath(), ipemFile);
+            String target = FileUtils.combine(FileUtils.getRuntimePath(),
+                    ipemFile);
             if (!FileUtils.exists(target)) {
-                FileUtils.copyFileFromJar("/be/hogent/tarsos/pitch/data/" + ipemFile, target);
+                FileUtils.copyFileFromJar("/be/hogent/tarsos/pitch/data/"
+                        + ipemFile, target);
             }
         }
     }
@@ -69,26 +72,35 @@ public class IPEMPitchDetection implements PitchDetector {
 
         FileUtils.writeFile(transcodedBaseName + "\n", "lijst.txt");
 
-        String annotationsDirectory = Configuration.get(ConfKey.raw_ipem_annotations_directory);
-        String csvFileName = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory,
-                transcodedBaseName + ".txt");
+        String annotationsDirectory = Configuration
+                .get(ConfKey.raw_ipem_annotations_directory);
+        String csvFileName = FileUtils.combine(FileUtils.getRuntimePath(),
+                annotationsDirectory, transcodedBaseName + ".txt");
         String command = null;
 
-        String audioDirectory = FileUtils.combine(AudioFile.TRANSCODED_AUDIO_DIRECTORY, "") + "/";
-        String outputDirectory = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory) + "/";
+        String audioDirectory = FileUtils.combine(
+                AudioFile.TRANSCODED_AUDIO_DIRECTORY, "")
+                + "/";
+        String outputDirectory = FileUtils.combine(FileUtils.getRuntimePath(),
+                annotationsDirectory)
+                + "/";
 
         if (System.getProperty("os.name").contains("indows")) {
-            audioDirectory = audioDirectory.replace("/", "\\").replace(":\\", "://");
-            outputDirectory = outputDirectory.replace("/", "\\").replace(":\\", "://");
-            command = "pitchdetection.exe  lijst.txt " + audioDirectory + " " + outputDirectory;
+            audioDirectory = audioDirectory.replace("/", "\\").replace(":\\",
+                    "://");
+            outputDirectory = outputDirectory.replace("/", "\\").replace(":\\",
+                    "://");
+            command = "pitchdetection.exe  lijst.txt " + audioDirectory + " "
+                    + outputDirectory;
 
         } else {// on linux use wine's Z-directory
             audioDirectory = "z://" + audioDirectory.replace("/", "\\\\");
             outputDirectory = "z://" + outputDirectory.replace("/", "\\\\");
             audioDirectory = audioDirectory.replace("//\\\\", "//");
             outputDirectory = outputDirectory.replace("//\\\\", "//");
-            command = FileUtils.getRuntimePath() + "/ipem_pitch_detection.sh \"" + audioDirectory + "\" \""
-            + outputDirectory + "\"";
+            command = FileUtils.getRuntimePath()
+                    + "/ipem_pitch_detection.sh \"" + audioDirectory + "\" \""
+                    + outputDirectory + "\"";
         }
 
         if (!FileUtils.exists(csvFileName)) {
@@ -111,8 +123,9 @@ public class IPEMPitchDetection implements PitchDetector {
                     // ignore number format exception
                 }
 
-                Double pitch = row[index * 2].equals("-1.#IND00") || row[index * 2].equals("-1.#QNAN0") ? 0.0
-                        : Double.parseDouble(row[index * 2]);
+                Double pitch = row[index * 2].equals("-1.#IND00")
+                        || row[index * 2].equals("-1.#QNAN0") ? 0.0 : Double
+                        .parseDouble(row[index * 2]);
                 // only accept values smaller than 25000Hz
                 // bigger values are probably annotated incorrectly
                 // With the ipem pitchdetector this happens sometimes, on wine
@@ -127,7 +140,8 @@ public class IPEMPitchDetection implements PitchDetector {
                     pitches.add(pitch);
                 }
             }
-            Sample sample = new Sample(start, pitches, probabilities, minimumAcceptableProbability);
+            Sample sample = new Sample(start, pitches, probabilities,
+                    minimumAcceptableProbability);
             sample.source = SampleSource.IPEM;
             samples.add(sample);
             start += 10;

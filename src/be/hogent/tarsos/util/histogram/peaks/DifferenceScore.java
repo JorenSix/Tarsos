@@ -33,13 +33,16 @@ public class DifferenceScore implements PeakScore {
                 for (int j = 0; j < windowSize; j++) {
                     before--;
                     after++;
-                    double scoreBefore = scores[(before + histogram.getNumberOfClasses())
+                    double scoreBefore = scores[(before + histogram
+                            .getNumberOfClasses())
                             % histogram.getNumberOfClasses()];
-                    double scoreAfter = scores[after % histogram.getNumberOfClasses()];
+                    double scoreAfter = scores[after
+                            % histogram.getNumberOfClasses()];
 
                     // if there is a bigger score in this window
                     // set the current score to 0.0
-                    if (scoreBefore >= currentScore || scoreAfter >= currentScore) {
+                    if (scoreBefore >= currentScore
+                            || scoreAfter >= currentScore) {
                         scores[i] = 0.0;
                         break;
                     }
@@ -60,8 +63,10 @@ public class DifferenceScore implements PeakScore {
             afterRange[j] += histogram.getCountForClass(index + after);
         }
         long current = histogram.getCountForClass(index);
-        boolean isPeak = StatUtils.mean(beforeRange) < current && current > StatUtils.mean(afterRange);
-        scores[index] = (isPeak ? 1.0 : 0.0) * histogram.getCountForClass(index);
+        boolean isPeak = StatUtils.mean(beforeRange) < current
+                && current > StatUtils.mean(afterRange);
+        scores[index] = (isPeak ? 1.0 : 0.0)
+                * histogram.getCountForClass(index);
     }
 
     @Override

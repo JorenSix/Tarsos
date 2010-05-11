@@ -36,7 +36,8 @@ public class TransmitterSink implements Transmitter {
             receiver = transmitters[0].getReceiver();
             for (int i = 1; i < transmitters.length; i++) {
                 if (transmitters[i].getReceiver() != receiver) {
-                    throw new Error("Each Transmitter in the TransmitterSink should have the same Receiver");
+                    throw new Error(
+                            "Each Transmitter in the TransmitterSink should have the same Receiver");
                 }
             }
         }

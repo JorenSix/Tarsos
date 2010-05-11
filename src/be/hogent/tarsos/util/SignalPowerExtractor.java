@@ -77,13 +77,15 @@ public class SignalPowerExtractor {
         AudioInputStream ais;
         try {
             ais = AudioSystem.getAudioInputStream(inputFile);
-            AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
+            AudioFloatInputStream afis = AudioFloatInputStream
+                    .getInputStream(ais);
             AudioFormat format = ais.getFormat();
 
             double sampleRate = format.getSampleRate();
             double frameSize = format.getFrameSize();
             double frameRate = format.getFrameRate();
-            double audioFileLengtInSeconds = inputFile.length() / (frameSize * frameRate);
+            double audioFileLengtInSeconds = inputFile.length()
+                    / (frameSize * frameRate);
 
             linearPowerArray = new double[secondsToIndex(audioFileLengtInSeconds) + 1];
             int readAmount = (int) (readWindow * sampleRate);
@@ -120,7 +122,8 @@ public class SignalPowerExtractor {
             double frameRate = format.getFrameRate();
             double timeFactor = 2.0 / (frameSize * frameRate);
 
-            RandomAccessFile file = new RandomAccessFile(new File(audioFile.path()), "r");
+            RandomAccessFile file = new RandomAccessFile(new File(audioFile
+                    .path()), "r");
             SimplePlot p = new SimplePlot("Waveform " + audioFile.basename());
             p.setSize(4000, 500);
             // skip header (44 bytes, fixed length)
@@ -160,7 +163,8 @@ public class SignalPowerExtractor {
 
         StringBuilder sb = new StringBuilder("Time (in seconds);Power\n");
         for (int index = 0; index < linearPowerArray.length; index++) {
-            sb.append(index * readWindow).append(";").append(linearPowerArray[index]).append("\n");
+            sb.append(index * readWindow).append(";").append(
+                    linearPowerArray[index]).append("\n");
         }
         FileUtils.writeFile(sb.toString(), textFileName);
     }
@@ -176,7 +180,8 @@ public class SignalPowerExtractor {
             extractPower();
         }
 
-        SimplePlot plot = new SimplePlot("Powerplot for " + audioFile.basename());
+        SimplePlot plot = new SimplePlot("Powerplot for "
+                + audioFile.basename());
         for (int index = 0; index < linearPowerArray.length; index++) {
             // prevents negative infinity
             double power = linearToDecibel(linearPowerArray[index] == 0.0 ? 0.00000000000001
@@ -236,7 +241,8 @@ public class SignalPowerExtractor {
      *            The threshold in dBSPL
      * @return
      */
-    public static boolean isSilence(final float[] buffer, double silenceThreshold) {
+    public static boolean isSilence(final float[] buffer,
+            double silenceThreshold) {
         return (soundPressureLevel(buffer) < silenceThreshold);
     }
 }

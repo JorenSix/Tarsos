@@ -37,14 +37,16 @@ public class HistogramTests {
     @Test
     public void testCreateToneScale() {
         double[] peaksA = { 100, 450, 500 };
-        Histogram a = ToneScaleHistogram.createToneScale(peaksA, null, null, null);
+        Histogram a = ToneScaleHistogram.createToneScale(peaksA, null, null,
+                null);
 
         double[] peaksB = { 200, 550 };
         double[] weights = { 200, 300 };
         double[] widths = { 25, 30 };
         double[] standardDeviations = { 1, 1.2 };
 
-        Histogram b = ToneScaleHistogram.createToneScale(peaksB, weights, widths, standardDeviations);
+        Histogram b = ToneScaleHistogram.createToneScale(peaksB, weights,
+                widths, standardDeviations);
         a.plotCorrelation(b, CorrelationMeasure.INTERSECTION);
 
         SimplePlot p = new SimplePlot("Gaussian_test_a");
@@ -71,7 +73,8 @@ public class HistogramTests {
         otherTable.add(0.5);
 
         assertTrue(1.0 != table.correlation(otherTable));
-        assertTrue(otherTable.correlation(table) == table.correlation(otherTable));
+        assertTrue(otherTable.correlation(table) == table
+                .correlation(otherTable));
         // area otherTable = 5*1 + 4*1 = 10
         // area thisTable = 4*1 + 5*1 = 9
         // correlation = matching area/biggestArea
@@ -113,17 +116,22 @@ public class HistogramTests {
         otherTable.add(2.6);
 
         assertTrue(3.0 / 5.0 == table.correlation(otherTable));
-        assertTrue(5.0 / 5.0 == table.correlationWithDisplacement(1, otherTable));
-        assertTrue(3.0 / 5.0 == table.correlationWithDisplacement(2, otherTable));
+        assertTrue(5.0 / 5.0 == table
+                .correlationWithDisplacement(1, otherTable));
+        assertTrue(3.0 / 5.0 == table
+                .correlationWithDisplacement(2, otherTable));
 
-        assertTrue(table.correlation(otherTable) == table.correlationWithDisplacement(3, otherTable));
+        assertTrue(table.correlation(otherTable) == table
+                .correlationWithDisplacement(3, otherTable));
 
         assertTrue(1 == table.displacementForOptimalCorrelation(otherTable));
         assertTrue(1.0 == table.correlationWithDisplacement(1, otherTable));
-        assertTrue(table.correlationWithDisplacement(2, otherTable) == table.correlationWithDisplacement(-1,
-                otherTable));
-        assertTrue(3.0 / 5.0 == table.correlationWithDisplacement(0, otherTable));
-        assertTrue(3.0 / 5.0 == table.correlationWithDisplacement(2, otherTable));
+        assertTrue(table.correlationWithDisplacement(2, otherTable) == table
+                .correlationWithDisplacement(-1, otherTable));
+        assertTrue(3.0 / 5.0 == table
+                .correlationWithDisplacement(0, otherTable));
+        assertTrue(3.0 / 5.0 == table
+                .correlationWithDisplacement(2, otherTable));
 
         otherTable = new Histogram(otherTable);
         // 3 value in bin 1
@@ -141,7 +149,7 @@ public class HistogramTests {
         // data = octave [0-1200]
         // classwidth = 6
         table = PitchFunctions
-        .readFrequencyTable("src/be/hogent/tarsos/test/data/african_octave_frequency_table.txt");
+                .readFrequencyTable("src/be/hogent/tarsos/test/data/african_octave_frequency_table.txt");
         otherTable = new Histogram(table);
 
         // create an other table with the same values but 30 cents higher
@@ -160,11 +168,13 @@ public class HistogramTests {
                 .correlationWithDisplacement(displacement, otherTable));
         // correlation with displacement should be one: all the same values are
         // used
-        assertTrue(1.0 == table.correlationWithDisplacement(displacement, otherTable));
+        assertTrue(1.0 == table.correlationWithDisplacement(displacement,
+                otherTable));
 
         // same test as above but with negative displacement
         for (Double key : table.keySet()) {
-            Double displacedKey = (key - 30 + table.getStop()) % table.getStop();
+            Double displacedKey = (key - 30 + table.getStop())
+                    % table.getStop();
             otherTable.setCount(displacedKey, table.getCount(key));// 30 cents
             // displaced
         }
@@ -172,21 +182,26 @@ public class HistogramTests {
         assertTrue(-30 == (int) (displacement * table.getClassWidth()));
         assertTrue(table.correlation(otherTable) < table
                 .correlationWithDisplacement(displacement, otherTable));
-        assertTrue(1.0 == table.correlationWithDisplacement(displacement, otherTable));
+        assertTrue(1.0 == table.correlationWithDisplacement(displacement,
+                otherTable));
 
-        table = PitchFunctions.readFrequencyTable("src/tarsos/test/data/african_octave_frequency_table.txt");
+        table = PitchFunctions
+                .readFrequencyTable("src/tarsos/test/data/african_octave_frequency_table.txt");
         otherTable = PitchFunctions
-        .readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
+                .readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
         table = table.normalize();
         otherTable = otherTable.normalize();
         displacement = table.displacementForOptimalCorrelation(otherTable);
         SimplePlot plot = new SimplePlot();
         plot.addData(0, table);
 
-        for (double current = otherTable.getStart() + otherTable.getClassWidth() / 2; current <= otherTable
-        .getStop(); current += otherTable.getClassWidth()) {
-            double displacedValue = (current + displacement * otherTable.getClassWidth())
-            % (otherTable.getNumberOfClasses() * otherTable.getClassWidth());
+        for (double current = otherTable.getStart()
+                + otherTable.getClassWidth() / 2; current <= otherTable
+                .getStop(); current += otherTable.getClassWidth()) {
+            double displacedValue = (current + displacement
+                    * otherTable.getClassWidth())
+                    % (otherTable.getNumberOfClasses() * otherTable
+                            .getClassWidth());
             plot.addData(1, current, otherTable.getCount(displacedValue));
         }
         plot.save();
@@ -228,7 +243,7 @@ public class HistogramTests {
     @Test
     public void testSmoothed() {
         Histogram table = PitchFunctions
-        .readFrequencyTable("src/be/hogent/tarsos/test/data/other_african_octave_frequency_table.txt");
+                .readFrequencyTable("src/be/hogent/tarsos/test/data/other_african_octave_frequency_table.txt");
         // table = table.normalize();
         Histogram smoothedWeighted = table.smooth(true, 2);
         Histogram smoothed = table.smooth(false, 2);
@@ -245,7 +260,7 @@ public class HistogramTests {
     @Test
     public void testGaussianFilter() {
         Histogram table = PitchFunctions
-        .readFrequencyTable("src/be/hogent/tarsos/test/data/other_african_octave_frequency_table.txt");
+                .readFrequencyTable("src/be/hogent/tarsos/test/data/other_african_octave_frequency_table.txt");
         Histogram gaussian = table.gaussianSmooth(1.0);
         Histogram doubleGaussian = gaussian.gaussianSmooth(1.0);
         SimplePlot p = new SimplePlot("histogram_gaussian");

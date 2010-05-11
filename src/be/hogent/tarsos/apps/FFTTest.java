@@ -19,11 +19,14 @@ import com.sun.media.sound.AudioFloatInputStream;
 
 public class FFTTest {
 
-    public static void main(String... args) throws UnsupportedAudioFileException, IOException {
-        AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test",
-                "data", "power_test.wav"));
-        AudioInputStream stream = AudioSystem.getAudioInputStream(new File(audioFile.path()));
-        AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(stream);
+    public static void main(String... args)
+            throws UnsupportedAudioFileException, IOException {
+        AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be",
+                "hogent", "tarsos", "test", "data", "power_test.wav"));
+        AudioInputStream stream = AudioSystem.getAudioInputStream(new File(
+                audioFile.path()));
+        AudioFloatInputStream afis = AudioFloatInputStream
+                .getInputStream(stream);
 
         int readAmount = 16384 / 2;
         float[] buffer = new float[readAmount];
@@ -48,8 +51,8 @@ public class FFTTest {
             double maxAmplitude = -1;
             double indexOfMostEnergyRichFrequencyBin = -1;
             for (int j = 0; j < data.length / 2; j++) {
-                double amplitude = data[j].getReal() * data[j].getReal() + data[j].getImaginary()
-                * data[j].getImaginary();
+                double amplitude = data[j].getReal() * data[j].getReal()
+                        + data[j].getImaginary() * data[j].getImaginary();
                 amplitude = Math.pow(amplitude, 0.5) / data.length;
                 if (amplitude > maxAmplitude) {
                     maxAmplitude = amplitude;
@@ -64,7 +67,8 @@ public class FFTTest {
                 System.out.println(index + " Is percussive");
             }
 
-            double mostEnergyRichPitch = indexOfMostEnergyRichFrequencyBin * sampleRate / readAmount; // in
+            double mostEnergyRichPitch = indexOfMostEnergyRichFrequencyBin
+                    * sampleRate / readAmount; // in
             // Hz
             plot.addData(index, mostEnergyRichPitch);
             index++;

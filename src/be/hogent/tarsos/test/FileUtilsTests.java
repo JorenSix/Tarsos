@@ -12,7 +12,8 @@ import be.hogent.tarsos.util.FileUtils;
 public class FileUtilsTests {
     @Test
     public void testGlob() {
-        assertTrue(FileUtils.glob("audio/makam", ".*.wav").get(0).endsWith(".wav"));
+        assertTrue(FileUtils.glob("audio/makam", ".*.wav").get(0).endsWith(
+                ".wav"));
         assertTrue(FileUtils.glob("audio/makam", ".*.wav").size() != 0);
     }
 
@@ -55,15 +56,18 @@ public class FileUtilsTests {
         assertEquals(expectedContents, contents);
 
         // a copy of the file should have the same contents
-        String copyFileName = FileUtils.combine("data", "tests", "test_file_copy.txt");
+        String copyFileName = FileUtils.combine("data", "tests",
+                "test_file_copy.txt");
         FileUtils.cp(fileName, copyFileName);
         contents = FileUtils.readFile(copyFileName);
         assertEquals(expectedContents, contents);
 
         // cleanup
-        assertTrue("File could not be deleted. Closed correctly?", FileUtils.rm(copyFileName));
+        assertTrue("File could not be deleted. Closed correctly?", FileUtils
+                .rm(copyFileName));
         assertTrue("File shoud not exist", !FileUtils.exists(copyFileName));
-        assertTrue("File could not be deleted. Closed correctly?", FileUtils.rm(fileName));
+        assertTrue("File could not be deleted. Closed correctly?", FileUtils
+                .rm(fileName));
         assertTrue("File shoud not exist", !FileUtils.exists(fileName));
     }
 
@@ -86,9 +90,11 @@ public class FileUtilsTests {
     @Test
     public void testCombine() {
         if (System.getProperty("os.name").contains("indows")) {
-            assertEquals("c:\\blaat\\test", FileUtils.combine("c:", "blaat", "test"));
+            assertEquals("c:\\blaat\\test", FileUtils.combine("c:", "blaat",
+                    "test"));
         } else {
-            assertEquals("/home/joren/test.jpg", FileUtils.combine("home", "joren", "test.jpg"));
+            assertEquals("/home/joren/test.jpg", FileUtils.combine("home",
+                    "joren", "test.jpg"));
         }
     }
 }

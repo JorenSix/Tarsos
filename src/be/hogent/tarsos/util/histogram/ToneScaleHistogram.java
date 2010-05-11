@@ -53,14 +53,16 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
  * 
  */
 public class ToneScaleHistogram extends Histogram {
-    private static final Logger log = Logger.getLogger(ToneScaleHistogram.class.getName());
+    private static final Logger log = Logger.getLogger(ToneScaleHistogram.class
+            .getName());
 
     /**
      * Create a new tone scale using the configured bin width. A tone scale is a
      * wrapping histogram with values from 0 to 1200 cents.
      */
     public ToneScaleHistogram() {
-        super(0, 1200, 1200 / Configuration.getInt(ConfKey.histogram_bin_width), true);
+        super(0, 1200,
+                1200 / Configuration.getInt(ConfKey.histogram_bin_width), true);
     }
 
     /**
@@ -70,7 +72,8 @@ public class ToneScaleHistogram extends Histogram {
      * standard for exchange of scales, owing to the size of the scale archive
      * of over 3700+ scales and the popularity of the Scala program.</i>
      */
-    public void exportToScalaScaleFileFormat(String fileName, String toneScaleName) {
+    public void exportToScalaScaleFileFormat(String fileName,
+            String toneScaleName) {
         List<Peak> peaks = PeakDetector.detect(this, 15, 0.5);
         exportPeaksToScalaFileFormat(fileName, toneScaleName, peaks);
     }
@@ -81,24 +84,30 @@ public class ToneScaleHistogram extends Histogram {
      * file format</a>: <i>This file format for musical tunings is becoming a
      * standard for exchange of scales, owing to the size of the scale archive
      * of over 3700+ scales and the popularity of the Scala program.</i>
+     * 
      * @param fileName
      * @param toneScaleName
      * @param peaks
      */
-    public static void exportPeaksToScalaFileFormat(String fileName, String toneScaleName, List<Peak> peaks) {
+    public static void exportPeaksToScalaFileFormat(String fileName,
+            String toneScaleName, List<Peak> peaks) {
         if (peaks.size() > 0) {
             StringBuilder sb = new StringBuilder();
-            sb.append("! ").append(FileUtils.basename(fileName)).append(".scl \n").append("!\n").append(
-                    toneScaleName).append("\n").append(peaks.size()).append("\n!\n");
+            sb.append("! ").append(FileUtils.basename(fileName)).append(
+                    ".scl \n").append("!\n").append(toneScaleName).append("\n")
+                    .append(peaks.size()).append("\n!\n");
             double firstPeakPosition = peaks.get(0).getPosition();
             for (int i = 1; i < peaks.size(); i++) {
-                double peakPosition = peaks.get(i).getPosition() - firstPeakPosition;
+                double peakPosition = peaks.get(i).getPosition()
+                        - firstPeakPosition;
                 sb.append(peakPosition).append("\n");
             }
             sb.append("2/1");
             FileUtils.writeFile(sb.toString(), fileName);
         } else {
-            log.warning("No peaks detected: file: " + fileName + " not created");
+            log
+                    .warning("No peaks detected: file: " + fileName
+                            + " not created");
         }
     }
 
@@ -123,15 +132,15 @@ public class ToneScaleHistogram extends Histogram {
      *            is 1. Bigger values give a wider peak.
      * @return a histogram with values from 0 to 1200 and the requested peaks.
      */
-    public static ToneScaleHistogram createToneScale(double[] peaks, double[] heights, double[] widths,
-            double[] standardDeviations) {
+    public static ToneScaleHistogram createToneScale(double[] peaks,
+            double[] heights, double[] widths, double[] standardDeviations) {
         ToneScaleHistogram toneScaleHistogram = new ToneScaleHistogram();
         // unwrapped histogram of 3 x 1200 cents wide. Used to correctly
         // calculate wrapping peaks
         // The middle octave is the 'real' octave, the other two are used to
         // 'fold' onto the middle one
-        Histogram unWrappedHistogram = new Histogram(0, 3 * 1200, 3600 / Configuration
-                .getInt(ConfKey.histogram_bin_width));
+        Histogram unWrappedHistogram = new Histogram(0, 3 * 1200,
+                3600 / Configuration.getInt(ConfKey.histogram_bin_width));
 
         // shift the peaks to the middle octave + sanity checks
         for (int i = 0; i < peaks.length; i++) {
@@ -170,7 +179,8 @@ public class ToneScaleHistogram extends Histogram {
                 if (Math.abs(difference) > 10 * widths[i]) {
                     continue;
                 }
-                double power = Math.pow(difference / (widths[i] / 2 * standardDeviations[i]), 2.0);
+                double power = Math.pow(difference
+                        / (widths[i] / 2 * standardDeviations[i]), 2.0);
                 currentValue += heights[i] * Math.pow(Math.E, -0.5 * power);
             }
             // add to the current value (for correct folding)
@@ -191,8 +201,8 @@ public class ToneScaleHistogram extends Histogram {
     public boolean isMelodic() {
         // 1 calculate a fitting function
         // 1a smooth the original histogram for better peak detection
-        ToneScaleHistogram smoothed = (ToneScaleHistogram) (new ToneScaleHistogram()).add(this)
-        .gaussianSmooth(1.0);
+        ToneScaleHistogram smoothed = (ToneScaleHistogram) (new ToneScaleHistogram())
+                .add(this).gaussianSmooth(1.0);
 
         // 1b detect peaks
         List<Peak> peaks = PeakDetector.detect(smoothed, 20, 0.8);
@@ -202,7 +212,8 @@ public class ToneScaleHistogram extends Histogram {
         // using the intersection measure. The result is a measure for peakiness
         // of
         // the original histogram
-        double peakiness = fittingHistogram.correlation(this, CorrelationMeasure.INTERSECTION);
+        double peakiness = fittingHistogram.correlation(this,
+                CorrelationMeasure.INTERSECTION);
         // if more than 50% of the fitting histogram and the original histogram
         // overlap
         // the original is peaky or melodic

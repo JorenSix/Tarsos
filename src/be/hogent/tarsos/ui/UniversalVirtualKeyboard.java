@@ -49,8 +49,10 @@ public class UniversalVirtualKeyboard extends VirtualKeyboard {
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
         int w = getWidth();
         int h = getHeight();
@@ -77,7 +79,8 @@ public class UniversalVirtualKeyboard extends VirtualKeyboard {
             if (i >= lowestAssignedKey) {
                 if (i - lowestAssignedKey < VirtualKeyboard.mappedKeys.length()) {
                     g2.setColor(Color.GRAY);
-                    char keyChar = VirtualKeyboard.mappedKeys.charAt(i - lowestAssignedKey);
+                    char keyChar = VirtualKeyboard.mappedKeys.charAt(i
+                            - lowestAssignedKey);
                     g2.drawString("" + keyChar, cx + 2, h - 4);
                 }
             }

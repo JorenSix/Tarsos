@@ -30,7 +30,8 @@ public class PitchDetectionMix implements PitchDetector {
      *            SCHMITT is accepted when pitchDeviation >= 0.01
      * 
      */
-    public PitchDetectionMix(List<PitchDetector> detectors, double pitchDeviation) {
+    public PitchDetectionMix(List<PitchDetector> detectors,
+            double pitchDeviation) {
         this.detectors = detectors;
         this.pitchDeviation = pitchDeviation;
 
@@ -70,10 +71,12 @@ public class PitchDetectionMix implements PitchDetector {
             Sample currentSample = allSamples.get(i);
             Sample nextSample = allSamples.get(i + 1);
             if (currentSample.source != nextSample.source) {
-                double pitch = currentSample.returnMatchingPitch(nextSample, pitchDeviation);
+                double pitch = currentSample.returnMatchingPitch(nextSample,
+                        pitchDeviation);
 
                 if (pitch > 0) {
-                    samples.add(new Sample((nextSample.getStart() + nextSample.getStart()) / 2, pitch));
+                    samples.add(new Sample((nextSample.getStart() + nextSample
+                            .getStart()) / 2, pitch));
                 }
             }
         }

@@ -115,7 +115,8 @@ public class Yin {
         // than the AUBIO implementation
         for (int tau = 1; tau < yinBuffer.length; tau++) {
             if (yinBuffer[tau] < threshold) {
-                while (tau + 1 < yinBuffer.length && yinBuffer[tau + 1] < yinBuffer[tau]) {
+                while (tau + 1 < yinBuffer.length
+                        && yinBuffer[tau + 1] < yinBuffer[tau]) {
                     tau++;
                 }
                 return tau;
@@ -137,7 +138,8 @@ public class Yin {
     private float parabolicInterpolation(int tauEstimate) {
         float s0, s1, s2;
         int x0 = (tauEstimate < 1) ? tauEstimate : tauEstimate - 1;
-        int x2 = (tauEstimate + 1 < yinBuffer.length) ? tauEstimate + 1 : tauEstimate;
+        int x2 = (tauEstimate + 1 < yinBuffer.length) ? tauEstimate + 1
+                : tauEstimate;
         if (x0 == tauEstimate) {
             return (yinBuffer[tauEstimate] <= yinBuffer[x2]) ? tauEstimate : x2;
         }
@@ -221,9 +223,11 @@ public class Yin {
      * @throws IOException
      *             If there is an error reading the file.
      */
-    public static void processFile(String fileName, DetectedPitchHandler detectedPitchHandler)
-    throws UnsupportedAudioFileException, IOException {
-        AudioInputStream ais = AudioSystem.getAudioInputStream(new File(fileName));
+    public static void processFile(String fileName,
+            DetectedPitchHandler detectedPitchHandler)
+            throws UnsupportedAudioFileException, IOException {
+        AudioInputStream ais = AudioSystem.getAudioInputStream(new File(
+                fileName));
         AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
         Yin.processStream(afis, detectedPitchHandler);
     }
@@ -241,8 +245,9 @@ public class Yin {
      * @throws IOException
      *             If there is an error reading the stream.
      */
-    public static void processStream(AudioFloatInputStream afis, DetectedPitchHandler detectedPitchHandler)
-    throws UnsupportedAudioFileException, IOException {
+    public static void processStream(AudioFloatInputStream afis,
+            DetectedPitchHandler detectedPitchHandler)
+            throws UnsupportedAudioFileException, IOException {
         AudioFormat format = afis.getFormat();
         float sampleRate = format.getSampleRate();
         double frameSize = format.getFrameSize();
@@ -258,7 +263,8 @@ public class Yin {
         int bufferStepSize = yinInstance.bufferSize - yinInstance.overlapSize;
 
         // read full buffer
-        boolean hasMoreBytes = afis.read(yinInstance.inputBuffer, 0, yinInstance.bufferSize) != -1;
+        boolean hasMoreBytes = afis.read(yinInstance.inputBuffer, 0,
+                yinInstance.bufferSize) != -1;
         floatsProcessed += yinInstance.inputBuffer.length;
         while (hasMoreBytes && yinInstance.running) {
             float pitch = yinInstance.getPitch();
@@ -268,7 +274,8 @@ public class Yin {
             }
 
             // slide buffer with predefined overlap
-            hasMoreBytes = Yin.slideBuffer(afis, yinInstance.inputBuffer, yinInstance.overlapSize);
+            hasMoreBytes = Yin.slideBuffer(afis, yinInstance.inputBuffer,
+                    yinInstance.overlapSize);
 
             floatsProcessed += bufferStepSize;
         }
@@ -308,8 +315,9 @@ public class Yin {
      *             particular, an IOException is thrown if the input stream has
      *             been closed.
      */
-    public static boolean slideBuffer(final AudioFloatInputStream audioFloatInputStream, float[] audioBuffer,
-            int overlap) throws IOException {
+    public static boolean slideBuffer(
+            final AudioFloatInputStream audioFloatInputStream,
+            float[] audioBuffer, int overlap) throws IOException {
         assert overlap < audioBuffer.length;
 
         int slideSize = audioBuffer.length - overlap;
@@ -318,7 +326,8 @@ public class Yin {
             audioBuffer[i + overlap] = audioBuffer[i];
         }
 
-        boolean hasMoreBytes = audioFloatInputStream.read(audioBuffer, 0, slideSize) != -1;
+        boolean hasMoreBytes = audioFloatInputStream.read(audioBuffer, 0,
+                slideSize) != -1;
         return hasMoreBytes;
     }
 
@@ -332,13 +341,15 @@ public class Yin {
      * @exception Error
      *                when the buffer has an incorrect length.
      */
-    public static synchronized float processBuffer(final float[] buffer, float sampleRate) {
+    public static synchronized float processBuffer(final float[] buffer,
+            float sampleRate) {
         if (yinInstance == null) {
             yinInstance = new Yin(sampleRate, buffer.length);
         }
 
         if (buffer.length != yinInstance.inputBuffer.length) {
-            throw new Error("Buffer and yin buffer should have the same length!");
+            throw new Error(
+                    "Buffer and yin buffer should have the same length!");
         }
 
         for (int i = 0; i < buffer.length; i++) {
@@ -357,18 +368,20 @@ public class Yin {
         }
     }
 
-    public static void main(String... args) throws UnsupportedAudioFileException, IOException {
+    public static void main(String... args)
+            throws UnsupportedAudioFileException, IOException {
         final SimplePlot p = new SimplePlot("Pitch tracking");
-        Yin.processFile("../Tarsos/audio/pitch_check/flute.novib.mf.C5B5.wav", new DetectedPitchHandler() {
-            @Override
-            public void handleDetectedPitch(float time, float pitch) {
-                System.out.println(time + "\t" + pitch);
-                if (pitch == -1) {
-                    pitch = 0;
-                }
-                p.addData(time, pitch);
-            }
-        });
+        Yin.processFile("../Tarsos/audio/pitch_check/flute.novib.mf.C5B5.wav",
+                new DetectedPitchHandler() {
+                    @Override
+                    public void handleDetectedPitch(float time, float pitch) {
+                        System.out.println(time + "\t" + pitch);
+                        if (pitch == -1) {
+                            pitch = 0;
+                        }
+                        p.addData(time, pitch);
+                    }
+                });
         p.save();
     }
 

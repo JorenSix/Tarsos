@@ -30,8 +30,9 @@ public class AmbitusHistogram extends Histogram {
     private final List<ToneScaleHistogram> toneScaleHistogramPerOctave = new ArrayList<ToneScaleHistogram>();
 
     public AmbitusHistogram() {
-        super(Configuration.getInt(ConfKey.ambitus_start), Configuration.getInt(ConfKey.ambitus_stop),
-                1200 / Configuration.getInt(ConfKey.histogram_bin_width), false,// does
+        super(Configuration.getInt(ConfKey.ambitus_start), Configuration
+                .getInt(ConfKey.ambitus_stop), 1200 / Configuration
+                .getInt(ConfKey.histogram_bin_width), false,// does
                 // not
                 // wrap
                 true// ignore values outside human hearing range
@@ -39,7 +40,7 @@ public class AmbitusHistogram extends Histogram {
 
         // initialize the list of tone scales
         for (int value = Configuration.getInt(ConfKey.ambitus_start); value < Configuration
-        .getInt(ConfKey.ambitus_stop); value += 1200) {
+                .getInt(ConfKey.ambitus_stop); value += 1200) {
             toneScaleHistogramPerOctave.add(new ToneScaleHistogram());
         }
 
@@ -50,7 +51,8 @@ public class AmbitusHistogram extends Histogram {
         super.add(value);
         // keep a histogram for each octave
         int octaveIndex = (int) (value / 1200);
-        if (toneScaleHistogramPerOctave.size() > octaveIndex && octaveIndex >= 0) {
+        if (toneScaleHistogramPerOctave.size() > octaveIndex
+                && octaveIndex >= 0) {
             toneScaleHistogramPerOctave.get(octaveIndex).add(value);
         }
         return this;
@@ -87,8 +89,10 @@ public class AmbitusHistogram extends Histogram {
         Collections.sort(octaves, new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
-                Long energyFirst = AmbitusHistogram.this.toneScaleHistogramPerOctave.get(o1).getSumFreq();
-                Long energySecond = AmbitusHistogram.this.toneScaleHistogramPerOctave.get(o2).getSumFreq();
+                Long energyFirst = AmbitusHistogram.this.toneScaleHistogramPerOctave
+                        .get(o1).getSumFreq();
+                Long energySecond = AmbitusHistogram.this.toneScaleHistogramPerOctave
+                        .get(o2).getSumFreq();
                 return energySecond.compareTo(energyFirst);
             }
         });
@@ -127,7 +131,8 @@ public class AmbitusHistogram extends Histogram {
      */
     public void plotAmbitusHistogram(String fileName, int start, int stop) {
         SimplePlot plot = new SimplePlot();
-        for (double current = start; current <= stop; current += this.getClassWidth()) {
+        for (double current = start; current <= stop; current += this
+                .getClassWidth()) {
             plot.addData(0, current, this.getCount(current));
         }
         plot.save(fileName);
@@ -150,18 +155,21 @@ public class AmbitusHistogram extends Histogram {
             Plot h = new Plot();
             h.setXRange(0, 1200);
             for (int dataset = 0; dataset < toneScaleHistogramPerOctave.size(); dataset++) {
-                ToneScaleHistogram currentToneScaleHistogram = toneScaleHistogramPerOctave.get(dataset);
+                ToneScaleHistogram currentToneScaleHistogram = toneScaleHistogramPerOctave
+                        .get(dataset);
                 for (double key : currentToneScaleHistogram.keySet()) {
                     long count = currentToneScaleHistogram.getCount(key);
                     for (int i = 0; i < dataset; i++) {
-                        count += toneScaleHistogramPerOctave.get(i).getCount(key);
+                        count += toneScaleHistogramPerOctave.get(i).getCount(
+                                key);
                     }
                     h.addPoint(dataset, key, count, true);
                 }
             }
             for (int dataset = 0; dataset < toneScaleHistogramPerOctave.size(); dataset++) {
-                h.addLegend(dataset, "C" + dataset + "-B" + dataset + " [" + dataset * 1200 + "-"
-                        + ((dataset * 1200) + 1199) + "]");
+                h.addLegend(dataset, "C" + dataset + "-B" + dataset + " ["
+                        + dataset * 1200 + "-" + ((dataset * 1200) + 1199)
+                        + "]");
             }
             h.setSize(1680, 1050);
             h.setTitle(FileUtils.basename(fileName));

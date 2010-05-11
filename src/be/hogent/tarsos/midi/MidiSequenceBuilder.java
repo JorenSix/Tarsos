@@ -17,6 +17,8 @@ import javax.sound.midi.Synthesizer;
 import javax.sound.midi.Track;
 import javax.sound.midi.Transmitter;
 
+import be.hogent.tarsos.pitch.PitchConverter;
+
 /**
  * Utility class to generate a sequence of MIDI events.
  * 
@@ -43,31 +45,36 @@ public class MidiSequenceBuilder {
     }
 
     public void addNote(int midiKey, int numberOfTicks) {
-        track.add(createNoteEvent(ShortMessage.NOTE_ON, midiKey, VELOCITY, currentTicks));
+        track.add(createNoteEvent(ShortMessage.NOTE_ON, midiKey, VELOCITY,
+                currentTicks));
         currentTicks = numberOfTicks + currentTicks;
-        track.add(createNoteEvent(ShortMessage.NOTE_OFF, midiKey, 0, currentTicks));
+        track.add(createNoteEvent(ShortMessage.NOTE_OFF, midiKey, 0,
+                currentTicks));
     }
 
     public void addNoteByFrequency(double frequency, int numberOfTicks) {
-        int closestMidiNumber = (int) Math.round((69 + 12 * Math.log(frequency / 440.0) / Math.log(2.0)));
-        double frequencyClosestMidiNumber = (Math.pow(2.0, (closestMidiNumber - 69.0) / 12.0) * 440.0);
-        double deviationInCents = 1200 * Math.log(frequency / frequencyClosestMidiNumber) / Math.log(2.0);
+        int closestMidiNumber = (int) Math.round((69 + 12
+                * Math.log(frequency / 440.0) / Math.log(2.0)));
+        double frequencyClosestMidiNumber = (Math.pow(2.0,
+                (closestMidiNumber - 69.0) / 12.0) * 440.0);
+        double deviationInCents = 1200
+                * Math.log(frequency / frequencyClosestMidiNumber)
+                / Math.log(2.0);
         assert deviationInCents <= 50;
         // System.out.println("Requested: " + frequency + "Hz; Midi key " +
         // closestMidiNumber + " frequency: " + frequencyClosestMidiNumber +
         // "Hz; Deviation " + deviationInCents + " cents");
-        this.addNoteByDeviationInCents(closestMidiNumber, numberOfTicks, deviationInCents);
+        this.addNoteByDeviationInCents(closestMidiNumber, numberOfTicks,
+                deviationInCents);
     }
 
     public void addNoteByAbsoluteCents(double absoluteCents, int numberOfTicks) {
-        // reference frequency of 32.7032... Hz
-        // 27.5 Hz is A0 (440, 220, 110, 55, 27.5)
-        double reference_frequency = 27.5 * Math.pow(2.0, 0.25);
-        double frequency = reference_frequency * Math.pow(2.0, absoluteCents / 1200);
+        double frequency = PitchConverter.absoluteCentToHertz(absoluteCents);
         this.addNoteByFrequency(frequency, numberOfTicks);
     }
 
-    public void addNoteByDeviationInCents(int midiKey, int numberOfTicks, double deviationInCents) {
+    public void addNoteByDeviationInCents(int midiKey, int numberOfTicks,
+            double deviationInCents) {
         midiKey = midiKey + (int) (deviationInCents / 100);
         deviationInCents = deviationInCents % 100;
         track.add(createPitchBendEvent(deviationInCents, currentTicks));
@@ -75,7 +82,8 @@ public class MidiSequenceBuilder {
         track.add(createPitchBendEvent(0.0, currentTicks));
     }
 
-    private MidiEvent createPitchBendEvent(double deviationInCents, int startTick) {
+    private MidiEvent createPitchBendEvent(double deviationInCents,
+            int startTick) {
         int bendFactorInMidi = 0;
         // 16384 values for 400 cents
         bendFactorInMidi = (int) (deviationInCents * (16384.0 / 400.0));
@@ -93,7 +101,8 @@ public class MidiSequenceBuilder {
         }
     }
 
-    public void play() throws MidiUnavailableException, InvalidMidiDataException {
+    public void play() throws MidiUnavailableException,
+            InvalidMidiDataException {
         final Sequencer sequencer;
         final Synthesizer synthesizer;
         /*
@@ -142,7 +151,6 @@ public class MidiSequenceBuilder {
                     if (synthesizer != null) {
                         synthesizer.close();
                     }
-                    // System.exit(0);
                 }
             }
         });
@@ -189,7 +197,8 @@ public class MidiSequenceBuilder {
         // -8191 <= bendfactor <= +8192
         bendFactor += 8191;
         if (0 > bendFactor || bendFactor >= 16384) {
-            throw new IllegalArgumentException("bendFactor invalid:  -8191 <= bendFactor <= +8192");
+            throw new IllegalArgumentException(
+                    "bendFactor invalid:  -8191 <= bendFactor <= +8192");
         }
 
         String binary = toBinaryString(bendFactor);
@@ -213,7 +222,8 @@ public class MidiSequenceBuilder {
         return binary;
     }
 
-    private MidiEvent createNoteEvent(int nCommand, int nKey, int nVelocity, long lTick) {
+    private MidiEvent createNoteEvent(int nCommand, int nKey, int nVelocity,
+            long lTick) {
         ShortMessage message = new ShortMessage();
         try {
             message.setMessage(nCommand, 0, // always on channel 1
@@ -228,6 +238,15 @@ public class MidiSequenceBuilder {
     public static void main(String[] args) {
         MidiSequenceBuilder builder = new MidiSequenceBuilder();
 
+        for (int i = 0; i < 10; i++) {
+            for (int j = 40; j < 80; j++) {
+                builder.addNote(j, 1);
+            }
+            for (int j = 80; j > 40; j++) {
+                builder.addNote(j, 1);
+            }
+        }
+
         builder.addNote(69, 3);
         builder.addNoteByFrequency(440, 3);
         builder.addNoteByDeviationInCents(68, 3, 100);
@@ -238,7 +257,6 @@ public class MidiSequenceBuilder {
         try {
             builder.export("test.midi");
             builder.play();
-
         } catch (MidiUnavailableException e) {
             e.printStackTrace();
         } catch (InvalidMidiDataException e) {

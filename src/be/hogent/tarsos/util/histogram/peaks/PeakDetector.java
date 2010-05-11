@@ -35,8 +35,8 @@ public class PeakDetector {
             peakPositionsDouble[i] = peaks.get(i).getPosition();
             peakHeights[i] = peaks.get(i).getHeight();
         }
-        return ToneScaleHistogram.createToneScale(peakPositionsDouble, peakHeights, peakWidths,
-                peakStandardDeviations);
+        return ToneScaleHistogram.createToneScale(peakPositionsDouble,
+                peakHeights, peakWidths, peakStandardDeviations);
     }
 
     /**
@@ -50,7 +50,8 @@ public class PeakDetector {
      * @param meanFactorThreshold
      * @return
      */
-    public static List<Peak> detect(Histogram histogram, int windowSize, double meanFactorThreshold) {
+    public static List<Peak> detect(Histogram histogram, int windowSize,
+            double meanFactorThreshold) {
         double[] peakFunctionValues = new double[histogram.getNumberOfClasses()];
         PeakScore differenceScore = new DifferenceScore(histogram, windowSize);
         PeakScore localHeightScore = new LocalHeightScore();
@@ -59,7 +60,8 @@ public class PeakDetector {
             // If the peak is a real peak according to the difference score,
             // then set the height score value.
             if (score != 0) {
-                peakFunctionValues[i] = localHeightScore.score(histogram, i, windowSize);
+                peakFunctionValues[i] = localHeightScore.score(histogram, i,
+                        windowSize);
             }
         }
 
@@ -81,12 +83,14 @@ public class PeakDetector {
         List<Integer> elementsToRemove = new ArrayList<Integer>();
         for (int i = 0; i < peakPositions.size(); i++) {
             int firstPeakIndex = peakPositions.get(i);
-            int secndPeakIndex = peakPositions.get(((i + 1) % peakPositions.size()));
+            int secndPeakIndex = peakPositions.get(((i + 1) % peakPositions
+                    .size()));
             if (Math.abs(secndPeakIndex - firstPeakIndex) <= windowSize) {
                 elementsToRemove
-                .add(histogram.getCount(firstPeakIndex) > histogram.getCount(secndPeakIndex) ? peakPositions
-                        .get((i + 1) % peakPositions.size())
-                        : peakPositions.get(i));
+                        .add(histogram.getCount(firstPeakIndex) > histogram
+                                .getCount(secndPeakIndex) ? peakPositions
+                                .get((i + 1) % peakPositions.size())
+                                : peakPositions.get(i));
             }
         }
         peakPositions.removeAll(elementsToRemove);

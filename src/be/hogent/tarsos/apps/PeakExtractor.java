@@ -45,71 +45,93 @@ public class PeakExtractor {
         double[] threshold = { 0.5, 0.8, 1.0, 1.5 };
 
         FileUtils
-        .writeFile(
-                "file;detector;windowsize;threshold;gaussian smoothing factor;number of peaks;peakx;heightx\n",
-        "peaks.csv");
+                .writeFile(
+                        "file;detector;windowsize;threshold;gaussian smoothing factor;number of peaks;peakx;heightx\n",
+                        "peaks.csv");
 
         for (AudioFile file : files) {
 
             String baseName = file.basename();
             System.out.println(baseName);
 
-            String annotationsDirectory = FileUtils.combine("data", "annotations", baseName);
+            String annotationsDirectory = FileUtils.combine("data",
+                    "annotations", baseName);
             FileUtils.mkdirs(annotationsDirectory);
-            String peaksDirectory = FileUtils.combine(annotationsDirectory, "peaks");
+            String peaksDirectory = FileUtils.combine(annotationsDirectory,
+                    "peaks");
             FileUtils.mkdirs(peaksDirectory);
 
             List<Sample> samples;
             List<PitchDetector> detectors = new ArrayList<PitchDetector>();
 
-            detectors.add(new AubioPitchDetection(file, AubioPitchDetectionMode.YIN));
+            detectors.add(new AubioPitchDetection(file,
+                    AubioPitchDetectionMode.YIN));
             detectors.add(new IPEMPitchDetection(file));
 
-            PitchDetector mix = new PitchDetectionMix(new ArrayList<PitchDetector>(detectors), 0.02);
+            PitchDetector mix = new PitchDetectionMix(
+                    new ArrayList<PitchDetector>(detectors), 0.02);
             detectors.add(mix);
 
             for (PitchDetector detector : detectors) {
                 detector.executePitchDetection();
                 samples = detector.getSamples();
-                AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
-                String ambitusTextFileName = FileUtils.combine(annotationsDirectory, baseName + "_"
-                        + detector.getName() + "_ambitus.txt");
-                String ambitusPNGFileName = FileUtils.combine(annotationsDirectory, baseName + "_"
-                        + detector.getName() + "_ambitus.png");
-                String coloredToneScalePNGFileName = FileUtils.combine(annotationsDirectory, baseName + "_"
-                        + detector.getName() + "_tone_scale_colored.png");
-                ambitusHistogram.plotToneScaleHistogram(coloredToneScalePNGFileName, true);
+                AmbitusHistogram ambitusHistogram = Sample
+                        .ambitusHistogram(samples);
+                String ambitusTextFileName = FileUtils.combine(
+                        annotationsDirectory, baseName + "_"
+                                + detector.getName() + "_ambitus.txt");
+                String ambitusPNGFileName = FileUtils.combine(
+                        annotationsDirectory, baseName + "_"
+                                + detector.getName() + "_ambitus.png");
+                String coloredToneScalePNGFileName = FileUtils.combine(
+                        annotationsDirectory, baseName + "_"
+                                + detector.getName()
+                                + "_tone_scale_colored.png");
+                ambitusHistogram.plotToneScaleHistogram(
+                        coloredToneScalePNGFileName, true);
                 ambitusHistogram.export(ambitusTextFileName);
-                ambitusHistogram.plot(ambitusPNGFileName, "Ambitus " + baseName + " " + detector.getName());
+                ambitusHistogram.plot(ambitusPNGFileName, "Ambitus " + baseName
+                        + " " + detector.getName());
                 for (int i = 0; i < gaussians.length; i++) {
 
-                    ToneScaleHistogram toneScaleHistogram = ambitusHistogram.toneScaleHistogram();
-                    String toneScaleTextFileName = FileUtils.combine(annotationsDirectory, baseName + "_"
-                            + detector.getName() + "_tone_scale.txt");
-                    String toneScalePNGFileName = FileUtils.combine(annotationsDirectory, baseName + "_"
-                            + detector.getName() + "_tone_scale.png");
+                    ToneScaleHistogram toneScaleHistogram = ambitusHistogram
+                            .toneScaleHistogram();
+                    String toneScaleTextFileName = FileUtils.combine(
+                            annotationsDirectory, baseName + "_"
+                                    + detector.getName() + "_tone_scale.txt");
+                    String toneScalePNGFileName = FileUtils.combine(
+                            annotationsDirectory, baseName + "_"
+                                    + detector.getName() + "_tone_scale.png");
 
                     toneScaleHistogram.export(toneScaleTextFileName);
-                    toneScaleHistogram.plot(toneScalePNGFileName, "Tone scale " + baseName + " "
-                            + detector.getName());
+                    toneScaleHistogram.plot(toneScalePNGFileName, "Tone scale "
+                            + baseName + " " + detector.getName());
                     toneScaleHistogram.gaussianSmooth(gaussians[i]);
 
                     for (int j = 0; j < windowsize.length; j++) {
                         for (int k = 0; k < threshold.length; k++) {
-                            FileUtils.appendFile(baseName + ";" + detector.getName() + ";" + threshold[k]
-                                                                                                       + ";" + windowsize[j] + ";" + gaussians[i] + ";", "peaks.csv");
-                            List<Peak> peaks = PeakDetector.detect(toneScaleHistogram, windowsize[j],
+                            FileUtils.appendFile(baseName + ";"
+                                    + detector.getName() + ";" + threshold[k]
+                                    + ";" + windowsize[j] + ";" + gaussians[i]
+                                    + ";", "peaks.csv");
+                            List<Peak> peaks = PeakDetector.detect(
+                                    toneScaleHistogram, windowsize[j],
                                     threshold[k]);
-                            Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
-                            String peaksTitle = detector.getName() + "_" + baseName + "_peaks_"
-                            + gaussians[i] + "_" + windowsize[j] + "_" + threshold[k];
+                            Histogram peakHistogram = PeakDetector
+                                    .newPeakDetection(peaks);
+                            String peaksTitle = detector.getName() + "_"
+                                    + baseName + "_peaks_" + gaussians[i] + "_"
+                                    + windowsize[j] + "_" + threshold[k];
                             SimplePlot p = new SimplePlot(peaksTitle);
                             appendFile(peaks);
                             p.addData(0, toneScaleHistogram);
                             p.addData(1, peakHistogram);
-                            p.save(FileUtils.combine(peaksDirectory, peaksTitle + ".png"));
-                            ToneScaleHistogram.exportPeaksToScalaFileFormat(FileUtils.combine(peaksDirectory,
-                                    peaksTitle + ".scl"), peaksTitle, peaks);
+                            p.save(FileUtils.combine(peaksDirectory, peaksTitle
+                                    + ".png"));
+                            ToneScaleHistogram.exportPeaksToScalaFileFormat(
+                                    FileUtils.combine(peaksDirectory,
+                                            peaksTitle + ".scl"), peaksTitle,
+                                    peaks);
                         }
                     }
                 }

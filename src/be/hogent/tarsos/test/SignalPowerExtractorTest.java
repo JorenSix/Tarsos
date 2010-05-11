@@ -18,8 +18,8 @@ public class SignalPowerExtractorTest {
      * second 440Hz at 100% power.
      */
     public AudioFile testAudioFile() {
-        return new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test", "data",
-                "power_test.wav"));
+        return new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos",
+                "test", "data", "power_test.wav"));
     }
 
     @Test
@@ -45,7 +45,8 @@ public class SignalPowerExtractorTest {
     public void testWriteTextFile() {
         AudioFile audioFile = testAudioFile();
         SignalPowerExtractor spex = new SignalPowerExtractor(audioFile);
-        String textFileName = FileUtils.combine("data", "tests", "power_text.txt");
+        String textFileName = FileUtils.combine("data", "tests",
+                "power_text.txt");
         spex.saveTextFile(textFileName);
         List<String[]> data = FileUtils.readCSVFile(textFileName, ";", 2);
         int rowNumber = 0;
@@ -60,7 +61,8 @@ public class SignalPowerExtractorTest {
     public void testPowerPlotCreation() {
         AudioFile audioFile = testAudioFile();
         SignalPowerExtractor spex = new SignalPowerExtractor(audioFile);
-        String powerPlotFileName = FileUtils.combine("data", "tests", "power_plot.png");
+        String powerPlotFileName = FileUtils.combine("data", "tests",
+                "power_plot.png");
         spex.savePowerPlot(powerPlotFileName, 0.70);
         assertTrue(FileUtils.exists(powerPlotFileName));
     }
@@ -69,7 +71,8 @@ public class SignalPowerExtractorTest {
     public void testWaveFormPlotCreation() {
         AudioFile audioFile = testAudioFile();
         SignalPowerExtractor spex = new SignalPowerExtractor(audioFile);
-        String waveFormPlotFileName = FileUtils.combine("data", "tests", "wave_form__plot.png");
+        String waveFormPlotFileName = FileUtils.combine("data", "tests",
+                "wave_form__plot.png");
         spex.saveWaveFormPlot(waveFormPlotFileName);
         assertTrue(FileUtils.exists(waveFormPlotFileName));
     }

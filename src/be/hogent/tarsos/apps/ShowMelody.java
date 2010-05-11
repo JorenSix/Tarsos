@@ -246,15 +246,18 @@ public class ShowMelody {
     public static void showMelody(String fileName) {
         PitchDetector detector;
         List<PitchDetector> list = new ArrayList<PitchDetector>();
-        list.add(new AubioPitchDetection(new AudioFile(fileName), AubioPitchDetectionMode.SCHMITT));
-        list.add(new AubioPitchDetection(new AudioFile(fileName), AubioPitchDetectionMode.FCOMB));
+        list.add(new AubioPitchDetection(new AudioFile(fileName),
+                AubioPitchDetectionMode.SCHMITT));
+        list.add(new AubioPitchDetection(new AudioFile(fileName),
+                AubioPitchDetectionMode.FCOMB));
         detector = new PitchDetectionMix(list, 0.05);
         detector.executePitchDetection();
         List<Sample> samples = detector.getSamples();
         try {
             MediaPlayer m = new MediaPlayer(fileName);
             StopWatch watch = new StopWatch();
-            PlotThread thread = new PlotThread(FileUtils.basename(fileName), samples, watch);
+            PlotThread thread = new PlotThread(FileUtils.basename(fileName),
+                    samples, watch);
             m.start();
             thread.start();
         } catch (LineUnavailableException e) {

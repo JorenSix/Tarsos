@@ -19,7 +19,8 @@ public class ToneScaleHistogramTest {
         // test edge wrapping:
 
         double[] peaks = { 18, 303, 603, 903, 1180 };
-        ToneScaleHistogram histo = ToneScaleHistogram.createToneScale(peaks, null, null, null);
+        ToneScaleHistogram histo = ToneScaleHistogram.createToneScale(peaks,
+                null, null, null);
         assertTrue(histo.getCount(0) > 0);
         assertTrue(histo.getCount(0) == histo.getCount(1200));
 
@@ -31,7 +32,8 @@ public class ToneScaleHistogramTest {
     @Test
     public void isToneScaleMelodicTest() {
         double[] peaks = { 18, 303, 603, 903, 1180 };
-        ToneScaleHistogram melodicToneScale = ToneScaleHistogram.createToneScale(peaks, null, null, null);
+        ToneScaleHistogram melodicToneScale = ToneScaleHistogram
+                .createToneScale(peaks, null, null, null);
         assertTrue(melodicToneScale.isMelodic());
 
         ToneScaleHistogram noiseToneScale = new ToneScaleHistogram();

@@ -17,7 +17,7 @@ public class PitchConverter {
      * C-1 = 16.35 Hz.
      */
     private static final double reference_frequency = Configuration
-    .getDouble(ConfKey.absolute_cents_reference_frequency);
+            .getDouble(ConfKey.absolute_cents_reference_frequency);
 
     /**
      * Cache log 2 calculation.
@@ -39,8 +39,9 @@ public class PitchConverter {
     public static int hertzToMidiKey(Double hertzValue) {
         int midiKey = (int) Math.round(hertzToMidiCent(hertzValue));
         if (midiKey < 0 || midiKey > 127) {
-            throw new IllegalArgumentException("MIDI is only defined between [" + midiKeyToHertz(0) + ","
-                    + midiKeyToHertz(127) + "] " + hertzValue + "does not map to a MIDI key.");
+            throw new IllegalArgumentException("MIDI is only defined between ["
+                    + midiKeyToHertz(0) + "," + midiKeyToHertz(127) + "] "
+                    + hertzValue + "does not map to a MIDI key.");
         }
         return midiKey;
     }
@@ -58,8 +59,9 @@ public class PitchConverter {
      */
     public static double midiKeyToHertz(int midiKey) {
         if (midiKey < 0 || midiKey > 127) {
-            throw new IllegalArgumentException("MIDI keys are values from 0 to 127, inclusive " + midiKey
-                    + " is invalid.");
+            throw new IllegalArgumentException(
+                    "MIDI keys are values from 0 to 127, inclusive " + midiKey
+                            + " is invalid.");
         }
         return midiCentToHertz(midiKey);
     }
@@ -74,7 +76,8 @@ public class PitchConverter {
     public static double hertzToRelativeCent(double hertzValue) {
         double absoluteCentValue = hertzToAbsoluteCent(hertzValue);
         // make absoluteCentValue positive
-        absoluteCentValue = absoluteCentValue >= 0 ? absoluteCentValue : Math.abs(1200 + absoluteCentValue);
+        absoluteCentValue = absoluteCentValue >= 0 ? absoluteCentValue : Math
+                .abs(1200 + absoluteCentValue);
         // so it can be folded to one octave
         return absoluteCentValue % 1200.0;
     }
@@ -106,7 +109,8 @@ public class PitchConverter {
     public static double hertzToAbsoluteCent(double hertzValue) {
         double pitchValueInAbsoluteCent = 0.0;
         if (hertzValue != 0) {
-            pitchValueInAbsoluteCent = 1200 * Math.log(hertzValue / reference_frequency) / log_two;
+            pitchValueInAbsoluteCent = 1200
+                    * Math.log(hertzValue / reference_frequency) / log_two;
         }
         return pitchValueInAbsoluteCent;
     }

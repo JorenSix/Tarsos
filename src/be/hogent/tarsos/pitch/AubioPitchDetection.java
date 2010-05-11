@@ -81,7 +81,8 @@ public class AubioPitchDetection implements PitchDetector {
     private final List<Sample> samples;
     private final String name;
 
-    public AubioPitchDetection(AudioFile file, AubioPitchDetectionMode pitchDetectionMode) {
+    public AubioPitchDetection(AudioFile file,
+            AubioPitchDetectionMode pitchDetectionMode) {
         this.file = file;
         this.pitchDetectionMode = pitchDetectionMode;
         this.samples = new ArrayList<Sample>();
@@ -90,13 +91,15 @@ public class AubioPitchDetection implements PitchDetector {
 
     @Override
     public void executePitchDetection() {
-        String annotationsDirectory = Configuration.get(ConfKey.raw_aubio_annotations_directory);
-        String csvFileName = FileUtils.combine(annotationsDirectory, this.name + "_" + file.basename()
-                + ".txt");
+        String annotationsDirectory = Configuration
+                .get(ConfKey.raw_aubio_annotations_directory);
+        String csvFileName = FileUtils.combine(annotationsDirectory, this.name
+                + "_" + file.basename() + ".txt");
 
         if (!FileUtils.exists(csvFileName)) {
-            String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.parameterName
-            + "  -s -70  -i " + file.transcodedPath();
+            String command = "aubiopitch  -u freq --mode "
+                    + this.pitchDetectionMode.parameterName + "  -s -70  -i "
+                    + file.transcodedPath();
             Execute.command(command, csvFileName);
         }
 
@@ -104,7 +107,8 @@ public class AubioPitchDetection implements PitchDetector {
         for (String[] row : csvData) {
             long start = (long) (Double.parseDouble(row[0]) * 1000);
             Double pitch = Double.parseDouble(row[1]);
-            Sample sample = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
+            Sample sample = pitch == -1 ? new Sample(start) : new Sample(start,
+                    pitch);
             switch (pitchDetectionMode) {
             case YIN:
                 sample.source = SampleSource.AUBIO_YIN;

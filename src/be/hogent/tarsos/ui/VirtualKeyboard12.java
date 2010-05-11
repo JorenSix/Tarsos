@@ -90,8 +90,10 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
         int w = getWidth();
         int h = getHeight();
@@ -113,7 +115,8 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
                 g2.setColor(Color.BLACK);
                 g2.draw(rect);
 
-                if (hasFocus() && (i >= lowestAssignedKey) && i - lowestAssignedKey < mappedKeys.length()) {
+                if (hasFocus() && (i >= lowestAssignedKey)
+                        && i - lowestAssignedKey < mappedKeys.length()) {
                     g2.setColor(Color.GRAY);
                     char k = mappedKeys.charAt(i - lowestAssignedKey);
                     g2.drawString("" + k, cx + 2, h - 4);
@@ -129,7 +132,8 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
             if (!a) {
                 cx += nw;
             } else {
-                rect.setRect(cx - (black_note_width / 2), 0, black_note_width, h * 4.0 / 7.0);
+                rect.setRect(cx - (black_note_width / 2), 0, black_note_width,
+                        h * 4.0 / 7.0);
                 if (isKeyDown(i)) {
                     g2.setColor(new Color(0.8f, 0.8f, 0.95f));
                 } else {
@@ -139,10 +143,12 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
                 g2.setColor(Color.BLACK);
                 g2.draw(rect);
 
-                if (hasFocus() && (i >= lowestAssignedKey) && i - lowestAssignedKey < mappedKeys.length()) {
+                if (hasFocus() && (i >= lowestAssignedKey)
+                        && i - lowestAssignedKey < mappedKeys.length()) {
                     g2.setColor(Color.LIGHT_GRAY);
                     char k = mappedKeys.charAt(i - lowestAssignedKey);
-                    g2.drawString("" + k, cx - (black_note_width / 2) + 1, (h * 4.0f / 7.0f) - 3);
+                    g2.drawString("" + k, cx - (black_note_width / 2) + 1,
+                            (h * 4.0f / 7.0f) - 3);
                 }
             }
         }

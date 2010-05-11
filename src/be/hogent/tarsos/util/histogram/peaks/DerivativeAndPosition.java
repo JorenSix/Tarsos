@@ -30,4 +30,3 @@ class DerivativeAndPosition implements Comparable<DerivativeAndPosition> {
         return derivative.hashCode();
     }
 }
-

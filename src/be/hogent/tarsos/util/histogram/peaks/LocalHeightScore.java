@@ -19,16 +19,21 @@ public class LocalHeightScore implements PeakScore {
         for (int j = 0; j < windowSize; j++) {
             before--;
             after++;
-            heightRange[heightRangeIndex] = originalHistogram.getCountForClass(index + before);
+            heightRange[heightRangeIndex] = originalHistogram
+                    .getCountForClass(index + before);
             heightRangeIndex++;
-            heightRange[heightRangeIndex] = originalHistogram.getCountForClass(index + after);
+            heightRange[heightRangeIndex] = originalHistogram
+                    .getCountForClass(index + after);
             heightRangeIndex++;
         }
-        heightRange[heightRangeIndex] = originalHistogram.getCountForClass(index);
+        heightRange[heightRangeIndex] = originalHistogram
+                .getCountForClass(index);
 
         double mean = StatUtils.mean(heightRange);
-        double standardDeviation = Math.pow(StatUtils.variance(heightRange, mean), 0.5);
-        double heigthScore = (originalHistogram.getCountForClass(index) - mean) / standardDeviation;
+        double standardDeviation = Math.pow(StatUtils.variance(heightRange,
+                mean), 0.5);
+        double heigthScore = (originalHistogram.getCountForClass(index) - mean)
+                / standardDeviation;
 
         return heigthScore > 0 ? heigthScore : 0.0;
     }

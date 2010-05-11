@@ -16,7 +16,8 @@ import java.util.prefs.Preferences;
  * @author Joren Six
  */
 public class Configuration {
-    private static final Logger log = Logger.getLogger(Configuration.class.getName());
+    private static final Logger log = Logger.getLogger(Configuration.class
+            .getName());
 
     private static Properties defaultConfigurationProperties;
     private static Preferences userPreferences = null;
@@ -145,7 +146,7 @@ public class Configuration {
         if (defaultConfigurationProperties == null) {
             defaultConfigurationProperties = new Properties();
             InputStream propertiesStream = Configuration.class
-            .getResourceAsStream("configuration.properties");
+                    .getResourceAsStream("configuration.properties");
             try {
                 defaultConfigurationProperties.load(propertiesStream);
             } catch (IOException e) {
@@ -156,12 +157,14 @@ public class Configuration {
         String defaultValue = defaultConfigurationProperties.getProperty(key);
 
         if (userPreferences == null) {
-            userPreferences = Preferences.userNodeForPackage(Configuration.class);
+            userPreferences = Preferences
+                    .userNodeForPackage(Configuration.class);
             for (ConfKey configKey : ConfKey.values()) {
                 // If there is no configuration for this user, write the default
                 // configuration
                 if (userPreferences.get(configKey.name(), null) == null) {
-                    String defaultConfigValue = defaultConfigurationProperties.getProperty(configKey.name());
+                    String defaultConfigValue = defaultConfigurationProperties
+                            .getProperty(configKey.name());
                     set(configKey, defaultConfigValue);
                 }
             }
@@ -182,7 +185,8 @@ public class Configuration {
      * @return a sanitized value: remove whitespace and correct directory
      *         separator for the current operating system.
      */
-    private static String sanitizeConfiguredValue(String key, String configuredValue) {
+    private static String sanitizeConfiguredValue(String key,
+            String configuredValue) {
         if (configuredValue != null) {
             // removes trailing and leading whitespace
             // limitation: whitespace can not be configured!
@@ -205,7 +209,8 @@ public class Configuration {
      * @return a path with correct path separator for the current operating
      *         system.
      */
-    private static String handleConfiguredDirectory(String key, String configuredValue) {
+    private static String handleConfiguredDirectory(String key,
+            String configuredValue) {
         ConfKey configurationKey = ConfKey.valueOf(key);
         if (configurationKey.isRequiredDirectory) {
             // split on / or on \

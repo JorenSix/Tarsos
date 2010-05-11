@@ -49,8 +49,10 @@ public class Spectrogram extends JComponent {
 
     private static final long serialVersionUID = -7760501261506593771L;
 
-    private static final int W = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-    private static final int H = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+    private static final int W = (int) Toolkit.getDefaultToolkit()
+    .getScreenSize().getWidth();
+    private static final int H = (int) Toolkit.getDefaultToolkit()
+    .getScreenSize().getHeight();
 
     private int position = -1;
 
@@ -75,14 +77,15 @@ public class Spectrogram extends JComponent {
     double[] amplitudes = new double[H];
     String lastDetectedNote = "";
 
-    public Spectrogram(int mixerIndex) throws UnsupportedAudioFileException, IOException,
-    LineUnavailableException {
+    public Spectrogram(int mixerIndex) throws UnsupportedAudioFileException,
+    IOException, LineUnavailableException {
 
         outputDevice = PlayAlong.chooseDevice(false, true);
         try {
             outputDevice.open();
             ShortMessage sm = new ShortMessage();
-            sm.setMessage(ShortMessage.PROGRAM_CHANGE, VirtualKeyboard.CHANNEL, 72, 0);
+            sm.setMessage(ShortMessage.PROGRAM_CHANGE, VirtualKeyboard.CHANNEL,
+                    72, 0);
             outputDevice.getReceiver().send(sm, -1);
         } catch (MidiUnavailableException e) {
             // Unable to open midi device
@@ -104,8 +107,10 @@ public class Spectrogram extends JComponent {
 
         javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[mixerIndex];
         Mixer mixer = AudioSystem.getMixer(selected);
-        AudioFormat format = new AudioFormat((float) sampleRate, 16, 1, true, false);
-        DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
+        AudioFormat format = new AudioFormat((float) sampleRate, 16, 1, true,
+                false);
+        DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,
+                format);
         TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
         int numberOfSamples = (int) (0.1 * sampleRate);
         line.open(format, numberOfSamples);
@@ -147,7 +152,8 @@ public class Spectrogram extends JComponent {
         double maxFrequency = 20000;// Hz
         int bin = 0;
         boolean logaritmic = true;
-        if (frequency != 0 && frequency > minFrequency && frequency < maxFrequency) {
+        if (frequency != 0 && frequency > minFrequency
+                && frequency < maxFrequency) {
             double binEstimate = 0;
             if (logaritmic) {
                 minFrequency = PitchConverter.hertzToAbsoluteCent(minFrequency);
@@ -173,7 +179,8 @@ public class Spectrogram extends JComponent {
         double maxAmplitude = 0.0;
         int pitchIndex = -1;
 
-        boolean bufferRead = Yin.slideBuffer(afis, audioDataBuffer, audioDataBuffer.length - 1024);
+        boolean bufferRead = Yin.slideBuffer(afis, audioDataBuffer,
+                audioDataBuffer.length - 1024);
         if (bufferRead) {
 
             float pitch = detectPitch();
@@ -213,10 +220,11 @@ public class Spectrogram extends JComponent {
 
             bufferGraphics.drawImage(imageEven, 0, 0, null);
             bufferGraphics.setColor(Color.WHITE);
-            bufferGraphics.drawString((new StringBuilder("Current frequency: ")).append(((int) pitch))
-                    .append("Hz").toString(), 20, 20);
-            bufferGraphics.drawString((new StringBuilder("Last detected note: ").append(lastDetectedNote)
-                    .toString()), 20, 45);
+            bufferGraphics.drawString(
+                    (new StringBuilder("Current frequency: ")).append(
+                            (int) pitch).append("Hz").toString(), 20, 20);
+            bufferGraphics.drawString(new StringBuilder("Last detected note: ")
+            .append(lastDetectedNote).toString(), 20, 45);
         } else {
             timer.cancel();
         }
@@ -247,7 +255,8 @@ public class Spectrogram extends JComponent {
 
         try {
             ShortMessage sm = new ShortMessage();
-            int command = sendOnMessage ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
+            int command = sendOnMessage ? ShortMessage.NOTE_ON
+                    : ShortMessage.NOTE_OFF;
             sm.setMessage(command, VirtualKeyboard.CHANNEL, midiKey, 125);
             outputDevice.getReceiver().send(sm, -1);
         } catch (InvalidMidiDataException e1) {
@@ -263,11 +272,13 @@ public class Spectrogram extends JComponent {
         double midiCentValue = PitchConverter.hertzToMidiCent(pitch);
         int newKeyDown = -1;
         // 'musical' pitch detected ?
-        if (Math.abs(midiCentValue - (int) midiCentValue) < 0.3 && midiCentValue < 128 && midiCentValue >= 0) {
+        if (Math.abs(midiCentValue - (int) midiCentValue) < 0.3
+                && midiCentValue < 128 && midiCentValue >= 0) {
             newKeyDown = (int) midiCentValue;
-            lastDetectedNote = "Name: " + Pitch.getInstance(PitchUnit.HERTZ, pitch).noteName()
-            + "\nFrequency: " + ((int) pitch) + "Hz \t" + " MIDI note:"
-            + PitchConverter.hertzToMidiCent(pitch);
+            lastDetectedNote = "Name: "
+                + Pitch.getInstance(PitchUnit.HERTZ, pitch).noteName()
+                + "\nFrequency: " + ((int) pitch) + "Hz \t" + " MIDI note:"
+                + PitchConverter.hertzToMidiCent(pitch);
         }
         // if no pitch detected
         // send note off
@@ -292,7 +303,8 @@ public class Spectrogram extends JComponent {
         return Yin.processBuffer(yinBuffer, (float) sampleRate);
     }
 
-    public static void main(String[] args) throws UnsupportedAudioFileException, IOException,
+    public static void main(String[] args)
+    throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
         final JPanel panel = new JPanel(new BorderLayout());
 
@@ -314,7 +326,8 @@ public class Spectrogram extends JComponent {
      */
     public static int chooseDevice() {
         try {
-            javax.sound.sampled.Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+            javax.sound.sampled.Mixer.Info[] mixers = AudioSystem
+            .getMixerInfo();
             for (int i = 0; i < mixers.length; i++) {
                 javax.sound.sampled.Mixer.Info mixerinfo = mixers[i];
                 if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0) {
@@ -323,7 +336,8 @@ public class Spectrogram extends JComponent {
             }
             // choose MIDI input device
             System.out.print("Choose the Mixer device: ");
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    System.in));
             int deviceIndex = Integer.parseInt(br.readLine());
             return deviceIndex;
         } catch (NumberFormatException e) {

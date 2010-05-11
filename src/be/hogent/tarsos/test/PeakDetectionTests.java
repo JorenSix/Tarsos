@@ -68,12 +68,14 @@ public class PeakDetectionTests {
     @Test
     public void testNewPeakDetection() {
         Histogram octaveHistogram = PitchFunctions
-        .readFrequencyTable("src/tarsos/test/data/african_octave_frequency_table.txt");
+                .readFrequencyTable("src/tarsos/test/data/african_octave_frequency_table.txt");
         octaveHistogram = octaveHistogram.gaussianSmooth(0.8);
-        octaveHistogram = octaveHistogram.add(octaveHistogram).add(octaveHistogram);
+        octaveHistogram = octaveHistogram.add(octaveHistogram).add(
+                octaveHistogram);
         List<Peak> peaks = PeakDetector.detect(octaveHistogram, 10, 0.05);
         Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
-        octaveHistogram.plotCorrelation(peakHistogram, CorrelationMeasure.INTERSECTION);
+        octaveHistogram.plotCorrelation(peakHistogram,
+                CorrelationMeasure.INTERSECTION);
     }
 
     @Test
@@ -112,7 +114,7 @@ public class PeakDetectionTests {
         assertTrue(peakScore.getVolumeAt(4) == 9.0);
 
         Histogram octaveHistogram = PitchFunctions
-        .readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
+                .readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
         octaveHistogram = octaveHistogram.gaussianSmooth(0.5);
         SimplePlot p = new SimplePlot("volume_score");
         p.addData(0, octaveHistogram);
@@ -144,10 +146,12 @@ public class PeakDetectionTests {
         double peakAcceptFactor = 1.5;
 
         Histogram octaveHistogram = PitchFunctions
-        .readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
-        octaveHistogram = octaveHistogram.gaussianSmooth(gaussianSmoothingFactor);
+                .readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
+        octaveHistogram = octaveHistogram
+                .gaussianSmooth(gaussianSmoothingFactor);
         LocalHeightScore peakHeightScore = new LocalHeightScore();
-        DifferenceScore peakDifferenceScore = new DifferenceScore(octaveHistogram, winddowSize);
+        DifferenceScore peakDifferenceScore = new DifferenceScore(
+                octaveHistogram, winddowSize);
 
         SimplePlot p = new SimplePlot("visual_peak_detection");
         p.addData(0, octaveHistogram);
@@ -156,8 +160,10 @@ public class PeakDetectionTests {
 
         double maxHeight = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < octaveHistogram.getNumberOfClasses(); i++) {
-            maxHeightScore = Math.max(peakHeightScore.score(octaveHistogram, i, winddowSize), maxHeightScore);
-            maxHeight = Math.max(maxHeight, octaveHistogram.getCountForClass(i));
+            maxHeightScore = Math.max(peakHeightScore.score(octaveHistogram, i,
+                    winddowSize), maxHeightScore);
+            maxHeight = Math
+                    .max(maxHeight, octaveHistogram.getCountForClass(i));
         }
 
         // double heigthScoreFactor = maxHeight/maxHeightScore/2.8;
@@ -165,10 +171,12 @@ public class PeakDetectionTests {
         for (int i = 0; i < octaveHistogram.getNumberOfClasses(); i++) {
             // p.addData(1, i * 6,peakHeightScore.score(octaveHistogram, i,
             // winddowSize) * heigthScoreFactor, true);
-            p.addData(2, i * 6, peakDifferenceScore.score(octaveHistogram, i, winddowSize), true);
+            p.addData(2, i * 6, peakDifferenceScore.score(octaveHistogram, i,
+                    winddowSize), true);
 
         }
-        List<Peak> peaks = PeakDetector.detect(octaveHistogram, winddowSize, peakAcceptFactor);
+        List<Peak> peaks = PeakDetector.detect(octaveHistogram, winddowSize,
+                peakAcceptFactor);
         Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
         p.addData(3, peakHistogram);
 

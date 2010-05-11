@@ -30,7 +30,8 @@ public class Execute {
             log.info("Executing " + cmd[0] + " " + cmd[1] + " " + cmd[2]);
             Runtime rt = Runtime.getRuntime();
             Process proc = rt.exec(cmd);
-            BufferedReader stdout = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            BufferedReader stdout = new BufferedReader(new InputStreamReader(
+                    proc.getInputStream()));
             String line = null;
             while ((line = stdout.readLine()) != null) {
                 System.out.println(line);
@@ -74,9 +75,11 @@ public class Execute {
         int exitValue = Execute.command(command);
         int commandNotFoundExitCode;
         if (System.getProperty("os.name").contains("indows")) {
-            commandNotFoundExitCode = Configuration.getInt(ConfKey.win_shell_executable_not_found_exit_code);
+            commandNotFoundExitCode = Configuration
+                    .getInt(ConfKey.win_shell_executable_not_found_exit_code);
         } else {
-            commandNotFoundExitCode = Configuration.getInt(ConfKey.unix_shell_executable_not_found_exit_code);
+            commandNotFoundExitCode = Configuration
+                    .getInt(ConfKey.unix_shell_executable_not_found_exit_code);
         }
         if (exitValue != commandNotFoundExitCode) {
             executableIsInPath = true;
@@ -84,7 +87,8 @@ public class Execute {
         return executableIsInPath;
     }
 
-    private static String[] buildCommand(String command, String redirectOutputToFile) {
+    private static String[] buildCommand(String command,
+            String redirectOutputToFile) {
         String[] cmd;
         if (System.getProperty("os.name").contains("indows")) {
             cmd = buildWindowsCommand(command, redirectOutputToFile);
@@ -94,9 +98,11 @@ public class Execute {
         return cmd;
     }
 
-    private static String[] buildWindowsCommand(String command, String redirectOutputToFile) {
-        redirectOutputToFile = redirectOutputToFile == null || redirectOutputToFile.equals("") ? "" : " > "
-            + redirectOutputToFile;
+    private static String[] buildWindowsCommand(String command,
+            String redirectOutputToFile) {
+        redirectOutputToFile = redirectOutputToFile == null
+                || redirectOutputToFile.equals("") ? "" : " > "
+                + redirectOutputToFile;
         String[] cmd = new String[3];
         cmd[0] = Configuration.get(ConfKey.win_shell_executable);
         cmd[1] = Configuration.get(ConfKey.win_shell_executable_option);
@@ -104,9 +110,11 @@ public class Execute {
         return cmd;
     }
 
-    private static String[] buildUinxCommand(String command, String redirectOutputToFile) {
-        redirectOutputToFile = redirectOutputToFile == null || redirectOutputToFile.equals("") ? ""
-                : "| cat > " + redirectOutputToFile;
+    private static String[] buildUinxCommand(String command,
+            String redirectOutputToFile) {
+        redirectOutputToFile = redirectOutputToFile == null
+                || redirectOutputToFile.equals("") ? "" : "| cat > "
+                + redirectOutputToFile;
         String[] cmd = new String[3];
         cmd[0] = Configuration.get(ConfKey.unix_shell_executable);
         cmd[1] = Configuration.get(ConfKey.unix_shell_executable_option);
