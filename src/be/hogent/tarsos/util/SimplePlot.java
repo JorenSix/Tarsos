@@ -31,8 +31,7 @@ public class SimplePlot {
     }
 
     public SimplePlot() {
-        this(new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss-"
-                + new Random().nextInt(100)).format(new Date()));
+        this(new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss-" + new Random().nextInt(100)).format(new Date()));
     }
 
     public void addData(int set, double x, double y) {
@@ -52,10 +51,8 @@ public class SimplePlot {
     public void addData(int set, Histogram histogram, int displacement) {
         plot.setXRange(histogram.getStart(), histogram.getStop());
         for (double current : histogram.keySet()) {
-            double displacedValue = (current + displacement
-                    * histogram.getClassWidth())
-                    % (histogram.getNumberOfClasses() * histogram
-                            .getClassWidth());
+            double displacedValue = (current + displacement * histogram.getClassWidth())
+                    % (histogram.getNumberOfClasses() * histogram.getClassWidth());
             addData(set, current, histogram.getCount(displacedValue));
         }
         first = true;

@@ -21,11 +21,9 @@ public class PowerExtractor {
         for (AudioFile file : files) {
             System.out.println(file.basename());
             SignalPowerExtractor spex = new SignalPowerExtractor(file);
-            spex.savePowerPlot("data/tests/power_" + file.basename() + ".png",
-                    -40);
+            spex.savePowerPlot("data/tests/power_" + file.basename() + ".png", -40);
             spex.saveTextFile("data/tests/power_" + file.basename() + ".txt");
-            spex.saveWaveFormPlot("data/tests/waveform_" + file.basename()
-                    + ".png");
+            spex.saveWaveFormPlot("data/tests/waveform_" + file.basename() + ".png");
         }
     }
 }

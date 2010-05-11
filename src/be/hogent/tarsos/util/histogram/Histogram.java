@@ -14,21 +14,18 @@ import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SimplePlot;
 
 /**
- * 
  * A histogram is defined by a start value, a stop value and a number of
  * classes. The 'key' of a class is the middle of the class. E.g. the keys of a
  * histogram that starts at 0, stops at 5 and has 5 classes are
  * {0.5,1.5,2.5,3.5,4.5}. The intervals for each key are
  * {[0,1[;[1,2[;[2,3[;[3,4];[4,5[} with [0,1[ meaning the interval between 0
  * inclusive and 1 exclusive.
- * 
  * <p>
  * The histogram uses a red and black tree as underlying structure: Search,
  * insert and delete are O(log n). The tree keeps the keys in order and makes
  * iteration (in order) easy. Optimization is possible by replacing the tree
  * with arrays.
  * </p>
- * 
  * <p>
  * The histogram uses doubles as key values. Java doubles are prone to rounding
  * errors. To prevent rounding errors the keys are rounded to a predefined
@@ -40,8 +37,7 @@ import be.hogent.tarsos.util.SimplePlot;
  * @author Joren Six
  */
 public class Histogram implements Cloneable {
-    private static final Logger log = Logger.getLogger(Histogram.class
-            .getName());
+    private static final Logger log = Logger.getLogger(Histogram.class.getName());
 
     /**
      * The width of each class (or bin) is equal to stop - start / number of
@@ -62,12 +58,12 @@ public class Histogram implements Cloneable {
      * The starting value != the first class middle start == the first class
      * middle - classWidth / 2.
      */
-    private final double start;// the starting value
+    private final double start; // the starting value
     /**
      * The last value != the last class middle stop == the last class middle +
      * classWidth / 2.
      */
-    private final double stop;// the stopping value
+    private final double stop; // the stopping value
     /**
      * If the histogram wraps values outside the range
      * <code>]start - classWidht / 2, stop + classWidth / 2 [</code> are mapped
@@ -112,16 +108,14 @@ public class Histogram implements Cloneable {
      *                           the valid range is added an
      *                           IllegalArgumentException is thrown.
      */
-    public Histogram(double start, double stop, int numberOfClasses,
-            boolean wraps, boolean ignoreValuesOutsideRange) {
+    public Histogram(double start, double stop, int numberOfClasses, boolean wraps,
+            boolean ignoreValuesOutsideRange) {
         if (stop <= start) {
             throw new IllegalArgumentException("The stopping value (" + stop
-                    + ") should be bigger than the starting value (" + start
-                    + ") .");
+                    + ") should be bigger than the starting value (" + start + ") .");
         }
 
-        this.classWidth = preventRoundingErrors((stop - start)
-                / numberOfClasses);
+        this.classWidth = preventRoundingErrors((stop - start) / numberOfClasses);
         this.start = start;
         this.stop = stop;
         this.freqTable = new TreeMap<Double, Long>();
@@ -130,8 +124,7 @@ public class Histogram implements Cloneable {
 
         double lastKey = stop - getClassWidth() / 2;
 
-        for (double current = start + getClassWidth() / 2; wraps ? current < lastKey
-                : current <= lastKey; current = preventRoundingErrors(current
+        for (double current = start + getClassWidth() / 2; wraps ? current < lastKey : current <= lastKey; current = preventRoundingErrors(current
                 + getClassWidth())) {
             freqTable.put(current, 0L);
         }
@@ -148,8 +141,8 @@ public class Histogram implements Cloneable {
      *            the original histogram
      */
     public Histogram(Histogram original) {
-        this(original.getStart(), original.getStop(), original.numberOfClasses,
-                original.wraps, original.ignoreValuesOutsideRange);
+        this(original.getStart(), original.getStop(), original.numberOfClasses, original.wraps,
+                original.ignoreValuesOutsideRange);
     }
 
     /**
@@ -202,8 +195,7 @@ public class Histogram implements Cloneable {
      *            are mapped to values inside the range using a modulo
      *            calculation.
      */
-    public Histogram(double start, double stop, int numberOfClasses,
-            boolean wraps) {
+    public Histogram(double start, double stop, int numberOfClasses, boolean wraps) {
         this(start, stop, numberOfClasses, wraps, true);
     }
 
@@ -217,7 +209,7 @@ public class Histogram implements Cloneable {
      * @return the key for class with index i
      */
     public double getKeyForClass(int i) {
-        while (i < 0) {// make sure i is positive
+        while (i < 0) { // make sure i is positive
             i += getNumberOfClasses();
         }
         // make sure i is within range
@@ -260,27 +252,23 @@ public class Histogram implements Cloneable {
     public Histogram add(double value) {
 
         if (!wraps && !ignoreValuesOutsideRange && !validValue(value)) {
-            throw new IllegalArgumentException(
-                    "Value not in the correct interval: " + value
-                            + " not between " + "[" + this.firstValidValue()
-                            + "," + this.lastValidValue() + "].");
+            throw new IllegalArgumentException("Value not in the correct interval: " + value
+                    + " not between " + "[" + this.firstValidValue() + "," + this.lastValidValue() + "].");
         } else if (!wraps && ignoreValuesOutsideRange && !validValue(value)) {
-            log.info("Ignored value " + value + " (not between " + "["
-                    + this.firstValidValue() + "," + this.lastValidValue()
-                    + "]).");
+            log.info("Ignored value " + value + " (not between " + "[" + this.firstValidValue() + ","
+                    + this.lastValidValue() + "]).");
         }
 
         if (value > 0) {
             double key = valueToKey(value);
             Long count = freqTable.get(key);
-            assert count != null : "All key values should be initialized, "
-                    + key + " is not.";
+            assert count != null : "All key values should be initialized, " + key + " is not.";
             if (count != null) {
                 freqTable.put(key, Long.valueOf(count.longValue() + 1));
             }
         } else {
-            log
-                    .warning("Using values below zero in is not tested, it can yield unexpected results. Values below zero are ignored!");
+            log.warning("Using values below zero in is not tested, "
+                    + "it can yield unexpected results. Values below zero are ignored!");
         }
         return this;
     }
@@ -316,8 +304,7 @@ public class Histogram implements Cloneable {
         // TODO remove the value below zero limitation
         // by changing the wraps modulo calculation and test
         if (value < 0) {
-            throw new IllegalArgumentException(
-                    "Currently no values below zero are accepted");
+            throw new IllegalArgumentException("Currently no values below zero are accepted");
         }
 
         if (wraps) {
@@ -332,8 +319,7 @@ public class Histogram implements Cloneable {
 
         double numberOfClasses = Math.floor((value + start) / classWidth);
         double offset = classWidth / 2 - start;
-        double key = preventRoundingErrors(numberOfClasses * classWidth
-                + offset);
+        double key = preventRoundingErrors(numberOfClasses * classWidth + offset);
         assert key >= freqTable.firstKey();
         assert key <= freqTable.lastKey();
         return key;
@@ -419,7 +405,6 @@ public class Histogram implements Cloneable {
      * @return the first value that correctly maps to a key. A valid value lays
      *         in the interval [{@link Histogram#firstValidValue()},
      *         {@link Histogram#lastValidValue()}]
-     * 
      */
     private double firstValidValue() {
         return this.freqTable.firstKey() - classWidth / 2.0;
@@ -493,9 +478,8 @@ public class Histogram implements Cloneable {
                 return result;
             }
         }
-        throw new AssertionError(
-                "The key is greather than te last key but this is impossible."
-                        + " It should have been returned already.");
+        throw new AssertionError("The key is greather than te last key but this is impossible."
+                + " It should have been returned already.");
     }
 
     /**
@@ -568,13 +552,11 @@ public class Histogram implements Cloneable {
 
     /**
      * Returns the entropy of the histogram.
-     * 
      * <p>
      * The histogram entropy is defined to be the negation of the sum of the
      * products of the probability associated with each bin with the base-2 log
      * of the probability.
      * </p>
-     * 
      * <p>
      * Uses code from https://jai-core.dev.java.net/ The source code for the
      * core Java Advanced Imaging API reference implementation is licensed under
@@ -584,7 +566,6 @@ public class Histogram implements Cloneable {
      * </p>
      * 
      * @return The entropy of the histogram.
-     * 
      */
     public double getEntropy() {
         double log2 = Math.log(2.0);
@@ -628,7 +609,6 @@ public class Histogram implements Cloneable {
 
     /**
      * Returns a string representation of the histogram.
-     * 
      * <p>
      * Uses code from <a href="http://commons.apache.org/math">Apache Commons
      * Math"</a> licensed to the Apache Software Foundation (ASF) under one or
@@ -845,8 +825,7 @@ public class Histogram implements Cloneable {
      */
     public Histogram raise(double exponent) {
         for (double key : this.freqTable.keySet()) {
-            this.setCount(key, Math.round(Math
-                    .pow(this.getCount(key), exponent)));
+            this.setCount(key, Math.round(Math.pow(this.getCount(key), exponent)));
         }
         return this;
     }
@@ -911,8 +890,6 @@ public class Histogram implements Cloneable {
 
     /**
      * Computes a smoothed version of the histogram.
-     * 
-     * 
      * <p>
      * The histogram is smoothed by averaging over a moving window of a size
      * specified by the method parameter: if the value of the parameter is
@@ -922,12 +899,10 @@ public class Histogram implements Cloneable {
      * weighted to favor the central value using a "triangular" weighting. For
      * example, for a value of <i>k</i> equal to 2 the central bin would have
      * weight 1/3, the adjacent bins 2/9, and the next adjacent bins 1/9.
-     * 
      * <p>
      * Changes the current histogram and returns it so it is possible to chain
      * modification e.g. <code>histo.normalize().addToEachBin(10)</code>
      * </p>
-     * 
      * <p>
      * Uses code from https://jai-core.dev.java.net/ The source code for the
      * core Java Advanced Imaging API reference implementation is licensed under
@@ -945,7 +920,6 @@ public class Histogram implements Cloneable {
      *            the histogram object will be returned with no smoothing
      *            applied.
      * @return A smoothed version of the histogram.
-     * 
      */
     public Histogram smooth(boolean isWeighted, int k) {
         if (k < 0) {
@@ -1031,7 +1005,6 @@ public class Histogram implements Cloneable {
 
     /**
      * Smooth the histogram using Gaussians.
-     * 
      * <p>
      * Each band of the histogram is smoothed by discrete convolution with a
      * kernel approximating a Gaussian impulse response with the specified
@@ -1041,7 +1014,6 @@ public class Histogram implements Cloneable {
      * to chain modification e.g.
      * <code>histo.normalize().addToEachBin(10)</code>
      * </p>
-     * 
      * <p>
      * Uses code from https://jai-core.dev.java.net/ The source code for the
      * core Java Advanced Imaging API reference implementation is licensed under
@@ -1057,7 +1029,6 @@ public class Histogram implements Cloneable {
      *            the histogram object will be returned with no smoothing
      *            applied.
      * @return A Gaussian smoothed version of the histogram.
-     * 
      */
     public Histogram gaussianSmooth(double standardDeviation) {
         if (standardDeviation < 0.0) {
@@ -1135,20 +1106,16 @@ public class Histogram implements Cloneable {
     // TODO Document correlation methods
 
     public int displacementForOptimalCorrelation(Histogram otherHistogram) {
-        return displacementForOptimalCorrelation(otherHistogram,
-                CorrelationMeasure.INTERSECTION);
+        return displacementForOptimalCorrelation(otherHistogram, CorrelationMeasure.INTERSECTION);
     }
 
-    public double correlationWithDisplacement(int displacement,
-            Histogram otherHistogram, CorrelationMeasure correlationMeasure) {
-        return correlationMeasure.getHistogramCorrelation().correlation(this,
-                displacement, otherHistogram);
+    public double correlationWithDisplacement(int displacement, Histogram otherHistogram,
+            CorrelationMeasure correlationMeasure) {
+        return correlationMeasure.getHistogramCorrelation().correlation(this, displacement, otherHistogram);
     }
 
-    public double correlationWithDisplacement(int displacement,
-            Histogram otherHistogram) {
-        return correlationWithDisplacement(displacement, otherHistogram,
-                CorrelationMeasure.INTERSECTION);
+    public double correlationWithDisplacement(int displacement, Histogram otherHistogram) {
+        return correlationWithDisplacement(displacement, otherHistogram, CorrelationMeasure.INTERSECTION);
     }
 
     /**
@@ -1158,14 +1125,12 @@ public class Histogram implements Cloneable {
      * @param correlationMeasure
      * @return the correlation between this histogram with another histogram.
      */
-    public double correlation(Histogram otherHistogram,
-            CorrelationMeasure correlationMeasure) {
+    public double correlation(Histogram otherHistogram, CorrelationMeasure correlationMeasure) {
         if (otherHistogram.classWidth != classWidth) {
             throw new IllegalArgumentException(
                     "Computation of correlation only correct when the classwidth of both histograms are the same");
         }
-        return correlationWithDisplacement(0, otherHistogram,
-                correlationMeasure);
+        return correlationWithDisplacement(0, otherHistogram, correlationMeasure);
 
     }
 
@@ -1184,14 +1149,14 @@ public class Histogram implements Cloneable {
 
     public int displacementForOptimalCorrelation(Histogram otherHistogram,
             CorrelationMeasure correlationMeasure) {
-        int optimalDisplacement = 0;// displacement with best correlation
-        double maximumCorrelation = -1;// best found correlation
+        int optimalDisplacement = 0; // displacement with best correlation
+        double maximumCorrelation = -1; // best found correlation
         int numberOfClasses = getNumberOfClasses();
 
         // current displacement, incremented with class width
         for (int currentDisplacement = 0; currentDisplacement < numberOfClasses; currentDisplacement++) {
-            double currentCorrelation = correlationWithDisplacement(
-                    currentDisplacement, otherHistogram, correlationMeasure);
+            double currentCorrelation = correlationWithDisplacement(currentDisplacement, otherHistogram,
+                    correlationMeasure);
             if (maximumCorrelation < currentCorrelation) {
                 maximumCorrelation = currentCorrelation;
                 optimalDisplacement = currentDisplacement;
@@ -1204,11 +1169,9 @@ public class Histogram implements Cloneable {
         return optimalDisplacement;
     }
 
-    public void plotCorrelation(Histogram otherHistogram,
-            CorrelationMeasure correlationMeasure) {
+    public void plotCorrelation(Histogram otherHistogram, CorrelationMeasure correlationMeasure) {
         int displacement = displacementForOptimalCorrelation(otherHistogram);
-        correlationMeasure.getHistogramCorrelation().plotCorrelation(this,
-                displacement, otherHistogram);
+        correlationMeasure.getHistogramCorrelation().plotCorrelation(this, displacement, otherHistogram);
     }
 
     // -----------------------------------------------------------

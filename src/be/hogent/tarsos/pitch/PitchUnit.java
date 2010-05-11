@@ -2,7 +2,6 @@ package be.hogent.tarsos.pitch;
 
 /**
  * Defines the unit of the pitch value.
- * 
  */
 public enum PitchUnit {
     /**

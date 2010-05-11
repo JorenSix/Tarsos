@@ -4,7 +4,6 @@ package be.hogent.tarsos.util;
  * Defines a configuration key.
  * 
  * @author Joren Six
- * 
  */
 public enum ConfKey {
 

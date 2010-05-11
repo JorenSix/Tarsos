@@ -8,7 +8,6 @@ import java.util.ListIterator;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 
 /**
- * 
  * A sample is a collection of pitches with corresponding probabilities that
  * starts at a certain time.
  * 
@@ -17,8 +16,8 @@ import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 public class Sample implements Comparable<Sample> {
 
     private long start;
-    private final List<Double> pitches;// in Hz
-    private final List<Double> probabilities;// values from 0 to 1 (inclusive).
+    private final List<Double> pitches; // in Hz
+    private final List<Double> probabilities; // values from 0 to 1 (inclusive).
     // One probability per pitch.
 
     /**
@@ -28,7 +27,6 @@ public class Sample implements Comparable<Sample> {
 
     /**
      * The source of the sample: the originating software and/or algorithm.
-     * 
      */
     public enum SampleSource {
         IPEM, AUBIO_YIN, AUBIO_YINFFT, AUBIO_SCHMITT, AUBIO_FCOMB, AUBIO_MCOMB
@@ -110,11 +108,9 @@ public class Sample implements Comparable<Sample> {
      *            defines the limits of what is seen as a harmonic. The list
      *            [100Hz,202Hz,230Hz] is reduced to [100Hz,230Hz] if the error
      *            percentage is greater than or equal to 2% (0.02)
-     * 
      * @return a reduced list without harmonics
      */
-    public List<Double> getPitchesWithoutHarmonicsIn(PitchUnit unit,
-            double errorPercentage) {
+    public List<Double> getPitchesWithoutHarmonicsIn(PitchUnit unit, double errorPercentage) {
 
         if (pitches.size() == 1) {
             return pitches;
@@ -132,8 +128,7 @@ public class Sample implements Comparable<Sample> {
                 Double maxPitchLimit = pitchToCheck + deviation;
                 Double minPitchLimit = pitchToCheck - deviation;
                 for (Double pitchToCheckWith : pitches) {
-                    if (maxPitchLimit >= pitchToCheckWith
-                            && pitchToCheckWith >= minPitchLimit) {
+                    if (maxPitchLimit >= pitchToCheckWith && pitchToCheckWith >= minPitchLimit) {
                         // System.out.println(pitch + " is harmonic of " +
                         // pitchToCheckWith + ": " + maxPitchLimit + " >= " +
                         // pitchToCheckWith + " >= " + minPitchLimit);
@@ -232,8 +227,7 @@ public class Sample implements Comparable<Sample> {
         // starttime first
         int startCompare = Long.valueOf(start).compareTo(Long.valueOf(o.start));
         // then order by source name
-        return startCompare == 0 ? source.toString().compareTo(
-                o.source.toString()) : startCompare;
+        return startCompare == 0 ? source.toString().compareTo(o.source.toString()) : startCompare;
     }
 
     @Override

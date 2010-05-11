@@ -11,8 +11,7 @@ import be.hogent.tarsos.pitch.Yin.DetectedPitchHandler;
 import be.hogent.tarsos.util.AudioFile;
 
 public class YinPitchDetection implements PitchDetector {
-    private static final Logger log = Logger.getLogger(YinPitchDetection.class
-            .getName());
+    private static final Logger log = Logger.getLogger(YinPitchDetection.class.getName());
 
     private final AudioFile file;
     private final List<Sample> samples;
@@ -31,17 +30,14 @@ public class YinPitchDetection implements PitchDetector {
                 @Override
                 public void handleDetectedPitch(float time, float pitch) {
                     long start = (long) time * 1000;
-                    Sample s = pitch == -1 ? new Sample(start) : new Sample(
-                            start, pitch);
+                    Sample s = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
                     samples.add(s);
                 }
             });
         } catch (UnsupportedAudioFileException e) {
-            log.severe("Unsupported audio file: " + file.basename() + " "
-                    + e.getMessage());
+            log.severe("Unsupported audio file: " + file.basename() + " " + e.getMessage());
         } catch (IOException e) {
-            log.severe("Exception while reading audio file: " + file.basename()
-                    + " " + e.getMessage());
+            log.severe("Exception while reading audio file: " + file.basename() + " " + e.getMessage());
         }
     }
 

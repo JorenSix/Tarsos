@@ -26,8 +26,7 @@ public class AmbitusHistogramTests {
     @Test
     public void testExportToScalaScaleFileFormat() {
         ToneScaleHistogram histo = createTestAmbitus().toneScaleHistogram();
-        histo.exportToScalaScaleFileFormat("data/tests/scale.scl",
-                "Test tone scale");
+        histo.exportToScalaScaleFileFormat("data/tests/scale.scl", "Test tone scale");
         SimplePlot plot = new SimplePlot("Exported tone scale");
         plot.addData(0, histo);
         plot.save();
@@ -40,8 +39,7 @@ public class AmbitusHistogramTests {
 
         toneScale.normalize();
 
-        toneScale.plotCorrelation(ambitus.toneScaleHistogram().normalize(),
-                CorrelationMeasure.INTERSECTION);
+        toneScale.plotCorrelation(ambitus.toneScaleHistogram().normalize(), CorrelationMeasure.INTERSECTION);
 
         SimplePlot correlationPlot = new SimplePlot("rich"); // plots the
         correlationPlot.addData(0, ambitus.toneScaleHistogram().normalize()); // plots

@@ -2,7 +2,6 @@ package be.hogent.tarsos.midi;
 
 /*
  * DumpReceiver.java
- *
  * This file is part of jsresources.org
  */
 
@@ -10,17 +9,14 @@ package be.hogent.tarsos.midi;
  * Copyright (c) 1999 - 2001 by Matthias Pfisterer
  * Copyright (c) 2003 by Florian Bomers
  * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
  * - Redistributions of source code must retain the above copyright notice,
  *   this list of conditions and the following disclaimer.
  * - Redistributions in binary form must reproduce the above copyright
  *   notice, this list of conditions and the following disclaimer in the
  *   documentation and/or other materials provided with the distribution.
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -53,27 +49,23 @@ public class DumpReceiver implements Receiver {
     public static long seCount = 0;
     public static long smCount = 0;
 
-    private static final String[] sm_astrKeyNames = { "C", "C#", "D", "D#",
-            "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+    private static final String[] sm_astrKeyNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A",
+            "A#", "B" };
 
-    private static final String[] sm_astrKeySignatures = { "Cb", "Gb", "Db",
-            "Ab", "Eb", "Bb", "F", "C", "G", "D", "A", "E", "B", "F#", "C#" };
+    private static final String[] sm_astrKeySignatures = { "Cb", "Gb", "Db", "Ab", "Eb", "Bb", "F", "C", "G",
+            "D", "A", "E", "B", "F#", "C#" };
     private static final String[] SYSTEM_MESSAGE_TEXT = {
-            "System Exclusive (should not be in ShortMessage!)",
-            "MTC Quarter Frame: ", "Song Position: ", "Song Select: ",
-            "Undefined", "Undefined", "Tune Request",
-            "End of SysEx (should not be in ShortMessage!)", "Timing clock",
-            "Undefined", "Start", "Continue", "Stop", "Undefined",
-            "Active Sensing", "System Reset" };
+            "System Exclusive (should not be in ShortMessage!)", "MTC Quarter Frame: ", "Song Position: ",
+            "Song Select: ", "Undefined", "Undefined", "Tune Request",
+            "End of SysEx (should not be in ShortMessage!)", "Timing clock", "Undefined", "Start",
+            "Continue", "Stop", "Undefined", "Active Sensing", "System Reset" };
 
-    private static final String[] QUARTER_FRAME_MESSAGE_TEXT = {
-            "frame count LS: ", "frame count MS: ", "seconds count LS: ",
-            "seconds count MS: ", "minutes count LS: ", "minutes count MS: ",
+    private static final String[] QUARTER_FRAME_MESSAGE_TEXT = { "frame count LS: ", "frame count MS: ",
+            "seconds count LS: ", "seconds count MS: ", "minutes count LS: ", "minutes count MS: ",
             "hours count LS: ", "hours count MS: " };
 
-    private static final String[] FRAME_TYPE_TEXT = { "24 frames/second",
-            "25 frames/second", "30 frames/second (drop)",
-            "30 frames/second (non-drop)", };
+    private static final String[] FRAME_TYPE_TEXT = { "24 frames/second", "25 frames/second",
+            "30 frames/second (drop)", "30 frames/second (non-drop)", };
 
     private final PrintStream m_printStream;
     private final boolean m_bPrintTimeStampAsTicks;
@@ -118,24 +110,20 @@ public class DumpReceiver implements Receiver {
         String strMessage = null;
         switch (message.getCommand()) {
         case 0x80:
-            strMessage = "note Off " + message.getData1() + " velocity: "
-                    + message.getData2();
+            strMessage = "note Off " + message.getData1() + " velocity: " + message.getData2();
             break;
 
         case 0x90:
-            strMessage = "note On  " + message.getData1() + " velocity: "
-                    + message.getData2();
+            strMessage = "note On  " + message.getData1() + " velocity: " + message.getData2();
             break;
 
         case 0xa0:
-            strMessage = "polyphonic key pressure "
-                    + getKeyName(message.getData1()) + " pressure: "
+            strMessage = "polyphonic key pressure " + getKeyName(message.getData1()) + " pressure: "
                     + message.getData2();
             break;
 
         case 0xb0:
-            strMessage = "control change " + message.getData1() + " value: "
-                    + message.getData2();
+            strMessage = "control change " + message.getData1() + " value: " + message.getData2();
             break;
 
         case 0xc0:
@@ -143,13 +131,12 @@ public class DumpReceiver implements Receiver {
             break;
 
         case 0xd0:
-            strMessage = "key pressure " + getKeyName(message.getData1())
-                    + " pressure: " + message.getData2();
+            strMessage = "key pressure " + getKeyName(message.getData1()) + " pressure: "
+                    + message.getData2();
             break;
 
         case 0xe0:
-            strMessage = "pitch wheel change "
-                    + get14bitValue(message.getData1(), message.getData2());
+            strMessage = "pitch wheel change " + get14bitValue(message.getData1(), message.getData2());
             break;
 
         case 0xF0:
@@ -164,14 +151,12 @@ public class DumpReceiver implements Receiver {
                 strMessage += QUARTER_FRAME_MESSAGE_TEXT[nQType] + nQData;
                 if (nQType == 7) {
                     int nFrameType = (message.getData1() & 0x06) >> 1;
-                    strMessage += ", frame type: "
-                            + FRAME_TYPE_TEXT[nFrameType];
+                    strMessage += ", frame type: " + FRAME_TYPE_TEXT[nFrameType];
                 }
                 break;
 
             case 0x2:
-                strMessage += get14bitValue(message.getData1(), message
-                        .getData2());
+                strMessage += get14bitValue(message.getData1(), message.getData2());
                 break;
 
             case 0x3:
@@ -183,9 +168,8 @@ public class DumpReceiver implements Receiver {
             break;
 
         default:
-            strMessage = "unknown message: status = " + message.getStatus()
-                    + ", byte1 = " + message.getData1() + ", byte2 = "
-                    + message.getData2();
+            strMessage = "unknown message: status = " + message.getStatus() + ", byte1 = "
+                    + message.getData1() + ", byte2 = " + message.getData2();
             break;
         }
         if (message.getCommand() != 0xF0) {
@@ -220,8 +204,7 @@ public class DumpReceiver implements Receiver {
         // System.out.println("data array length: " + abData.length);
         switch (message.getType()) {
         case 0:
-            int nSequenceNumber = ((abData[0] & 0xFF) << 8)
-                    | (abData[1] & 0xFF);
+            int nSequenceNumber = ((abData[0] & 0xFF) << 8) | (abData[1] & 0xFF);
             strMessage = "Sequence Number: " + nSequenceNumber;
             break;
 
@@ -270,8 +253,7 @@ public class DumpReceiver implements Receiver {
             break;
 
         case 0x51:
-            int nTempo = ((abData[0] & 0xFF) << 16) | ((abData[1] & 0xFF) << 8)
-                    | (abData[2] & 0xFF); // tempo
+            int nTempo = ((abData[0] & 0xFF) << 16) | ((abData[1] & 0xFF) << 8) | (abData[2] & 0xFF); // tempo
             // in
             // microseconds
             // per
@@ -284,22 +266,19 @@ public class DumpReceiver implements Receiver {
 
         case 0x54:
             // System.out.println("data array length: " + abData.length);
-            strMessage = "SMTPE Offset: " + (abData[0] & 0xFF) + ":"
-                    + (abData[1] & 0xFF) + ":" + (abData[2] & 0xFF) + "."
-                    + (abData[3] & 0xFF) + "." + (abData[4] & 0xFF);
+            strMessage = "SMTPE Offset: " + (abData[0] & 0xFF) + ":" + (abData[1] & 0xFF) + ":"
+                    + (abData[2] & 0xFF) + "." + (abData[3] & 0xFF) + "." + (abData[4] & 0xFF);
             break;
 
         case 0x58:
-            strMessage = "Time Signature: " + (abData[0] & 0xFF) + "/"
-                    + (1 << (abData[1] & 0xFF))
+            strMessage = "Time Signature: " + (abData[0] & 0xFF) + "/" + (1 << (abData[1] & 0xFF))
                     + ", MIDI clocks per metronome tick: " + (abData[2] & 0xFF)
                     + ", 1/32 per 24 MIDI clocks: " + (abData[3] & 0xFF);
             break;
 
         case 0x59:
             String strGender = (abData[1] == 1) ? "minor" : "major";
-            strMessage = "Key Signature: "
-                    + sm_astrKeySignatures[abData[0] + 7] + " " + strGender;
+            strMessage = "Key Signature: " + sm_astrKeySignatures[abData[0] + 7] + " " + strGender;
             break;
 
         case 0x7F:
@@ -339,8 +318,8 @@ public class DumpReceiver implements Receiver {
         return 60000000.0f / value;
     }
 
-    private static char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7',
-            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+    private static char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+            'E', 'F' };
 
     public static String getHexString(byte[] aByte) {
         StringBuffer sbuf = new StringBuffer(aByte.length * 3 + 2);

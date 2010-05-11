@@ -30,26 +30,22 @@ public class CorrelationTests {
     @Test
     public void testPerfectCorrelation() {
         Histogram h = buildTable();
-        for (CorrelationMeasure correlationMeasure : CorrelationMeasure
-                .values()) {
+        for (CorrelationMeasure correlationMeasure : CorrelationMeasure.values()) {
             System.out.println(correlationMeasure.name());
             System.out.println(h.correlation(h, correlationMeasure));
             // h.plotAutoCorrelation(correlationMeasure);
         }
 
-        h = PitchFunctions
-                .readFrequencyTable("src/tarsos/test/data/african_octave_frequency_table.txt");
+        h = PitchFunctions.readFrequencyTable("src/tarsos/test/data/african_octave_frequency_table.txt");
         Histogram otherHistogram = PitchFunctions
                 .readFrequencyTable("src/tarsos/test/data/other_african_octave_frequency_table.txt");
 
         otherHistogram = otherHistogram.normalize();
         h = h.normalize();
 
-        for (CorrelationMeasure correlationMeasure : CorrelationMeasure
-                .values()) {
+        for (CorrelationMeasure correlationMeasure : CorrelationMeasure.values()) {
             System.out.println(correlationMeasure.name());
-            System.out.println(h
-                    .correlation(otherHistogram, correlationMeasure));
+            System.out.println(h.correlation(otherHistogram, correlationMeasure));
             h.plotCorrelation(otherHistogram, correlationMeasure);
         }
     }

@@ -1,7 +1,6 @@
 package be.hogent.tarsos.util.histogram;
 
 /**
- * 
  * Defines an implementation of a histogram correlation or distance measure.
  * 
  * @author Joren Six
@@ -19,8 +18,7 @@ public interface HistogramCorrelation {
      *            the second (not displaced) histogram
      * @return the correlation between a histogram and a displaced histogram
      */
-    double correlation(Histogram thisHistogram, int displacement,
-            Histogram otherHistogram);
+    double correlation(Histogram thisHistogram, int displacement, Histogram otherHistogram);
 
     /**
      * Plots two histograms and the intersection between the two.
@@ -33,6 +31,5 @@ public interface HistogramCorrelation {
      * @param otherHistogram
      *            the second (not displaced) histogram
      */
-    void plotCorrelation(Histogram thisHistogram, int displacement,
-            Histogram otherHistogram);
+    void plotCorrelation(Histogram thisHistogram, int displacement, Histogram otherHistogram);
 }

@@ -9,10 +9,9 @@ public class PitchTable {
      * @param args
      */
     public static void main(String[] args) {
-        System.out.printf("%4s %10s %16s %14s %15s %10s\n", "MIDI", "NAME",
-                "FREQUENCY", "ABS CENTS", "REL CENTS", "OCTAVE");
-        System.out
-                .println("---------------------------------------------------------------------------");
+        System.out.printf("%4s %10s %16s %14s %15s %10s\n", "MIDI", "NAME", "FREQUENCY", "ABS CENTS",
+                "REL CENTS", "OCTAVE");
+        System.out.println("---------------------------------------------------------------------------");
         for (int i = 0; i < 128; i++) {
             Pitch p = Pitch.getInstance(PitchUnit.MIDI_KEY, i);
 
@@ -21,9 +20,8 @@ public class PitchTable {
             double relativeCents = p.getPitch(PitchUnit.RELATIVE_CENTS);
             int octaveIndex = p.octaveIndex();
 
-            System.out.printf("%4d %10s %14.5fHz %14.0f  %14.0f %10d\n", i, p
-                    .noteName(), frequency, absoluteCents, relativeCents,
-                    octaveIndex);
+            System.out.printf("%4d %10s %14.5fHz %14.0f  %14.0f %10d\n", i, p.noteName(), frequency,
+                    absoluteCents, relativeCents, octaveIndex);
         }
     }
 }

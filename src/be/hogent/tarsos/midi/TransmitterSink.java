@@ -1,5 +1,4 @@
 /**
- *
  */
 package be.hogent.tarsos.midi;
 
@@ -7,7 +6,6 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.Transmitter;
 
 /**
- * 
  * Sends messages to a list of Transmitters. Can be used to send MIDI messages
  * to several receivers. Each transmitter in the sin should have the same
  * receiver (or ReceiverSink)
@@ -36,8 +34,7 @@ public class TransmitterSink implements Transmitter {
             receiver = transmitters[0].getReceiver();
             for (int i = 1; i < transmitters.length; i++) {
                 if (transmitters[i].getReceiver() != receiver) {
-                    throw new Error(
-                            "Each Transmitter in the TransmitterSink should have the same Receiver");
+                    throw new Error("Each Transmitter in the TransmitterSink should have the same Receiver");
                 }
             }
         }

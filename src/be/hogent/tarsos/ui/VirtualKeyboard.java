@@ -16,7 +16,6 @@ import javax.sound.midi.Transmitter;
 import javax.swing.JComponent;
 
 /**
- * 
  * An abstract class to represent a keyboard.
  * <p>
  * Uses refactored code from the gervill package licensed under the GPL with the
@@ -29,16 +28,14 @@ import javax.swing.JComponent;
  * 
  * @author Joren Six
  */
-public abstract class VirtualKeyboard extends JComponent implements
-        Transmitter, Receiver {
+public abstract class VirtualKeyboard extends JComponent implements Transmitter, Receiver {
     /**
-     *
      */
     private static final long serialVersionUID = -8109877572069108012L;
     /**
      * Channel to send MIDI events to.
      */
-    public static final int CHANNEL = 0;// channel zero.. bad to the bone
+    public static final int CHANNEL = 0; // channel zero.. bad to the bone
     /**
      * The velocity of NOTE_ON events.
      */
@@ -109,7 +106,7 @@ public abstract class VirtualKeyboard extends JComponent implements
         this.numberOfKeys = numberOfKeys;
         this.numberOfKeysPerOctave = numberOfKeysPerOctave;
         this.currentlyPressedMidiNote = -1;
-        lowestAssignedKey = 3 * numberOfKeysPerOctave;// start at octave 3
+        lowestAssignedKey = 3 * numberOfKeysPerOctave; // start at octave 3
 
         keyDown = new boolean[VirtualKeyboard.NUMBER_OF_MIDI_KEYS];
 
@@ -146,8 +143,7 @@ public abstract class VirtualKeyboard extends JComponent implements
                 for (int i = 0; i < VirtualKeyboard.mappedKeys.length(); i++) {
                     if (VirtualKeyboard.mappedKeys.charAt(i) == pressedKeyChar) {
                         int midiKey = i + lowestAssignedKey;
-                        if (midiKey < VirtualKeyboard.this.numberOfKeys
-                                && !keyDown[midiKey]) {
+                        if (midiKey < VirtualKeyboard.this.numberOfKeys && !keyDown[midiKey]) {
                             sendNoteMessage(midiKey, true);
                         }
                         return;
@@ -218,8 +214,7 @@ public abstract class VirtualKeyboard extends JComponent implements
 
         try {
             ShortMessage sm = new ShortMessage();
-            int command = sendOnMessage ? ShortMessage.NOTE_ON
-                    : ShortMessage.NOTE_OFF;
+            int command = sendOnMessage ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
             int velocity = sendOnMessage ? VirtualKeyboard.VELOCITY : 0;
             sm.setMessage(command, VirtualKeyboard.CHANNEL, midiKey, velocity);
 
@@ -276,8 +271,7 @@ public abstract class VirtualKeyboard extends JComponent implements
             boolean noteOnOrOff = sm.getCommand() == ShortMessage.NOTE_ON
                     || sm.getCommand() == ShortMessage.NOTE_OFF;
             if (correctChannel && noteOnOrOff) {
-                keyDown[sm.getData1()] = (sm.getCommand() == ShortMessage.NOTE_ON)
-                        && (sm.getData2() != 0);
+                keyDown[sm.getData1()] = (sm.getCommand() == ShortMessage.NOTE_ON) && (sm.getData2() != 0);
                 repaint();
             }
         }
@@ -294,8 +288,7 @@ public abstract class VirtualKeyboard extends JComponent implements
      * @return a <code>VirtualKeyboard</code> using the best representation
      *         available.
      */
-    public static VirtualKeyboard createVirtualKeyboard(
-            int numberOfKeysPerOctave) {
+    public static VirtualKeyboard createVirtualKeyboard(int numberOfKeysPerOctave) {
         VirtualKeyboard keyboard = null;
         switch (numberOfKeysPerOctave) {
         case 12:

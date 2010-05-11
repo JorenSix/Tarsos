@@ -5,7 +5,6 @@ package be.hogent.tarsos.util;
  * switch FFT algorithm with minimal overhead.
  * 
  * @author Joren Six
- * 
  */
 public class FFT {
     /**
@@ -23,7 +22,6 @@ public class FFT {
     }
 
     /**
-     * 
      * Computes forward DFT.
      * 
      * @param data
@@ -56,35 +54,28 @@ public class FFT {
      *         i
      */
     public float modulus(float[] data, int i) {
-        float modulus = data[i] * data[i] + data[i + data.length / 2]
-                * data[i + data.length / 2];
+        float modulus = data[i] * data[i] + data[i + data.length / 2] * data[i + data.length / 2];
         modulus = (float) Math.pow(modulus, 0.5);
         return modulus;
     }
 
     /*
      * Copyright 2007 Sun Microsystems, Inc. All Rights Reserved. DO NOT ALTER
-     * OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
-     * 
-     * This code is free software; you can redistribute it and/or modify it
-     * under the terms of the GNU General Public License version 2 only, as
-     * published by the Free Software Foundation. Sun designates this particular
-     * file as subject to the "Classpath" exception as provided by Sun in the
-     * LICENSE file that accompanied this code.
-     * 
-     * This code is distributed in the hope that it will be useful, but WITHOUT
-     * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-     * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
-     * version 2 for more details (a copy is included in the LICENSE file that
-     * accompanied this code).
-     * 
-     * You should have received a copy of the GNU General Public License version
-     * 2 along with this work; if not, write to the Free Software Foundation,
-     * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
-     * 
-     * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
-     * CA 95054 USA or visit www.sun.com if you need additional information or
-     * have any questions.
+     * OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER. This code is free
+     * software; you can redistribute it and/or modify it under the terms of the
+     * GNU General Public License version 2 only, as published by the Free
+     * Software Foundation. Sun designates this particular file as subject to
+     * the "Classpath" exception as provided by Sun in the LICENSE file that
+     * accompanied this code. This code is distributed in the hope that it will
+     * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+     * Public License version 2 for more details (a copy is included in the
+     * LICENSE file that accompanied this code). You should have received a copy
+     * of the GNU General Public License version 2 along with this work; if not,
+     * write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+     * Boston, MA 02110-1301 USA. Please contact Sun Microsystems, Inc., 4150
+     * Network Circle, Santa Clara, CA 95054 USA or visit www.sun.com if you
+     * need additional information or have any questions.
      */
     /**
      * Fast Fourier Transformer. Converted the implementation by Karl Helgason
@@ -164,7 +155,7 @@ public class FFT {
                 }
             }
 
-            // PRECOMPUTATION of wwr1, wwi1 for factor 4 Decomposition (3 *
+            // PRECOMPUTATION of wwr1, wwi1 for factor 4 Decomposition (3
             // complex
             // operators and 8 +/- complex operators)
             {
@@ -190,8 +181,7 @@ public class FFT {
             return warray;
         }
 
-        private static void calc(int fftFrameSize, float[] data, int sign,
-                float[] w) {
+        private static void calc(int fftFrameSize, float[] data, int sign, float[] w) {
 
             final int fftFrameSize2 = fftFrameSize << 1;
 
@@ -209,8 +199,7 @@ public class FFT {
 
         }
 
-        private static void calcF2E(int fftFrameSize, float[] data, int i,
-                int nstep, float[] w) {
+        private static void calcF2E(int fftFrameSize, float[] data, int i, int nstep, float[] w) {
             int jmax = nstep;
             for (int n = 0; n < jmax; n += 2) {
                 float wr = w[i++];
@@ -233,8 +222,7 @@ public class FFT {
 
         // Perform Factor-4 Decomposition with 3 * complex operators and 8 +/-
         // complex operators
-        private static void calcF4F(int fftFrameSize, float[] data, int i,
-                int nstep, float[] w) {
+        private static void calcF4F(int fftFrameSize, float[] data, int i, int nstep, float[] w) {
             final int fftFrameSize2 = fftFrameSize << 1; // 2*fftFrameSize;
             // Factor-4 Decomposition
 
@@ -401,8 +389,7 @@ public class FFT {
 
         // Perform Factor-4 Decomposition with 3 * complex operators and 8 +/-
         // complex operators
-        private static void calcF4I(int fftFrameSize, float[] data, int i,
-                int nstep, float[] w) {
+        private static void calcF4I(int fftFrameSize, float[] data, int i, int nstep, float[] w) {
             final int fftFrameSize2 = fftFrameSize << 1; // 2*fftFrameSize;
             // Factor-4 Decomposition
 
@@ -569,8 +556,7 @@ public class FFT {
 
         // Perform Factor-4 Decomposition with 3 * complex operators and 8 +/-
         // complex operators
-        private static void calcF4FE(int fftFrameSize, float[] data, int i,
-                int nstep, float[] w) {
+        private static void calcF4FE(int fftFrameSize, float[] data, int i, int nstep, float[] w) {
             final int fftFrameSize2 = fftFrameSize << 1; // 2*fftFrameSize;
             // Factor-4 Decomposition
 
@@ -663,8 +649,7 @@ public class FFT {
 
         // Perform Factor-4 Decomposition with 3 * complex operators and 8 +/-
         // complex operators
-        private static void calcF4IE(int fftFrameSize, float[] data, int i,
-                int nstep, float[] w) {
+        private static void calcF4IE(int fftFrameSize, float[] data, int i, int nstep, float[] w) {
             final int fftFrameSize2 = fftFrameSize << 1; // 2*fftFrameSize;
             // Factor-4 Decomposition
 

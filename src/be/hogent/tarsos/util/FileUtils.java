@@ -36,19 +36,16 @@ import java.util.regex.Pattern;
  * Exports a DatabaseResult to a CSV-file.
  * 
  * @author Joren Six
- * 
  */
 public class FileUtils {
-    private static final Logger log = Logger.getLogger(FileUtils.class
-            .getName());
+    private static final Logger log = Logger.getLogger(FileUtils.class.getName());
     private static final char pathSeparator = File.separatorChar;
     private static final char extensionSeparator = '.';
 
     public static String temporaryDirectory() {
         String tempDir = System.getProperty("java.io.tmpdir");
         if (tempDir.contains(" ")) {
-            log.warning("Temporary directory (" + tempDir
-                    + ") contains whitespace");
+            log.warning("Temporary directory (" + tempDir + ") contains whitespace");
         }
         return tempDir;
 
@@ -75,9 +72,7 @@ public class FileUtils {
     }
 
     /**
-     * 
      * @return The path where the program is executed.
-     * 
      */
     public static String getRuntimePath() {
         String runtimePath = "";
@@ -97,7 +92,6 @@ public class FileUtils {
      *            The contents of the file.
      * @param name
      *            The name of the file to create.
-     * 
      */
     public static void writeFile(String contents, String name) {
         FileWriter FW = null;
@@ -120,7 +114,6 @@ public class FileUtils {
      *            The contents of the file.
      * @param name
      *            The name of the file to create.
-     * 
      */
     public static void appendFile(String contents, String name) {
         FileWriter FW = null;
@@ -179,21 +172,17 @@ public class FileUtils {
         URLConnection connection;
         try {
             connection = url.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                contents.append(new String(inputLine.getBytes(), "UTF-8"))
-                        .append("\n");
+                contents.append(new String(inputLine.getBytes(), "UTF-8")).append("\n");
             }
             in.close();
         } catch (IOException e) {
-            log.severe("Error while reading file " + path + " from jar: "
-                    + e.getMessage());
+            log.severe("Error while reading file " + path + " from jar: " + e.getMessage());
             e.printStackTrace();
         } catch (NullPointerException e) {
-            log.severe("Error while reading file " + path + " from jar: "
-                    + e.getMessage());
+            log.severe("Error while reading file " + path + " from jar: " + e.getMessage());
             e.printStackTrace();
         }
         return contents.toString();
@@ -207,8 +196,7 @@ public class FileUtils {
      */
     public static void copyFileFromJar(String source, String target) {
         try {
-            InputStream in = new FileUtils().getClass().getResourceAsStream(
-                    source);
+            InputStream in = new FileUtils().getClass().getResourceAsStream(source);
             OutputStream out;
             out = new FileOutputStream(target);
             byte[] buffer = new byte[4096];
@@ -222,9 +210,7 @@ public class FileUtils {
             log.severe("File not found: " + e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            log
-                    .severe("Exception while copying file from jar"
-                            + e.getMessage());
+            log.severe("Exception while copying file from jar" + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -244,8 +230,7 @@ public class FileUtils {
      * @return a List of string arrays. The data of the CSV-file can be found in
      *         the arrays. Each row corresponds with an array.
      */
-    public static List<String[]> readCSVFile(String fileName, String separator,
-            int expectedNumberOfColumns) {
+    public static List<String[]> readCSVFile(String fileName, String separator, int expectedNumberOfColumns) {
         List<String[]> data = new ArrayList<String[]>();
         FileReader fileReader = null;
 
@@ -261,13 +246,11 @@ public class FileUtils {
             while ((inputLine = in.readLine()) != null) {
                 lineNumber++;
                 String[] row = inputLine.split(separator);
-                if (expectedNumberOfColumns == -1
-                        || expectedNumberOfColumns == row.length) {
+                if (expectedNumberOfColumns == -1 || expectedNumberOfColumns == row.length) {
                     data.add(row);
                 } else {
-                    throw new Error("Unexpected row length (line " + lineNumber
-                            + " ). " + "Expected:" + expectedNumberOfColumns
-                            + " real " + row.length
+                    throw new Error("Unexpected row length (line " + lineNumber + " ). " + "Expected:"
+                            + expectedNumberOfColumns + " real " + row.length
                             + ". CVS-file incorrectly formatted?");
                 }
             }
@@ -289,8 +272,7 @@ public class FileUtils {
         }
     };
 
-    public static List<String> readColumnFromCSVData(List<String[]> data,
-            int columnIndex, RowFilter filter) {
+    public static List<String> readColumnFromCSVData(List<String[]> data, int columnIndex, RowFilter filter) {
         filter = filter == null ? ACCEPT_ALL_ROWFILTER : filter;
         List<String> columnData = new ArrayList<String>();
         for (String[] row : data) {
@@ -301,8 +283,7 @@ public class FileUtils {
         return columnData;
     }
 
-    public static void export(String filename, String[] header,
-            List<Object[]> data) {
+    public static void export(String filename, String[] header, List<Object[]> data) {
 
         String dateFormat = "yyyy-MM-dd hh:mm:ss";
         String numberFormat = "#0.000";
@@ -321,8 +302,7 @@ public class FileUtils {
                 // HEADERS
                 for (int column = 0; column < header.length; column++) {
                     Object valueObject = header[column];
-                    String value = valueObject == null ? "" : valueObject
-                            .toString();
+                    String value = valueObject == null ? "" : valueObject.toString();
                     value = value.replace(separator, "");
                     output.print(value + separator);
                 }
@@ -333,8 +313,7 @@ public class FileUtils {
             for (Object[] row : data) {
                 for (int column = 0; column < row.length; column++) {
                     Object valueObject = row[column];
-                    String value = valueObject == null ? "" : valueObject
-                            .toString();
+                    String value = valueObject == null ? "" : valueObject.toString();
                     if (valueObject != null) {
                         if (valueObject instanceof Double) {
                             value = exportDecimalFormat.format(valueObject);
@@ -378,7 +357,6 @@ public class FileUtils {
      * @exception java.util.regex.PatternSyntaxException
      *                Unchecked exception thrown to indicate a syntax error in a
      *                regular-expression pattern.
-     * 
      */
     public static List<String> glob(String directory, String pattern) {
         File dir = new File(directory);
@@ -388,8 +366,7 @@ public class FileUtils {
             throw new Error(directory + " is not a directory");
         }
         for (String file : dir.list()) {
-            if (!new File(file).isDirectory() && p.matcher(file).matches()
-                    && file != null) {
+            if (!new File(file).isDirectory() && p.matcher(file).matches() && file != null) {
                 matchingFiles.add(FileUtils.combine(directory, file));
             }
         }
@@ -469,7 +446,6 @@ public class FileUtils {
 
     /**
      * replaces UTF-8 characters and spaces with _ . Returns the complete path.
-     * 
      * <p>
      * E.g. <code>/tmp/01.��skar ton.mp3</code> is converted to:
      * <code>/tmp/01.__skar_ton.mp3</code>
@@ -506,8 +482,7 @@ public class FileUtils {
             CharBuffer cbuf = decoder.decode(bbuf);
             result = cbuf.toString();
         } catch (CharacterCodingException cce) {
-            log.severe("Exception during character encoding/decoding: "
-                    + cce.getMessage());
+            log.severe("Exception during character encoding/decoding: " + cce.getMessage());
         }
 
         return result;
@@ -531,8 +506,7 @@ public class FileUtils {
         } catch (FileNotFoundException e) {
             log.severe("File " + source + " not found! " + e.getMessage());
         } catch (IOException e) {
-            log.severe("Error while copying " + source + " to " + target
-                    + " : " + e.getMessage());
+            log.severe("Error while copying " + source + " to " + target + " : " + e.getMessage());
         } finally {
             try {
                 if (inChannel != null) {

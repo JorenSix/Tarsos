@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
  * Represents an audio file. Facilitates transcoding, handling of path names and
  * data sets.
  * 
@@ -17,8 +16,7 @@ public class AudioFile {
      */
     public static final String TRANSCODED_AUDIO_DIRECTORY = Configuration
             .get(ConfKey.transcoded_audio_directory);
-    private static final String ORIGINAL_AUDIO_DIRECTORY = Configuration
-            .get(ConfKey.audio_directory);
+    private static final String ORIGINAL_AUDIO_DIRECTORY = Configuration.get(ConfKey.audio_directory);
 
     private final String path;
 
@@ -40,8 +38,7 @@ public class AudioFile {
      */
     public String transcodedPath() {
         String baseName = FileUtils.basename(FileUtils.sanitizedFileName(path));
-        String fileName = baseName + "."
-                + Configuration.get(ConfKey.transcoded_audio_format);
+        String fileName = baseName + "." + Configuration.get(ConfKey.transcoded_audio_format);
         return FileUtils.combine(TRANSCODED_AUDIO_DIRECTORY, fileName);
     }
 
@@ -75,8 +72,8 @@ public class AudioFile {
     public static List<AudioFile> audioFiles(String... datasets) {
         List<AudioFile> files = new ArrayList<AudioFile>();
         for (String dataset : datasets) {
-            for (String originalFile : FileUtils.glob(FileUtils.combine(
-                    ORIGINAL_AUDIO_DIRECTORY, dataset), ".*\\..*")) {
+            for (String originalFile : FileUtils.glob(FileUtils.combine(ORIGINAL_AUDIO_DIRECTORY, dataset),
+                    ".*\\..*")) {
                 files.add(new AudioFile(originalFile));
             }
         }

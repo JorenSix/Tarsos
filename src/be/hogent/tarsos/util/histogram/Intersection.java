@@ -3,9 +3,7 @@ package be.hogent.tarsos.util.histogram;
 import be.hogent.tarsos.util.SimplePlot;
 
 /**
- * 
  * Implements a histogram intersection distance for modulo type histograms.
- * 
  * Works well on pitch frequency histograms according to Bozkurt
  * 
  * @author Joren Six
@@ -13,8 +11,7 @@ import be.hogent.tarsos.util.SimplePlot;
 public class Intersection implements HistogramCorrelation {
 
     @Override
-    public double correlation(Histogram thisHistogram, int displacement,
-            Histogram otherHistogram) {
+    public double correlation(Histogram thisHistogram, int displacement, Histogram otherHistogram) {
 
         // number of bins (classes)
         int numberOfClasses = thisHistogram.getNumberOfClasses();
@@ -27,23 +24,20 @@ public class Intersection implements HistogramCorrelation {
 
         // make displacement positive
         if (displacement < 0) {
-            displacement = ((displacement % numberOfClasses) + numberOfClasses)
-                    % numberOfClasses;
+            displacement = ((displacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
         }
 
         // matching area, displaced
         double matchingArea = 0.0;
 
         for (double current = start + classWidth / 2; current <= stop; current += classWidth) {
-            double displacedValue = (current + displacement * classWidth)
-                    % (numberOfClasses * classWidth);
-            matchingArea += Math.min(thisHistogram.getCount(current),
-                    otherHistogram.getCount(displacedValue));
+            double displacedValue = (current + displacement * classWidth) % (numberOfClasses * classWidth);
+            matchingArea += Math
+                    .min(thisHistogram.getCount(current), otherHistogram.getCount(displacedValue));
         }
 
         // the biggest area under the curve
-        double biggestHistogramArea = Math.max(thisHistogram.getSumFreq(),
-                otherHistogram.getSumFreq());
+        double biggestHistogramArea = Math.max(thisHistogram.getSumFreq(), otherHistogram.getSumFreq());
 
         double correlation = 0.0;
 
@@ -54,8 +48,7 @@ public class Intersection implements HistogramCorrelation {
         return correlation;
     }
 
-    public void plotCorrelation(Histogram thisHistogram, int displacement,
-            Histogram otherHistogram) {
+    public void plotCorrelation(Histogram thisHistogram, int displacement, Histogram otherHistogram) {
         // number of bins (classes)
         int numberOfClasses = thisHistogram.getNumberOfClasses();
         // start value
@@ -67,8 +60,7 @@ public class Intersection implements HistogramCorrelation {
 
         // make displacement positive
         if (displacement < 0) {
-            displacement = ((displacement % numberOfClasses) + numberOfClasses)
-                    % numberOfClasses;
+            displacement = ((displacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
         }
 
         // matching area, displaced
@@ -82,10 +74,9 @@ public class Intersection implements HistogramCorrelation {
 
         // Visualize the intersection using impulses
         for (double current = start + classWidth / 2; current <= stop; current += classWidth) {
-            double displacedValue = (current + displacement * classWidth)
-                    % (numberOfClasses * classWidth);
-            double areaAdded = Math.min(thisHistogram.getCount(current),
-                    otherHistogram.getCount(displacedValue));
+            double displacedValue = (current + displacement * classWidth) % (numberOfClasses * classWidth);
+            double areaAdded = Math.min(thisHistogram.getCount(current), otherHistogram
+                    .getCount(displacedValue));
             matchingArea += areaAdded;
             for (int i = 0; i < areaAdded; i++) {
                 correlationPlot.addData(2, current, areaAdded, true);

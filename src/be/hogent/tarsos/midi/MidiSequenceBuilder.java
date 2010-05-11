@@ -23,7 +23,6 @@ import be.hogent.tarsos.pitch.PitchConverter;
  * Utility class to generate a sequence of MIDI events.
  * 
  * @author Joren Six
- * 
  */
 public class MidiSequenceBuilder {
     private Sequence sequence;
@@ -45,27 +44,20 @@ public class MidiSequenceBuilder {
     }
 
     public void addNote(int midiKey, int numberOfTicks) {
-        track.add(createNoteEvent(ShortMessage.NOTE_ON, midiKey, VELOCITY,
-                currentTicks));
+        track.add(createNoteEvent(ShortMessage.NOTE_ON, midiKey, VELOCITY, currentTicks));
         currentTicks = numberOfTicks + currentTicks;
-        track.add(createNoteEvent(ShortMessage.NOTE_OFF, midiKey, 0,
-                currentTicks));
+        track.add(createNoteEvent(ShortMessage.NOTE_OFF, midiKey, 0, currentTicks));
     }
 
     public void addNoteByFrequency(double frequency, int numberOfTicks) {
-        int closestMidiNumber = (int) Math.round((69 + 12
-                * Math.log(frequency / 440.0) / Math.log(2.0)));
-        double frequencyClosestMidiNumber = (Math.pow(2.0,
-                (closestMidiNumber - 69.0) / 12.0) * 440.0);
-        double deviationInCents = 1200
-                * Math.log(frequency / frequencyClosestMidiNumber)
-                / Math.log(2.0);
+        int closestMidiNumber = (int) Math.round((69 + 12 * Math.log(frequency / 440.0) / Math.log(2.0)));
+        double frequencyClosestMidiNumber = (Math.pow(2.0, (closestMidiNumber - 69.0) / 12.0) * 440.0);
+        double deviationInCents = 1200 * Math.log(frequency / frequencyClosestMidiNumber) / Math.log(2.0);
         assert deviationInCents <= 50;
         // System.out.println("Requested: " + frequency + "Hz; Midi key " +
         // closestMidiNumber + " frequency: " + frequencyClosestMidiNumber +
         // "Hz; Deviation " + deviationInCents + " cents");
-        this.addNoteByDeviationInCents(closestMidiNumber, numberOfTicks,
-                deviationInCents);
+        this.addNoteByDeviationInCents(closestMidiNumber, numberOfTicks, deviationInCents);
     }
 
     public void addNoteByAbsoluteCents(double absoluteCents, int numberOfTicks) {
@@ -73,8 +65,7 @@ public class MidiSequenceBuilder {
         this.addNoteByFrequency(frequency, numberOfTicks);
     }
 
-    public void addNoteByDeviationInCents(int midiKey, int numberOfTicks,
-            double deviationInCents) {
+    public void addNoteByDeviationInCents(int midiKey, int numberOfTicks, double deviationInCents) {
         midiKey = midiKey + (int) (deviationInCents / 100);
         deviationInCents = deviationInCents % 100;
         track.add(createPitchBendEvent(deviationInCents, currentTicks));
@@ -82,8 +73,7 @@ public class MidiSequenceBuilder {
         track.add(createPitchBendEvent(0.0, currentTicks));
     }
 
-    private MidiEvent createPitchBendEvent(double deviationInCents,
-            int startTick) {
+    private MidiEvent createPitchBendEvent(double deviationInCents, int startTick) {
         int bendFactorInMidi = 0;
         // 16384 values for 400 cents
         bendFactorInMidi = (int) (deviationInCents * (16384.0 / 400.0));
@@ -101,8 +91,7 @@ public class MidiSequenceBuilder {
         }
     }
 
-    public void play() throws MidiUnavailableException,
-            InvalidMidiDataException {
+    public void play() throws MidiUnavailableException, InvalidMidiDataException {
         final Sequencer sequencer;
         final Synthesizer synthesizer;
         /*
@@ -137,12 +126,9 @@ public class MidiSequenceBuilder {
 
         /*
          * To free system resources, it is recommended to close the synthesizer
-         * and sequencer properly.
-         * 
-         * To accomplish this, we register a Listener to the Sequencer. It is
-         * called when there are "meta" events. Meta event 47 is end of track.
-         * 
-         * Thanks to Espen Riskedal for finding this trick.
+         * and sequencer properly. To accomplish this, we register a Listener to
+         * the Sequencer. It is called when there are "meta" events. Meta event
+         * 47 is end of track. Thanks to Espen Riskedal for finding this trick.
          */
         sequencer.addMetaEventListener(new MetaEventListener() {
             public void meta(MetaMessage event) {
@@ -162,7 +148,6 @@ public class MidiSequenceBuilder {
     }
 
     /*
-     * 
      * While almost all channel voice messages assign a single data byte to a
      * single parameter such as key # or velocity (128 values because they start
      * with '0,' so = 2^7=128), the exception is pitch bend. If pitch bend used
@@ -171,24 +156,13 @@ public class MidiSequenceBuilder {
      * non-zero bits of the first data byte (called the most significant byte or
      * MSB) are combined with the 7 non-zero bits from the second data byte
      * (called the least significant byte or LSB) to create a 14-bit data value,
-     * giving pitch bend data a range of 16,384 values.
-     * 
-     * Pitch Bend Range: <pre> RPN LSB = 0: Bn 64 00 RPN MSB = 0: Bn 65 00 Data
-     * MSB: Bn 06 mm (mm sets bend range in semitones. mm can be from 00 to 18
-     * for 0 to 24 (+/- 12) semitones both up and down) Data LSB=0 (usually not
-     * required): Bn 26 00
-     * 
-     * So to set Pitch Bend Range to +/- 12 semitones:
-     * 
-     * HEX ; DECIMAL
-     * 
-     * Bn 65 00 ; 101 00 MSB
-     * 
-     * Bn 64 00 ; 100 00 LSB
-     * 
-     * Bn 06 18 ; 06 24 MSB
-     * 
-     * Bn 26 00 ; 38 00 LSB </pre>
+     * giving pitch bend data a range of 16,384 values. Pitch Bend Range: <pre>
+     * RPN LSB = 0: Bn 64 00 RPN MSB = 0: Bn 65 00 Data MSB: Bn 06 mm (mm sets
+     * bend range in semitones. mm can be from 00 to 18 for 0 to 24 (+/- 12)
+     * semitones both up and down) Data LSB=0 (usually not required): Bn 26 00
+     * So to set Pitch Bend Range to +/- 12 semitones: HEX ; DECIMAL Bn 65 00 ;
+     * 101 00 MSB Bn 64 00 ; 100 00 LSB Bn 06 18 ; 06 24 MSB Bn 26 00 ; 38 00
+     * LSB </pre>
      */
     private MidiEvent createPitchBendEvent(int bendFactor, long startTick) {
 
@@ -197,8 +171,7 @@ public class MidiSequenceBuilder {
         // -8191 <= bendfactor <= +8192
         bendFactor += 8191;
         if (0 > bendFactor || bendFactor >= 16384) {
-            throw new IllegalArgumentException(
-                    "bendFactor invalid:  -8191 <= bendFactor <= +8192");
+            throw new IllegalArgumentException("bendFactor invalid:  -8191 <= bendFactor <= +8192");
         }
 
         String binary = toBinaryString(bendFactor);
@@ -222,8 +195,7 @@ public class MidiSequenceBuilder {
         return binary;
     }
 
-    private MidiEvent createNoteEvent(int nCommand, int nKey, int nVelocity,
-            long lTick) {
+    private MidiEvent createNoteEvent(int nCommand, int nKey, int nVelocity, long lTick) {
         ShortMessage message = new ShortMessage();
         try {
             message.setMessage(nCommand, 0, // always on channel 1

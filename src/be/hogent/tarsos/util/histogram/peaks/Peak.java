@@ -4,7 +4,6 @@ package be.hogent.tarsos.util.histogram.peaks;
  *Defines a Peak in a histogram.
  * 
  * @author Joren Six
- * 
  */
 public class Peak {
     private final double position;

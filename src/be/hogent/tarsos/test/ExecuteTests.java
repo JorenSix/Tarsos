@@ -10,9 +10,7 @@ public class ExecuteTests {
 
     @Test
     public void testExecutableInPath() {
-        assertTrue("Executable should be in path", Execute
-                .executableAvailable("dir"));
-        assertTrue("Executable should not be in path", !Execute
-                .executableAvailable("qfmjfpoenl"));
+        assertTrue("Executable should be in path", Execute.executableAvailable("dir"));
+        assertTrue("Executable should not be in path", !Execute.executableAvailable("qfmjfpoenl"));
     }
 }

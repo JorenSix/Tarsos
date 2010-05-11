@@ -1,17 +1,12 @@
 /**
- *
  */
 package be.hogent.tarsos.util.histogram;
 
 /**
- * 
  * Defines a correlation measure for histograms. See On measuring the distance
  * between histograms: Sung-Hyuk Chaa, Sargur N. Sriharib (2002)
- * 
  * CorrelationMeasure is a bit of a strange name: also distance measures are
- * defined.
- * 
- * Side note: java enums are nice.
+ * defined. Side note: java enums are nice.
  * 
  * @author Joren Six
  */

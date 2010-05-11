@@ -37,8 +37,7 @@ public final class Annotate {
     public static void main(final String... args) {
         LongOpt[] longopts = new LongOpt[3];
         longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
-        longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null,
-                'd');
+        longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
         longopts[2] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
 
         Getopt g = new Getopt("annotate", args, "-i:d:h", longopts);
@@ -68,11 +67,9 @@ public final class Annotate {
             printHelp();
         } else if (inputFile == null) {
             String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
-            String globDirectory = FileUtils.combine(
-                    FileUtils.getRuntimePath(), "audio");
+            String globDirectory = FileUtils.combine(FileUtils.getRuntimePath(), "audio");
             List<String> inputFiles = FileUtils.glob(globDirectory, pattern);
-            inputFiles.addAll(FileUtils.glob(globDirectory, pattern
-                    .toLowerCase()));
+            inputFiles.addAll(FileUtils.glob(globDirectory, pattern.toLowerCase()));
             for (String file : inputFiles) {
                 annotateInputFile(file, detector);
             }
@@ -87,8 +84,7 @@ public final class Annotate {
                         + "format, detects pitch and stores information about the files. It uses the defined files with the in "
                         + "option or all the audiofiles in the audio directory.");
         System.out.println("");
-        System.out
-                .println("java -jar annotate.jar [--in in.wav] [--detector AUBIO|IPEM]");
+        System.out.println("java -jar annotate.jar [--in in.wav] [--detector AUBIO|IPEM]");
         System.exit(0);
     }
 
@@ -98,8 +94,7 @@ public final class Annotate {
 
         PitchDetector pitchDetector = new YinPitchDetection(audioFile);
         if (detector.equals("AUBIO")) {
-            pitchDetector = new AubioPitchDetection(audioFile,
-                    AubioPitchDetectionMode.YIN);
+            pitchDetector = new AubioPitchDetection(audioFile, AubioPitchDetectionMode.YIN);
         } else if (detector.equals("IPEM")) {
             pitchDetector = new IPEMPitchDetection(audioFile);
         }
@@ -113,25 +108,19 @@ public final class Annotate {
 
         List<Sample> samples = pitchDetector.getSamples();
         AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
-        String ambitusTextFileName = FileUtils.combine(directory, prefix
-                + "_ambitus.txt");
-        String ambitusPNGFileName = FileUtils.combine(directory, prefix
-                + "_ambitus.png");
+        String ambitusTextFileName = FileUtils.combine(directory, prefix + "_ambitus.txt");
+        String ambitusPNGFileName = FileUtils.combine(directory, prefix + "_ambitus.png");
         String coloredToneScalePNGFileName = prefix + "_tone_scale_colored.png";
-        ambitusHistogram.plotToneScaleHistogram(FileUtils.combine(directory,
-                coloredToneScalePNGFileName), true);
+        ambitusHistogram.plotToneScaleHistogram(FileUtils.combine(directory, coloredToneScalePNGFileName),
+                true);
         ambitusHistogram.export(ambitusTextFileName);
-        ambitusHistogram.plot(ambitusPNGFileName, "Ambitus " + baseName + " "
-                + pitchDetector.getName());
-        ToneScaleHistogram toneScaleHistogram = ambitusHistogram
-                .toneScaleHistogram();
-        String toneScaleTextFileName = FileUtils.combine(directory, prefix
-                + "_tone_scale.txt");
-        String toneScalePNGFileName = FileUtils.combine(directory, prefix
-                + "_tone_scale.png");
+        ambitusHistogram.plot(ambitusPNGFileName, "Ambitus " + baseName + " " + pitchDetector.getName());
+        ToneScaleHistogram toneScaleHistogram = ambitusHistogram.toneScaleHistogram();
+        String toneScaleTextFileName = FileUtils.combine(directory, prefix + "_tone_scale.txt");
+        String toneScalePNGFileName = FileUtils.combine(directory, prefix + "_tone_scale.png");
         toneScaleHistogram.export(toneScaleTextFileName);
-        toneScaleHistogram.plot(toneScalePNGFileName, "Tone scale " + baseName
-                + " " + pitchDetector.getName());
+        toneScaleHistogram.plot(toneScalePNGFileName, "Tone scale " + baseName + " "
+                + pitchDetector.getName());
 
         toneScaleHistogram.gaussianSmooth(1.0);
         List<Peak> peaks = PeakDetector.detect(toneScaleHistogram, 15, 0.8);
@@ -141,15 +130,12 @@ public final class Annotate {
         p.addData(0, toneScaleHistogram);
         p.addData(1, peakHistogram);
         p.save(FileUtils.combine(directory, peaksTitle + ".png"));
-        ToneScaleHistogram.exportPeaksToScalaFileFormat(FileUtils.combine(
-                directory, peaksTitle + ".scl"), peaksTitle, peaks);
+        ToneScaleHistogram.exportPeaksToScalaFileFormat(FileUtils.combine(directory, peaksTitle + ".scl"),
+                peaksTitle, peaks);
 
-        SignalPowerExtractor powerExtractor = new SignalPowerExtractor(
-                audioFile);
-        powerExtractor.saveTextFile(FileUtils.combine(directory, prefix
-                + "_power.txt"));
-        powerExtractor.saveWaveFormPlot(FileUtils.combine(directory, prefix
-                + "_wave.png"));
+        SignalPowerExtractor powerExtractor = new SignalPowerExtractor(audioFile);
+        powerExtractor.saveTextFile(FileUtils.combine(directory, prefix + "_power.txt"));
+        powerExtractor.saveWaveFormPlot(FileUtils.combine(directory, prefix + "_wave.png"));
     }
 
 }
