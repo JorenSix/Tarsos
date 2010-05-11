@@ -147,41 +147,18 @@ public class PlayAlong {
 
         System.out.println(peaks.size() + " peaks found in: " + FileUtils.basename(fileName));
         System.out.println("");
+        double[] peakPositions = new double[peaks.size()];
+        int peakIndex = 0;
         for (Peak p : peaks) {
+            peakPositions[peakIndex] = p.getPosition();
             System.out.println(p.getPosition());
+            peakIndex++;
         }
         System.out.println("");
 
-        final double[] tuning = new double[128];
-
-        // align tuning to MIDI note 57, A3 or 220Hz.
-        Double referenceNote = PitchConverter.hertzToAbsoluteCent(220.0);
-        int referenceNoteMidiNumber = 57;
-
-        int midiNoteClosestToReference = -1;
-        double closestDistance = Double.MAX_VALUE;
-        for (int i = 0; i < tuning.length; i++) {
-            int octave = i / peaks.size();
-            double centOffset = peaks.get(i % peaks.size()).getPosition();
-            tuning[i] = octave * 1200 + centOffset;
-            double distanceToReferenceNote = Math.abs(tuning[i] - referenceNote); // cents
-            if (distanceToReferenceNote < closestDistance) {
-                closestDistance = distanceToReferenceNote;
-                midiNoteClosestToReference = i;
-            }
-        }
-
-        System.out.println("Closest to midi key 57 (220Hz," + referenceNote
-                + " cents) is the tuned midi key " + midiNoteClosestToReference + " at "
-                + tuning[midiNoteClosestToReference] + " cents");
-
-        double[] rebasedTuning = new double[128];
-        int diff = referenceNoteMidiNumber - midiNoteClosestToReference;
-        for (int i = 0; i < tuning.length; i++) {
-            rebasedTuning[i] = tuning[(i + diff) % 128];
-        }
 
         final VirtualKeyboard keyboard = VirtualKeyboard.createVirtualKeyboard(peaks.size());
+        double[] rebasedTuning = tuningFromPeaks(peakPositions);
 
         try {
             MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("Gervill", true);
@@ -204,6 +181,7 @@ public class PlayAlong {
             Transmitter midiInputTransmitter = virtualMidiInputDevice.getTransmitter();
             midiInputTransmitter.setReceiver(keyboard);
 
+
             MidiUtils.sendTunings(recv, 0, 2, "african", rebasedTuning);
             MidiUtils.sendTuningChange(recv, VirtualKeyboard.CHANNEL, 2);
         } catch (MidiUnavailableException e) {
@@ -214,7 +192,7 @@ public class PlayAlong {
             e.printStackTrace();
         }
 
-        JFrame f = new PianoTestFrame(keyboard, tuning);
+        JFrame f = new PianoTestFrame(keyboard, rebasedTuning);
         f.setVisible(true);
 
         final List<Double> midiKeysUnfiltered = new ArrayList<Double>();
@@ -240,6 +218,42 @@ public class PlayAlong {
             }
             currentSample = sampleIterator.next();
         }
+    }
+
+    /**
+     * @param peaks
+     * @return
+     */
+    public static double[] tuningFromPeaks(final double[] peaks) {
+        final double[] tuning = new double[128];
+
+        // align tuning to MIDI note 57, A3 or 220Hz.
+        Double referenceNote = PitchConverter.hertzToAbsoluteCent(220.0);
+        int referenceNoteMidiNumber = 57;
+
+        int midiNoteClosestToReference = -1;
+        double closestDistance = Double.MAX_VALUE;
+        for (int i = 0; i < tuning.length; i++) {
+            int octave = i / peaks.length;
+            double centOffset = peaks[(i % peaks.length)];
+            tuning[i] = octave * 1200 + centOffset;
+            double distanceToReferenceNote = Math.abs(tuning[i] - referenceNote); // cents
+            if (distanceToReferenceNote < closestDistance) {
+                closestDistance = distanceToReferenceNote;
+                midiNoteClosestToReference = i;
+            }
+        }
+
+        System.out.println("Closest to midi key 57 (220Hz," + referenceNote
+                + " cents) is the tuned midi key " + midiNoteClosestToReference + " at "
+                + tuning[midiNoteClosestToReference] + " cents");
+
+        double[] rebasedTuning = new double[128];
+        int diff = referenceNoteMidiNumber - midiNoteClosestToReference;
+        for (int i = 0; i < tuning.length; i++) {
+            rebasedTuning[i] = tuning[(i + diff) % 128];
+        }
+        return rebasedTuning;
     }
 
     private static void printHelp() {
