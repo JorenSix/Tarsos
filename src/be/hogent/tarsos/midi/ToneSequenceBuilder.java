@@ -279,7 +279,7 @@ public class ToneSequenceBuilder {
     public static CSVFileHandler IPEM_CSVFILEHANDLER = new IpemCSVFileHandler();
 
     private static class BozkurtCSVFileHandler implements CSVFileHandler {
-        private final double referenceFrequency = 8.17579891564371;// Hz
+        private static final double referenceFrequency = 8.17579891564371;// Hz
 
         @Override
         public void handleRow(ToneSequenceBuilder builder, String[] row) {
@@ -314,6 +314,7 @@ public class ToneSequenceBuilder {
                 frequency = Double.parseDouble(row[0]);
             } catch (NumberFormatException e) {
                 // ignore
+
             }
             builder.addTone(frequency, realTime);
         }

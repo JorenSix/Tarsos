@@ -25,7 +25,7 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
      */
     public VirtualKeyboard19() {
         super(19, 19 * 5); // 19*5 = 95
-        mappedKeys = "qézs\"edrf(tg§yhèujikçolàp";
+        VirtualKeyboard19.mappedKeys = "qézs\"edrf(tg§yhèujikçolàp";
     }
 
     @Override

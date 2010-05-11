@@ -42,10 +42,11 @@ public class MediaPlayer implements Runnable {
         playThread = new Thread(this);
         playing = false;
         notYetEOF = true;
-        playThread.start();
+
     }
 
     public void run() {
+        playThread.start();
         int readPoint = 0;
         int bytesRead = 0;
 

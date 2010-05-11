@@ -64,7 +64,7 @@ public class Spectrogram extends JComponent {
 
     private final Timer timer;
 
-    private final int fftSize = 16384 / 2;
+    private static final int fftSize = 16384 / 2;
     private final float[] audioDataBuffer = new float[fftSize];
 
     AudioFloatInputStream afis;

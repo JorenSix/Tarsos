@@ -21,7 +21,7 @@ import com.sun.media.sound.AudioFloatInputStream;
 public class SignalPowerExtractor {
 
     private final AudioFile audioFile;
-    private final double readWindow = 0.01; // seconds
+    private static final double readWindow = 0.01; // seconds
     private double[] linearPowerArray;
     double maxLinearPower = -1;
     double minLinearPower = Double.MAX_VALUE;
