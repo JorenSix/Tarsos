@@ -88,7 +88,7 @@ public class PlayAlong {
     }
 
     public static void main(final String[] args) throws MidiUnavailableException, InterruptedException,
-            IOException {
+    IOException {
         LongOpt[] longopts = new LongOpt[4];
         longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
         longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
@@ -230,7 +230,7 @@ public class PlayAlong {
         double closestDistance = Double.MAX_VALUE;
         for (int i = 0; i < tuning.length; i++) {
             int octave = i / peaks.length;
-            double centOffset = peaks[(i % peaks.length)];
+            double centOffset = peaks[i % peaks.length];
             tuning[i] = octave * 1200 + centOffset;
             double distanceToReferenceNote = Math.abs(tuning[i] - referenceNote); // cents
             if (distanceToReferenceNote < closestDistance) {
@@ -258,7 +258,7 @@ public class PlayAlong {
         System.out.println("-----------------------");
         System.out.println("");
         System.out
-                .println("java -jar playalong.jar --in file.wav [--detector TARSOS|AUBIO|IPEM] [--midi_in 1]");
+        .println("java -jar playalong.jar --in file.wav [--detector TARSOS|AUBIO|IPEM] [--midi_in 1]");
         System.out.println("");
         System.out.println("-----------------------");
         System.out.println("");

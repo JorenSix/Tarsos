@@ -57,7 +57,7 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
             float cx = 0;
             float black_note_width = nw * 0.7f;
             for (int b = 0; b < 12; b++) {
-                boolean a = (b == 1 || b == 3 | b == 6 | b == 8 | b == 10);
+                boolean a = b == 1 || b == 3 | b == 6 | b == 8 | b == 10;
                 if (!a) {
                     cx += nw;
                 } else {
@@ -95,7 +95,7 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
         Rectangle2D rect = new Rectangle2D.Double();
         for (int i = 0; i < 128; i++) {
             int b = i % 12;
-            boolean a = (b == 1 || b == 3 | b == 6 | b == 8 | b == 10);
+            boolean a = b == 1 || b == 3 | b == 6 | b == 8 | b == 10;
             if (!a) {
                 rect.setRect(cx, 0, nw, h);
                 if (isKeyDown(i)) {
@@ -119,7 +119,7 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
         float black_note_width = nw * 0.7f;
         for (int i = 0; i < 128; i++) {
             int b = i % 12;
-            boolean a = (b == 1 || b == 3 | b == 6 | b == 8 | b == 10);
+            boolean a = b == 1 || b == 3 | b == 6 | b == 8 | b == 10;
             if (!a) {
                 cx += nw;
             } else {

@@ -61,8 +61,8 @@ public class MidiCommon {
         for (int i = 0; i < aInfos.length; i++) {
             try {
                 MidiDevice device = MidiSystem.getMidiDevice(aInfos[i]);
-                boolean bAllowsInput = (device.getMaxTransmitters() != 0);
-                boolean bAllowsOutput = (device.getMaxReceivers() != 0);
+                boolean bAllowsInput = device.getMaxTransmitters() != 0;
+                boolean bAllowsOutput = device.getMaxReceivers() != 0;
                 if ((bAllowsInput && bForInput) || (bAllowsOutput && bForOutput)) {
                     if (bVerbose) {
                         out("" + i + "  " + (bAllowsInput ? "IN " : "   ")
@@ -105,8 +105,8 @@ public class MidiCommon {
             if (aInfos[i].getName().equals(strDeviceName)) {
                 try {
                     MidiDevice device = MidiSystem.getMidiDevice(aInfos[i]);
-                    boolean bAllowsInput = (device.getMaxTransmitters() != 0);
-                    boolean bAllowsOutput = (device.getMaxReceivers() != 0);
+                    boolean bAllowsInput = device.getMaxTransmitters() != 0;
+                    boolean bAllowsOutput = device.getMaxReceivers() != 0;
                     if ((bAllowsOutput && bForOutput) || (bAllowsInput && !bForOutput)) {
                         return aInfos[i];
                     }

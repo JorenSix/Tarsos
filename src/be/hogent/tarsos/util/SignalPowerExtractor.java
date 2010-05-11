@@ -236,6 +236,6 @@ public class SignalPowerExtractor {
      * @return
      */
     public static boolean isSilence(final float[] buffer, double silenceThreshold) {
-        return (soundPressureLevel(buffer) < silenceThreshold);
+        return soundPressureLevel(buffer) < silenceThreshold;
     }
 }

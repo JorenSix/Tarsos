@@ -50,22 +50,22 @@ public class DumpReceiver implements Receiver {
     public static long smCount = 0;
 
     private static final String[] sm_astrKeyNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A",
-            "A#", "B" };
+        "A#", "B" };
 
     private static final String[] sm_astrKeySignatures = { "Cb", "Gb", "Db", "Ab", "Eb", "Bb", "F", "C", "G",
-            "D", "A", "E", "B", "F#", "C#" };
+        "D", "A", "E", "B", "F#", "C#" };
     private static final String[] SYSTEM_MESSAGE_TEXT = {
-            "System Exclusive (should not be in ShortMessage!)", "MTC Quarter Frame: ", "Song Position: ",
-            "Song Select: ", "Undefined", "Undefined", "Tune Request",
-            "End of SysEx (should not be in ShortMessage!)", "Timing clock", "Undefined", "Start",
-            "Continue", "Stop", "Undefined", "Active Sensing", "System Reset" };
+        "System Exclusive (should not be in ShortMessage!)", "MTC Quarter Frame: ", "Song Position: ",
+        "Song Select: ", "Undefined", "Undefined", "Tune Request",
+        "End of SysEx (should not be in ShortMessage!)", "Timing clock", "Undefined", "Start",
+        "Continue", "Stop", "Undefined", "Active Sensing", "System Reset" };
 
     private static final String[] QUARTER_FRAME_MESSAGE_TEXT = { "frame count LS: ", "frame count MS: ",
-            "seconds count LS: ", "seconds count MS: ", "minutes count LS: ", "minutes count MS: ",
-            "hours count LS: ", "hours count MS: " };
+        "seconds count LS: ", "seconds count MS: ", "minutes count LS: ", "minutes count MS: ",
+        "hours count LS: ", "hours count MS: " };
 
     private static final String[] FRAME_TYPE_TEXT = { "24 frames/second", "25 frames/second",
-            "30 frames/second (drop)", "30 frames/second (non-drop)", };
+        "30 frames/second (drop)", "30 frames/second (non-drop)", };
 
     private final PrintStream m_printStream;
     private final boolean m_bPrintTimeStampAsTicks;
@@ -119,7 +119,7 @@ public class DumpReceiver implements Receiver {
 
         case 0xa0:
             strMessage = "polyphonic key pressure " + getKeyName(message.getData1()) + " pressure: "
-                    + message.getData2();
+            + message.getData2();
             break;
 
         case 0xb0:
@@ -132,7 +132,7 @@ public class DumpReceiver implements Receiver {
 
         case 0xd0:
             strMessage = "key pressure " + getKeyName(message.getData1()) + " pressure: "
-                    + message.getData2();
+            + message.getData2();
             break;
 
         case 0xe0:
@@ -169,7 +169,7 @@ public class DumpReceiver implements Receiver {
 
         default:
             strMessage = "unknown message: status = " + message.getStatus() + ", byte1 = "
-                    + message.getData1() + ", byte2 = " + message.getData2();
+            + message.getData1() + ", byte2 = " + message.getData2();
             break;
         }
         if (message.getCommand() != 0xF0) {
@@ -260,20 +260,20 @@ public class DumpReceiver implements Receiver {
             // beat
             float bpm = convertTempo(nTempo);
             // truncate it to 2 digits after dot
-            bpm = (Math.round(bpm * 100.0f) / 100.0f);
+            bpm = Math.round(bpm * 100.0f) / 100.0f;
             strMessage = "Set Tempo: " + bpm + " bpm";
             break;
 
         case 0x54:
             // System.out.println("data array length: " + abData.length);
             strMessage = "SMTPE Offset: " + (abData[0] & 0xFF) + ":" + (abData[1] & 0xFF) + ":"
-                    + (abData[2] & 0xFF) + "." + (abData[3] & 0xFF) + "." + (abData[4] & 0xFF);
+            + (abData[2] & 0xFF) + "." + (abData[3] & 0xFF) + "." + (abData[4] & 0xFF);
             break;
 
         case 0x58:
             strMessage = "Time Signature: " + (abData[0] & 0xFF) + "/" + (1 << (abData[1] & 0xFF))
-                    + ", MIDI clocks per metronome tick: " + (abData[2] & 0xFF)
-                    + ", 1/32 per 24 MIDI clocks: " + (abData[3] & 0xFF);
+            + ", MIDI clocks per metronome tick: " + (abData[2] & 0xFF)
+            + ", 1/32 per 24 MIDI clocks: " + (abData[3] & 0xFF);
             break;
 
         case 0x59:
@@ -319,7 +319,7 @@ public class DumpReceiver implements Receiver {
     }
 
     private static char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
-            'E', 'F' };
+        'E', 'F' };
 
     public static String getHexString(byte[] aByte) {
         StringBuffer sbuf = new StringBuffer(aByte.length * 3 + 2);

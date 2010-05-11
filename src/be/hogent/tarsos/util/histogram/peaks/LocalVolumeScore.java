@@ -30,7 +30,7 @@ public class LocalVolumeScore implements PeakScore {
             int after = i + windowSize;
             int before = i - windowSize - 1;
             volumes[i] = volumes[i - 1] + originalHistogram.getCountForClass(after)
-                    - originalHistogram.getCountForClass(before);
+            - originalHistogram.getCountForClass(before);
         }
     }
 
@@ -48,10 +48,10 @@ public class LocalVolumeScore implements PeakScore {
         for (int j = 0; j < windowSize; j++) {
             before--;
             after++;
-            volumeRange[volumeRangeIndex] = volumes[((index + before + originalHistogram.getNumberOfClasses()) % originalHistogram
-                    .getNumberOfClasses())];
+            volumeRange[volumeRangeIndex] = volumes[(index + before + originalHistogram.getNumberOfClasses()) % originalHistogram
+                                                    .getNumberOfClasses()];
             volumeRangeIndex++;
-            volumeRange[volumeRangeIndex] = volumes[((index + after) % originalHistogram.getNumberOfClasses())];
+            volumeRange[volumeRangeIndex] = volumes[(index + after) % originalHistogram.getNumberOfClasses()];
             volumeRangeIndex++;
         }
         volumeRange[volumeRangeIndex] = volumes[index];

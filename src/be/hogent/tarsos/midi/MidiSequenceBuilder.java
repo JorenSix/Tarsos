@@ -50,8 +50,8 @@ public class MidiSequenceBuilder {
     }
 
     public void addNoteByFrequency(double frequency, int numberOfTicks) {
-        int closestMidiNumber = (int) Math.round((69 + 12 * Math.log(frequency / 440.0) / Math.log(2.0)));
-        double frequencyClosestMidiNumber = (Math.pow(2.0, (closestMidiNumber - 69.0) / 12.0) * 440.0);
+        int closestMidiNumber = (int) Math.round(69 + 12 * Math.log(frequency / 440.0) / Math.log(2.0));
+        double frequencyClosestMidiNumber = Math.pow(2.0, (closestMidiNumber - 69.0) / 12.0) * 440.0;
         double deviationInCents = 1200 * Math.log(frequency / frequencyClosestMidiNumber) / Math.log(2.0);
         assert deviationInCents <= 50;
         // System.out.println("Requested: " + frequency + "Hz; Midi key " +
