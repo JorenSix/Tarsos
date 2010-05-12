@@ -3,7 +3,6 @@ package be.hogent.tarsos.pitch;
 import java.util.ArrayList;
 import java.util.List;
 
-import be.hogent.tarsos.pitch.Sample.SampleSource;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -79,7 +78,7 @@ public class IPEMPitchDetection implements PitchDetector {
             audioDirectory = audioDirectory.replace("//\\\\", "//");
             outputDirectory = outputDirectory.replace("//\\\\", "//");
             command = FileUtils.getRuntimePath() + "/ipem_pitch_detection.sh \"" + audioDirectory + "\" \""
-                    + outputDirectory + "\"";
+            + outputDirectory + "\"";
         }
 
         if (!FileUtils.exists(csvFileName)) {
@@ -119,7 +118,7 @@ public class IPEMPitchDetection implements PitchDetector {
                 }
             }
             Sample sample = new Sample(start, pitches, probabilities, minimumAcceptableProbability);
-            sample.source = SampleSource.IPEM;
+            sample.source = PitchDetectionMode.IPEM;
             samples.add(sample);
             start += 10;
 

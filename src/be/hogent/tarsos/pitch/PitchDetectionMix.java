@@ -25,8 +25,8 @@ public class PitchDetectionMix implements PitchDetector {
      * @param pitchDeviation
      *            a percentage that defines when an annotation of two
      *            consecutive samples is accepted: e.g. a sample of 100HZ
-     *            detected with YIN and the next sample of 101HZ detected with
-     *            SCHMITT is accepted when pitchDeviation >= 0.01
+     *            detected with AUBIO_YIN and the next sample of 101HZ detected with
+     *            AUBIO_SCHMITT is accepted when pitchDeviation >= 0.01
      */
     public PitchDetectionMix(List<PitchDetector> detectors, double pitchDeviation) {
         this.detectors = detectors;

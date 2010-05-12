@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import be.hogent.tarsos.midi.ToneSequenceBuilder;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.Yin;
@@ -37,7 +38,7 @@ public class YinTests {
         FileUtils.mkdirs("data/tests/yin_tests");
         for (AudioFile file : files) {
             PitchDetector aubioYin = new AubioPitchDetection(file,
-                    AubioPitchDetection.AubioPitchDetectionMode.YIN);
+                    PitchDetectionMode.AUBIO_YIN);
             aubioYin.executePitchDetection();
             AmbitusHistogram ambitusHistogramAubio = Sample.ambitusHistogram(aubioYin.getSamples());
             ToneScaleHistogram toneScaleHistogramAubio = ambitusHistogramAubio.toneScaleHistogram();

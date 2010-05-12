@@ -209,4 +209,10 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
         }
     }
 
+    @Override
+    public void close() {
+        // TODO Auto-generated method stub
+
+    }
+
 }

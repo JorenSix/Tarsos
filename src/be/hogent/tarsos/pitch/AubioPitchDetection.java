@@ -3,7 +3,6 @@ package be.hogent.tarsos.pitch;
 import java.util.ArrayList;
 import java.util.List;
 
-import be.hogent.tarsos.pitch.Sample.SampleSource;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -19,7 +18,7 @@ import be.hogent.tarsos.util.FileUtils;
  * The algorithm used is yin. The default silence threshold of -70 is used. The
  * file that is annoted is in.wav For more information see the <a
  * href="http//aubio.org">aubio</a> man pages or website. The pitch detection
- * algorithm is defined by {@link AubioPitchDetectionMode}. See
+ * algorithm is defined by {@link PitchDetectionMode}. See
  * http://www.elec.qmul.ac.uk/research/thesis/Brossier07-phdthesis.pdf for more
  * info.
  * 
@@ -27,54 +26,12 @@ import be.hogent.tarsos.util.FileUtils;
  */
 public class AubioPitchDetection implements PitchDetector {
 
-    /**
-     * The pitch detection mode defines which algorithm is used to detect pitch.
-     * 
-     * @author Joren Six
-     */
-    public enum AubioPitchDetectionMode {
-        /**
-         * The YIN algorithm.
-         */
-        YIN("yin"),
-        /**
-         * A faster version of YIN: spectral YIN. It should yield very similar
-         * results as YIN, only faster.
-         */
-        YINFFT("yinfft"),
-        /**
-         * Fast spectral comb.
-         */
-        FCOMB("fcomb"),
-        /**
-         * Multi comb with spectral smoothing.
-         */
-        MCOMB("mcomb"),
-        /**
-         * Schmitt trigger.
-         */
-        SCHMITT("schmitt");
-
-        private final String parameterName;
-
-        private AubioPitchDetectionMode(String parameterName) {
-            this.parameterName = parameterName;
-        }
-
-        /**
-         * @return The name used in the aubio command.
-         */
-        public String getParametername() {
-            return this.parameterName;
-        }
-    }
-
     private final AudioFile file;
-    private final AubioPitchDetectionMode pitchDetectionMode;
+    private final PitchDetectionMode pitchDetectionMode;
     private final List<Sample> samples;
     private final String name;
 
-    public AubioPitchDetection(AudioFile file, AubioPitchDetectionMode pitchDetectionMode) {
+    public AubioPitchDetection(AudioFile file, PitchDetectionMode pitchDetectionMode) {
         this.file = file;
         this.pitchDetectionMode = pitchDetectionMode;
         this.samples = new ArrayList<Sample>();
@@ -88,8 +45,8 @@ public class AubioPitchDetection implements PitchDetector {
                 + ".txt");
 
         if (!FileUtils.exists(csvFileName)) {
-            String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.parameterName
-                    + "  -s -70  -i " + file.transcodedPath();
+            String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.detectionModeName
+            + "  -s -70  -i " + file.transcodedPath();
             Execute.command(command, csvFileName);
         }
 
@@ -99,20 +56,20 @@ public class AubioPitchDetection implements PitchDetector {
             Double pitch = Double.parseDouble(row[1]);
             Sample sample = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
             switch (pitchDetectionMode) {
-            case YIN:
-                sample.source = SampleSource.AUBIO_YIN;
+            case AUBIO_YIN:
+                sample.source = PitchDetectionMode.AUBIO_YIN;
                 break;
-            case YINFFT:
-                sample.source = SampleSource.AUBIO_YINFFT;
+            case AUBIO_YINFFT:
+                sample.source = PitchDetectionMode.AUBIO_YINFFT;
                 break;
-            case MCOMB:
-                sample.source = SampleSource.AUBIO_MCOMB;
+            case AUBIO_MCOMB:
+                sample.source = PitchDetectionMode.AUBIO_MCOMB;
                 break;
-            case FCOMB:
-                sample.source = SampleSource.AUBIO_FCOMB;
+            case AUBIO_FCOMB:
+                sample.source = PitchDetectionMode.AUBIO_FCOMB;
                 break;
-            case SCHMITT:
-                sample.source = SampleSource.AUBIO_SCHMITT;
+            case AUBIO_SCHMITT:
+                sample.source = PitchDetectionMode.AUBIO_SCHMITT;
                 break;
             default:
                 break;

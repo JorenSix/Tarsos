@@ -9,17 +9,17 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.hogent.tarsos.pitch.AubioPitchDetection;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetectionMix;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
-import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.ui.PlotThread;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.MediaPlayer;
 import be.hogent.tarsos.util.StopWatch;
 
-public class ShowMelody {
+public final class ShowMelody {
 
     private ShowMelody() {
     }
@@ -103,7 +103,7 @@ public class ShowMelody {
          * j = 0; j<fileNames.size();j++){ if(i!=j){ PitchDetector detector;
          * List<PitchDetector> detectors; detectors = new
          * ArrayList<PitchDetector>(); detectors.add(new AubioPitchDetection(new
-         * AudioFile(fileNames.get(i)), AubioPitchDetectionMode.YIN));
+         * AudioFile(fileNames.get(i)), PitchDetectionMode.AUBIO_YIN));
          * detectors.add(new IPEMPitchDetection(new
          * AudioFile(fileNames.get(i)))); detector = new
          * PitchDetectionMix(detectors, 0.01); detector.executePitchDetection();
@@ -111,7 +111,7 @@ public class ShowMelody {
          * 
          * detectors = new ArrayList<PitchDetector>(); detectors.add(new
          * AubioPitchDetection(new AudioFile(fileNames.get(j)),
-         * AubioPitchDetectionMode.YIN)); detectors.add(new
+         * PitchDetectionMode.AUBIO_YIN)); detectors.add(new
          * IPEMPitchDetection(new AudioFile(fileNames.get(j)))); detector = new
          * PitchDetectionMix(detectors, 0.01); detector.executePitchDetection();
          * List<Sample> samplesJ = detector.getSamples(); Histogram histogramI =
@@ -151,7 +151,7 @@ public class ShowMelody {
         /*
          * for(AudioFile file : AudioFile.audioFiles("formats")){ PitchDetector
          * detector; detector = new
-         * AubioPitchDetection(file,AubioPitchDetectionMode.YIN);
+         * AubioPitchDetection(file,PitchDetectionMode.AUBIO_YIN);
          * detector.executePitchDetection(); List<Sample> samples =
          * detector.getSamples(); String transcodedBasename =
          * FileUtils.basename(file.transcodedPath());
@@ -176,12 +176,12 @@ public class ShowMelody {
         /*
          * List<PitchDetector> detectors; detectors = new
          * ArrayList<PitchDetector>(); detectors.add(new AubioPitchDetection(new
-         * AudioFile(fileName), AubioPitchDetectionMode.YIN)); detectors.add(new
+         * AudioFile(fileName), PitchDetectionMode.AUBIO_YIN)); detectors.add(new
          * IPEMPitchDetection(new AudioFile(fileName))); detectors.add(new
          * AubioPitchDetection(new AudioFile(fileName),
-         * AubioPitchDetectionMode.MCOMB)); detectors.add(new
+         * PitchDetectionMode.AUBIO_MCOMB)); detectors.add(new
          * AubioPitchDetection(new AudioFile(fileName),
-         * AubioPitchDetectionMode.YINFFT)); detectors.add(new
+         * PitchDetectionMode.AUBIO_YINFFT)); detectors.add(new
          * PitchDetectionMix(new
          * ArrayList<PitchDetector>(detectors.subList(0,2)), 0.01));
          * detectors.add(new PitchDetectionMix(new
@@ -206,8 +206,8 @@ public class ShowMelody {
     public static void showMelody(String fileName) {
         PitchDetector detector;
         List<PitchDetector> list = new ArrayList<PitchDetector>();
-        list.add(new AubioPitchDetection(new AudioFile(fileName), AubioPitchDetectionMode.SCHMITT));
-        list.add(new AubioPitchDetection(new AudioFile(fileName), AubioPitchDetectionMode.FCOMB));
+        list.add(new AubioPitchDetection(new AudioFile(fileName), PitchDetectionMode.AUBIO_SCHMITT));
+        list.add(new AubioPitchDetection(new AudioFile(fileName), PitchDetectionMode.AUBIO_FCOMB));
         detector = new PitchDetectionMix(list, 0.05);
         detector.executePitchDetection();
         List<Sample> samples = detector.getSamples();

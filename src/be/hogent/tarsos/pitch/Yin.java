@@ -13,9 +13,9 @@ import be.hogent.tarsos.util.SimplePlot;
 import com.sun.media.sound.AudioFloatInputStream;
 
 /**
- * An implementation of the YIN pitch tracking algorithm. See <a href=
+ * An implementation of the AUBIO_YIN pitch tracking algorithm. See <a href=
  * "http://recherche.ircam.fr/equipes/pcm/cheveign/ps/2002_JASA_YIN_proof.pdf"
- * >the YIN paper.</a> Implementation based on <a
+ * >the AUBIO_YIN paper.</a> Implementation based on <a
  * href="http://aubio.org">aubio</a>
  * 
  * @author Joren Six
@@ -28,7 +28,7 @@ public class Yin {
     private static Yin yinInstance;
 
     /**
-     * The YIN threshold value.
+     * The AUBIO_YIN threshold value.
      */
     private final double threshold = 0.15;
 
@@ -64,7 +64,7 @@ public class Yin {
     }
 
     /**
-     * Implements the difference function as described in step 2 of the YIN
+     * Implements the difference function as described in step 2 of the AUBIO_YIN
      * paper.
      */
     private void difference() {
@@ -83,7 +83,7 @@ public class Yin {
 
     /**
      * The cumulative mean normalized difference function as described in step 3
-     * of the YIN paper. <br>
+     * of the AUBIO_YIN paper. <br>
      * <code>
      * yinBuffer[0] == yinBuffer[1] = 1
      * </code>
@@ -105,7 +105,7 @@ public class Yin {
     }
 
     /**
-     * Implements step 4 of the YIN paper.
+     * Implements step 4 of the AUBIO_YIN paper.
      */
     private int absoluteThreshold() {
         // Uses another loop construct
@@ -123,7 +123,7 @@ public class Yin {
     }
 
     /**
-     * Implements step 5 of the YIN paper. It refines the estimated tau value
+     * Implements step 5 of the AUBIO_YIN paper. It refines the estimated tau value
      * using parabolic interpolation. This is needed to detect higher
      * frequencies more precisely. See http://fizyka.umk.pl/nrbook/c10-2.pdf
      * 
@@ -150,7 +150,7 @@ public class Yin {
     }
 
     /**
-     * The main flow of the YIN algorithm. Returns a pitch value in Hz or -1 if
+     * The main flow of the AUBIO_YIN algorithm. Returns a pitch value in Hz or -1 if
      * no pitch is detected.
      * 
      * @return a pitch value in Hz or -1 if no pitch is detected.
@@ -173,9 +173,9 @@ public class Yin {
             float betterTau = parabolicInterpolation(tauEstimate);
 
             // step 6
-            // TODO Implement optimization for the YIN algorithm.
+            // TODO Implement optimization for the AUBIO_YIN algorithm.
             // 0.77% => 0.5% error rate,
-            // using the data of the YIN paper
+            // using the data of the AUBIO_YIN paper
             // bestLocalEstimate()
 
             // conversion to Hz

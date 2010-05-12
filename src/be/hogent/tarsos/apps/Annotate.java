@@ -1,16 +1,17 @@
 package be.hogent.tarsos.apps;
 
-import gnu.getopt.Getopt;
-import gnu.getopt.LongOpt;
-
+import java.io.File;
 import java.util.List;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.YinPitchDetection;
-import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -26,75 +27,25 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 /**
  * Annotates an audio file with everything Tarsos is capable off Pitch
  * information, ambitus, tone scale peaks, waveform, scala files...
- * 
  * @author Joren Six
  */
-public final class Annotate {
+public final class Annotate implements TarsosApplication {
 
-    private Annotate() {
-    }
 
-    public static void main(final String... args) {
-        LongOpt[] longopts = new LongOpt[3];
-        longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
-        longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
-        longopts[2] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
+    /**
+     * Annotates an input file.
+     * @param inputFile
+     *            The file to annotate.
+     * @param detector
+     *            The detector to use.
+     */
+    private void annotateInputFile(final String inputFile, final String detector) {
 
-        Getopt g = new Getopt("annotate", args, "-i:d:h", longopts);
-
-        String inputFile = null;
-        String detector = "TARSOS";
-
-        int c;
-        while ((c = g.getopt()) != -1) {
-            String arg = g.getOptarg();
-            switch (c) {
-            case 'i':
-                inputFile = arg;
-                break;
-            case 'd':
-                detector = arg.toUpperCase();
-                break;
-            case 'h':
-                printHelp();
-                return;
-            default:
-                break;
-            }
-        }
-
-        if (inputFile != null && !FileUtils.exists(inputFile)) {
-            printHelp();
-        } else if (inputFile == null) {
-            String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
-            String globDirectory = FileUtils.combine(FileUtils.getRuntimePath(), "audio");
-            List<String> inputFiles = FileUtils.glob(globDirectory, pattern);
-            inputFiles.addAll(FileUtils.glob(globDirectory, pattern.toLowerCase()));
-            for (String file : inputFiles) {
-                annotateInputFile(file, detector);
-            }
-        } else {
-            annotateInputFile(inputFile, detector);
-        }
-    }
-
-    private static void printHelp() {
-        System.out
-                .println("Annotate can be used to annotate audio files. It transcodes audio to an understandable"
-                        + "format, detects pitch and stores information about the files. It uses the defined files with the in "
-                        + "option or all the audiofiles in the audio directory.");
-        System.out.println("");
-        System.out.println("java -jar annotate.jar [--in in.wav] [--detector AUBIO|IPEM]");
-        System.exit(0);
-    }
-
-    private static void annotateInputFile(String inputFile, String detector) {
-        Configuration.createRequiredDirectories();
         AudioFile audioFile = new AudioFile(inputFile);
 
         PitchDetector pitchDetector = new YinPitchDetection(audioFile);
         if (detector.equals("AUBIO")) {
-            pitchDetector = new AubioPitchDetection(audioFile, AubioPitchDetectionMode.YIN);
+            pitchDetector = new AubioPitchDetection(audioFile, PitchDetectionMode.AUBIO_YIN);
         } else if (detector.equals("IPEM")) {
             pitchDetector = new IPEMPitchDetection(audioFile);
         }
@@ -136,6 +87,52 @@ public final class Annotate {
         SignalPowerExtractor powerExtractor = new SignalPowerExtractor(audioFile);
         powerExtractor.saveTextFile(FileUtils.combine(directory, prefix + "_power.txt"));
         powerExtractor.saveWaveFormPlot(FileUtils.combine(directory, prefix + "_wave.png"));
+    }
+
+    @Override
+    public void run(final String... args) {
+
+        OptionParser parser = new OptionParser();
+        OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate").withRequiredArg().ofType(
+                File.class)
+                .withValuesSeparatedBy(' ').defaultsTo(new File("in.wav"));
+
+        OptionSpec<PitchDetectionMode> detectionMode = parser.accepts("detector", "The detector to use")
+        .withRequiredArg().ofType(PitchDetectionMode.class)
+        .defaultsTo(PitchDetectionMode.TARSOS_YIN);
+
+
+        OptionSet options = parser.parse(args);
+        String inputFile = options.valueOf(fileSpec).getAbsolutePath();
+
+        String detector = "TARSOS";
+
+        if (inputFile != null && !FileUtils.exists(inputFile)) {
+            // help
+        } else if (inputFile == null) {
+            String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
+            String globDirectory = FileUtils.combine(FileUtils.getRuntimePath(), "audio");
+            List<String> inputFiles = FileUtils.glob(globDirectory, pattern);
+            inputFiles.addAll(FileUtils.glob(globDirectory, pattern.toLowerCase()));
+            for (String file : inputFiles) {
+                annotateInputFile(file, detector);
+            }
+        } else {
+            annotateInputFile(inputFile, detector);
+        }
+    }
+
+    @Override
+    public String description() {
+        return "Annotate can be used to annotate audio files. It transcodes "
+        + "audio to an understandable format, detects pitch and stores information about the files. "
+        + "It uses the defined files with the in "
+        + "option or all the audiofiles in the audio directory.";
+    }
+
+    @Override
+    public String name() {
+        return "annotate";
     }
 
 }

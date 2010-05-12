@@ -249,8 +249,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
     }
 
     @Override
-    public void close() {
-    }
+    public abstract void close();
 
     @Override
     public Receiver getReceiver() {
@@ -269,7 +268,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
             ShortMessage sm = (ShortMessage) message;
             boolean correctChannel = sm.getChannel() == VirtualKeyboard.CHANNEL;
             boolean noteOnOrOff = sm.getCommand() == ShortMessage.NOTE_ON
-                    || sm.getCommand() == ShortMessage.NOTE_OFF;
+            || sm.getCommand() == ShortMessage.NOTE_OFF;
             if (correctChannel && noteOnOrOff) {
                 keyDown[sm.getData1()] = (sm.getCommand() == ShortMessage.NOTE_ON) && (sm.getData2() != 0);
                 repaint();

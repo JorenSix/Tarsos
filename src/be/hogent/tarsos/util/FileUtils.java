@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import be.hogent.tarsos.pitch.PitchConverter;
+
 /**
  * Exports a DatabaseResult to a CSV-file.
  * 
@@ -190,7 +192,6 @@ public class FileUtils {
 
     /**
      * Copy a file from a jar.
-     * 
      * @param source
      *            The path to read e.g. /package/name/here/help.html
      */
@@ -283,7 +284,7 @@ public class FileUtils {
         return columnData;
     }
 
-    public static void export(String filename, String[] header, List<Object[]> data) {
+    public static void export(final String filename, final String[] header, final List<Object[]> data) {
 
         String dateFormat = "yyyy-MM-dd hh:mm:ss";
         String numberFormat = "#0.000";
@@ -291,12 +292,11 @@ public class FileUtils {
         DecimalFormat exportDecimalFormat = new DecimalFormat(numberFormat);
         String separator = "\t";
 
-        filename = filename + ".csv";
-        FileWriter FW = null;
+        FileWriter fileWriter = null;
         try {
-            FW = new FileWriter(filename);
-            BufferedWriter OutputStream = new BufferedWriter(FW);
-            PrintWriter output = new PrintWriter(OutputStream);
+            fileWriter = new FileWriter(filename + ".csv");
+            BufferedWriter outputStream = new BufferedWriter(fileWriter);
+            PrintWriter output = new PrintWriter(outputStream);
 
             if (header != null) {
                 // HEADERS
@@ -326,8 +326,8 @@ public class FileUtils {
                 }
                 output.println("");
             }
-            OutputStream.flush();
-            OutputStream.close();
+            outputStream.flush();
+            outputStream.close();
         } catch (IOException i1) {
             log.severe("Can't open file:" + filename);
         }
@@ -345,7 +345,6 @@ public class FileUtils {
      * the pattern <code>.*\.wav</code> matches <code>blaat.wav</code> and
      * <code>foobar.wav</code>
      * </p>
-     * 
      * @param directory
      *            a readable directory.
      * @param pattern
@@ -358,13 +357,14 @@ public class FileUtils {
      *                Unchecked exception thrown to indicate a syntax error in a
      *                regular-expression pattern.
      */
-    public static List<String> glob(String directory, String pattern) {
+    public static List<String> glob(final String directory, final String pattern) {
         File dir = new File(directory);
         Pattern p = Pattern.compile(pattern);
         List<String> matchingFiles = new ArrayList<String>();
         if (!dir.isDirectory()) {
-            throw new Error(directory + " is not a directory");
+            throw new IllegalArgumentException(directory + " is not a directory");
         }
+
         for (String file : dir.list()) {
             if (!new File(file).isDirectory() && p.matcher(file).matches() && file != null) {
                 matchingFiles.add(FileUtils.combine(directory, file));
@@ -377,23 +377,21 @@ public class FileUtils {
 
     /**
      * Return the extension of a file.
-     * 
      * @param fileName
      *            the file to get the extension for
      * @return the extension. E.g. TXT or JPEG.
      */
-    public static String extension(String fileName) {
+    public static String extension(final String fileName) {
         int dot = fileName.lastIndexOf(extensionSeparator);
         return dot == -1 ? "" : fileName.substring(dot + 1);
     }
 
     /**
      * Returns the filename without path and without extension.
-     * 
      * @param fileName
      * @return the file name without extension and path
      */
-    public static String basename(String fileName) {
+    public static String basename(final String fileName) {
         int dot = fileName.lastIndexOf(extensionSeparator);
         int sep = fileName.lastIndexOf(pathSeparator);
         if (sep == -1) {
@@ -410,37 +408,34 @@ public class FileUtils {
      * <code>path("/home/user/test.jpg") == "/home/user"</code><br>
      * Uses the correct pathSeparator depending on the operating system. On
      * windows c:/test/ is not c:\test\
-     * 
      * @param fileName
      *            the name of the file using correct path separators.
      * @return the path of the file.
      */
-    public static String path(String fileName) {
+    public static String path(final String fileName) {
         int sep = fileName.lastIndexOf(pathSeparator);
         return fileName.substring(0, sep);
     }
 
     /**
      * Checks if a file exists.
-     * 
      * @param fileName
      *            the name of the file to check.
      * @return true if and only if the file or directory denoted by this
      *         abstract pathname exists; false otherwise
      */
-    public static boolean exists(String fileName) {
+    public static boolean exists(final String fileName) {
         return new File(fileName).exists();
     }
 
     /**
      * Creates a directory and parent directories if needed.
-     * 
      * @param path
      *            the path of the directory to create
      * @return true if the directory was created (possibly with parent
      *         directories) , false otherwise
      */
-    public static boolean mkdirs(String path) {
+    public static boolean mkdirs(final String path) {
         return new File(path).mkdirs();
     }
 
@@ -450,12 +445,11 @@ public class FileUtils {
      * E.g. <code>/tmp/01.��skar ton.mp3</code> is converted to:
      * <code>/tmp/01.__skar_ton.mp3</code>
      * </p>
-     * 
      * @param fileName
      *            the filename to sanitize
      * @return the complete sanitized path.
      */
-    public static String sanitizedFileName(String fileName) {
+    public static String sanitizedFileName(final String fileName) {
         String baseName = basename(fileName);
         String newBaseName = baseName.replaceAll(" ", "_");
         newBaseName = newBaseName.replaceAll("\\(", "-");
@@ -465,7 +459,7 @@ public class FileUtils {
         return fileName.replace(baseName, newBaseName);
     }
 
-    private static String filterNonAscii(String inString) {
+    private static String filterNonAscii(final String inString) {
         // Create the encoder and decoder for the character encoding
         Charset charset = Charset.forName("US-ASCII");
         CharsetDecoder decoder = charset.newDecoder();
@@ -490,13 +484,12 @@ public class FileUtils {
 
     /**
      * Copy from source to target.
-     * 
      * @param source
      *            the source file.
      * @param target
      *            the target file.
      */
-    public static void cp(String source, String target) {
+    public static void cp(final String source, final String target) {
         FileChannel inChannel = null;
         FileChannel outChannel = null;
         try {
@@ -523,14 +516,141 @@ public class FileUtils {
     }
 
     /**
+     * Reads a Scala file from disk and returns a list of peaks. The peaks use
+     * cent values.
+     * <p>
+     * The <a href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala
+     * scale file format</a>: <i>This file format for musical tunings is
+     * becoming a standard for exchange of scales, owing to the size of the
+     * scale archive of over 3700+ scales and the popularity of the Scala
+     * program.</i>
+     * </p>
+     * <p>
+     * Usually it has <code>.scl</code> as extension.
+     * </p>
+     * @param scalaFile
+     *            The Scala file to read.
+     * @return A list of peaks in cents, represented by the scala file.
+     */
+    public static final double[] readScalaFile(final String scalaFile) {
+        List<String[]> rows = FileUtils.readCSVFile(scalaFile, "\\|", -1);
+        List<Double> toneScaleTones = new ArrayList<Double>();
+        List<String> pitches = FileUtils.readColumnFromCSVData(rows, 0, new RowFilter() {
+            private boolean numberOfNotesDefined = false;
+
+            @Override
+            public boolean acceptRow(final String[] row) {
+
+                boolean isNumberOfNoteDefinition = !numberOfNotesDefined && row[0].matches("\\s*[0-9]+\\s*");
+                boolean isValidRow = false;
+
+                if (isNumberOfNoteDefinition) {
+                    numberOfNotesDefined = true;
+                } else if (numberOfNotesDefined) {
+                    boolean isComment = row[0].trim().startsWith("!");
+                    boolean isValidRatio = row[0].matches("\\s*[0-9]+(|/[0-9]+)\\s*");
+                    boolean isValidCent = row[0].matches("\\s*(-|\\+)?[0-9]+(\\.)?[0-9]*\\s*");
+                    boolean isValidPitch = isValidRatio || isValidCent;
+                    isValidRow = !isComment && isValidPitch;
+                }
+                return isValidRow;
+            }
+        });
+        for (String pitch : pitches) {
+            double parsedPitch = parseScalaRow(pitch);
+            toneScaleTones.add(parsedPitch);
+        }
+        double[] peaks = new double[toneScaleTones.size()];
+        for (int i = 0; i < toneScaleTones.size(); i++) {
+            peaks[i] = toneScaleTones.get(i);
+        }
+        return peaks;
+    }
+
+    /**
+     * Parses a row from a scala file and returns a double value representing
+     * cents.These lines are all valid pitch lines:
+     * <pre>
+     * 81/64
+     * 408.0
+     * 408.
+     * 5
+     * -5.0
+     * 10/20
+     * 100.0 cents
+     * 100.0 C#
+     * 5/4   E\
+     * </pre>
+     * @param row
+     *            The row to parse.
+     * @return The parsed pitch.
+     */
+    private static double parseScalaRow(final String row) {
+        double parsedPitch;
+        if (row.contains("/") || !row.contains(".")) {
+            String[] data = row.split("/");
+            double denominator = Double.parseDouble(data[0]);
+            double quotient;
+            if (data.length == 2) {
+                quotient = Double.parseDouble(data[1]);
+            } else {
+                quotient = 1;
+            }
+            double absCentDenominator = PitchConverter.hertzToAbsoluteCent(denominator);
+            double absCentQuotient = PitchConverter.hertzToAbsoluteCent(quotient);
+            parsedPitch = Math.abs(absCentDenominator - absCentQuotient);
+        } else {
+            parsedPitch = Double.parseDouble(row);
+        }
+        return parsedPitch;
+    }
+
+    /**
+     * Reads a Scala file from disk and returns a list of peaks. The peaks use
+     * cent values.
+     * <p>
+     * The <a href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala
+     * scale file format</a>: <i>This file format for musical tunings is
+     * becoming a standard for exchange of scales, owing to the size of the
+     * scale archive of over 3700+ scales and the popularity of the Scala
+     * program.</i>
+     * </p>
+     * <p>
+     * Usually it has <code>.scl</code> as extension.
+     * </p>
+     * @param peaks
+     *            The peaks that represent a tone scale (in cent).
+     * @param scalaFile
+     *            The file to write to.
+     * @param toneScaleName
+     *            The name of the tone scale (E.g. 12TET) or null.
+     */
+    public static final void writeScalaFile(final double[] peaks, final String scalaFile,
+            final String toneScaleName) {
+        if (peaks.length > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("! ").append(FileUtils.basename(scalaFile)).append(".scl \n").append("!\n").append(
+                    toneScaleName).append("\n").append(peaks.length).append("\n!\n");
+            double firstPeakPosition = peaks[0];
+            for (int i = 1; i < peaks.length; i++) {
+                double peakPosition = peaks[i] - firstPeakPosition;
+                sb.append(peakPosition).append("\n");
+            }
+            sb.append("2/1");
+            FileUtils.writeFile(sb.toString(), scalaFile);
+        } else {
+            log.warning("No peaks detected: file: " + scalaFile + " not created");
+        }
+    }
+
+    /**
      * Removes a file from disk.
-     * 
      * @param fileName
      *            the file to remove
      * @return true if and only if the file or directory is successfully
      *         deleted; false otherwise
      */
-    public static boolean rm(String fileName) {
+    public static boolean rm(final String fileName) {
         return new File(fileName).delete();
     }
 }

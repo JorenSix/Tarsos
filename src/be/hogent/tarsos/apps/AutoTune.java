@@ -51,11 +51,11 @@ public class AutoTune {
     }
 
     private static class Speaker {
-        private static final float sampleRate = 44100;
-        private static final int channels = 1;
-        private static final int bits = 16;
+        private static final float SAMPLERATE = 44100;
+        private static final int CHANNELS = 1;
+        private static final int BITS = 16;
 
-        private final AudioFormat format = new AudioFormat(sampleRate, bits, channels, true, false);
+        private final AudioFormat format = new AudioFormat(SAMPLERATE, BITS, CHANNELS, true, false);
         private final AudioFloatConverter converter = AudioFloatConverter.getConverter(format);
 
         private SourceDataLine line;
@@ -76,11 +76,7 @@ public class AutoTune {
             }
         }
 
-        public void write(float[] data) {
-            write(data, 0, data.length);
-        }
-
-        public void write(float[] originalData, int start, int end) {
+        public void write(final float[] originalData, final int start, final int end) {
             byte[] convertedData = new byte[originalData.length * 2];
             converter.toByteArray(originalData, convertedData);
             line.write(convertedData, start, end - start);
@@ -120,7 +116,7 @@ public class AutoTune {
                 boolean hasMoreBytes = afis.read(audioBuffer, 0, audioBuffer.length) != -1;
                 while (hasMoreBytes) {
 
-                    // float pitch = Yin.processBuffer(audioBuffer, sampleRate);
+                    // float pitch = Yin.processBuffer(audioBuffer, SAMPLERATE);
 
                     // if(pitch > 440 && pitch < 3520){
                     // System.out.println(pitch);
@@ -131,8 +127,8 @@ public class AutoTune {
                     // scale pitch
                     /*
                      * int originalBin = (int) (pitch * audioBuffer.length /
-                     * sampleRate); int newBin = (int) (1760 audioBuffer.length
-                     * / sampleRate); int diff = newBin - originalBin; if(diff >
+                     * SAMPLERATE); int newBin = (int) (1760 audioBuffer.length
+                     * / SAMPLERATE); int diff = newBin - originalBin; if(diff >
                      * 0) for(int i = audioBuffer.length - 1; i >= 0 ; i--){
                      * audioBuffer[i] = i - diff >= 0 ? audioBuffer[i-diff] : 0;
                      * } else for(int i = 0; i < audioBuffer.length ; i++){

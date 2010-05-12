@@ -83,4 +83,10 @@ public class UniversalVirtualKeyboard extends VirtualKeyboard {
             cx += nw;
         }
     }
+
+    @Override
+    public void close() {
+        // TODO Auto-generated method stub
+
+    }
 }

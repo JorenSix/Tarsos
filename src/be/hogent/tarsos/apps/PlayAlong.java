@@ -24,13 +24,13 @@ import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchConverter;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.PitchUnit;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.YinPitchDetection;
-import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.ui.PianoTestFrame;
 import be.hogent.tarsos.ui.VirtualKeyboard;
 import be.hogent.tarsos.util.AudioFile;
@@ -128,7 +128,7 @@ public class PlayAlong {
         AudioFile fileToPlayAlongWith = new AudioFile(fileName);
         PitchDetector detector = new YinPitchDetection(fileToPlayAlongWith);
         if (detectorString.equals("AUBIO")) {
-            detector = new AubioPitchDetection(fileToPlayAlongWith, AubioPitchDetectionMode.YIN);
+            detector = new AubioPitchDetection(fileToPlayAlongWith, PitchDetectionMode.AUBIO_YIN);
         } else if (detectorString.equals("IPEM")) {
             detector = new IPEMPitchDetection(fileToPlayAlongWith);
         }

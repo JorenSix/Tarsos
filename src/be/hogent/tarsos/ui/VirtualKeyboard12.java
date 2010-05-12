@@ -141,4 +141,10 @@ public class VirtualKeyboard12 extends VirtualKeyboard {
             }
         }
     }
+
+    @Override
+    public void close() {
+        // TODO Auto-generated method stub
+
+    }
 }

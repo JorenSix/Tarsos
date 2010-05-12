@@ -3,11 +3,11 @@ package be.hogent.tarsos.apps;
 import java.util.List;
 
 import be.hogent.tarsos.pitch.AubioPitchDetection;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.YinPitchDetection;
-import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
@@ -26,7 +26,7 @@ public class HistogramSummationTest {
         AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
         ToneScaleHistogram toneScaleHistogramTarsosYin = ambitusHistogram.toneScaleHistogram();
 
-        pitchDetector = new AubioPitchDetection(audioFile, AubioPitchDetectionMode.YIN);
+        pitchDetector = new AubioPitchDetection(audioFile, PitchDetectionMode.AUBIO_YIN);
         pitchDetector.executePitchDetection();
         samples = pitchDetector.getSamples();
         ambitusHistogram = Sample.ambitusHistogram(samples);

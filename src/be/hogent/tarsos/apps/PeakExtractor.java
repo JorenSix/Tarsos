@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import be.hogent.tarsos.pitch.AubioPitchDetection;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetectionMix;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
-import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SimplePlot;
@@ -62,7 +62,7 @@ public class PeakExtractor {
             List<Sample> samples;
             List<PitchDetector> detectors = new ArrayList<PitchDetector>();
 
-            detectors.add(new AubioPitchDetection(file, AubioPitchDetectionMode.YIN));
+            detectors.add(new AubioPitchDetection(file, PitchDetectionMode.AUBIO_YIN));
             detectors.add(new IPEMPitchDetection(file));
 
             PitchDetector mix = new PitchDetectionMix(new ArrayList<PitchDetector>(detectors), 0.02);

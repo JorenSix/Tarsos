@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="lib/jass.jar" sourcepath="lib/jass-src.zip"/>
 	<classpathentry kind="lib" path="lib/jtransforms-2.3.jar" sourcepath="lib/jtransforms-2.3-src.zip"/>
 	<classpathentry kind="lib" path="lib/spectro-edit_0.4.jar" sourcepath="lib/spectro-edit_0.4_src.zip"/>
+	<classpathentry kind="lib" path="lib/jopt-simple-3.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

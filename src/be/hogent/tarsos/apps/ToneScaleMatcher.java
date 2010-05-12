@@ -3,28 +3,29 @@ package be.hogent.tarsos.apps;
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
 import be.hogent.tarsos.pitch.AubioPitchDetection;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
-import be.hogent.tarsos.pitch.AubioPitchDetection.AubioPitchDetectionMode;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.FileUtils.RowFilter;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.CorrelationMeasure;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
-public class ToneScaleMatcher {
+public final class ToneScaleMatcher {
 
+    /**
+     * Disables the default constructor.
+     */
     private ToneScaleMatcher() {
     }
 
@@ -51,6 +52,8 @@ public class ToneScaleMatcher {
                 printHelp();
                 System.exit(0);
                 return;
+            default:
+                throw new AssertionError("Your argument is invalid.");
             }
         }
 
@@ -59,22 +62,7 @@ public class ToneScaleMatcher {
             System.exit(-1);
         }
 
-        List<String[]> rows = FileUtils.readCSVFile(inputFile, " ", -1);
-        List<Double> toneScaleTones = new ArrayList<Double>();
-        List<String> pitches = FileUtils.readColumnFromCSVData(rows, 0, new RowFilter() {
-            @Override
-            public boolean acceptRow(String[] row) {
-                return !row[0].contains("!") && row[0].matches("((-|\\+)?[0-9]+(\\.[0-9]+)?)+");
-            }
-        });
-        for (String pitch : pitches) {
-            toneScaleTones.add(Double.parseDouble(pitch));
-        }
-
-        double[] peaks = new double[toneScaleTones.size()];
-        for (int i = 0; i < toneScaleTones.size(); i++) {
-            peaks[i] = toneScaleTones.get(i);
-        }
+        double[] peaks = FileUtils.readScalaFile(inputFile);
         ToneScaleHistogram needleToneScale = ToneScaleHistogram.createToneScale(peaks, null, null, null);
 
         String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
@@ -87,7 +75,7 @@ public class ToneScaleMatcher {
         for (String file : inputFiles) {
             AudioFile audioFile = new AudioFile(file);
             PitchDetector pitchDetector = detector.equals("AUBIO") ? new AubioPitchDetection(audioFile,
-                    AubioPitchDetectionMode.YIN) : new IPEMPitchDetection(audioFile);
+                    PitchDetectionMode.AUBIO_YIN) : new IPEMPitchDetection(audioFile);
             pitchDetector.executePitchDetection();
 
             List<Sample> samples = pitchDetector.getSamples();
@@ -100,10 +88,10 @@ public class ToneScaleMatcher {
                 peaks[i] = detectedPeaks.get(i).getPosition();
             }
             ToneScaleHistogram hayStackHistogram = ToneScaleHistogram
-                    .createToneScale(peaks, null, null, null);
+            .createToneScale(peaks, null, null, null);
 
             int displacementForOptimalCorrelation = needleToneScale
-                    .displacementForOptimalCorrelation(hayStackHistogram);
+            .displacementForOptimalCorrelation(hayStackHistogram);
             Double correlation = needleToneScale.correlationWithDisplacement(
                     displacementForOptimalCorrelation, hayStackHistogram);
 
@@ -129,7 +117,7 @@ public class ToneScaleMatcher {
     private static void printHelp() {
         System.out.println("");
         System.out
-                .println("Find a file in the audio directory with the best match for the defined tone scale.");
+        .println("Find a file in the audio directory with the best match for the defined tone scale.");
         System.out.println("");
         System.out.println("-----------------------");
         System.out.println("");
