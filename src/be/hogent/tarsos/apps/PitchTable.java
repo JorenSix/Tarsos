@@ -1,5 +1,9 @@
 package be.hogent.tarsos.apps;
 
+import java.io.PrintStream;
+
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 import be.hogent.tarsos.pitch.Pitch;
 import be.hogent.tarsos.pitch.PitchUnit;
 
@@ -7,12 +11,11 @@ import be.hogent.tarsos.pitch.PitchUnit;
  * Generates a table with pitches in various units.
  * @author Joren Six
  */
-public class PitchTable implements TarsosApplication {
-
+public final class PitchTable implements TarsosApplication {
     /**
      * Defines the number of available MIDI keys.
      */
-    private static final int NUMBER_OF_MIDI_KEYS = 128;
+    private static final int MAX_MIDI_KEY = 128;
 
     /*
      * (non-Javadoc)
@@ -20,32 +23,47 @@ public class PitchTable implements TarsosApplication {
      */
     @Override
     public void run(final String... args) {
-        System.out.printf("%4s %10s %16s %14s %15s %10s\n", "MIDI", "NAME", "FREQUENCY", "ABS CENTS",
+        final OptionParser parser = new OptionParser();
+        final OptionSet options = Tarsos.parse(args, parser, this);
+        if (options == null) {
+            printTable();
+        }
+    }
+
+    private void printTable() {
+        final PrintStream stdOut = System.out;
+        stdOut.printf("%4s %10s %16s %14s %15s %10s\n", "MIDI", "NAME", "FREQUENCY", "ABS CENTS",
                 "REL CENTS", "OCTAVE");
-        System.out.println("---------------------------------------------------------------------------");
-        for (int i = 0; i < PitchTable.NUMBER_OF_MIDI_KEYS; i++) {
-            Pitch p = Pitch.getInstance(PitchUnit.MIDI_KEY, i);
+        stdOut.println("---------------------------------------------------------------------------");
+        for (int i = 0; i < PitchTable.MAX_MIDI_KEY; i++) {
+            final Pitch pitch = Pitch.getInstance(PitchUnit.MIDI_KEY, i);
 
-            double frequency = p.getPitch(PitchUnit.HERTZ);
-            double absoluteCents = p.getPitch(PitchUnit.ABSOLUTE_CENTS);
-            double relativeCents = p.getPitch(PitchUnit.RELATIVE_CENTS);
-            int octaveIndex = p.octaveIndex();
+            final double frequency = pitch.getPitch(PitchUnit.HERTZ);
+            final double absoluteCents = pitch.getPitch(PitchUnit.ABSOLUTE_CENTS);
+            final double relativeCents = pitch.getPitch(PitchUnit.RELATIVE_CENTS);
+            final int octaveIndex = pitch.octaveIndex();
 
-            System.out.printf("%4d %10s %14.5fHz %14.0f  %14.0f %10d\n", i, p.noteName(), frequency,
+            stdOut.printf("%4d %10s %14.5fHz %14.0f  %14.0f %10d\n", i, pitch.noteName(), frequency,
                     absoluteCents, relativeCents, octaveIndex);
         }
-
     }
 
+
+    /*
+     * (non-Javadoc)
+     * @see be.hogent.tarsos.apps.TarsosApplication#description()
+     */
     @Override
     public String description() {
-        // TODO Auto-generated method stub
-        return null;
+        return "Prints a table with pitches in different units.";
     }
 
+    /*
+     * (non-Javadoc)
+     * @see be.hogent.tarsos.apps.TarsosApplication#name()
+     */
     @Override
     public String name() {
-        // TODO Auto-generated method stub
-        return null;
+        return "pitch_table";
     }
 }
