@@ -1,0 +1,20 @@
+! tone_scale.scl
+!
+! see http://www.huygens-fokker.org/scala/scl_format.html
+!
+A test tone scale using all different pitch representations.
+ 12
+!
+ 76.04900
+ 193.15686 name of note  
+   310.26471 note name   
+ 5/4
+ 5 ratio
+  -5. (cents)
+ !696.57843 comment	
+ 698.57843 cqfsd
+ 25/16
+ 	889.73529
+ 			1006.84314                 
+ 1082.89214
+ 2/1
