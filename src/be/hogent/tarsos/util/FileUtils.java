@@ -36,7 +36,6 @@ import be.hogent.tarsos.pitch.PitchConverter;
 
 /**
  * Exports a DatabaseResult to a CSV-file.
- * 
  * @author Joren Six
  */
 public class FileUtils {
@@ -50,7 +49,6 @@ public class FileUtils {
             log.warning("Temporary directory (" + tempDir + ") contains whitespace");
         }
         return tempDir;
-
     }
 
     // disable the default constructor
@@ -59,7 +57,7 @@ public class FileUtils {
 
     /**
      * Joins path elements using the systems path separator. e.g. "/tmp" and
-     * "test.wav" combined together should yield /tmp/test.wav on UNIX
+     * "test.wav" combined together should yield /tmp/test.wav on UNIX.
      * 
      * @param path
      *            the path parts part
@@ -89,7 +87,6 @@ public class FileUtils {
     /**
      * Writes a file to disk. Uses the string contents as content. Failures are
      * logged.
-     * 
      * @param contents
      *            The contents of the file.
      * @param name
@@ -111,7 +108,6 @@ public class FileUtils {
 
     /**
      * Appends a string to a file on disk. Fails silently.
-     * 
      * @param contents
      *            The contents of the file.
      * @param name
@@ -149,9 +145,10 @@ public class FileUtils {
             }
             fileReader = new FileReader(file);
             BufferedReader in = new BufferedReader(fileReader);
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
+            String inputLine = in.readLine();
+            while (inputLine != null) {
                 contents.append(inputLine).append("\n");
+                inputLine = in.readLine();
             }
             in.close();
         } catch (IOException i1) {
@@ -162,13 +159,12 @@ public class FileUtils {
 
     /**
      * Reads the contents of a file in a jar.
-     * 
      * @param path
      *            the path to read e.g. /package/name/here/help.html
      * @return the contents of the file when successful, an empty string
      *         otherwise.
      */
-    public static String readFileFromJar(String path) {
+    public static String readFileFromJar(final String path) {
         StringBuilder contents = new StringBuilder();
         URL url = FileUtils.class.getResource(path);
         URLConnection connection;
@@ -548,8 +544,8 @@ public class FileUtils {
                     numberOfNotesDefined = true;
                 } else if (numberOfNotesDefined) {
                     boolean isComment = row[0].trim().startsWith("!");
-                    boolean isValidRatio = row[0].matches("\\s*[0-9]+(|/[0-9]+)\\s*");
-                    boolean isValidCent = row[0].matches("\\s*(-|\\+)?[0-9]+(\\.)?[0-9]*\\s*");
+                    boolean isValidRatio = row[0].matches("\\s*[0-9]+(|/[0-9]+).*");
+                    boolean isValidCent = row[0].matches("\\s*(-|\\+)?[0-9]+\\.[0-9]*.*");
                     boolean isValidPitch = isValidRatio || isValidCent;
                     isValidRow = !isComment && isValidPitch;
                 }
@@ -557,6 +553,7 @@ public class FileUtils {
             }
         });
         for (String pitch : pitches) {
+            pitch = pitch.trim().split("\\s")[0];
             double parsedPitch = parseScalaRow(pitch);
             toneScaleTones.add(parsedPitch);
         }
@@ -587,6 +584,7 @@ public class FileUtils {
      */
     private static double parseScalaRow(final String row) {
         double parsedPitch;
+
         if (row.contains("/") || !row.contains(".")) {
             String[] data = row.split("/");
             double denominator = Double.parseDouble(data[0]);
@@ -600,6 +598,7 @@ public class FileUtils {
             double absCentQuotient = PitchConverter.hertzToAbsoluteCent(quotient);
             parsedPitch = Math.abs(absCentDenominator - absCentQuotient);
         } else {
+
             parsedPitch = Double.parseDouble(row);
         }
         return parsedPitch;
@@ -629,14 +628,16 @@ public class FileUtils {
             final String toneScaleName) {
         if (peaks.length > 0) {
             StringBuilder sb = new StringBuilder();
-            sb.append("! ").append(FileUtils.basename(scalaFile)).append(".scl \n").append("!\n").append(
-                    toneScaleName).append("\n").append(peaks.length).append("\n!\n");
+            sb.append("! ").append(FileUtils.basename(scalaFile)).append(".scl \n");
+            sb.append("!\n");
+            sb.append(toneScaleName).append("\n");
+            sb.append(peaks.length - 1).append("\n!\n");
+
             double firstPeakPosition = peaks[0];
             for (int i = 1; i < peaks.length; i++) {
                 double peakPosition = peaks[i] - firstPeakPosition;
                 sb.append(peakPosition).append("\n");
             }
-            sb.append("2/1");
             FileUtils.writeFile(sb.toString(), scalaFile);
         } else {
             log.warning("No peaks detected: file: " + scalaFile + " not created");
