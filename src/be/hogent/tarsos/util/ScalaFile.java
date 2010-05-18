@@ -96,7 +96,7 @@ public final class ScalaFile {
             final String pitchData = lineData[0];
             String nameData;
             if (lineData.length == 2) {
-                nameData = lineData[1];
+                nameData = lineData[1].trim();
             } else {
                 nameData = "";
             }
@@ -173,8 +173,8 @@ public final class ScalaFile {
             for (int i = 1; i < pitches.length; i++) {
                 final double peakPosition = pitches[i] - pitches[0];
                 contents.append(peakPosition);
-                if (pitchNames != null) {
-                    contents.append("  ").append(pitchNames[i]);
+                if (pitchNames != null && pitchNames[i] != null) {
+                    contents.append(" ").append(pitchNames[i]);
                 }
                 contents.append("\n");
             }
@@ -196,5 +196,18 @@ public final class ScalaFile {
      */
     public String getDescription() {
         return this.description;
+    }
+
+    /**
+     * @return A list of pitch names. Or null.
+     */
+    public String[] getPitchNames() {
+        final String[] names;
+        if (this.pitchNames == null) {
+            names = null;
+        } else {
+            names = pitchNames.clone();
+        }
+        return names;
     }
 }
