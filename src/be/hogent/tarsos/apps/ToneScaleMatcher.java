@@ -15,6 +15,7 @@ import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.CorrelationMeasure;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
@@ -62,7 +63,7 @@ public final class ToneScaleMatcher {
             System.exit(-1);
         }
 
-        double[] peaks = FileUtils.readScalaFile(inputFile);
+        double[] peaks = ScalaFile.readScalaFile(inputFile);
         ToneScaleHistogram needleToneScale = ToneScaleHistogram.createToneScale(peaks, null, null, null);
 
         String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
