@@ -17,7 +17,7 @@ import be.hogent.tarsos.util.SimplePlot;
 
 import com.sun.media.sound.AudioFloatInputStream;
 
-public class FFTTest {
+public final class FFTTest {
 
     public static void main(String... args) throws UnsupportedAudioFileException, IOException {
         AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test",
@@ -49,7 +49,7 @@ public class FFTTest {
             double indexOfMostEnergyRichFrequencyBin = -1;
             for (int j = 0; j < data.length / 2; j++) {
                 double amplitude = data[j].getReal() * data[j].getReal() + data[j].getImaginary()
-                        * data[j].getImaginary();
+                * data[j].getImaginary();
                 amplitude = Math.pow(amplitude, 0.5) / data.length;
                 if (amplitude > maxAmplitude) {
                     maxAmplitude = amplitude;

@@ -18,7 +18,7 @@ import be.hogent.tarsos.util.FFT;
 import com.sun.media.sound.AudioFloatConverter;
 import com.sun.media.sound.AudioFloatInputStream;
 
-public class AutoTune {
+public final class AutoTune {
 
     /**
      * Choose a Mixer device using CLI.

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import be.hogent.tarsos.pitch.AubioPitchDetection;
-import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetectionMix;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.util.AudioFile;
@@ -18,7 +18,7 @@ import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
-public class PeakExtractor {
+public final class PeakExtractor {
 
     private static void appendFile(List<Peak> peaks) {
         StringBuilder sb = new StringBuilder();
@@ -45,9 +45,9 @@ public class PeakExtractor {
         double[] threshold = { 0.5, 0.8, 1.0, 1.5 };
 
         FileUtils
-                .writeFile(
-                        "file;detector;windowsize;threshold;gaussian smoothing factor;number of peaks;peakx;heightx\n",
-                        "peaks.csv");
+        .writeFile(
+                "file;detector;windowsize;threshold;gaussian smoothing factor;number of peaks;peakx;heightx\n",
+        "peaks.csv");
 
         for (AudioFile file : files) {
 
@@ -97,12 +97,12 @@ public class PeakExtractor {
                     for (int j = 0; j < windowsize.length; j++) {
                         for (int k = 0; k < threshold.length; k++) {
                             FileUtils.appendFile(baseName + ";" + detector.getName() + ";" + threshold[k]
-                                    + ";" + windowsize[j] + ";" + gaussians[i] + ";", "peaks.csv");
+                                                                                                       + ";" + windowsize[j] + ";" + gaussians[i] + ";", "peaks.csv");
                             List<Peak> peaks = PeakDetector.detect(toneScaleHistogram, windowsize[j],
                                     threshold[k]);
                             Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
                             String peaksTitle = detector.getName() + "_" + baseName + "_peaks_"
-                                    + gaussians[i] + "_" + windowsize[j] + "_" + threshold[k];
+                            + gaussians[i] + "_" + windowsize[j] + "_" + threshold[k];
                             SimplePlot p = new SimplePlot(peaksTitle);
                             appendFile(peaks);
                             p.addData(0, toneScaleHistogram);

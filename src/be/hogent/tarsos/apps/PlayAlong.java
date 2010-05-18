@@ -24,9 +24,9 @@ import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
-import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchConverter;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.PitchUnit;
 import be.hogent.tarsos.pitch.Sample;
@@ -39,7 +39,7 @@ import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
-public class PlayAlong {
+public final class PlayAlong {
 
     /**
      * Choose a MIDI device using a CLI. If an invalid device number is given

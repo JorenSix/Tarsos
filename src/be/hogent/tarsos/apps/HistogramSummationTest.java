@@ -3,8 +3,8 @@ package be.hogent.tarsos.apps;
 import java.util.List;
 
 import be.hogent.tarsos.pitch.AubioPitchDetection;
-import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.YinPitchDetection;
@@ -12,7 +12,7 @@ import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
-public class HistogramSummationTest {
+public final class HistogramSummationTest {
 
     /**
      * Tests if summing histograms constructed with different pitch extractors
@@ -47,6 +47,6 @@ public class HistogramSummationTest {
         toneScaleHistogramIPEM.plot("data/tests/ipem.png", "ipem");
 
         toneScaleHistogramTarsosYin.add(toneScaleHistogramAbioYin).add(toneScaleHistogramIPEM).normalize()
-                .gaussianSmooth(1.0).plot("data/tests/added.png", "Aubio + Tarsos + Ipem");
+        .gaussianSmooth(1.0).plot("data/tests/added.png", "Aubio + Tarsos + Ipem");
     }
 }

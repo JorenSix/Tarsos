@@ -10,7 +10,7 @@ import be.hogent.tarsos.midi.DumpReceiver;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
 
-public class GervillDelayTest {
+public final class GervillDelayTest {
 
     public static void main(String[] args) throws Exception {
         Receiver recv;

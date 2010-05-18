@@ -6,12 +6,9 @@ import java.util.List;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import be.hogent.tarsos.pitch.AubioPitchDetection;
-import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
-import be.hogent.tarsos.pitch.YinPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -39,16 +36,11 @@ public final class Annotate implements TarsosApplication {
      * @param detector
      *            The detector to use.
      */
-    private void annotateInputFile(final String inputFile, final String detector) {
+    private void annotateInputFile(final String inputFile, final PitchDetectionMode detectionMode) {
 
         AudioFile audioFile = new AudioFile(inputFile);
 
-        PitchDetector pitchDetector = new YinPitchDetection(audioFile);
-        if (detector.equals("AUBIO")) {
-            pitchDetector = new AubioPitchDetection(audioFile, PitchDetectionMode.AUBIO_YIN);
-        } else if (detector.equals("IPEM")) {
-            pitchDetector = new IPEMPitchDetection(audioFile);
-        }
+        PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
 
         pitchDetector.executePitchDetection();
         String baseName = audioFile.basename();
@@ -97,15 +89,15 @@ public final class Annotate implements TarsosApplication {
                 File.class)
                 .withValuesSeparatedBy(' ').defaultsTo(new File("in.wav"));
 
-        OptionSpec<PitchDetectionMode> detectionMode = parser.accepts("detector", "The detector to use")
+        OptionSpec<PitchDetectionMode> detectionModeSpec = parser.accepts("detector", "The detector to use")
         .withRequiredArg().ofType(PitchDetectionMode.class)
         .defaultsTo(PitchDetectionMode.TARSOS_YIN);
 
 
+
         OptionSet options = parser.parse(args);
         String inputFile = options.valueOf(fileSpec).getAbsolutePath();
-
-        String detector = "TARSOS";
+        PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
 
         if (inputFile != null && !FileUtils.exists(inputFile)) {
             // help
@@ -115,10 +107,10 @@ public final class Annotate implements TarsosApplication {
             List<String> inputFiles = FileUtils.glob(globDirectory, pattern);
             inputFiles.addAll(FileUtils.glob(globDirectory, pattern.toLowerCase()));
             for (String file : inputFiles) {
-                annotateInputFile(file, detector);
+                annotateInputFile(file, detectionMode);
             }
         } else {
-            annotateInputFile(inputFile, detector);
+            annotateInputFile(inputFile, detectionMode);
         }
     }
 
