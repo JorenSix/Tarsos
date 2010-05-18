@@ -76,7 +76,10 @@ public final class Tarsos {
             if (applications.containsKey(subcommand)) {
                 applications.get(subcommand).run(subcommandArgs);
             } else {
-                print("Unknown subcommand");
+                print("Unknown subcommand. Valid subcommands:");
+                for (String key : applications.keySet()) {
+                    print("\t" + key);
+                }
             }
         }
     }
@@ -152,9 +155,6 @@ public final class Tarsos {
         OptionSet options = null;
         try {
             options = parser.parse(args);
-            if (options.has("help")) {
-                printHelp(parser, application);
-            }
         } catch (OptionException e) {
             final String message = e.getMessage();
             tarsosInstance.print(message);
@@ -181,7 +181,7 @@ public final class Tarsos {
      * @param application
      *            The application.
      */
-    private static void printHelp(final OptionParser parser, final TarsosApplication application) {
+    public static void printHelp(final OptionParser parser, final TarsosApplication application) {
         tarsosInstance.print("Application description");
         tarsosInstance.print("-----------------------");
         tarsosInstance.print(application.description());

@@ -10,8 +10,6 @@ import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.util.AudioFile;
-import be.hogent.tarsos.util.ConfKey;
-import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SignalPowerExtractor;
 import be.hogent.tarsos.util.SimplePlot;
@@ -88,29 +86,27 @@ public final class Annotate implements TarsosApplication {
         OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate").withRequiredArg().ofType(
                 File.class)
                 .withValuesSeparatedBy(' ').defaultsTo(new File("in.wav"));
-
         OptionSpec<PitchDetectionMode> detectionModeSpec = parser.accepts("detector", "The detector to use")
         .withRequiredArg().ofType(PitchDetectionMode.class)
         .defaultsTo(PitchDetectionMode.TARSOS_YIN);
 
-
-
-        OptionSet options = parser.parse(args);
+        OptionSet options = Tarsos.parse(args, parser, this);
         String inputFile = options.valueOf(fileSpec).getAbsolutePath();
         PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
 
-        if (inputFile != null && !FileUtils.exists(inputFile)) {
-            // help
-        } else if (inputFile == null) {
-            String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
-            String globDirectory = FileUtils.combine(FileUtils.getRuntimePath(), "audio");
-            List<String> inputFiles = FileUtils.glob(globDirectory, pattern);
-            inputFiles.addAll(FileUtils.glob(globDirectory, pattern.toLowerCase()));
-            for (String file : inputFiles) {
-                annotateInputFile(file, detectionMode);
-            }
-        } else {
+        if (!Tarsos.isHelpOptionSet(options)) {
             annotateInputFile(inputFile, detectionMode);
+
+            // String pattern =
+            // Configuration.get(ConfKey.audio_file_name_pattern);
+            // String globDirectory =
+            // FileUtils.combine(FileUtils.getRuntimePath(), "audio");
+            // List<String> inputFiles = FileUtils.glob(globDirectory, pattern);
+            // inputFiles.addAll(FileUtils.glob(globDirectory,
+            // pattern.toLowerCase()));
+            // for (String file : inputFiles) {
+            // annotateInputFile(file, detectionMode);
+            // }
         }
     }
 
