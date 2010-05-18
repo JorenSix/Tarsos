@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.TreeMap;
 
 import be.hogent.tarsos.pitch.AubioPitchDetection;
-import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.util.AudioFile;
@@ -63,7 +63,7 @@ public final class ToneScaleMatcher {
             System.exit(-1);
         }
 
-        double[] peaks = ScalaFile.readScalaFile(inputFile);
+        double[] peaks = new ScalaFile(inputFile).getPitches();
         ToneScaleHistogram needleToneScale = ToneScaleHistogram.createToneScale(peaks, null, null, null);
 
         String pattern = Configuration.get(ConfKey.audio_file_name_pattern);

@@ -45,7 +45,7 @@ public class AubioPitchDetection implements PitchDetector {
                 + ".txt");
 
         if (!FileUtils.exists(csvFileName)) {
-            String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.detectionModeName
+            String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.getDetectionModeName()
             + "  -s -70  -i " + file.transcodedPath();
             Execute.command(command, csvFileName);
         }
