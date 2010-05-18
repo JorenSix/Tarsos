@@ -32,14 +32,13 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import be.hogent.tarsos.pitch.PitchConverter;
 
 /**
  * Exports a DatabaseResult to a CSV-file.
  * @author Joren Six
  */
 public class FileUtils {
-    private static final Logger log = Logger.getLogger(FileUtils.class.getName());
+    static final Logger log = Logger.getLogger(FileUtils.class.getName());
     private static final char pathSeparator = File.separatorChar;
     private static final char extensionSeparator = '.';
 
@@ -91,6 +90,10 @@ public class FileUtils {
      *            The contents of the file.
      * @param name
      *            The name of the file to create.
+     */
+    /**
+     * @param contents
+     * @param name
      */
     public static void writeFile(String contents, String name) {
         FileWriter FW = null;
@@ -508,139 +511,6 @@ public class FileUtils {
                 // ignore
                 e.printStackTrace();
             }
-        }
-    }
-
-    /**
-     * Reads a Scala file from disk and returns a list of peaks. The peaks use
-     * cent values.
-     * <p>
-     * The <a href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala
-     * scale file format</a>: <i>This file format for musical tunings is
-     * becoming a standard for exchange of scales, owing to the size of the
-     * scale archive of over 3700+ scales and the popularity of the Scala
-     * program.</i>
-     * </p>
-     * <p>
-     * Usually it has <code>.scl</code> as extension.
-     * </p>
-     * @param scalaFile
-     *            The Scala file to read.
-     * @return A list of peaks in cents, represented by the scala file.
-     */
-    public static final double[] readScalaFile(final String scalaFile) {
-        List<String[]> rows = FileUtils.readCSVFile(scalaFile, "\\|", -1);
-        List<Double> toneScaleTones = new ArrayList<Double>();
-        List<String> pitches = FileUtils.readColumnFromCSVData(rows, 0, new RowFilter() {
-            private boolean numberOfNotesDefined = false;
-
-            @Override
-            public boolean acceptRow(final String[] row) {
-
-                boolean isNumberOfNoteDefinition = !numberOfNotesDefined && row[0].matches("\\s*[0-9]+\\s*");
-                boolean isValidRow = false;
-
-                if (isNumberOfNoteDefinition) {
-                    numberOfNotesDefined = true;
-                } else if (numberOfNotesDefined) {
-                    boolean isComment = row[0].trim().startsWith("!");
-                    boolean isValidRatio = row[0].matches("\\s*[0-9]+(|/[0-9]+).*");
-                    boolean isValidCent = row[0].matches("\\s*(-|\\+)?[0-9]+\\.[0-9]*.*");
-                    boolean isValidPitch = isValidRatio || isValidCent;
-                    isValidRow = !isComment && isValidPitch;
-                }
-                return isValidRow;
-            }
-        });
-        for (String pitch : pitches) {
-            pitch = pitch.trim().split("\\s")[0];
-            double parsedPitch = parseScalaRow(pitch);
-            toneScaleTones.add(parsedPitch);
-        }
-        double[] peaks = new double[toneScaleTones.size()];
-        for (int i = 0; i < toneScaleTones.size(); i++) {
-            peaks[i] = toneScaleTones.get(i);
-        }
-        return peaks;
-    }
-
-    /**
-     * Parses a row from a scala file and returns a double value representing
-     * cents.These lines are all valid pitch lines:
-     * <pre>
-     * 81/64
-     * 408.0
-     * 408.
-     * 5
-     * -5.0
-     * 10/20
-     * 100.0 cents
-     * 100.0 C#
-     * 5/4   E\
-     * </pre>
-     * @param row
-     *            The row to parse.
-     * @return The parsed pitch.
-     */
-    private static double parseScalaRow(final String row) {
-        double parsedPitch;
-
-        if (row.contains("/") || !row.contains(".")) {
-            String[] data = row.split("/");
-            double denominator = Double.parseDouble(data[0]);
-            double quotient;
-            if (data.length == 2) {
-                quotient = Double.parseDouble(data[1]);
-            } else {
-                quotient = 1;
-            }
-            double absCentDenominator = PitchConverter.hertzToAbsoluteCent(denominator);
-            double absCentQuotient = PitchConverter.hertzToAbsoluteCent(quotient);
-            parsedPitch = Math.abs(absCentDenominator - absCentQuotient);
-        } else {
-
-            parsedPitch = Double.parseDouble(row);
-        }
-        return parsedPitch;
-    }
-
-    /**
-     * Reads a Scala file from disk and returns a list of peaks. The peaks use
-     * cent values.
-     * <p>
-     * The <a href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala
-     * scale file format</a>: <i>This file format for musical tunings is
-     * becoming a standard for exchange of scales, owing to the size of the
-     * scale archive of over 3700+ scales and the popularity of the Scala
-     * program.</i>
-     * </p>
-     * <p>
-     * Usually it has <code>.scl</code> as extension.
-     * </p>
-     * @param peaks
-     *            The peaks that represent a tone scale (in cent).
-     * @param scalaFile
-     *            The file to write to.
-     * @param toneScaleName
-     *            The name of the tone scale (E.g. 12TET) or null.
-     */
-    public static final void writeScalaFile(final double[] peaks, final String scalaFile,
-            final String toneScaleName) {
-        if (peaks.length > 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("! ").append(FileUtils.basename(scalaFile)).append(".scl \n");
-            sb.append("!\n");
-            sb.append(toneScaleName).append("\n");
-            sb.append(peaks.length - 1).append("\n!\n");
-
-            double firstPeakPosition = peaks[0];
-            for (int i = 1; i < peaks.length; i++) {
-                double peakPosition = peaks[i] - firstPeakPosition;
-                sb.append(peakPosition).append("\n");
-            }
-            FileUtils.writeFile(sb.toString(), scalaFile);
-        } else {
-            log.warning("No peaks detected: file: " + scalaFile + " not created");
         }
     }
 
