@@ -41,7 +41,6 @@ public final class PeakDetector {
      * Detects peaks in a histogram. The peaks are positioned at places where
      * DifferenceScore != 0 and HeigthScore is bigger than a certain threshold
      * value.
-     * 
      * @param histogram
      * @param windowSize
      *            Number of bins.
