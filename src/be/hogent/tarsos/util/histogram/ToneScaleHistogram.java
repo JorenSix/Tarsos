@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
-import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
@@ -52,7 +52,7 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
  *         instrument).
  */
 public class ToneScaleHistogram extends Histogram {
-    private static final Logger log = Logger.getLogger(ToneScaleHistogram.class.getName());
+    private static final Logger LOG = Logger.getLogger(ToneScaleHistogram.class.getName());
 
     /**
      * Create a new tone scale using the configured bin width. A tone scale is a
@@ -80,25 +80,21 @@ public class ToneScaleHistogram extends Histogram {
      * file format</a>: <i>This file format for musical tunings is becoming a
      * standard for exchange of scales, owing to the size of the scale archive
      * of over 3700+ scales and the popularity of the Scala program.</i>
-     * 
      * @param fileName
      * @param toneScaleName
      * @param peaks
      */
-    public static void exportPeaksToScalaFileFormat(String fileName, String toneScaleName, List<Peak> peaks) {
-        if (peaks.size() > 0) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("! ").append(FileUtils.basename(fileName)).append(".scl \n").append("!\n").append(
-                    toneScaleName).append("\n").append(peaks.size()).append("\n!\n");
-            double firstPeakPosition = peaks.get(0).getPosition();
-            for (int i = 1; i < peaks.size(); i++) {
-                double peakPosition = peaks.get(i).getPosition() - firstPeakPosition;
-                sb.append(peakPosition).append("\n");
-            }
-            sb.append("2/1");
-            FileUtils.writeFile(sb.toString(), fileName);
+    public static void exportPeaksToScalaFileFormat(final String fileName, final String toneScaleName,
+            final List<Peak> peaks) {
+        if (peaks.isEmpty()) {
+            LOG.warning("No peaks detected: file: " + fileName + " not created");
         } else {
-            log.warning("No peaks detected: file: " + fileName + " not created");
+            final double[] notes = new double[peaks.size()];
+            for (int i = 0; i < peaks.size(); i++) {
+                notes[i] = peaks.get(i).getPosition();
+            }
+            ScalaFile scalaFile = new ScalaFile(toneScaleName, notes, null);
+            scalaFile.write(fileName);
         }
     }
 
@@ -192,7 +188,7 @@ public class ToneScaleHistogram extends Histogram {
         // 1 calculate a fitting function
         // 1a smooth the original histogram for better peak detection
         ToneScaleHistogram smoothed = (ToneScaleHistogram) (new ToneScaleHistogram()).add(this)
-                .gaussianSmooth(1.0);
+        .gaussianSmooth(1.0);
 
         // 1b detect peaks
         List<Peak> peaks = PeakDetector.detect(smoothed, 20, 0.8);
