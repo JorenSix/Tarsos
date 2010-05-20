@@ -42,7 +42,11 @@ public final class ScalaFile {
         }
         description = desc;
         pitches = notes.clone();
-        pitchNames = names.clone();
+        if (names == null) {
+            pitchNames = null;
+        } else {
+            pitchNames = names.clone();
+        }
     }
 
     /**
@@ -202,10 +206,8 @@ public final class ScalaFile {
      * @return A list of pitch names. Or null.
      */
     public String[] getPitchNames() {
-        final String[] names;
-        if (this.pitchNames == null) {
-            names = null;
-        } else {
+        String[] names = null;
+        if (this.pitchNames != null) {
             names = pitchNames.clone();
         }
         return names;
