@@ -1,5 +1,7 @@
 package be.hogent.tarsos.midi;
 
+import jass.engine.BufferNotAvailableException;
+import jass.engine.SinkIsFullException;
 import jass.generators.LoopBuffer;
 import jass.generators.Mixer;
 import jass.render.SourcePlayer;
@@ -10,6 +12,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -25,7 +28,6 @@ import be.hogent.tarsos.util.SignalPowerExtractor;
  * frequency (in Hertz) starting at a certain time (in seconds) the current tone
  * stops when another tone starts: this class generates only one tone at the
  * time (monophonic).
- * 
  * @author Joren Six
  */
 public class ToneSequenceBuilder {
@@ -109,6 +111,24 @@ public class ToneSequenceBuilder {
         return sineWaveFile.toURI().toURL();
     }
 
+    public void playAnnotations(final int smootFilterWindowSize) {
+        try {
+            writeFile(null, smootFilterWindowSize);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SinkIsFullException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (BufferNotAvailableException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Write a WAV-file (sample rate 44.1 kHz) containing the tones and their
      * respective durations (start times). If the fileName the file played.
@@ -129,10 +149,14 @@ public class ToneSequenceBuilder {
      *            to zero</strong>. Otherwise a value between 5 and 50 is
      *            normal. ( 50 x 10 ms = 500 ms = 0.5 seconds). A
      *            <em>median filter</em> is used.
-     * @throws Exception
-     *             when something goes awry.
+     * @throws IOException
+     *             When something goes awry.
+     * @throws SinkIsFullException
+     * @throws InterruptedException
+     * @throws BufferNotAvailableException
      */
-    public void writeFile(String fileName, int smootFilterWindowSize) throws Exception {
+    public void writeFile(String fileName, int smootFilterWindowSize) throws IOException,
+    SinkIsFullException, InterruptedException, BufferNotAvailableException {
         // invariant: at any time the lists are equal in length
         assert frequencies.size() == realTimes.size();
 
@@ -185,8 +209,10 @@ public class ToneSequenceBuilder {
 
     /**
      * Adds a correct header to a raw file.
+     * 
+     * @throws IOException
      */
-    private void convertRawToWav(double srate, String rawFileName, String wavFileName) throws Exception {
+    private void convertRawToWav(double srate, String rawFileName, String wavFileName) throws IOException {
         FileInputStream inStream = new FileInputStream(new File(rawFileName));
         File out = new File(wavFileName);
         int bytesAvailable = inStream.available();
@@ -205,7 +231,6 @@ public class ToneSequenceBuilder {
     /**
      * Read data from a CSV-File, handle it with the handler, smooth it and save
      * it to the generated audio folder.
-     * 
      * @param csvFileName
      *            the CSV-file to process
      * @param handler
@@ -213,16 +238,17 @@ public class ToneSequenceBuilder {
      * @param smootFilterWindowSize
      *            the window size for the smoothing function (Median filter).
      */
-    public static void saveAsWav(String csvFileName, CSVFileHandler handler, int smootFilterWindowSize) {
-        csvFileName = new File(csvFileName).getAbsolutePath();
+    public static void saveAsWav(final String csvFileName, final CSVFileHandler handler,
+            final int smootFilterWindowSize) {
+        String correctedFileName = new File(csvFileName).getAbsolutePath();
         try {
             ToneSequenceBuilder builder = new ToneSequenceBuilder();
-            List<String[]> rows = FileUtils.readCSVFile(csvFileName, handler.getSeparator(), handler
+            List<String[]> rows = FileUtils.readCSVFile(correctedFileName, handler.getSeparator(), handler
                     .getNumberOfExpectedColumn());
             for (String[] row : rows) {
                 handler.handleRow(builder, row);
             }
-            builder.writeFile("data/generated_audio/" + FileUtils.basename(csvFileName) + ".wav",
+            builder.writeFile("data/generated_audio/" + FileUtils.basename(correctedFileName) + ".wav",
                     smootFilterWindowSize);
         } catch (Exception e) {
             e.printStackTrace();
@@ -239,25 +265,94 @@ public class ToneSequenceBuilder {
         String getSeparator();
 
         int getNumberOfExpectedColumn();
+
+        void setExtractor(SignalPowerExtractor extractor);
     }
 
-    public static CSVFileHandler AUBIO_CSVFILEHANDLER = new AubioCSVHandler();
+    /**
+     * @author Joren Six
+     */
+    public enum AnnotationCVSFileHandlers {
+        /**
+         * Handles files generated by BOZKURT.
+         */
+        BOZKURT(new BozkurtCSVFileHandler()),
+        /**
+         * Handles files generated by IPEM.
+         */
+        IPEM(new IpemCSVFileHandler()),
+        /**
+         * Handles files generated by AUBIO.
+         */
+        AUBIO(new AubioCSVHandler());
 
-    private static class AubioCSVHandler implements CSVFileHandler {
-        private final SignalPowerExtractor extractor;
+        /**
+         * The underlying handler.
+         */
+        private final CSVFileHandler cvsFileHandler;
 
-        public AubioCSVHandler() {
-            extractor = null;
+        /**
+         * Create a new annotation Handler.
+         * @param handler
+         *            The underlying handler.
+         */
+        private AnnotationCVSFileHandlers(final CSVFileHandler handler) {
+            cvsFileHandler = handler;
+        }
+
+        /**
+         * @return the cvsFileHandler
+         */
+        public CSVFileHandler getCvsFileHandler() {
+            return cvsFileHandler;
+        }
+
+    }
+
+    private static class BozkurtCSVFileHandler implements CSVFileHandler {
+        private static final double REFFREQUENCY = 8.17579891564371; // Hz
+        private static final int SAMPLERATE = 100; // Hz
+        private static final int CENTSINOCTAVE = 1200;
+        private SignalPowerExtractor extr;
+
+        @Override
+        public void handleRow(final ToneSequenceBuilder builder, final String[] row) {
+            double realTime = Double.parseDouble(row[0]) / SAMPLERATE;
+            double frequency = REFFREQUENCY * Math.pow(2.0, Double.parseDouble(row[1]) / CENTSINOCTAVE);
+            if (extr == null) {
+                builder.addTone(frequency, realTime);
+            } else {
+                builder.addTone(frequency, realTime, extr.powerAt(realTime, true));
+            }
         }
 
         @Override
-        public void handleRow(ToneSequenceBuilder builder, String[] row) {
+        public int getNumberOfExpectedColumn() {
+            return 2;
+        }
+
+        @Override
+        public String getSeparator() {
+            return "[\\s]+";
+        }
+
+        @Override
+        public void setExtractor(SignalPowerExtractor extractor) {
+            extr = extractor;
+        }
+    }
+
+    private static class AubioCSVHandler implements CSVFileHandler {
+        private SignalPowerExtractor extr;
+
+        @Override
+        public void handleRow(final ToneSequenceBuilder builder, final String[] row) {
             double realTime = Double.parseDouble(row[0]);
             double frequency = Double.parseDouble(row[1]);
-            if (extractor == null) {
+            if (extr == null) {
                 builder.addTone(frequency, realTime);
             } else {
-                builder.addTone(frequency, realTime, extractor.powerAt(realTime, true));
+                builder.addTone(frequency, realTime, extr.powerAt(realTime, true));
             }
         }
 
@@ -270,51 +365,37 @@ public class ToneSequenceBuilder {
         public String getSeparator() {
             return "\t";
         }
+
+        @Override
+        public void setExtractor(SignalPowerExtractor extractor) {
+            extr = extractor;
+        }
     };
 
-    public static CSVFileHandler BOZKURT_CSVFILEHANDLER = new BozkurtCSVFileHandler();
-
-    public static CSVFileHandler IPEM_CSVFILEHANDLER = new IpemCSVFileHandler();
-
-    private static class BozkurtCSVFileHandler implements CSVFileHandler {
-        private static final double referenceFrequency = 8.17579891564371; // Hz
-
-        @Override
-        public void handleRow(ToneSequenceBuilder builder, String[] row) {
-            double realTime = Double.parseDouble(row[0]) / 100; // 100 Hz sample
-            // frequency
-            // (every 10 ms)
-            double frequency = referenceFrequency * Math.pow(2.0, Double.parseDouble(row[1]) / 1200);
-            builder.addTone(frequency, realTime);
-        }
-
-        @Override
-        public int getNumberOfExpectedColumn() {
-            return 2;
-        }
-
-        @Override
-        public String getSeparator() {
-            return "[\\s]+";
-        }
-    }
-
     private static class IpemCSVFileHandler implements CSVFileHandler {
+        /**
+         * Log messages.
+         */
+        private static final Logger LOG = Logger.getLogger(IpemCSVFileHandler.class.getName());
         private int sampleNumber = 0;
+        private SignalPowerExtractor extr;
 
         @Override
-        public void handleRow(ToneSequenceBuilder builder, String[] row) {
+        public void handleRow(final ToneSequenceBuilder builder, final String[] row) {
             sampleNumber++;
             double realTime = sampleNumber / 100.0; // 100 Hz sample frequency
             // (every 10 ms)
             double frequency = 0.0;
             try {
                 frequency = Double.parseDouble(row[0]);
+                if (extr == null) {
+                    builder.addTone(frequency, realTime);
+                } else {
+                    builder.addTone(frequency, realTime, extr.powerAt(realTime, true));
+                }
             } catch (NumberFormatException e) {
-                // ignore
-
+                LOG.warning("Ignored invalid formatted number: " + row[0]);
             }
-            builder.addTone(frequency, realTime);
         }
 
         @Override
@@ -325,6 +406,11 @@ public class ToneSequenceBuilder {
         @Override
         public String getSeparator() {
             return " ";
+        }
+
+        @Override
+        public void setExtractor(SignalPowerExtractor extractor) {
+            extr = extractor;
         }
     }
 
