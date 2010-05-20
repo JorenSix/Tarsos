@@ -119,6 +119,7 @@ public final class Tarsos {
         applicationList.add(new Annotate());
         applicationList.add(new PitchTable());
         applicationList.add(new MidiToWav());
+        applicationList.add(new AudioToScala());
 
         for (TarsosApplication application : applicationList) {
             instance.registerApplication(application.name(), application);
@@ -182,10 +183,11 @@ public final class Tarsos {
      *            The application.
      */
     public static void printHelp(final OptionParser parser, final TarsosApplication application) {
-        tarsosInstance.print("Application description");
-        tarsosInstance.print("-----------------------");
-        tarsosInstance.print(application.description());
-        tarsosInstance.print("");
+        Tarsos instance = Tarsos.getInstance();
+        instance.print("Application description");
+        instance.print("-----------------------");
+        instance.print(application.description());
+        instance.print("");
         try {
             parser.printHelpOn(System.out);
         } catch (IOException e1) {

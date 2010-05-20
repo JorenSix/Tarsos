@@ -91,6 +91,7 @@ public final class Annotate implements TarsosApplication {
         .defaultsTo(PitchDetectionMode.TARSOS_YIN);
 
         OptionSet options = Tarsos.parse(args, parser, this);
+
         String inputFile = options.valueOf(fileSpec).getAbsolutePath();
         PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
 
@@ -107,6 +108,8 @@ public final class Annotate implements TarsosApplication {
             // for (String file : inputFiles) {
             // annotateInputFile(file, detectionMode);
             // }
+        } else {
+            Tarsos.printHelp(parser, this);
         }
     }
 

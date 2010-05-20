@@ -231,7 +231,7 @@ public final class PlayAlong {
         for (int i = 0; i < tuning.length; i++) {
             int octave = i / peaks.length;
             double centOffset = peaks[i % peaks.length];
-            tuning[i] = octave * 1200 + centOffset;
+            tuning[i] = octave * 1200 + centOffset - 2400;
             double distanceToReferenceNote = Math.abs(tuning[i] - referenceNote); // cents
             if (distanceToReferenceNote < closestDistance) {
                 closestDistance = distanceToReferenceNote;
