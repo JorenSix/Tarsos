@@ -10,7 +10,7 @@ import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 /**
  * @author Joren Six
  */
-public class PeakDetector {
+public final class PeakDetector {
 
     private PeakDetector() {
     }
@@ -19,13 +19,12 @@ public class PeakDetector {
      * Create a histogram with peak information. Instead of triangular peaks it
      * creates a histogram (with the same resolution (bin widths) as the
      * original) with peaks in the form of gaussian curves.
-     * 
      * @param peaks
      *            A list With Peaks
      * @return a histogram with peak information. Can be used to match with
      *         other histograms (files)
      */
-    public static Histogram newPeakDetection(List<Peak> peaks) {
+    public static Histogram newPeakDetection(final List<Peak> peaks) {
         double[] peakPositionsDouble = new double[peaks.size()];
         double[] peakWidths = null;
         double[] peakHeights = new double[peaks.size()];
@@ -45,11 +44,12 @@ public class PeakDetector {
      * 
      * @param histogram
      * @param windowSize
-     *            in number of bins
+     *            Number of bins.
      * @param meanFactorThreshold
      * @return
      */
-    public static List<Peak> detect(Histogram histogram, int windowSize, double meanFactorThreshold) {
+    public static List<Peak> detect(final Histogram histogram, final int windowSize,
+            final double meanFactorThreshold) {
         double[] peakFunctionValues = new double[histogram.getNumberOfClasses()];
         PeakScore differenceScore = new DifferenceScore(histogram, windowSize);
         PeakScore localHeightScore = new LocalHeightScore();
