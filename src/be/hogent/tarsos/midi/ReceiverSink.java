@@ -1,5 +1,3 @@
-/**
- */
 package be.hogent.tarsos.midi;
 
 import javax.sound.midi.MidiMessage;
@@ -10,19 +8,18 @@ import javax.sound.midi.Receiver;
  * messages to each registered <code>Receiver</code>. It can be used to send
  * messages to a synthesizer while monitoring the events by writing them to the
  * command line, a log file,... or to build a MIDI file from any input
- * 
  * @author Joren Six
  */
 public class ReceiverSink implements Receiver {
 
-    Receiver[] receivers;
-    boolean ignoreTiming;
+    private final Receiver[] receivers;
+    private final boolean ignoreTiming;
 
     /**
      * @param receivers
      *            the list of <code>Receiver</code>s to send messages to
      */
-    public ReceiverSink(boolean ignoreTiming, Receiver... receivers) {
+    public ReceiverSink(final boolean ignoreTiming, final Receiver... receivers) {
         this.receivers = receivers;
         this.ignoreTiming = ignoreTiming;
     }
@@ -35,10 +32,13 @@ public class ReceiverSink implements Receiver {
     }
 
     @Override
-    public void send(MidiMessage message, long timeStamp) {
-        timeStamp = ignoreTiming ? -1 : timeStamp;
+    public void send(final MidiMessage message, final long timeStamp) {
+        long actualTimeStamp = timeStamp;
+        if (ignoreTiming) {
+            actualTimeStamp = -1;
+        }
         for (Receiver receiver : receivers) {
-            receiver.send(message, timeStamp);
+            receiver.send(message, actualTimeStamp);
         }
     }
 }
