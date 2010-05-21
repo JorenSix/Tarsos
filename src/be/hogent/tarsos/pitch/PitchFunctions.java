@@ -23,7 +23,7 @@ import be.hogent.tarsos.util.histogram.Histogram;
  * 
  * @author Joren Six
  */
-public class PitchFunctions {
+public final class PitchFunctions {
     private PitchFunctions() {
     }
 
@@ -53,7 +53,7 @@ public class PitchFunctions {
         case HERTZ:
             break;
         default:
-            throw new Error("Unsupported unit: " + unit.name());
+            throw new AssertionError("Unsupported unit: " + unit.name());
         }
         return convertedValues;
     }
@@ -134,7 +134,7 @@ public class PitchFunctions {
      */
     public static Double median(List<Double> list) {
         if (list == null || list.size() == 0) {
-            throw new Error("Mean of an empty list is undefined");
+            throw new AssertionError("Mean of an empty list is undefined");
         }
         int size = list.size();
         Collections.sort(list);
@@ -179,7 +179,7 @@ public class PitchFunctions {
     public static List<Double> medianFilter(List<Double> listToFilter, int n) {
 
         if (n % 2 == 0) {
-            throw new Error("Medianfilter not implemented for even n values");
+            throw new IllegalArgumentException("Medianfilter not implemented for even n values");
         }
 
         List<Double> filteredList = new ArrayList<Double>();
@@ -386,7 +386,7 @@ public class PitchFunctions {
     public static void exportFrequencyTable(Histogram histogram, String fileName, double start, double stop) {
         StringBuilder sb = new StringBuilder();
         for (double current = start + histogram.getClassWidth() / 2; current <= stop; current += histogram
-                .getClassWidth()) {
+        .getClassWidth()) {
             double count = histogram.getCount(current);
             long cumFreq = histogram.getCumFreq(current);
             double derivative = (current + histogram.getClassWidth() > stop) ? 0 : (histogram
@@ -418,7 +418,7 @@ public class PitchFunctions {
         double[] values = new double[histogram.getNumberOfClasses()];
         int i = 0;
         for (double current = start + histogram.getClassWidth() / 2; current <= stop; current += histogram
-                .getClassWidth()) {
+        .getClassWidth()) {
 
             h.addPoint(0, current, histogram.getCount(current), !first);
             values[i] = histogram.getCount(current);

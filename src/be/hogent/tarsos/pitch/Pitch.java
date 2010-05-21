@@ -6,7 +6,7 @@ package be.hogent.tarsos.pitch;
  * 
  * @author Joren Six
  */
-public class Pitch {
+public final class Pitch {
 
     /**
      * The pitch in Hz.
@@ -48,7 +48,7 @@ public class Pitch {
             value = pitchInHertz;
             break;
         default:
-            throw new Error("Unsupported unit: " + unit.name());
+            throw new AssertionError("Unsupported unit: " + unit.name());
         }
         return value;
     }
@@ -131,7 +131,7 @@ public class Pitch {
             hertzValue = value;
             break;
         default:
-            throw new Error("Unsupported unit: " + unit.name());
+            throw new AssertionError("Unsupported unit: " + unit.name());
         }
         return new Pitch(hertzValue);
     }

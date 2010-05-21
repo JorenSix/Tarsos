@@ -60,9 +60,10 @@ public final class FFTTest {
                     numberOfFilledBins++;
                 }
             }
-            if (numberOfFilledBins > data.length / 3) {
-                System.out.println(index + " Is percussive");
-            }
+            /*
+             * if (numberOfFilledBins > data.length / 3) {
+             * System.out.println(index + " Is percussive"); }
+             */
 
             double mostEnergyRichPitch = indexOfMostEnergyRichFrequencyBin * sampleRate / readAmount; // in
             // Hz

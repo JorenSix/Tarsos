@@ -25,7 +25,9 @@ public final class PitchTable implements TarsosApplication {
     public void run(final String... args) {
         final OptionParser parser = new OptionParser();
         final OptionSet options = Tarsos.parse(args, parser, this);
-        if (options == null) {
+        if (Tarsos.isHelpOptionSet(options)) {
+            Tarsos.printHelp(parser, this);
+        } else {
             printTable();
         }
     }

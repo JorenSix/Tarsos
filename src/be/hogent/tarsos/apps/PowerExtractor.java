@@ -1,7 +1,12 @@
 package be.hogent.tarsos.apps;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.SignalPowerExtractor;
 
@@ -9,27 +14,48 @@ import be.hogent.tarsos.util.SignalPowerExtractor;
  * Extracts power from a file.
  * @author Joren Six
  */
-public final class PowerExtractor {
+public final class PowerExtractor implements TarsosApplication {
 
     /**
-     *
+     * The default silence level used in the power plot.
      */
-    private PowerExtractor() {
+    private static final int SILENCELEVEL = -40;
+
+    @Override
+    public String description() {
+        return "Extracts power features from one or more files.";
     }
 
-    /**
-     * Extracts power features from some files.
-     * @param args
-     *            Nothing.
-     */
-    public static void main(final String... args) {
-        String[] globDirectories = { "makam", "maghreb" };
-        List<AudioFile> files = AudioFile.audioFiles(globDirectories);
-        for (AudioFile file : files) {
-            final SignalPowerExtractor spex = new SignalPowerExtractor(file);
-            spex.savePowerPlot("data/tests/power_" + file.basename() + ".png", -40);
-            spex.saveTextFile("data/tests/power_" + file.basename() + ".txt");
-            spex.saveWaveFormPlot("data/tests/waveform_" + file.basename() + ".png");
+    @Override
+    public String name() {
+        return "power_extractor";
+    }
+
+    @Override
+    public void run(final String... args) {
+        final OptionParser parser = new OptionParser();
+
+        final OptionSpec<File> inputSpec = parser.accepts("in",
+        "Input audio file(s).").withRequiredArg()
+        .ofType(
+                File.class).withValuesSeparatedBy(' ');
+
+        final OptionSet options = Tarsos.parse(args, parser, this);
+
+        if (Tarsos.isHelpOptionSet(options)) {
+            Tarsos.printHelp(parser, this);
+        } else {
+            List<AudioFile> audioFiles = new ArrayList<AudioFile>();
+            for (File inputFile : options.valuesOf(inputSpec)) {
+                audioFiles.add(new AudioFile(inputFile.getAbsolutePath()));
+            }
+            SignalPowerExtractor spex;
+            for (AudioFile file : audioFiles) {
+                spex = new SignalPowerExtractor(file);
+                spex.savePowerPlot("power_" + file.basename() + ".png", SILENCELEVEL);
+                spex.saveTextFile("power_" + file.basename() + ".txt");
+                spex.saveWaveFormPlot("waveform_" + file.basename() + ".png");
+            }
         }
     }
 }

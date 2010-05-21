@@ -34,24 +34,26 @@ public final class AudioToScala implements TarsosApplication {
     @Override
     public void run(final String... args) {
         final OptionParser parser = new OptionParser();
-        final OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate").withRequiredArg()
+        final OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate.").withRequiredArg()
         .ofType(
                 File.class)
                 .withValuesSeparatedBy(' ');
         final OptionSpec<File> scalaSpec = parser.accepts("scala",
-        "The output scala file. Defaults to the name of the input file with correct extension")
+        "The output scala file. (default: 'name of the input file'.scl)")
         .withRequiredArg().ofType(
                 File.class)
                 .withValuesSeparatedBy(' ');
 
         final OptionSpec<PitchDetectionMode> detectionModeSpec = parser.accepts("detector",
-        "The detector to use")
+                "The detector to use.")
         .withRequiredArg().ofType(PitchDetectionMode.class)
         .defaultsTo(PitchDetectionMode.TARSOS_YIN);
 
         final OptionSet options = Tarsos.parse(args, parser, this);
 
-        if (!Tarsos.isHelpOptionSet(options)) {
+        if (Tarsos.isHelpOptionSet(options)) {
+            Tarsos.printHelp(parser, this);
+        } else {
             final File inputFile = options.valueOf(fileSpec);
             final PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
             File scalaFile;
@@ -61,8 +63,6 @@ public final class AudioToScala implements TarsosApplication {
                 scalaFile = options.valueOf(scalaSpec);
             }
             exportScalaFile(scalaFile, inputFile, detectionMode);
-        } else {
-            Tarsos.printHelp(parser, this);
         }
     }
 

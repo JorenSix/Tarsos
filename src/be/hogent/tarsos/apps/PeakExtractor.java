@@ -38,8 +38,6 @@ public final class PeakExtractor {
         String[] globDirectories = { "dekkmma_random", "makam", "maghreb" };
         List<AudioFile> files = AudioFile.audioFiles(globDirectories);
 
-        System.out.println(files.size());
-
         double[] gaussians = { 0, 0.5, 1.0 };
         int[] windowsize = { 5, 10, 15, 20 };
         double[] threshold = { 0.5, 0.8, 1.0, 1.5 };
@@ -52,7 +50,6 @@ public final class PeakExtractor {
         for (AudioFile file : files) {
 
             String baseName = file.basename();
-            System.out.println(baseName);
 
             String annotationsDirectory = FileUtils.combine("data", "annotations", baseName);
             FileUtils.mkdirs(annotationsDirectory);

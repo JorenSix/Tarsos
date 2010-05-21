@@ -49,10 +49,10 @@ public class DumpReceiver implements Receiver {
     public static long seCount = 0;
     public static long smCount = 0;
 
-    private static final String[] sm_astrKeyNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A",
+    private static final String[] KEYNAMES = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A",
         "A#", "B" };
 
-    private static final String[] sm_astrKeySignatures = { "Cb", "Gb", "Db", "Ab", "Eb", "Bb", "F", "C", "G",
+    private static final String[] KEYSIGNATURES = { "Cb", "Gb", "Db", "Ab", "Eb", "Bb", "F", "C", "G",
         "D", "A", "E", "B", "F#", "C#" };
     private static final String[] SYSTEM_MESSAGE_TEXT = {
         "System Exclusive (should not be in ShortMessage!)", "MTC Quarter Frame: ", "Song Position: ",
@@ -278,7 +278,7 @@ public class DumpReceiver implements Receiver {
 
         case 0x59:
             String strGender = (abData[1] == 1) ? "minor" : "major";
-            strMessage = "Key Signature: " + sm_astrKeySignatures[abData[0] + 7] + " " + strGender;
+            strMessage = "Key Signature: " + KEYSIGNATURES[abData[0] + 7] + " " + strGender;
             break;
 
         case 0x7F:
@@ -301,7 +301,7 @@ public class DumpReceiver implements Receiver {
         } else {
             int nNote = nKeyNumber % 12;
             int nOctave = nKeyNumber / 12;
-            return sm_astrKeyNames[nNote] + (nOctave - 1);
+            return KEYNAMES[nNote] + (nOctave - 1);
         }
     }
 
@@ -380,6 +380,4 @@ public class DumpReceiver implements Receiver {
         return res;
     }
 }
-
-/*** DumpReceiver.java ***/
 

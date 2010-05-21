@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -21,8 +23,11 @@ import be.hogent.tarsos.util.FileUtils;
  * STDIN.
  * @author Joren Six
  */
-public class AnnotationSynth implements TarsosApplication {
-
+public final class AnnotationSynth implements TarsosApplication {
+    /**
+     * Log messages.
+     */
+    private static final Logger LOG = Logger.getLogger(AnnotationSynth.class.getName());
 
     @Override
     public String description() {
@@ -38,60 +43,60 @@ public class AnnotationSynth implements TarsosApplication {
 
     @Override
     public void run(final String... args) {
-        OptionParser parser = new OptionParser();
+        final OptionParser parser = new OptionParser();
 
-        OptionSpec<File> inputSpec = parser.accepts("in",
+        final OptionSpec<File> inputSpec = parser.accepts("in",
         "Input annotations. If no file is given it reads standard input.").withRequiredArg().ofType(
                 File.class);
 
-        OptionSpec<File> outputSpec = parser.accepts("out", "Output WAV-file.").withRequiredArg().ofType(
+        final OptionSpec<File> outputSpec = parser.accepts("out", "Output WAV-file.").withRequiredArg()
+        .ofType(
                 File.class).defaultsTo(new File("out.wav"));
 
-        OptionSpec<AnnotationCVSFileHandlers> annotationFormatSpec = parser.accepts("format",
+        final OptionSpec<AnnotationCVSFileHandlers> annoFormatSpec = parser.accepts("format",
         "Annotation format of the input file: AUBIO|IPEM|BOZKURT").withRequiredArg().ofType(
                 AnnotationCVSFileHandlers.class).defaultsTo(AnnotationCVSFileHandlers.AUBIO);
 
-        String listenOption = "listen";
-        parser.accepts(listenOption, "Do not write a "
+        parser.accepts("listen", "Do not write a "
                 + "wav file but listen to the generated tones.");
 
 
-        OptionSpec<Integer> filterSpec = parser
+        final OptionSpec<Integer> filterSpec = parser
         .accepts(
                 "filter",
                 "Defines the number of samples are used in a median filter. "
                 + "With samples every 10ms and a median filter of 5 there can be a 50/2 ms delay")
                 .withRequiredArg().ofType(Integer.class).defaultsTo(0);
 
-        OptionSet options = Tarsos.parse(args, parser, this);
+        final OptionSet options = Tarsos.parse(args, parser, this);
 
-        CSVFileHandler handler = options.valueOf(annotationFormatSpec).getCvsFileHandler();
-        File outputFile = options.valueOf(outputSpec);
-        File inputFile = options.valueOf(inputSpec);
-        int filterSize = options.valueOf(filterSpec);
-        boolean listen = options.has(listenOption);
+        final CSVFileHandler handler = options.valueOf(annoFormatSpec).getCvsFileHandler();
+        final File outputFile = options.valueOf(outputSpec);
+        final File inputFile = options.valueOf(inputSpec);
+        final int filterSize = options.valueOf(filterSpec);
+        final boolean listen = options.has("listen");
 
 
         // System.out.println("Bugs: currently gain information is only
         // used while listening, not while writing a file.");
 
-        ToneSequenceBuilder builder = new ToneSequenceBuilder();
-        String separator = handler.getSeparator();
+        final ToneSequenceBuilder builder = new ToneSequenceBuilder();
+        final String separator = handler.getSeparator();
         if (inputFile == null) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+            final BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
             String line;
             try {
-                line = in.readLine();
+                line = stdIn.readLine();
                 while (line != null && line.length() != 0) {
-                    String[] row = line.split(separator);
+                    final String[] row = line.split(separator);
                     handler.handleRow(builder, row);
-                    line = in.readLine();
+                    line = stdIn.readLine();
                 }
             } catch (IOException e1) {
-                e1.printStackTrace();
+                LOG.log(Level.SEVERE, "Could not read from standard input.", e1);
             }
         } else {
-            List<String[]> rows = FileUtils.readCSVFile(inputFile.getAbsolutePath(), separator, -1);
+            final List<String[]> rows = FileUtils.readCSVFile(inputFile.getAbsolutePath(), separator, -1);
             for (String[] row : rows) {
                 handler.handleRow(builder, row);
             }
@@ -103,7 +108,7 @@ public class AnnotationSynth implements TarsosApplication {
             try {
                 builder.writeFile(outputFile.getAbsolutePath(), filterSize);
             } catch (Exception e) {
-                System.out.println("Could not write: " + outputFile + "\n");
+                LOG.log(Level.SEVERE, "Could not write: " + outputFile + "\n", e);
             }
         }
     }

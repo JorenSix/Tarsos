@@ -33,7 +33,6 @@ public class MidiSequenceBuilder {
 
     public MidiSequenceBuilder() {
         try {
-
             sequence = new Sequence(Sequence.PPQ, 1);
             track = sequence.createTrack();
             currentTicks = 0;

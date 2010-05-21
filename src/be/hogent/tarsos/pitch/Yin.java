@@ -20,7 +20,7 @@ import com.sun.media.sound.AudioFloatInputStream;
  * 
  * @author Joren Six
  */
-public class Yin {
+public final class Yin {
 
     /**
      * Used to start and stop real time annotations.
@@ -131,7 +131,7 @@ public class Yin {
      *            the estimated tau value.
      * @return a better, more precise tau value.
      */
-    private float parabolicInterpolation(int tauEstimate) {
+    private float parabolicInterpolation(final int tauEstimate) {
         float s0, s1, s2;
         int x0 = (tauEstimate < 1) ? tauEstimate : tauEstimate - 1;
         int x2 = (tauEstimate + 1 < yinBuffer.length) ? tauEstimate + 1 : tauEstimate;
@@ -152,7 +152,6 @@ public class Yin {
     /**
      * The main flow of the AUBIO_YIN algorithm. Returns a pitch value in Hz or -1 if
      * no pitch is detected.
-     * 
      * @return a pitch value in Hz or -1 if no pitch is detected.
      */
     private float getPitch() {
@@ -170,7 +169,7 @@ public class Yin {
 
         // step 5
         if (tauEstimate != -1) {
-            float betterTau = parabolicInterpolation(tauEstimate);
+            final float betterTau = parabolicInterpolation(tauEstimate);
 
             // step 6
             // TODO Implement optimization for the AUBIO_YIN algorithm.
@@ -187,7 +186,6 @@ public class Yin {
 
     /**
      * The interface to use to react to detected pitches.
-     * 
      * @author Joren Six
      */
     public interface DetectedPitchHandler {
@@ -195,7 +193,6 @@ public class Yin {
          * Use this method to react to detected pitches. The handleDetectedPitch
          * is called for every sample even when there is no pitch detected: in
          * that case -1 is the pitch value.
-         * 
          * @param time
          *            in seconds
          * @param pitch
@@ -206,7 +203,6 @@ public class Yin {
 
     /**
      * Annotate a file wit pitch information.
-     * 
      * @param fileName
      *            the file to annotate.
      * @param detectedPitchHandler
@@ -217,8 +213,8 @@ public class Yin {
      * @throws IOException
      *             If there is an error reading the file.
      */
-    public static void processFile(String fileName, DetectedPitchHandler detectedPitchHandler)
-            throws UnsupportedAudioFileException, IOException {
+    public static void processFile(final String fileName, final DetectedPitchHandler detectedPitchHandler)
+    throws UnsupportedAudioFileException, IOException {
         AudioInputStream ais = AudioSystem.getAudioInputStream(new File(fileName));
         AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
         Yin.processStream(afis, detectedPitchHandler);
@@ -237,8 +233,9 @@ public class Yin {
      * @throws IOException
      *             If there is an error reading the stream.
      */
-    public static void processStream(AudioFloatInputStream afis, DetectedPitchHandler detectedPitchHandler)
-            throws UnsupportedAudioFileException, IOException {
+    public static void processStream(final AudioFloatInputStream afis,
+            final DetectedPitchHandler detectedPitchHandler)
+    throws UnsupportedAudioFileException, IOException {
         AudioFormat format = afis.getFormat();
         float sampleRate = format.getSampleRate();
         double frameSize = format.getFrameSize();
@@ -274,7 +271,6 @@ public class Yin {
      * Slides a buffer with an overlap and reads new data from the stream. to
      * the correct place in the buffer. E.g. with a buffer size of 9 and overlap
      * of 3.
-     * 
      * <pre>
      *      | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
      *                        |
@@ -288,7 +284,6 @@ public class Yin {
      *                        v
      *      | 14| 13| 12| 11| 10| 9 | 8 | 7 | 6 |
      * </pre>
-     * 
      * @param audioFloatInputStream
      *            The stream to read audio data from.
      * @param audioBuffer
@@ -302,8 +297,9 @@ public class Yin {
      *             particular, an IOException is thrown if the input stream has
      *             been closed.
      */
-    public static boolean slideBuffer(final AudioFloatInputStream audioFloatInputStream, float[] audioBuffer,
-            int overlap) throws IOException {
+    public static boolean slideBuffer(final AudioFloatInputStream audioFloatInputStream,
+            final float[] audioBuffer,
+            final int overlap) throws IOException {
         assert overlap < audioBuffer.length;
 
         int slideSize = audioBuffer.length - overlap;
@@ -326,15 +322,16 @@ public class Yin {
      * @exception Error
      *                when the buffer has an incorrect length.
      */
-    public static synchronized float processBuffer(final float[] buffer, float sampleRate) {
+    public static synchronized float processBuffer(final float[] buffer, final float sampleRate) {
         if (yinInstance == null) {
             yinInstance = new Yin(sampleRate, buffer.length);
         }
 
         if (buffer.length != yinInstance.inputBuffer.length) {
-            throw new Error("Buffer and yin buffer should have the same length!");
+            throw new AssertionError("Buffer and yin buffer should have the same length!");
         }
 
+        // OPTIMIZE: use
         for (int i = 0; i < buffer.length; i++) {
             yinInstance.inputBuffer[i] = buffer[i];
         }
@@ -355,18 +352,19 @@ public class Yin {
         final SimplePlot p = new SimplePlot("Pitch tracking");
         Yin.processFile("../Tarsos/audio/pitch_check/flute.novib.mf.C5B5.wav", new DetectedPitchHandler() {
             @Override
-            public void handleDetectedPitch(float time, float pitch) {
+            public void handleDetectedPitch(final float time, final float pitch) {
                 System.out.println(time + "\t" + pitch);
-                if (pitch == -1) {
-                    pitch = 0;
+                double plotPitch = pitch;
+                if (plotPitch == -1) {
+                    plotPitch = 0;
                 }
-                p.addData(time, pitch);
+                p.addData(time, plotPitch);
             }
         });
         p.save();
     }
 
-    public static DetectedPitchHandler PRINT_DETECTED_PITCH_HANDLER = new DetectedPitchHandler() {
+    public static final DetectedPitchHandler PRINT_DETECTED_PITCH_HANDLER = new DetectedPitchHandler() {
         @Override
         public void handleDetectedPitch(float time, float pitch) {
             System.out.println(time + "\t" + pitch);

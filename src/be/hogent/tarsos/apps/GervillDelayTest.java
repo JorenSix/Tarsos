@@ -1,5 +1,7 @@
 package be.hogent.tarsos.apps;
 
+import java.util.Random;
+
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
@@ -26,16 +28,17 @@ public final class GervillDelayTest {
 
         ShortMessage msg = new ShortMessage();
 
+        Random rnd = new Random();
         double[] tunings = new double[128];
         for (int i = 1; i < 128; i++) {
-            tunings[i] = tunings[i - 1] + 240;
+            tunings[i] = i * 100 + rnd.nextDouble() * 400;
         }
 
         MidiUtils.sendTunings(recv, 0, 0, "test", tunings);
         MidiUtils.sendTuningChange(recv, 0, 0);
         msg.setMessage(ShortMessage.NOTE_ON, 0, 69, 100);
         recv.send(msg, -1);
-        msg.setMessage(ShortMessage.NOTE_OFF, 0, 69, 100);
+        msg.setMessage(ShortMessage.NOTE_OFF, 0, 69, 0);
         recv.send(msg, -1);
         new JFrame().setVisible(true);
     }
