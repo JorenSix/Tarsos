@@ -16,7 +16,7 @@ public class TransmitterSink implements Transmitter {
 
     private final Transmitter[] transmitters;
 
-    public TransmitterSink(Transmitter... transmitters) {
+    public TransmitterSink(final Transmitter... transmitters) {
         this.transmitters = transmitters;
     }
 
@@ -34,7 +34,8 @@ public class TransmitterSink implements Transmitter {
             receiver = transmitters[0].getReceiver();
             for (int i = 1; i < transmitters.length; i++) {
                 if (transmitters[i].getReceiver() != receiver) {
-                    throw new Error("Each Transmitter in the TransmitterSink should have the same Receiver");
+                    throw new AssertionError(
+                    "Each Transmitter in the TransmitterSink should have the same Receiver");
                 }
             }
         }
@@ -42,7 +43,7 @@ public class TransmitterSink implements Transmitter {
     }
 
     @Override
-    public void setReceiver(Receiver receiver) {
+    public void setReceiver(final Receiver receiver) {
         for (Transmitter transmitter : transmitters) {
             transmitter.setReceiver(receiver);
         }
