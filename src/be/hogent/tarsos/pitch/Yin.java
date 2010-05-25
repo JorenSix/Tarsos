@@ -17,7 +17,6 @@ import com.sun.media.sound.AudioFloatInputStream;
  * "http://recherche.ircam.fr/equipes/pcm/cheveign/ps/2002_JASA_YIN_proof.pdf"
  * >the AUBIO_YIN paper.</a> Implementation based on <a
  * href="http://aubio.org">aubio</a>
- * 
  * @author Joren Six
  */
 public final class Yin {
@@ -39,7 +38,7 @@ public final class Yin {
      * A boolean to start and stop the algorithm. Practical for real time
      * processing of data.
      */
-    private volatile boolean running;
+    private transient boolean running;
 
     /**
      * The buffer with audio information. The information in the buffer is not
@@ -53,7 +52,7 @@ public final class Yin {
      */
     private final float[] yinBuffer;
 
-    private Yin(float sampleRate, int bufferSize) {
+    private Yin(final float sampleRate, final int bufferSize) {
         this.sampleRate = sampleRate;
         this.bufferSize = bufferSize;
         // half of each buffer overlaps
@@ -247,7 +246,7 @@ public final class Yin {
         // confused.
         float timeCalculationDivider = (float) (frameSize * frameRate / 2);
         long floatsProcessed = 0;
-        yinInstance = new Yin(sampleRate, 2048);
+        yinInstance = new Yin(sampleRate, 1024);
         int bufferStepSize = yinInstance.bufferSize - yinInstance.overlapSize;
 
         // read full buffer
@@ -284,7 +283,7 @@ public final class Yin {
      *                        v
      *      | 14| 13| 12| 11| 10| 9 | 8 | 7 | 6 |
      * </pre>
-     * @param audioFloatInputStream
+     * @param audioInputStream
      *            The stream to read audio data from.
      * @param audioBuffer
      *            The buffer to read audio data to.
@@ -297,25 +296,23 @@ public final class Yin {
      *             particular, an IOException is thrown if the input stream has
      *             been closed.
      */
-    public static boolean slideBuffer(final AudioFloatInputStream audioFloatInputStream,
+    public static boolean slideBuffer(final AudioFloatInputStream audioInputStream,
             final float[] audioBuffer,
             final int overlap) throws IOException {
         assert overlap < audioBuffer.length;
 
-        int slideSize = audioBuffer.length - overlap;
+        int bufferStepSize = audioBuffer.length - overlap;
 
-        for (int i = 0; i < slideSize; i++) {
-            audioBuffer[i + overlap] = audioBuffer[i];
+        for (int i = 0; i < bufferStepSize; i++) {
+            audioBuffer[i] = audioBuffer[i + overlap];
         }
 
-        boolean hasMoreBytes = audioFloatInputStream.read(audioBuffer, 0, slideSize) != -1;
-        return hasMoreBytes;
+        return audioInputStream.read(audioBuffer, overlap, bufferStepSize) != -1;
     }
 
     /**
      * Process one and only one buffer and return the pitch. Useful for
      * applications where multiple actions are taken on the same buffer.
-     * 
      * @param buffer
      *            The audio information.
      * @return a pitch in Hz or -1 if no pitch is found.
@@ -331,7 +328,7 @@ public final class Yin {
             throw new AssertionError("Buffer and yin buffer should have the same length!");
         }
 
-        // OPTIMIZE: use
+        // OPTIMIZE: use array copy
         for (int i = 0; i < buffer.length; i++) {
             yinInstance.inputBuffer[i] = buffer[i];
         }
