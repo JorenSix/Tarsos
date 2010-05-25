@@ -24,7 +24,7 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
  * information, ambitus, tone scale peaks, waveform, scala files...
  * @author Joren Six
  */
-public final class Annotate implements TarsosApplication {
+public final class Annotate extends AbstractTarsosApp {
 
 
     /**
@@ -90,14 +90,13 @@ public final class Annotate implements TarsosApplication {
         .withRequiredArg().ofType(PitchDetectionMode.class)
         .defaultsTo(PitchDetectionMode.TARSOS_YIN);
 
-        OptionSet options = Tarsos.parse(args, parser, this);
+        OptionSet options = parse(args, parser, this);
 
         String inputFile = options.valueOf(fileSpec).getAbsolutePath();
         PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
 
-        if (!Tarsos.isHelpOptionSet(options)) {
-            annotateInputFile(inputFile, detectionMode);
-
+        if (isHelpOptionSet(options)) {
+            printHelp(parser);
             // String pattern =
             // Configuration.get(ConfKey.audio_file_name_pattern);
             // String globDirectory =
@@ -109,7 +108,7 @@ public final class Annotate implements TarsosApplication {
             // annotateInputFile(file, detectionMode);
             // }
         } else {
-            Tarsos.printHelp(parser, this);
+            annotateInputFile(inputFile, detectionMode);
         }
     }
 

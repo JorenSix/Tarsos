@@ -17,7 +17,7 @@ import be.hogent.tarsos.util.ScalaFile;
 /**
  * @author Joren Six
  */
-public final class MidiToWav implements TarsosApplication {
+public final class MidiToWav extends AbstractTarsosApp {
 
     /**
      * Log messages.
@@ -26,7 +26,7 @@ public final class MidiToWav implements TarsosApplication {
 
     /*
      * (non-Javadoc)
-     * @see be.hogent.tarsos.apps.TarsosApplication#description()
+     * @see be.hogent.tarsos.apps.AbstractTarsosApp#description()
      */
     @Override
     public String description() {
@@ -36,7 +36,7 @@ public final class MidiToWav implements TarsosApplication {
 
     /*
      * (non-Javadoc)
-     * @see be.hogent.tarsos.apps.TarsosApplication#name()
+     * @see be.hogent.tarsos.apps.AbstractTarsosApp#name()
      */
     @Override
     public String name() {
@@ -45,7 +45,7 @@ public final class MidiToWav implements TarsosApplication {
 
     /*
      * (non-Javadoc)
-     * @see be.hogent.tarsos.apps.TarsosApplication#run(java.lang.String[])
+     * @see be.hogent.tarsos.apps.AbstractTarsosApp#run(java.lang.String[])
      */
     @Override
     public void run(final String... args) {
@@ -65,9 +65,9 @@ public final class MidiToWav implements TarsosApplication {
         final OptionSpec<File> outFileSpec = parser.accepts("out", "The outpu WAV file.").withRequiredArg()
         .ofType(File.class).defaultsTo(new File("out.wav"));
 
-        final OptionSet options = Tarsos.parse(args, parser, this);
+        final OptionSet options = parse(args, parser, this);
 
-        if (!Tarsos.isHelpOptionSet(options) && options.has(midiFileSpec) && options.has(sclFileSpec)) {
+        if (!isHelpOptionSet(options) && options.has(midiFileSpec) && options.has(sclFileSpec)) {
             midiFile = options.valueOf(midiFileSpec);
             sclFile = options.valueOf(sclFileSpec);
             outFile = options.valueOf(outFileSpec);
@@ -86,7 +86,7 @@ public final class MidiToWav implements TarsosApplication {
                 LOG.log(Level.SEVERE, "IOException while converting MIDI to WAV.", e);
             }
         } else {
-            Tarsos.printHelp(parser, this);
+            printHelp(parser);
         }
     }
 }

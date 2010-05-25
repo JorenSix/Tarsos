@@ -11,7 +11,7 @@ import be.hogent.tarsos.pitch.PitchUnit;
  * Generates a table with pitches in various units.
  * @author Joren Six
  */
-public final class PitchTable implements TarsosApplication {
+public final class PitchTable extends AbstractTarsosApp {
     /**
      * Defines the number of available MIDI keys.
      */
@@ -19,14 +19,14 @@ public final class PitchTable implements TarsosApplication {
 
     /*
      * (non-Javadoc)
-     * @see be.hogent.tarsos.apps.TarsosApplication#run(java.lang.String[])
+     * @see be.hogent.tarsos.apps.AbstractTarsosApp#run(java.lang.String[])
      */
     @Override
     public void run(final String... args) {
         final OptionParser parser = new OptionParser();
-        final OptionSet options = Tarsos.parse(args, parser, this);
-        if (Tarsos.isHelpOptionSet(options)) {
-            Tarsos.printHelp(parser, this);
+        final OptionSet options = parse(args, parser, this);
+        if (isHelpOptionSet(options)) {
+            printHelp(parser);
         } else {
             printTable();
         }
@@ -53,7 +53,7 @@ public final class PitchTable implements TarsosApplication {
 
     /*
      * (non-Javadoc)
-     * @see be.hogent.tarsos.apps.TarsosApplication#description()
+     * @see be.hogent.tarsos.apps.AbstractTarsosApp#description()
      */
     @Override
     public String description() {
@@ -62,7 +62,7 @@ public final class PitchTable implements TarsosApplication {
 
     /*
      * (non-Javadoc)
-     * @see be.hogent.tarsos.apps.TarsosApplication#name()
+     * @see be.hogent.tarsos.apps.AbstractTarsosApp#name()
      */
     @Override
     public String name() {

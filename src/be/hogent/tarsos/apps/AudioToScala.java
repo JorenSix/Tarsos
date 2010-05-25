@@ -19,7 +19,7 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 /**
  * @author Joren Six
  */
-public final class AudioToScala implements TarsosApplication {
+public final class AudioToScala extends AbstractTarsosApp {
 
     @Override
     public String description() {
@@ -45,14 +45,14 @@ public final class AudioToScala implements TarsosApplication {
                 .withValuesSeparatedBy(' ');
 
         final OptionSpec<PitchDetectionMode> detectionModeSpec = parser.accepts("detector",
-                "The detector to use.")
+        "The detector to use.")
         .withRequiredArg().ofType(PitchDetectionMode.class)
         .defaultsTo(PitchDetectionMode.TARSOS_YIN);
 
-        final OptionSet options = Tarsos.parse(args, parser, this);
+        final OptionSet options = parse(args, parser, this);
 
-        if (Tarsos.isHelpOptionSet(options)) {
-            Tarsos.printHelp(parser, this);
+        if (isHelpOptionSet(options)) {
+            printHelp(parser);
         } else {
             final File inputFile = options.valueOf(fileSpec);
             final PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
@@ -84,7 +84,7 @@ public final class AudioToScala implements TarsosApplication {
         final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
         final ToneScaleHistogram scaleHistogram = ambitusHistogram.toneScaleHistogram();
         scaleHistogram.gaussianSmooth(1.0);
-        final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 20, 0.8);
+        final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 20, 0.5);
         ToneScaleHistogram.exportPeaksToScalaFileFormat(scalaFile.getAbsolutePath(), FileUtils
                 .basename(inputFile.getAbsolutePath()), peaks);
     }

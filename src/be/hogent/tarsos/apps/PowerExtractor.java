@@ -14,7 +14,7 @@ import be.hogent.tarsos.util.SignalPowerExtractor;
  * Extracts power from a file.
  * @author Joren Six
  */
-public final class PowerExtractor implements TarsosApplication {
+public final class PowerExtractor implements AbstractTarsosApp {
 
     /**
      * The default silence level used in the power plot.
@@ -43,7 +43,7 @@ public final class PowerExtractor implements TarsosApplication {
         final OptionSet options = Tarsos.parse(args, parser, this);
 
         if (Tarsos.isHelpOptionSet(options)) {
-            Tarsos.printHelp(parser, this);
+            Tarsos.printHelp(parser);
         } else {
             List<AudioFile> audioFiles = new ArrayList<AudioFile>();
             for (File inputFile : options.valuesOf(inputSpec)) {

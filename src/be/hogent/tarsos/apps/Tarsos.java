@@ -1,18 +1,13 @@
 package be.hogent.tarsos.apps;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
 import be.hogent.tarsos.util.Configuration;
 
 /**
@@ -32,13 +27,13 @@ public final class Tarsos {
     /**
      * A map of applications, maps the name of the application to the instance.
      */
-    private final transient Map<String, TarsosApplication> applications;
+    private final transient Map<String, AbstractTarsosApp> applications;
 
     /**
      * Create a new Tarsos application instance.
      */
     private Tarsos() {
-        applications = new HashMap<String, TarsosApplication>();
+        applications = new HashMap<String, AbstractTarsosApp>();
         Configuration.createRequiredDirectories();
         // default confiuration
         // logging configuration, ...
@@ -53,7 +48,7 @@ public final class Tarsos {
      * @param application
      *            The instance that represents the Tarsos application.
      */
-    public void registerApplication(final String name, final TarsosApplication application) {
+    public void registerApplication(final String name, final AbstractTarsosApp application) {
         applications.put(name, application);
         LOG.fine("Registering " + name);
     }
@@ -115,13 +110,13 @@ public final class Tarsos {
     public static void main(final String... args) {
         final Tarsos instance = Tarsos.getInstance();
 
-        final List<TarsosApplication> applicationList = new ArrayList<TarsosApplication>();
+        final List<AbstractTarsosApp> applicationList = new ArrayList<AbstractTarsosApp>();
         applicationList.add(new Annotate());
         applicationList.add(new PitchTable());
         applicationList.add(new MidiToWav());
         applicationList.add(new AudioToScala());
 
-        for (TarsosApplication application : applicationList) {
+        for (AbstractTarsosApp application : applicationList) {
             instance.registerApplication(application.name(), application);
         }
 
@@ -133,65 +128,8 @@ public final class Tarsos {
      * @param info
      *            the information to print.
      */
-    private void print(final String info) {
+    void print(final String info) {
         final PrintStream standardOut = System.out;
         standardOut.println(info);
-    }
-
-    /**
-     * Parses arguments, adds and checks for help option an prints command line
-     * help for an application.
-     * @param args
-     *            The command line arguments (options).
-     * @param parser
-     *            The argument parser.
-     * @param application
-     *            The application that needs the parameters.
-     * @return null if the arguments could not be parsed by parser. An OptionSet
-     *         otherwise.
-     */
-    public static OptionSet parse(final String[] args, final OptionParser parser,
-            final TarsosApplication application) {
-        parser.acceptsAll(Arrays.asList("h", "?", "help"), "Show help");
-        OptionSet options = null;
-        try {
-            options = parser.parse(args);
-        } catch (OptionException e) {
-            final String message = e.getMessage();
-            tarsosInstance.print(message);
-            tarsosInstance.print("");
-            printHelp(parser, application);
-        }
-        return options;
-    }
-
-    /**
-     * Checks if the OptionSet contains the help argument.
-     * @param options
-     *            The options to check.
-     * @return True if options is null or options contain help.
-     */
-    public static boolean isHelpOptionSet(final OptionSet options) {
-        return options == null || options.has("help");
-    }
-
-    /**
-     * Prints command line help for an application.
-     * @param parser
-     *            The command line argument parser.
-     * @param application
-     *            The application.
-     */
-    public static void printHelp(final OptionParser parser, final TarsosApplication application) {
-        Tarsos instance = Tarsos.getInstance();
-        instance.print("Application description");
-        instance.print("-----------------------");
-        instance.print(application.description());
-        instance.print("");
-        try {
-            parser.printHelpOn(System.out);
-        } catch (IOException e1) {
-            LOG.log(Level.SEVERE, "Could not print to STD OUT. How quaint.", e1);
-        }
     }
 }

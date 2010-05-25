@@ -23,7 +23,7 @@ import be.hogent.tarsos.util.FileUtils;
  * STDIN.
  * @author Joren Six
  */
-public final class AnnotationSynth implements TarsosApplication {
+public final class AnnotationSynth extends AbstractTarsosApp {
     /**
      * Log messages.
      */
@@ -33,7 +33,7 @@ public final class AnnotationSynth implements TarsosApplication {
     public String description() {
         return "Generates audio from a set of annotations. AnnotationSynth is used to "
         + "sonificate pitch annotation files. For the moment it uderstands the pitch "
-        + "files used by BOZKURT, AUBIO and IPEM. It reads the data from a file or from " + "STDIN.";
+        + "files used by BOZKURT, AUBIO and IPEM. It reads the data from a file or from STDIN.";
     }
 
     @Override
@@ -44,6 +44,7 @@ public final class AnnotationSynth implements TarsosApplication {
     @Override
     public void run(final String... args) {
         final OptionParser parser = new OptionParser();
+
 
         final OptionSpec<File> inputSpec = parser.accepts("in",
         "Input annotations. If no file is given it reads standard input.").withRequiredArg().ofType(
@@ -68,47 +69,47 @@ public final class AnnotationSynth implements TarsosApplication {
                 + "With samples every 10ms and a median filter of 5 there can be a 50/2 ms delay")
                 .withRequiredArg().ofType(Integer.class).defaultsTo(0);
 
-        final OptionSet options = Tarsos.parse(args, parser, this);
+        final OptionSet options = parse(args, parser, this);
 
-        final CSVFileHandler handler = options.valueOf(annoFormatSpec).getCvsFileHandler();
-        final File outputFile = options.valueOf(outputSpec);
-        final File inputFile = options.valueOf(inputSpec);
-        final int filterSize = options.valueOf(filterSpec);
-        final boolean listen = options.has("listen");
+        if (isHelpOptionSet(options)) {
+            isHelpOptionSet(options);
+        } else {
+            final CSVFileHandler handler = options.valueOf(annoFormatSpec).getCvsFileHandler();
+            final File outputFile = options.valueOf(outputSpec);
+            final File inputFile = options.valueOf(inputSpec);
+            final int filterSize = options.valueOf(filterSpec);
+            final boolean listen = options.has("listen");
 
-
-        // System.out.println("Bugs: currently gain information is only
-        // used while listening, not while writing a file.");
-
-        final ToneSequenceBuilder builder = new ToneSequenceBuilder();
-        final String separator = handler.getSeparator();
-        if (inputFile == null) {
-            final BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-            String line;
-            try {
-                line = stdIn.readLine();
-                while (line != null && line.length() != 0) {
-                    final String[] row = line.split(separator);
-                    handler.handleRow(builder, row);
+            final ToneSequenceBuilder builder = new ToneSequenceBuilder();
+            final String separator = handler.getSeparator();
+            if (inputFile == null) {
+                final BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+                String line;
+                try {
                     line = stdIn.readLine();
+                    while (line != null && line.length() != 0) {
+                        final String[] row = line.split(separator);
+                        handler.handleRow(builder, row);
+                        line = stdIn.readLine();
+                    }
+                } catch (IOException e1) {
+                    LOG.log(Level.SEVERE, "Could not read from standard input.", e1);
                 }
-            } catch (IOException e1) {
-                LOG.log(Level.SEVERE, "Could not read from standard input.", e1);
+            } else {
+                final List<String[]> rows = FileUtils.readCSVFile(inputFile.getAbsolutePath(), separator, -1);
+                for (String[] row : rows) {
+                    handler.handleRow(builder, row);
+                }
             }
-        } else {
-            final List<String[]> rows = FileUtils.readCSVFile(inputFile.getAbsolutePath(), separator, -1);
-            for (String[] row : rows) {
-                handler.handleRow(builder, row);
-            }
-        }
 
-        if (listen) {
-            builder.playAnnotations(filterSize);
-        } else {
-            try {
-                builder.writeFile(outputFile.getAbsolutePath(), filterSize);
-            } catch (Exception e) {
-                LOG.log(Level.SEVERE, "Could not write: " + outputFile + "\n", e);
+            if (listen) {
+                builder.playAnnotations(filterSize);
+            } else {
+                try {
+                    builder.writeFile(outputFile.getAbsolutePath(), filterSize);
+                } catch (Exception e) {
+                    LOG.log(Level.SEVERE, "Could not write: " + outputFile + "\n", e);
+                }
             }
         }
     }
