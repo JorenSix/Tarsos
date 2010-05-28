@@ -2,7 +2,6 @@ package be.hogent.tarsos.util;
 
 /**
  * Defines a configuration key.
- * 
  * @author Joren Six
  */
 public enum ConfKey {
@@ -144,17 +143,34 @@ public enum ConfKey {
      */
     audio_file_name_pattern;
 
-    boolean isRequiredDirectory;
+    /**
+     * True if the configured key is a required directory. False otherwise.
+     */
+    private final boolean isRequiredDir;
 
-    ConfKey(boolean isRequiredDirectory) {
-        this.isRequiredDirectory = isRequiredDirectory;
+    /**
+     * Create a configuration key.
+     * @param isReqDir
+     *            True if the configured key is a required directory. False
+     *            otherwise.
+     */
+    ConfKey(final boolean isReqDir) {
+        this.isRequiredDir = isReqDir;
     }
 
+    /**
+     * By default configured values are not required directories.
+     */
     ConfKey() {
         this(false);
     }
 
+    /**
+     * Checks if this key is a required directory.
+     * @return True if the configured value is a required directory, false
+     *         otherwise.
+     */
     boolean isRequiredDirectory() {
-        return isRequiredDirectory;
+        return isRequiredDir;
     }
 }

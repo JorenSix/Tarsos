@@ -13,6 +13,10 @@ import be.hogent.tarsos.pitch.PitchConverter;
 public final class ScalaFile {
 
     /**
+     * The octave is 1200 cents.
+     */
+    private static final double OCTAVE_IN_CENTS = 1200.0;
+    /**
      * A description of the tone scale.
      */
     private final transient String description;
@@ -182,6 +186,11 @@ public final class ScalaFile {
                 }
                 contents.append("\n");
             }
+
+            if (pitches[pitches.length - 1] != OCTAVE_IN_CENTS) {
+                contents.append(OCTAVE_IN_CENTS).append("\n");
+            }
+
             FileUtils.writeFile(contents.toString(), scalaFile);
         } else {
             LOG.warning("No pitches defined, file: " + scalaFile + " not created.");

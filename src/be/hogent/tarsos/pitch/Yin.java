@@ -17,6 +17,7 @@ import com.sun.media.sound.AudioFloatInputStream;
  * "http://recherche.ircam.fr/equipes/pcm/cheveign/ps/2002_JASA_YIN_proof.pdf"
  * >the AUBIO_YIN paper.</a> Implementation based on <a
  * href="http://aubio.org">aubio</a>
+ * 
  * @author Joren Six
  */
 public final class Yin {
@@ -125,7 +126,6 @@ public final class Yin {
      * Implements step 5 of the AUBIO_YIN paper. It refines the estimated tau value
      * using parabolic interpolation. This is needed to detect higher
      * frequencies more precisely. See http://fizyka.umk.pl/nrbook/c10-2.pdf
-     * 
      * @param tauEstimate
      *            the estimated tau value.
      * @return a better, more precise tau value.
@@ -184,7 +184,7 @@ public final class Yin {
     }
 
     /**
-     * The interface to use to react to detected pitches.
+     * An interface to react to detected pitches.
      * @author Joren Six
      */
     public interface DetectedPitchHandler {
@@ -214,14 +214,13 @@ public final class Yin {
      */
     public static void processFile(final String fileName, final DetectedPitchHandler detectedPitchHandler)
     throws UnsupportedAudioFileException, IOException {
-        AudioInputStream ais = AudioSystem.getAudioInputStream(new File(fileName));
-        AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
+        final AudioInputStream ais = AudioSystem.getAudioInputStream(new File(fileName));
+        final AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
         Yin.processStream(afis, detectedPitchHandler);
     }
 
     /**
      * Annotate an audio stream: useful for real-time pitch tracking.
-     * 
      * @param afis
      *            The audio stream.
      * @param detectedPitchHandler
@@ -246,7 +245,7 @@ public final class Yin {
         // confused.
         float timeCalculationDivider = (float) (frameSize * frameRate / 2);
         long floatsProcessed = 0;
-        yinInstance = new Yin(sampleRate, 1024);
+        yinInstance = new Yin(sampleRate, 2048);
         int bufferStepSize = yinInstance.bufferSize - yinInstance.overlapSize;
 
         // read full buffer
@@ -267,9 +266,9 @@ public final class Yin {
     }
 
     /**
-     * Slides a buffer with an overlap and reads new data from the stream. to
-     * the correct place in the buffer. E.g. with a buffer size of 9 and overlap
-     * of 3.
+     * This comment is not really up to date. Beware! Here be dragons. Slides a
+     * buffer with an overlap and reads new data from the stream. to the correct
+     * place in the buffer. E.g. with a buffer size of 9 and overlap of 3.
      * <pre>
      *      | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
      *                        |
@@ -328,10 +327,15 @@ public final class Yin {
             throw new AssertionError("Buffer and yin buffer should have the same length!");
         }
 
-        // OPTIMIZE: use array copy
-        for (int i = 0; i < buffer.length; i++) {
-            yinInstance.inputBuffer[i] = buffer[i];
-        }
+        // Small optimization: difference between loop and System.arraycopy is
+        // minimal but there. These are the results for different methods to
+        // copy an array of 100 000 000 elements using this benchmark:
+        // http://www.javapractices.com/topic/TopicAction.do?Id=3
+        // Using clone: 17531ms
+        // Using System.arraycopy: 17846ms
+        // Using Arrays.copyOf: 21815ms
+        // Using for loop: 26002ms
+        System.arraycopy(buffer, 0, yinInstance.inputBuffer, 0, buffer.length);
 
         return yinInstance.getPitch();
     }

@@ -19,7 +19,7 @@ public final class PitchConverter {
     .getDouble(ConfKey.absolute_cents_reference_frequency);
 
     /**
-     * Cache log 2 calculation.
+     * Cache LOG 2 calculation.
      */
     private static final double LOG_TWO = Math.log(2.0);
 

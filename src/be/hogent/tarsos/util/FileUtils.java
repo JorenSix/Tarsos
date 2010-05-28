@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -38,14 +39,14 @@ import java.util.regex.Pattern;
  * @author Joren Six
  */
 public class FileUtils {
-    static final Logger log = Logger.getLogger(FileUtils.class.getName());
-    private static final char pathSeparator = File.separatorChar;
-    private static final char extensionSeparator = '.';
+    static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
+
+
 
     public static String temporaryDirectory() {
-        String tempDir = System.getProperty("java.io.tmpdir");
+        final String tempDir = System.getProperty("java.io.tmpdir");
         if (tempDir.contains(" ")) {
-            log.warning("Temporary directory (" + tempDir + ") contains whitespace");
+            LOG.warning("Temporary directory (" + tempDir + ") contains whitespace");
         }
         return tempDir;
     }
@@ -57,12 +58,11 @@ public class FileUtils {
     /**
      * Joins path elements using the systems path separator. e.g. "/tmp" and
      * "test.wav" combined together should yield /tmp/test.wav on UNIX.
-     * 
      * @param path
      *            the path parts part
      * @return each element from path joined by the systems path separator.
      */
-    public static String combine(String... path) {
+    public static String combine(final String... path) {
         File file = new File(path[0]);
         for (int i = 1; i < path.length; i++) {
             file = new File(file, path[i]);
@@ -77,8 +77,8 @@ public class FileUtils {
         String runtimePath = "";
         try {
             runtimePath = new File(".").getCanonicalPath();
-        } catch (IOException e) {
-            throw new Error(e);
+        } catch (final IOException e) {
+            LOG.log(Level.SEVERE, "Could not find runtime path, strange.", e);
         }
         return runtimePath;
     }
@@ -95,17 +95,34 @@ public class FileUtils {
      * @param contents
      * @param name
      */
-    public static void writeFile(String contents, String name) {
-        FileWriter FW = null;
+    public static void writeFile(final String contents, final String name) {
+        writeFile(contents, name, false);
+    }
+
+    private static void writeFile(final String contents, final String name, final boolean append) {
+        BufferedWriter outputStream = null;
+        PrintWriter output = null;
+        FileWriter fileWriter = null;
         try {
-            FW = new FileWriter(name);
-            BufferedWriter outputStream = new BufferedWriter(FW);
-            PrintWriter output = new PrintWriter(outputStream);
+            fileWriter = new FileWriter(name, append);
+            outputStream = new BufferedWriter(fileWriter);
+            output = new PrintWriter(outputStream);
             output.print(contents);
             outputStream.flush();
-            outputStream.close();
-        } catch (IOException i1) {
-            log.severe("Can't open file:" + name);
+            output.close();
+        } catch (final IOException e) {
+            LOG.log(Level.SEVERE, "Could not write file " + name, e);
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+                if (output != null) {
+                    output.close();
+                }
+            } catch (final IOException e) {
+                LOG.log(Level.SEVERE, "Failed to close file: " + name, e);
+            }
         }
     }
 
@@ -116,46 +133,35 @@ public class FileUtils {
      * @param name
      *            The name of the file to create.
      */
-    public static void appendFile(String contents, String name) {
-        FileWriter FW = null;
-        try {
-            FW = new FileWriter(name, true);
-            BufferedWriter outputStream = new BufferedWriter(FW);
-            PrintWriter output = new PrintWriter(outputStream);
-            output.print(contents);
-            outputStream.flush();
-            outputStream.close();
-        } catch (IOException i1) {
-            log.severe("Can't open file:" + name);
-        }
+    public static void appendFile(final String contents, final String name) {
+        writeFile(contents, name, true);
     }
 
     /**
      * Reads the contents of a file.
-     * 
      * @param name
      *            the name of the file to read
      * @return the contents of the file if successful, an empty string
      *         otherwise.
      */
-    public static String readFile(String name) {
+    public static String readFile(final String name) {
         FileReader fileReader = null;
-        StringBuilder contents = new StringBuilder();
+        final StringBuilder contents = new StringBuilder();
         try {
-            File file = new File(name);
+            final File file = new File(name);
             if (!file.exists()) {
                 throw new Error("File " + name + " does not exist");
             }
             fileReader = new FileReader(file);
-            BufferedReader in = new BufferedReader(fileReader);
+            final BufferedReader in = new BufferedReader(fileReader);
             String inputLine = in.readLine();
             while (inputLine != null) {
                 contents.append(inputLine).append("\n");
                 inputLine = in.readLine();
             }
             in.close();
-        } catch (IOException i1) {
-            log.severe("Can't open file:" + name);
+        } catch (final IOException i1) {
+            LOG.severe("Can't open file:" + name);
         }
         return contents.toString();
     }
@@ -168,22 +174,22 @@ public class FileUtils {
      *         otherwise.
      */
     public static String readFileFromJar(final String path) {
-        StringBuilder contents = new StringBuilder();
-        URL url = FileUtils.class.getResource(path);
+        final StringBuilder contents = new StringBuilder();
+        final URL url = FileUtils.class.getResource(path);
         URLConnection connection;
         try {
             connection = url.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            final BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 contents.append(new String(inputLine.getBytes(), "UTF-8")).append("\n");
             }
             in.close();
-        } catch (IOException e) {
-            log.severe("Error while reading file " + path + " from jar: " + e.getMessage());
+        } catch (final IOException e) {
+            LOG.severe("Error while reading file " + path + " from jar: " + e.getMessage());
             e.printStackTrace();
-        } catch (NullPointerException e) {
-            log.severe("Error while reading file " + path + " from jar: " + e.getMessage());
+        } catch (final NullPointerException e) {
+            LOG.severe("Error while reading file " + path + " from jar: " + e.getMessage());
             e.printStackTrace();
         }
         return contents.toString();
@@ -194,23 +200,23 @@ public class FileUtils {
      * @param source
      *            The path to read e.g. /package/name/here/help.html
      */
-    public static void copyFileFromJar(String source, String target) {
+    public static void copyFileFromJar(final String source, final String target) {
         try {
-            InputStream in = new FileUtils().getClass().getResourceAsStream(source);
+            final InputStream in = new FileUtils().getClass().getResourceAsStream(source);
             OutputStream out;
             out = new FileOutputStream(target);
-            byte[] buffer = new byte[4096];
+            final byte[] buffer = new byte[4096];
             int r;
             while ((r = in.read(buffer)) != -1) {
                 out.write(buffer, 0, r);
             }
             out.close();
             in.close();
-        } catch (FileNotFoundException e) {
-            log.severe("File not found: " + e.getMessage());
+        } catch (final FileNotFoundException e) {
+            LOG.severe("File not found: " + e.getMessage());
             e.printStackTrace();
-        } catch (IOException e) {
-            log.severe("Exception while copying file from jar" + e.getMessage());
+        } catch (final IOException e) {
+            LOG.severe("Exception while copying file from jar" + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -230,22 +236,22 @@ public class FileUtils {
      * @return a List of string arrays. The data of the CSV-file can be found in
      *         the arrays. Each row corresponds with an array.
      */
-    public static List<String[]> readCSVFile(String fileName, String separator, int expectedNumberOfColumns) {
-        List<String[]> data = new ArrayList<String[]>();
+    public static List<String[]> readCSVFile(final String fileName, final String separator, final int expectedNumberOfColumns) {
+        final List<String[]> data = new ArrayList<String[]>();
         FileReader fileReader = null;
 
         try {
-            File file = new File(fileName);
+            final File file = new File(fileName);
             if (!file.exists()) {
                 throw new Error("File '" + fileName + "' does not exist");
             }
             fileReader = new FileReader(file);
-            BufferedReader in = new BufferedReader(fileReader);
+            final BufferedReader in = new BufferedReader(fileReader);
             String inputLine;
             int lineNumber = 0;
             while ((inputLine = in.readLine()) != null) {
                 lineNumber++;
-                String[] row = inputLine.split(separator);
+                final String[] row = inputLine.split(separator);
                 if (expectedNumberOfColumns == -1 || expectedNumberOfColumns == row.length) {
                     data.add(row);
                 } else {
@@ -255,8 +261,8 @@ public class FileUtils {
                 }
             }
             in.close();
-        } catch (IOException i1) {
-            log.severe("Can't open file:" + fileName);
+        } catch (final IOException i1) {
+            LOG.severe("Can't open file:" + fileName);
         }
         return data;
     }
@@ -267,15 +273,15 @@ public class FileUtils {
 
     public static RowFilter ACCEPT_ALL_ROWFILTER = new RowFilter() {
         @Override
-        public boolean acceptRow(String[] row) {
+        public boolean acceptRow(final String[] row) {
             return true;
         }
     };
 
-    public static List<String> readColumnFromCSVData(List<String[]> data, int columnIndex, RowFilter filter) {
+    public static List<String> readColumnFromCSVData(final List<String[]> data, final int columnIndex, RowFilter filter) {
         filter = filter == null ? ACCEPT_ALL_ROWFILTER : filter;
-        List<String> columnData = new ArrayList<String>();
-        for (String[] row : data) {
+        final List<String> columnData = new ArrayList<String>();
+        for (final String[] row : data) {
             if (filter.acceptRow(row)) {
                 columnData.add(row[columnIndex]);
             }
@@ -285,22 +291,22 @@ public class FileUtils {
 
     public static void export(final String filename, final String[] header, final List<Object[]> data) {
 
-        String dateFormat = "yyyy-MM-dd hh:mm:ss";
-        String numberFormat = "#0.000";
-        SimpleDateFormat exportDateFormatter = new SimpleDateFormat(dateFormat);
-        DecimalFormat exportDecimalFormat = new DecimalFormat(numberFormat);
-        String separator = "\t";
+        final String dateFormat = "yyyy-MM-dd hh:mm:ss";
+        final String numberFormat = "#0.000";
+        final SimpleDateFormat exportDateFormatter = new SimpleDateFormat(dateFormat);
+        final DecimalFormat exportDecimalFormat = new DecimalFormat(numberFormat);
+        final String separator = "\t";
 
         FileWriter fileWriter = null;
         try {
             fileWriter = new FileWriter(filename + ".csv");
-            BufferedWriter outputStream = new BufferedWriter(fileWriter);
-            PrintWriter output = new PrintWriter(outputStream);
+            final BufferedWriter outputStream = new BufferedWriter(fileWriter);
+            final PrintWriter output = new PrintWriter(outputStream);
 
             if (header != null) {
                 // HEADERS
                 for (int column = 0; column < header.length; column++) {
-                    Object valueObject = header[column];
+                    final Object valueObject = header[column];
                     String value = valueObject == null ? "" : valueObject.toString();
                     value = value.replace(separator, "");
                     output.print(value + separator);
@@ -309,9 +315,9 @@ public class FileUtils {
             }
 
             // DATA
-            for (Object[] row : data) {
+            for (final Object[] row : data) {
                 for (int column = 0; column < row.length; column++) {
-                    Object valueObject = row[column];
+                    final Object valueObject = row[column];
                     String value = valueObject == null ? "" : valueObject.toString();
                     if (valueObject != null) {
                         if (valueObject instanceof Double) {
@@ -327,8 +333,8 @@ public class FileUtils {
             }
             outputStream.flush();
             outputStream.close();
-        } catch (IOException i1) {
-            log.severe("Can't open file:" + filename);
+        } catch (final IOException i1) {
+            LOG.severe("Can't open file:" + filename);
         }
     }
 
@@ -357,14 +363,14 @@ public class FileUtils {
      *                regular-expression pattern.
      */
     public static List<String> glob(final String directory, final String pattern) {
-        File dir = new File(directory);
-        Pattern p = Pattern.compile(pattern);
-        List<String> matchingFiles = new ArrayList<String>();
+        final File dir = new File(directory);
+        final Pattern p = Pattern.compile(pattern);
+        final List<String> matchingFiles = new ArrayList<String>();
         if (!dir.isDirectory()) {
             throw new IllegalArgumentException(directory + " is not a directory");
         }
 
-        for (String file : dir.list()) {
+        for (final String file : dir.list()) {
             if (!new File(file).isDirectory() && p.matcher(file).matches() && file != null) {
                 matchingFiles.add(FileUtils.combine(directory, file));
             }
@@ -381,7 +387,7 @@ public class FileUtils {
      * @return the extension. E.g. TXT or JPEG.
      */
     public static String extension(final String fileName) {
-        int dot = fileName.lastIndexOf(extensionSeparator);
+        final int dot = fileName.lastIndexOf('.');
         return dot == -1 ? "" : fileName.substring(dot + 1);
     }
 
@@ -391,8 +397,8 @@ public class FileUtils {
      * @return the file name without extension and path
      */
     public static String basename(final String fileName) {
-        int dot = fileName.lastIndexOf(extensionSeparator);
-        int sep = fileName.lastIndexOf(pathSeparator);
+        int dot = fileName.lastIndexOf('.');
+        int sep = fileName.lastIndexOf(File.separatorChar);
         if (sep == -1) {
             sep = fileName.lastIndexOf('\\');
         }
@@ -412,7 +418,7 @@ public class FileUtils {
      * @return the path of the file.
      */
     public static String path(final String fileName) {
-        int sep = fileName.lastIndexOf(pathSeparator);
+        final int sep = fileName.lastIndexOf(File.separatorChar);
         return fileName.substring(0, sep);
     }
 
@@ -449,7 +455,7 @@ public class FileUtils {
      * @return the complete sanitized path.
      */
     public static String sanitizedFileName(final String fileName) {
-        String baseName = basename(fileName);
+        final String baseName = basename(fileName);
         String newBaseName = baseName.replaceAll(" ", "_");
         newBaseName = newBaseName.replaceAll("\\(", "-");
         newBaseName = newBaseName.replaceAll("\\)", "-");
@@ -460,22 +466,22 @@ public class FileUtils {
 
     private static String filterNonAscii(final String inString) {
         // Create the encoder and decoder for the character encoding
-        Charset charset = Charset.forName("US-ASCII");
-        CharsetDecoder decoder = charset.newDecoder();
-        CharsetEncoder encoder = charset.newEncoder();
+        final Charset charset = Charset.forName("US-ASCII");
+        final CharsetDecoder decoder = charset.newDecoder();
+        final CharsetEncoder encoder = charset.newEncoder();
         // This line is the key to removing "unmappable" characters.
         encoder.replaceWith("_".getBytes());
         encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
         String result = inString;
         try {
             // Convert a string to bytes in a ByteBuffer
-            ByteBuffer bbuf = encoder.encode(CharBuffer.wrap(inString));
+            final ByteBuffer bbuf = encoder.encode(CharBuffer.wrap(inString));
             // Convert bytes in a ByteBuffer to a character ByteBuffer and then
             // to a string.
-            CharBuffer cbuf = decoder.decode(bbuf);
+            final CharBuffer cbuf = decoder.decode(bbuf);
             result = cbuf.toString();
-        } catch (CharacterCodingException cce) {
-            log.severe("Exception during character encoding/decoding: " + cce.getMessage());
+        } catch (final CharacterCodingException cce) {
+            LOG.severe("Exception during character encoding/decoding: " + cce.getMessage());
         }
 
         return result;
@@ -495,10 +501,10 @@ public class FileUtils {
             inChannel = new FileInputStream(new File(source)).getChannel();
             outChannel = new FileOutputStream(new File(target)).getChannel();
             inChannel.transferTo(0, inChannel.size(), outChannel);
-        } catch (FileNotFoundException e) {
-            log.severe("File " + source + " not found! " + e.getMessage());
-        } catch (IOException e) {
-            log.severe("Error while copying " + source + " to " + target + " : " + e.getMessage());
+        } catch (final FileNotFoundException e) {
+            LOG.severe("File " + source + " not found! " + e.getMessage());
+        } catch (final IOException e) {
+            LOG.severe("Error while copying " + source + " to " + target + " : " + e.getMessage());
         } finally {
             try {
                 if (inChannel != null) {
@@ -507,7 +513,7 @@ public class FileUtils {
                 if (outChannel != null) {
                     outChannel.close();
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // ignore
                 e.printStackTrace();
             }

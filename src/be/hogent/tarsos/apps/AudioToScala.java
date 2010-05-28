@@ -56,7 +56,7 @@ public final class AudioToScala extends AbstractTarsosApp {
         } else {
             final File inputFile = options.valueOf(fileSpec);
             final PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
-            File scalaFile;
+            final File scalaFile;
             if (options.valueOf(scalaSpec) == null) {
                 scalaFile = new File(FileUtils.basename(inputFile.getAbsolutePath()) + ".scl");
             } else {
@@ -83,8 +83,10 @@ public final class AudioToScala extends AbstractTarsosApp {
         final List<Sample> samples = pitchDetector.getSamples();
         final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
         final ToneScaleHistogram scaleHistogram = ambitusHistogram.toneScaleHistogram();
+        scaleHistogram.plot(FileUtils.basename(scalaFile.getAbsolutePath()) + "png", FileUtils
+                .basename(scalaFile.getAbsolutePath()));
         scaleHistogram.gaussianSmooth(1.0);
-        final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 20, 0.5);
+        final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 15, 0.2);
         ToneScaleHistogram.exportPeaksToScalaFileFormat(scalaFile.getAbsolutePath(), FileUtils
                 .basename(inputFile.getAbsolutePath()), peaks);
     }

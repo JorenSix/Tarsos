@@ -22,7 +22,7 @@ import be.hogent.tarsos.util.SimplePlot;
  * inclusive and 1 exclusive.
  * <p>
  * The histogram uses a red and black tree as underlying structure: Search,
- * insert and delete are O(log n). The tree keeps the keys in order and makes
+ * insert and delete are O(LOG n). The tree keeps the keys in order and makes
  * iteration (in order) easy. Optimization is possible by replacing the tree
  * with arrays.
  * </p>
@@ -37,7 +37,7 @@ import be.hogent.tarsos.util.SimplePlot;
  * @author Joren Six
  */
 public class Histogram implements Cloneable {
-    private static final Logger log = Logger.getLogger(Histogram.class.getName());
+    private static final Logger LOG = Logger.getLogger(Histogram.class.getName());
 
     /**
      * The width of each class (or bin) is equal to stop - start / number of
@@ -108,8 +108,8 @@ public class Histogram implements Cloneable {
      *                           the valid range is added an
      *                           IllegalArgumentException is thrown.
      */
-    public Histogram(double start, double stop, int numberOfClasses, boolean wraps,
-            boolean ignoreValuesOutsideRange) {
+    public Histogram(final double start, final double stop, final int numberOfClasses, final boolean wraps,
+            final boolean ignoreValuesOutsideRange) {
         if (stop <= start) {
             throw new IllegalArgumentException("The stopping value (" + stop
                     + ") should be bigger than the starting value (" + start + ") .");
@@ -122,7 +122,7 @@ public class Histogram implements Cloneable {
         this.wraps = wraps;
         this.ignoreValuesOutsideRange = ignoreValuesOutsideRange;
 
-        double lastKey = stop - getClassWidth() / 2;
+        final double lastKey = stop - getClassWidth() / 2;
 
         for (double current = start + getClassWidth() / 2; wraps ? current < lastKey : current <= lastKey; current = preventRoundingErrors(current
                 + getClassWidth())) {
@@ -140,7 +140,7 @@ public class Histogram implements Cloneable {
      * @param original
      *            the original histogram
      */
-    public Histogram(Histogram original) {
+    public Histogram(final Histogram original) {
         this(original.getStart(), original.getStop(), original.numberOfClasses, original.wraps,
                 original.ignoreValuesOutsideRange);
     }
@@ -165,7 +165,7 @@ public class Histogram implements Cloneable {
      *            the number of classes between the starting and stopping
      *            values. Also defines the classWidth.
      */
-    public Histogram(double start, double stop, int numberOfClasses) {
+    public Histogram(final double start, final double stop, final int numberOfClasses) {
         this(start, stop, numberOfClasses, false, false);
     }
 
@@ -195,26 +195,26 @@ public class Histogram implements Cloneable {
      *            are mapped to values inside the range using a modulo
      *            calculation.
      */
-    public Histogram(double start, double stop, int numberOfClasses, boolean wraps) {
+    public Histogram(final double start, final double stop, final int numberOfClasses, final boolean wraps) {
         this(start, stop, numberOfClasses, wraps, true);
     }
 
     /**
      * Returns the key for class with index i.
-     * 
      * @param i
      *            a class index. If i lays outside the interval
      *            <code>[0,getNumberOfClasses()[</code> it is mapped to a value
      *            inside the interval using a modulo calculation.
      * @return the key for class with index i
      */
-    public double getKeyForClass(int i) {
-        while (i < 0) { // make sure i is positive
-            i += getNumberOfClasses();
+    public final double getKeyForClass(final int i) {
+        int classIndex = i;
+        while (classIndex < 0) { // make sure i is positive
+            classIndex += getNumberOfClasses();
         }
         // make sure i is within range
-        i = i % getNumberOfClasses();
-        double key = getStart() + i * getClassWidth() + getClassWidth() / 2.0;
+        classIndex = classIndex % getNumberOfClasses();
+        final double key = getStart() + classIndex * getClassWidth() + getClassWidth() / 2.0;
         return preventRoundingErrors(key);
     }
 
@@ -227,7 +227,7 @@ public class Histogram implements Cloneable {
      *            inside the interval using a modulo calculation.
      * @return the number of items in bin with index i
      */
-    public long getCountForClass(int i) {
+    public long getCountForClass(final int i) {
         return getCount(getKeyForClass(i));
     }
 
@@ -249,25 +249,25 @@ public class Histogram implements Cloneable {
      * @throws IllegalArgumentException
      *             when the value is not in the range of the histogram.
      */
-    public Histogram add(double value) {
+    public Histogram add(final double value) {
 
         if (!wraps && !ignoreValuesOutsideRange && !validValue(value)) {
             throw new IllegalArgumentException("Value not in the correct interval: " + value
                     + " not between " + "[" + this.firstValidValue() + "," + this.lastValidValue() + "].");
         } else if (!wraps && ignoreValuesOutsideRange && !validValue(value)) {
-            log.info("Ignored value " + value + " (not between " + "[" + this.firstValidValue() + ","
+            LOG.info("Ignored value " + value + " (not between " + "[" + this.firstValidValue() + ","
                     + this.lastValidValue() + "]).");
         }
 
         if (value > 0) {
-            double key = valueToKey(value);
-            Long count = freqTable.get(key);
+            final double key = valueToKey(value);
+            final Long count = freqTable.get(key);
             assert count != null : "All key values should be initialized, " + key + " is not.";
             if (count != null) {
                 freqTable.put(key, Long.valueOf(count.longValue() + 1));
             }
         } else {
-            log.warning("Using values below zero in is not tested, "
+            LOG.warning("Using values below zero in is not tested, "
                     + "it can yield unexpected results. Values below zero are ignored!");
         }
         return this;
@@ -288,7 +288,7 @@ public class Histogram implements Cloneable {
      *            to prevent errors for.
      * @return a rounded value to
      */
-    private double preventRoundingErrors(double value) {
+    private double preventRoundingErrors(final double value) {
         return Math.floor(value * PRECISION_FACTOR) / PRECISION_FACTOR;
     }
 
@@ -308,7 +308,7 @@ public class Histogram implements Cloneable {
         }
 
         if (wraps) {
-            double interval = stop - start;
+            final double interval = stop - start;
             while (value < freqTable.firstKey()) {
                 value = preventRoundingErrors(value + interval);
             }
@@ -317,9 +317,9 @@ public class Histogram implements Cloneable {
 
         assert validValue(value);
 
-        double numberOfClasses = Math.floor((value + start) / classWidth);
-        double offset = classWidth / 2 - start;
-        double key = preventRoundingErrors(numberOfClasses * classWidth + offset);
+        final double numberOfClasses = Math.floor((value + start) / classWidth);
+        final double offset = classWidth / 2 - start;
+        final double key = preventRoundingErrors(numberOfClasses * classWidth + offset);
         assert key >= freqTable.firstKey();
         assert key <= freqTable.lastKey();
         return key;
@@ -332,10 +332,10 @@ public class Histogram implements Cloneable {
      *            the value to lookup.
      * @return the frequency of v.
      */
-    public long getCount(double value) {
+    public final long getCount(double value) {
         value = valueToKey(value);
         long result = 0;
-        Long count = freqTable.get(value);
+        final Long count = freqTable.get(value);
         if (count != null) {
             result = count.longValue();
         }
@@ -351,7 +351,7 @@ public class Histogram implements Cloneable {
      * @param count
      *            the number of items in the bin
      */
-    public void setCount(double value, long count) {
+    public final void setCount(double value, final long count) {
         value = valueToKey(value);
         freqTable.put(value, count);
     }
@@ -359,24 +359,23 @@ public class Histogram implements Cloneable {
     /**
      * @return the width of a class (bin)
      */
-    public double getClassWidth() {
+    public final double getClassWidth() {
         return classWidth;
     }
 
     /**
      * @return the number of classes
      */
-    public int getNumberOfClasses() {
+    public final int getNumberOfClasses() {
         return numberOfClasses;
     }
 
     /**
      * The starting value is not the same as the first key. It is equal to
      * <code>firstKey - classWidth / 2.0</code>
-     * 
      * @return the starting value
      */
-    public double getStart() {
+    public final double getStart() {
         assert Math.abs(start - freqTable.firstKey() - classWidth / 2.0) < 0.0001;
         return start;
     }
@@ -427,7 +426,7 @@ public class Histogram implements Cloneable {
      *            the value to check
      * @return
      */
-    private boolean validValue(double value) {
+    private boolean validValue(final double value) {
         return value >= firstValidValue() && value <= lastValidValue();
     }
 
@@ -446,7 +445,7 @@ public class Histogram implements Cloneable {
      *            the value to lookup.
      * @return the proportion of values equal to v
      */
-    public long getCumFreq(Double v) {
+    public long getCumFreq(final Double v) {
         if (getSumFreq() == 0) {
             return 0;
         }
@@ -463,15 +462,15 @@ public class Histogram implements Cloneable {
 
         // the frequency of this key
         long result = 0;
-        Long value = freqTable.get(v);
+        final Long value = freqTable.get(v);
         if (value != null) {
             result = value.longValue();
         }
 
         // add the frequencies of values smaller than this key
-        Iterator<Double> values = freqTable.keySet().iterator();
+        final Iterator<Double> values = freqTable.keySet().iterator();
         while (values.hasNext()) {
-            Double nextValue = values.next();
+            final Double nextValue = values.next();
             if (v.compareTo(nextValue) > 0) {
                 result += getCount(nextValue);
             } else {
@@ -493,7 +492,7 @@ public class Histogram implements Cloneable {
      *            the value to lookup
      * @return the proportion of values less than or equal to v
      */
-    public double getCumPct(Double v) {
+    public double getCumPct(final Double v) {
         final long sumFreq = getSumFreq();
         if (sumFreq == 0) {
             return Double.NaN;
@@ -509,7 +508,7 @@ public class Histogram implements Cloneable {
      */
     public long getSumFreq() {
         long result = 0;
-        Iterator<Long> iterator = freqTable.values().iterator();
+        final Iterator<Long> iterator = freqTable.values().iterator();
         while (iterator.hasNext()) {
             result += iterator.next().longValue();
         }
@@ -524,7 +523,7 @@ public class Histogram implements Cloneable {
      */
     public long getAbsoluteSumFreq() {
         long result = 0;
-        Iterator<Long> iterator = freqTable.values().iterator();
+        final Iterator<Long> iterator = freqTable.values().iterator();
         while (iterator.hasNext()) {
             result += Math.abs(iterator.next().longValue());
         }
@@ -542,7 +541,7 @@ public class Histogram implements Cloneable {
      *            the value to lookup
      * @return the proportion of values equal to v
      */
-    public double getPct(Double v) {
+    public double getPct(final Double v) {
         final long sumFreq = getSumFreq();
         if (sumFreq == 0) {
             return Double.NaN;
@@ -554,7 +553,7 @@ public class Histogram implements Cloneable {
      * Returns the entropy of the histogram.
      * <p>
      * The histogram entropy is defined to be the negation of the sum of the
-     * products of the probability associated with each bin with the base-2 log
+     * products of the probability associated with each bin with the base-2 LOG
      * of the probability.
      * </p>
      * <p>
@@ -568,11 +567,11 @@ public class Histogram implements Cloneable {
      * @return The entropy of the histogram.
      */
     public double getEntropy() {
-        double log2 = Math.log(2.0);
+        final double log2 = Math.log(2.0);
         double entropy = 0.0;
-        double total = getSumFreq();
+        final double total = getSumFreq();
         for (int b = 0; b < numberOfClasses; b++) {
-            double p = getCountForClass(b) / total;
+            final double p = getCountForClass(b) / total;
             if (p != 0.0) {
                 entropy -= p * (Math.log(p) / log2);
             }
@@ -588,9 +587,9 @@ public class Histogram implements Cloneable {
      * @return the mean bin count.
      */
     public double getMean() {
-        double[] binCounts = new double[this.getNumberOfClasses() + 1];
+        final double[] binCounts = new double[this.getNumberOfClasses() + 1];
         int i = 0;
-        for (double key : this.keySet()) {
+        for (final double key : this.keySet()) {
             binCounts[i] = this.getCount(key);
             i++;
         }
@@ -620,13 +619,13 @@ public class Histogram implements Cloneable {
      *            otherwise it generates a frequency table
      * @return a string representation.
      */
-    public String toString(boolean asciiArt) {
+    public String toString(final boolean asciiArt) {
         if (asciiArt) {
-            StringBuffer outBuffer = new StringBuffer();
+            final StringBuffer outBuffer = new StringBuffer();
             outBuffer.append('\n');
-            Iterator<Double> iter = freqTable.keySet().iterator();
+            final Iterator<Double> iter = freqTable.keySet().iterator();
             while (iter.hasNext()) {
-                Double value = iter.next();
+                final Double value = iter.next();
                 outBuffer.append(value).append("\t").append("\t|");
                 for (int i = 0; i < getPct(value) * 100; i++) {
                     outBuffer.append('x');
@@ -636,12 +635,12 @@ public class Histogram implements Cloneable {
             outBuffer.append('\n');
             return outBuffer.toString();
         } else {
-            NumberFormat nf = NumberFormat.getPercentInstance();
-            StringBuffer outBuffer = new StringBuffer();
+            final NumberFormat nf = NumberFormat.getPercentInstance();
+            final StringBuffer outBuffer = new StringBuffer();
             outBuffer.append("\nValue \t Freq. \t Pct. \t Cum Pct. \n");
-            Iterator<Double> iter = freqTable.keySet().iterator();
+            final Iterator<Double> iter = freqTable.keySet().iterator();
             while (iter.hasNext()) {
-                Double value = iter.next();
+                final Double value = iter.next();
                 outBuffer.append(value);
                 outBuffer.append('\t');
                 outBuffer.append(getCount(value));
@@ -672,12 +671,12 @@ public class Histogram implements Cloneable {
      * @return a Histogram with normalized peak.
      */
     public Histogram normalize() {
-        List<Long> normalizedCounts = new ArrayList<Long>();
-        for (double key : freqTable.keySet()) {
+        final List<Long> normalizedCounts = new ArrayList<Long>();
+        for (final double key : freqTable.keySet()) {
             normalizedCounts.add((long) (getPct(key) * 10000));
         }
         int index = 0;
-        for (double key : freqTable.keySet()) {
+        for (final double key : freqTable.keySet()) {
             this.setCount(key, normalizedCounts.get(index));
             index++;
         }
@@ -697,10 +696,10 @@ public class Histogram implements Cloneable {
      * @return returns the current histogram so it is possible to chain
      *         modifications.
      */
-    public Histogram addToEachBin(long value) {
+    public Histogram addToEachBin(final long value) {
         // do nothing if value == 0
         if (value != 0) {
-            for (double key : freqTable.keySet()) {
+            for (final double key : freqTable.keySet()) {
                 this.setCount(key, getCount(key) + value);
             }
         }
@@ -727,10 +726,10 @@ public class Histogram implements Cloneable {
      */
     public Histogram baselineHistogram() {
         long smallestValue = Long.MAX_VALUE;
-        for (double key : freqTable.keySet()) {
+        for (final double key : freqTable.keySet()) {
             smallestValue = Math.min(getCount(key), smallestValue);
         }
-        long valueToAdd = (long) -1.0 * smallestValue;
+        final long valueToAdd = (long) -1.0 * smallestValue;
         return addToEachBin(valueToAdd);
     }
 
@@ -749,11 +748,11 @@ public class Histogram implements Cloneable {
      * @return the changed histogram with more (or the same) number of items in
      *         the bins.
      */
-    public Histogram add(Histogram other) {
+    public Histogram add(final Histogram other) {
         assert freqTable.keySet().size() == other.keySet().size();
         assert start == other.start;
         assert stop == other.stop;
-        for (double key : freqTable.keySet()) {
+        for (final double key : freqTable.keySet()) {
             this.setCount(key, this.getCount(key) + other.getCount(key));
         }
         return this;
@@ -774,7 +773,7 @@ public class Histogram implements Cloneable {
      * @return the changed histogram with less (or the same) number of items in
      *         the bins.
      */
-    public Histogram subtract(Histogram other) {
+    public Histogram subtract(final Histogram other) {
         this.invert();
         this.add(other);
         return this;
@@ -805,8 +804,8 @@ public class Histogram implements Cloneable {
      *            the factor to multiply each bin value with.
      * @return histogram with each bin value multiplied by the factor.
      */
-    public Histogram multiply(double factor) {
-        for (double key : this.freqTable.keySet()) {
+    public Histogram multiply(final double factor) {
+        for (final double key : this.freqTable.keySet()) {
             this.setCount(key, Math.round(this.getCount(key) * factor));
         }
         return this;
@@ -823,8 +822,8 @@ public class Histogram implements Cloneable {
      *            The exponent to raise each bincount with.
      * @return Histogram with each bin count raised with exponent.
      */
-    public Histogram raise(double exponent) {
-        for (double key : this.freqTable.keySet()) {
+    public Histogram raise(final double exponent) {
+        for (final double key : this.freqTable.keySet()) {
             this.setCount(key, Math.round(Math.pow(this.getCount(key), exponent)));
         }
         return this;
@@ -836,14 +835,10 @@ public class Histogram implements Cloneable {
      * @see java.lang.Object#clone()
      */
     @Override
-    public Histogram clone() {
-        try {
-            super.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        Histogram clone = new Histogram(this);
-        for (double key : this.freqTable.keySet()) {
+    public Histogram clone() throws CloneNotSupportedException {
+        super.clone();
+        final Histogram clone = new Histogram(this);
+        for (final double key : this.freqTable.keySet()) {
             clone.setCount(key, this.getCount(key));
         }
         return clone;
@@ -859,15 +854,15 @@ public class Histogram implements Cloneable {
      * @return a histogram with the mean values. If the list is empty it returns
      *         null.
      */
-    public static Histogram mean(List<Histogram> histograms) {
+    public static Histogram mean(final List<Histogram> histograms) {
         Histogram mean = null;
         if (histograms.size() != 0) {
-            Histogram first = histograms.get(0);
+            final Histogram first = histograms.get(0);
             mean = new Histogram(first);
-            for (double key : first.freqTable.keySet()) {
-                double[] values = new double[histograms.size()];
+            for (final double key : first.freqTable.keySet()) {
+                final double[] values = new double[histograms.size()];
                 int countIndex = 0;
-                for (Histogram h : histograms) {
+                for (final Histogram h : histograms) {
                     assert h.keySet().size() == first.keySet().size();
                     assert first.classWidth == h.classWidth;
                     assert first.start == h.start;
@@ -875,7 +870,7 @@ public class Histogram implements Cloneable {
                     values[countIndex] = h.getCount(key);
                     countIndex++;
                 }
-                long currentMean = Math.round(StatUtils.mean(values));
+                final long currentMean = Math.round(StatUtils.mean(values));
                 mean.setCount(key, currentMean);
             }
         }
@@ -921,7 +916,7 @@ public class Histogram implements Cloneable {
      *            applied.
      * @return A smoothed version of the histogram.
      */
-    public Histogram smooth(boolean isWeighted, int k) {
+    public Histogram smooth(final boolean isWeighted, final int k) {
         if (k < 0) {
             throw new IllegalArgumentException("k");
         } else if (k == 0) {
@@ -931,8 +926,8 @@ public class Histogram implements Cloneable {
         // Initialize the smoothing weights if needed.
         double[] weights = null;
         if (isWeighted) {
-            int numWeights = 2 * k + 1;
-            double denom = numWeights * numWeights;
+            final int numWeights = 2 * k + 1;
+            final double denom = numWeights * numWeights;
             weights = new double[numWeights];
             for (int i = 0; i <= k; i++) {
                 weights[i] = (i + 1) / denom;
@@ -942,7 +937,7 @@ public class Histogram implements Cloneable {
             }
         }
 
-        int[] smoothedCounts = new int[numberOfClasses];
+        final int[] smoothedCounts = new int[numberOfClasses];
 
         // Clear the band total count for the smoothed histogram.
         int sum = 0;
@@ -950,8 +945,8 @@ public class Histogram implements Cloneable {
         if (isWeighted) {
             for (int b = 0; b < numberOfClasses; b++) {
                 // Determine clipped range.
-                int min = Math.max(b - k, 0);
-                int max = Math.min(b + k, numberOfClasses);
+                final int min = Math.max(b - k, 0);
+                final int max = Math.min(b + k, numberOfClasses);
 
                 // Calculate the offset into the weight array.
                 int offset = k > b ? k - b : 0;
@@ -960,7 +955,7 @@ public class Histogram implements Cloneable {
                 double acc = 0;
                 double weightTotal = 0;
                 for (int i = min; i < max; i++) {
-                    double w = weights[offset++];
+                    final double w = weights[offset++];
                     acc += getCountForClass(i) * w;
                     weightTotal += w;
                 }
@@ -974,8 +969,8 @@ public class Histogram implements Cloneable {
         } else {
             for (int b = 0; b < numberOfClasses; b++) {
                 // Determine clipped range.
-                int min = Math.max(b - k, 0);
-                int max = Math.min(b + k, numberOfClasses);
+                final int min = Math.max(b - k, 0);
+                final int max = Math.min(b + k, numberOfClasses);
 
                 // Accumulate the total for the range.
                 int acc = 0;
@@ -993,10 +988,10 @@ public class Histogram implements Cloneable {
 
         // Rescale the counts such that the band total is approximately
         // the same as for the same band of the original histogram.
-        double factor = getSumFreq() / (double) sum;
+        final double factor = getSumFreq() / (double) sum;
         for (int b = 0; b < numberOfClasses; b++) {
-            int smoothedCount = (int) (smoothedCounts[b] * factor + 0.5);
-            double key = getKeyForClass(b);
+            final int smoothedCount = (int) (smoothedCounts[b] * factor + 0.5);
+            final double key = getKeyForClass(b);
             this.setCount(key, smoothedCount);
         }
 
@@ -1030,7 +1025,7 @@ public class Histogram implements Cloneable {
      *            applied.
      * @return A Gaussian smoothed version of the histogram.
      */
-    public Histogram gaussianSmooth(double standardDeviation) {
+    public Histogram gaussianSmooth(final double standardDeviation) {
         if (standardDeviation < 0.0) {
             throw new IllegalArgumentException("standardDeviation invalid");
         } else if (standardDeviation == 0.0) {
@@ -1047,13 +1042,13 @@ public class Histogram implements Cloneable {
         }
 
         // Initialize the smoothing weights.
-        double[] weights = new double[numWeights];
-        int m = numWeights / 2;
-        double var = standardDeviation * standardDeviation;
-        double gain = 1.0 / Math.sqrt(2.0 * Math.PI * var);
-        double exp = -1.0 / (2.0 * var);
+        final double[] weights = new double[numWeights];
+        final int m = numWeights / 2;
+        final double var = standardDeviation * standardDeviation;
+        final double gain = 1.0 / Math.sqrt(2.0 * Math.PI * var);
+        final double exp = -1.0 / (2.0 * var);
         for (int i = m; i < numWeights; i++) {
-            double del = i - m;
+            final double del = i - m;
             weights[i] = gain * Math.exp(exp * del * del);
             weights[numWeights - 1 - i] = weights[i];
         }
@@ -1061,12 +1056,12 @@ public class Histogram implements Cloneable {
         // Clear the band total count for the smoothed histogram.
         int sum = 0;
 
-        int[] smoothedCounts = new int[numberOfClasses];
+        final int[] smoothedCounts = new int[numberOfClasses];
 
         for (int b = 0; b < numberOfClasses; b++) {
             // Determine clipped range.
-            int min = Math.max(b - m, 0);
-            int max = Math.min(b + m, numberOfClasses);
+            final int min = Math.max(b - m, 0);
+            final int max = Math.min(b + m, numberOfClasses);
 
             // Calculate the offset into the weight array.
             int offset = m > b ? m - b : 0;
@@ -1075,7 +1070,7 @@ public class Histogram implements Cloneable {
             double acc = 0;
             double weightTotal = 0;
             for (int i = min; i < max; i++) {
-                double w = weights[offset++];
+                final double w = weights[offset++];
                 acc += getCountForClass(i) * w;
                 weightTotal += w;
             }
@@ -1089,10 +1084,10 @@ public class Histogram implements Cloneable {
 
         // Rescale the counts such that the band total is approximately
         // the same as for the same band of the original histogram.
-        double factor = getSumFreq() / (double) sum;
+        final double factor = getSumFreq() / (double) sum;
         for (int b = 0; b < numberOfClasses; b++) {
-            int smoothedCount = (int) (smoothedCounts[b] * factor + 0.5);
-            double key = getKeyForClass(b);
+            final int smoothedCount = (int) (smoothedCounts[b] * factor + 0.5);
+            final double key = getKeyForClass(b);
             this.setCount(key, smoothedCount);
         }
         return this;
@@ -1105,16 +1100,16 @@ public class Histogram implements Cloneable {
     // -----------------------------------------------------------
     // TODO Document correlation methods
 
-    public int displacementForOptimalCorrelation(Histogram otherHistogram) {
+    public int displacementForOptimalCorrelation(final Histogram otherHistogram) {
         return displacementForOptimalCorrelation(otherHistogram, CorrelationMeasure.INTERSECTION);
     }
 
-    public double correlationWithDisplacement(int displacement, Histogram otherHistogram,
-            CorrelationMeasure correlationMeasure) {
+    public double correlationWithDisplacement(final int displacement, final Histogram otherHistogram,
+            final CorrelationMeasure correlationMeasure) {
         return correlationMeasure.getHistogramCorrelation().correlation(this, displacement, otherHistogram);
     }
 
-    public double correlationWithDisplacement(int displacement, Histogram otherHistogram) {
+    public double correlationWithDisplacement(final int displacement, final Histogram otherHistogram) {
         return correlationWithDisplacement(displacement, otherHistogram, CorrelationMeasure.INTERSECTION);
     }
 
@@ -1125,10 +1120,10 @@ public class Histogram implements Cloneable {
      * @param correlationMeasure
      * @return the correlation between this histogram with another histogram.
      */
-    public double correlation(Histogram otherHistogram, CorrelationMeasure correlationMeasure) {
+    public double correlation(final Histogram otherHistogram, final CorrelationMeasure correlationMeasure) {
         if (otherHistogram.classWidth != classWidth) {
             throw new IllegalArgumentException(
-                    "Computation of correlation only correct when the classwidth of both histograms are the same");
+            "Computation of correlation only correct when the classwidth of both histograms are the same");
         }
         return correlationWithDisplacement(0, otherHistogram, correlationMeasure);
 
@@ -1143,19 +1138,19 @@ public class Histogram implements Cloneable {
      *            the other histogram
      * @return the correlation the computed correlation
      */
-    public double correlation(Histogram otherHistogram) {
+    public double correlation(final Histogram otherHistogram) {
         return correlation(otherHistogram, CorrelationMeasure.INTERSECTION);
     }
 
-    public int displacementForOptimalCorrelation(Histogram otherHistogram,
-            CorrelationMeasure correlationMeasure) {
+    public int displacementForOptimalCorrelation(final Histogram otherHistogram,
+            final CorrelationMeasure correlationMeasure) {
         int optimalDisplacement = 0; // displacement with best correlation
         double maximumCorrelation = -1; // best found correlation
-        int numberOfClasses = getNumberOfClasses();
+        final int numberOfClasses = getNumberOfClasses();
 
         // current displacement, incremented with class width
         for (int currentDisplacement = 0; currentDisplacement < numberOfClasses; currentDisplacement++) {
-            double currentCorrelation = correlationWithDisplacement(currentDisplacement, otherHistogram,
+            final double currentCorrelation = correlationWithDisplacement(currentDisplacement, otherHistogram,
                     correlationMeasure);
             if (maximumCorrelation < currentCorrelation) {
                 maximumCorrelation = currentCorrelation;
@@ -1169,8 +1164,8 @@ public class Histogram implements Cloneable {
         return optimalDisplacement;
     }
 
-    public void plotCorrelation(Histogram otherHistogram, CorrelationMeasure correlationMeasure) {
-        int displacement = displacementForOptimalCorrelation(otherHistogram);
+    public void plotCorrelation(final Histogram otherHistogram, final CorrelationMeasure correlationMeasure) {
+        final int displacement = displacementForOptimalCorrelation(otherHistogram);
         correlationMeasure.getHistogramCorrelation().plotCorrelation(this, displacement, otherHistogram);
     }
 
@@ -1183,7 +1178,6 @@ public class Histogram implements Cloneable {
     /**
      * Plots the histogram to a x y plot. The file is saved in PNG file format
      * so the fileName should end on PNG.
-     * 
      * @param fileName
      *            The file is saved in PNG file format so the fileName should
      *            end on PNG.
@@ -1191,9 +1185,9 @@ public class Histogram implements Cloneable {
      *            The title of the histogram. Use an empty string or null for an
      *            empty title.
      */
-    public void plot(String fileName, String title) {
-        title = title == null ? "" : title;
-        SimplePlot plot = new SimplePlot(title);
+    public void plot(final String fileName, final String title) {
+        final String actualTitle = title == null ? "" : title;
+        final SimplePlot plot = new SimplePlot(actualTitle);
         plot.addData(0, this);
         plot.save(fileName);
     }
@@ -1201,14 +1195,13 @@ public class Histogram implements Cloneable {
     /**
      * Export the histogram data as a plain text file. The format uses ; to
      * separate keys from values.
-     * 
      * @param fileName
      *            Where to save the text file.
      */
-    public void export(String fileName) {
-        StringBuilder sb = new StringBuilder();
+    public void export(final String fileName) {
+        final StringBuilder sb = new StringBuilder();
         sb.append("key;value\n");
-        for (double key : keySet()) {
+        for (final double key : keySet()) {
             sb.append(key).append(";").append(getCount(key)).append("\n");
         }
         FileUtils.writeFile(sb.toString(), fileName);

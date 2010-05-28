@@ -12,61 +12,61 @@ import java.util.prefs.Preferences;
  * utility methods for booleans, doubles and integers. It automatically converts
  * directory separators with the correct file separator for the current
  * operating system.
- * 
  * @author Joren Six
  */
-public class Configuration {
-    private static final Logger log = Logger.getLogger(Configuration.class.getName());
+public final class Configuration {
+    /**
+     * Log messages.
+     */
+    private static final Logger LOG = Logger.getLogger(Configuration.class.getName());
 
-    private static Properties defaultConfigurationProperties;
+    /**
+     * The default configuration, defined in a properties file.
+     */
+    private static Properties defaultConfProps;
+
+    /**
+     * The preferences of the user. Defined in an XML-file (UNIX) or registry
+     * (Windows).
+     */
     private static Preferences userPreferences = null;
 
     // hides default constuctor
     private Configuration() {
     }
 
-    /**
-     * Creates all the required directories if needed. Iterates over all
-     * configuration values and creates the ones marked as required directory.
-     */
-    public static void createRequiredDirectories() {
-        for (ConfKey confKey : ConfKey.values()) {
-            if (confKey.isRequiredDirectory && FileUtils.mkdirs(get(confKey))) {
-                log.info("Created directory: " + get(confKey));
-            }
-        }
-    }
+    /************************************************
+     * Get configuration methods.
+     ************************************************/
 
     /**
      * Read the configuration for a certain key. If the key can not be found in
      * the UserPreferences the default is loaded from a properties file, written
-     * in the UserPreferences, and returned. Otherwise the configured value is
-     * returned.
-     * 
+     * in the UserPreferences, and returned. Otherwise the user configured value
+     * is returned.
      * @param key
      *            the configuration key
      * @return if the key is configured, the configured value. Otherwise the
      *         default value is returned.
      */
-    public static String get(ConfKey key) {
+    public static String get(final ConfKey key) {
         return get(key.name());
     }
 
     /**
-     * Read the configuration for a certain key. If the key can not be found in
-     * the UserPreferences the default is loaded from a properties file, written
-     * in the UserPreferences, and returned. Otherwise the configured value is
-     * returned.
-     * 
+     * Read the configured Integer for a certain key. If the key can not be
+     * found in the UserPreferences the default is loaded from a properties
+     * file, written in the UserPreferences, and returned. Otherwise the
+     * configured value is returned.
      * @param key
-     *            the configuration key
+     *            The configuration key.
      * @return if the key is configured, the configured value. Otherwise the
      *         default value is returned.
      * @exception NumberFormatException
      *                If the configured value can not be parsed to an integer a
      *                is thrown.
      */
-    public static int getInt(ConfKey key) {
+    public static int getInt(final ConfKey key) {
         return Integer.parseInt(get(key.name()));
     }
 
@@ -75,15 +75,12 @@ public class Configuration {
      * the UserPreferences the default is loaded from a properties file, written
      * in the UserPreferences, and returned. Otherwise the configured value is
      * returned.
-     * 
      * @param key
-     *            the configuration key
-     * @return if the key is configured, the configured value. Otherwise the
+     *            The configuration key.
+     * @return If the key is configured, the configured value. Otherwise the
      *         default value is returned.
-     * @exception if the configured value can not be parsed to a double a
-     *            NumberFormatException is thrown..
      */
-    public static double getDouble(ConfKey key) {
+    public static double getDouble(final ConfKey key) {
         return Double.parseDouble(get(key.name()));
     }
 
@@ -97,72 +94,49 @@ public class Configuration {
      * Example: <code>Boolean.parseBoolean("yes")</code> returns
      * <code>false</code>.
      * </p>
-     * 
      * @param key
      *            the name of the configuration parameter
      * @return <code>true</code> if the configured value is not null and is
      *         equal, ignoring case, to the string "true", <code>false</code>
      *         otherwise.
      */
-    public static boolean getBoolean(ConfKey key) {
+    public static boolean getBoolean(final ConfKey key) {
         return Boolean.parseBoolean(get(key));
-    }
-
-    /**
-     * Set a configuration parameter. Sanitizes the value automatically: removes
-     * whitespace and correct file separators if the configured value is a
-     * directory.
-     * 
-     * @param key
-     *            the key
-     * @param value
-     *            the value
-     */
-    public static void set(ConfKey key, String value) {
-        if (value == null) {
-            return;
-        }
-        try {
-            value = sanitizeConfiguredValue(key.name(), value);
-            userPreferences.put(key.name(), value);
-            userPreferences.flush();
-            log.info(key.name() + " = " + value);
-        } catch (BackingStoreException e) {
-            log.severe("Could not save preference for " + key.name());
-            e.printStackTrace();
-        }
     }
 
     /**
      * Fetches configured values. If no values are configured a default
      * configuration is written (based on configuration.properties).
-     * 
      * @param key
      *            the name of the configuration parameter
      * @return a configured or default value
      */
-    private static synchronized String get(final String key) {
-        if (defaultConfigurationProperties == null) {
-            defaultConfigurationProperties = new Properties();
-            InputStream propertiesStream = Configuration.class
-                    .getResourceAsStream("configuration.properties");
-            try {
-                defaultConfigurationProperties.load(propertiesStream);
-            } catch (IOException e) {
-                log.severe("Could not find default configurations");
-                throw new Error(e);
+    private static String get(final String key) {
+        synchronized (Configuration.class) {
+            if (defaultConfProps == null) {
+                defaultConfProps = new Properties();
+                final InputStream propertiesStream = Configuration.class
+                .getResourceAsStream("configuration.properties");
+                try {
+                    defaultConfProps.load(propertiesStream);
+                } catch (final IOException e) {
+                    LOG.severe("Could not find default configurations");
+                }
             }
         }
-        String defaultValue = defaultConfigurationProperties.getProperty(key);
+        final String defaultValue = defaultConfProps.getProperty(key);
 
-        if (userPreferences == null) {
-            userPreferences = Preferences.userNodeForPackage(Configuration.class);
-            for (ConfKey configKey : ConfKey.values()) {
-                // If there is no configuration for this user, write the default
-                // configuration
-                if (userPreferences.get(configKey.name(), null) == null) {
-                    String defaultConfigValue = defaultConfigurationProperties.getProperty(configKey.name());
-                    set(configKey, defaultConfigValue);
+        synchronized (Configuration.class) {
+            if (userPreferences == null) {
+                userPreferences = Preferences.userNodeForPackage(Configuration.class);
+                for (final ConfKey configKey : ConfKey.values()) {
+                    // If there is no configuration for this user, write the default
+                    // configuration
+                    if (userPreferences.get(configKey.name(), null) == null) {
+                        final String defaultConfigVal = defaultConfProps.getProperty(configKey
+                                .name());
+                        set(configKey, defaultConfigVal);
+                    }
                 }
             }
         }
@@ -172,9 +146,31 @@ public class Configuration {
     }
 
     /**
+     * Set a configuration parameter. Sanitizes the value automatically: removes
+     * whitespace and correct file separators if the configured value is a
+     * directory.
+     * @param key
+     *            the key
+     * @param value
+     *            the value
+     */
+    public static void set(final ConfKey key, final String value) {
+        if (value == null) {
+            return;
+        }
+        try {
+            final String actualValue = sanitizeConfiguredValue(key.name(), value);
+            userPreferences.put(key.name(), actualValue);
+            userPreferences.flush();
+            LOG.info(key.name() + " = " + actualValue);
+        } catch (final BackingStoreException e) {
+            LOG.severe("Could not save preference for " + key.name());
+        }
+    }
+
+    /**
      * Sanitizes each configured value. Is called every time when a
      * configuration is written or read.
-     * 
      * @param key
      *            the configuration key
      * @param configuredValue
@@ -182,22 +178,21 @@ public class Configuration {
      * @return a sanitized value: remove whitespace and correct directory
      *         separator for the current operating system.
      */
-    private static String sanitizeConfiguredValue(String key, String configuredValue) {
+    private static String sanitizeConfiguredValue(final String key, final String configuredValue) {
+        String sanitizedValue = null;
         if (configuredValue != null) {
             // removes trailing and leading whitespace
             // limitation: whitespace can not be configured!
-            configuredValue = configuredValue.trim();
             // depending on the operating system: use the correct path
             // separators!
-            configuredValue = handleConfiguredDirectory(key, configuredValue);
+            sanitizedValue = handleConfiguredDirectory(key, configuredValue.trim());
         }
-        return configuredValue;
+        return sanitizedValue;
     }
 
     /**
      * Makes sure the correct path separator is used in configured directory
      * names.
-     * 
      * @param key
      *            the name of the configuration parameter.
      * @param configuredValue
@@ -205,14 +200,27 @@ public class Configuration {
      * @return a path with correct path separator for the current operating
      *         system.
      */
-    private static String handleConfiguredDirectory(String key, String configuredValue) {
-        ConfKey configurationKey = ConfKey.valueOf(key);
-        if (configurationKey.isRequiredDirectory) {
+    private static String handleConfiguredDirectory(final String key, final String configuredValue) {
+        final ConfKey configurationKey = ConfKey.valueOf(key);
+        String configuredDir = configuredValue;
+        if (configurationKey.isRequiredDirectory()) {
             // split on / or on \
-            String[] path = configuredValue.split("(/|\\\\)");
+            final String[] path = configuredDir.split("(/|\\\\)");
             // combine using the correct path separator
-            configuredValue = FileUtils.combine(path);
+            configuredDir = FileUtils.combine(path);
         }
-        return configuredValue;
+        return configuredDir;
+    }
+
+    /**
+     * Creates all the required directories if needed. Iterates over all
+     * configuration values and creates the ones marked as required directory.
+     */
+    public static void createRequiredDirectories() {
+        for (final ConfKey confKey : ConfKey.values()) {
+            if (confKey.isRequiredDirectory() && FileUtils.mkdirs(get(confKey))) {
+                LOG.info("Created directory: " + get(confKey));
+            }
+        }
     }
 }

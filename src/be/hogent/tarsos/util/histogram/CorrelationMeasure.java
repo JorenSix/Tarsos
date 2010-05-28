@@ -1,5 +1,3 @@
-/**
- */
 package be.hogent.tarsos.util.histogram;
 
 /**
@@ -7,7 +5,6 @@ package be.hogent.tarsos.util.histogram;
  * between histograms: Sung-Hyuk Chaa, Sargur N. Sriharib (2002)
  * CorrelationMeasure is a bit of a strange name: also distance measures are
  * defined. Side note: java enums are nice.
- * 
  * @author Joren Six
  */
 public enum CorrelationMeasure {
@@ -36,10 +33,18 @@ public enum CorrelationMeasure {
      */
     CROSSCORRELATION(new CrossCorrelation());
 
-    private final HistogramCorrelation histogramCorrelation;
+    /**
+     * The underlying histogram correlation.
+     */
+    private final HistogramCorrelation histoCorrelation;
 
-    private CorrelationMeasure(HistogramCorrelation histogramCorrelation) {
-        this.histogramCorrelation = histogramCorrelation;
+    /**
+     * Create a new correlation measure.
+     * @param histoCor
+     *            The underlying histogram correlation.
+     */
+    private CorrelationMeasure(final HistogramCorrelation histoCor) {
+        this.histoCorrelation = histoCor;
     }
 
     /**
@@ -47,6 +52,7 @@ public enum CorrelationMeasure {
      *         / correlation
      */
     public HistogramCorrelation getHistogramCorrelation() {
-        return this.histogramCorrelation;
+        return this.histoCorrelation;
     }
 }
+

@@ -24,31 +24,31 @@ import be.hogent.tarsos.util.SimplePlot;
  * 
  * @author Joren Six
  */
-public class AmbitusHistogram extends Histogram {
+public final class AmbitusHistogram extends Histogram {
 
     private final List<ToneScaleHistogram> toneScaleHistogramPerOctave = new ArrayList<ToneScaleHistogram>();
 
     public AmbitusHistogram() {
         super(Configuration.getInt(ConfKey.ambitus_start), Configuration.getInt(ConfKey.ambitus_stop),
                 1200 / Configuration.getInt(ConfKey.histogram_bin_width), false, // does
-                                                                                 // not
-                                                                                 // wrap
+                // not
+                // wrap
                 true// ignore values outside human hearing range
         );
 
         // initialize the list of tone scales
         for (int value = Configuration.getInt(ConfKey.ambitus_start); value < Configuration
-                .getInt(ConfKey.ambitus_stop); value += 1200) {
+        .getInt(ConfKey.ambitus_stop); value += 1200) {
             toneScaleHistogramPerOctave.add(new ToneScaleHistogram());
         }
 
     }
 
     @Override
-    public Histogram add(double value) {
+    public Histogram add(final double value) {
         super.add(value);
         // keep a histogram for each octave
-        int octaveIndex = (int) (value / 1200);
+        final int octaveIndex = (int) (value / 1200);
         if (toneScaleHistogramPerOctave.size() > octaveIndex && octaveIndex >= 0) {
             toneScaleHistogramPerOctave.get(octaveIndex).add(value);
         }
@@ -61,11 +61,11 @@ public class AmbitusHistogram extends Histogram {
      * @return a ToneScaleHistogram containing only samples from the
      *         numberOfOctaves most energy rich octaves.
      */
-    public ToneScaleHistogram mostEnergyRichOctaves(int numberOfOctaves) {
-        ToneScaleHistogram h = new ToneScaleHistogram();
-        List<Integer> octavesOrderedByEnergy = octavesOrderedByEnergy();
+    public ToneScaleHistogram mostEnergyRichOctaves(final int numberOfOctaves) {
+        final ToneScaleHistogram h = new ToneScaleHistogram();
+        final List<Integer> octavesOrderedByEnergy = octavesOrderedByEnergy();
         for (int i = 0; i < numberOfOctaves; i++) {
-            int octaveIndex = octavesOrderedByEnergy.get(i);
+            final int octaveIndex = octavesOrderedByEnergy.get(i);
             h.add(toneScaleHistogramPerOctave.get(octaveIndex));
         }
         return h;
@@ -77,7 +77,7 @@ public class AmbitusHistogram extends Histogram {
      *         in the interval E.g. [4,3,2,5,7,6,0,1]
      */
     private List<Integer> octavesOrderedByEnergy() {
-        List<Integer> octaves = new ArrayList<Integer>();
+        final List<Integer> octaves = new ArrayList<Integer>();
 
         for (int i = 0; i < toneScaleHistogramPerOctave.size(); i++) {
             octaves.add(i);
@@ -85,9 +85,9 @@ public class AmbitusHistogram extends Histogram {
 
         Collections.sort(octaves, new Comparator<Integer>() {
             @Override
-            public int compare(Integer o1, Integer o2) {
-                Long energyFirst = AmbitusHistogram.this.toneScaleHistogramPerOctave.get(o1).getSumFreq();
-                Long energySecond = AmbitusHistogram.this.toneScaleHistogramPerOctave.get(o2).getSumFreq();
+            public int compare(final Integer o1, final Integer o2) {
+                final Long energyFirst = AmbitusHistogram.this.toneScaleHistogramPerOctave.get(o1).getSumFreq();
+                final Long energySecond = AmbitusHistogram.this.toneScaleHistogramPerOctave.get(o2).getSumFreq();
                 return energySecond.compareTo(energyFirst);
             }
         });
@@ -98,8 +98,8 @@ public class AmbitusHistogram extends Histogram {
      * @return the ambitus folded to one octave (1200 cents)
      */
     public ToneScaleHistogram toneScaleHistogram() {
-        ToneScaleHistogram summedToneScaleHistogram = new ToneScaleHistogram();
-        for (ToneScaleHistogram histogram : toneScaleHistogramPerOctave) {
+        final ToneScaleHistogram summedToneScaleHistogram = new ToneScaleHistogram();
+        for (final ToneScaleHistogram histogram : toneScaleHistogramPerOctave) {
             summedToneScaleHistogram.add(histogram);
         }
         return summedToneScaleHistogram;
@@ -110,7 +110,7 @@ public class AmbitusHistogram extends Histogram {
      * 
      * @param fileName
      */
-    public void plotAmbitusHistogram(String fileName) {
+    public void plotAmbitusHistogram(final String fileName) {
         this.plotAmbitusHistogram(fileName, (int) getStart(), (int) getStop());
     }
 
@@ -124,8 +124,8 @@ public class AmbitusHistogram extends Histogram {
      * @param stop
      *            stopping value
      */
-    public void plotAmbitusHistogram(String fileName, int start, int stop) {
-        SimplePlot plot = new SimplePlot();
+    public void plotAmbitusHistogram(final String fileName, final int start, final int stop) {
+        final SimplePlot plot = new SimplePlot();
         for (double current = start; current <= stop; current += this.getClassWidth()) {
             plot.addData(0, current, this.getCount(current));
         }
@@ -142,15 +142,15 @@ public class AmbitusHistogram extends Histogram {
      *            if true each octave is separated, otherwise only the total is
      *            shown.
      */
-    public void plotToneScaleHistogram(String fileName, boolean splitOctaves) {
-        ToneScaleHistogram summedToneScaleHistogram = toneScaleHistogram();
+    public void plotToneScaleHistogram(final String fileName, final boolean splitOctaves) {
+        final ToneScaleHistogram summedToneScaleHistogram = toneScaleHistogram();
 
         if (splitOctaves) {
-            Plot h = new Plot();
+            final Plot h = new Plot();
             h.setXRange(0, 1200);
             for (int dataset = 0; dataset < toneScaleHistogramPerOctave.size(); dataset++) {
-                ToneScaleHistogram currentToneScaleHistogram = toneScaleHistogramPerOctave.get(dataset);
-                for (double key : currentToneScaleHistogram.keySet()) {
+                final ToneScaleHistogram currentToneScaleHistogram = toneScaleHistogramPerOctave.get(dataset);
+                for (final double key : currentToneScaleHistogram.keySet()) {
                     long count = currentToneScaleHistogram.getCount(key);
                     for (int i = 0; i < dataset; i++) {
                         count += toneScaleHistogramPerOctave.get(i).getCount(key);
@@ -166,29 +166,29 @@ public class AmbitusHistogram extends Histogram {
             h.setTitle(FileUtils.basename(fileName));
             try {
                 Thread.sleep(60);
-                BufferedImage image = h.exportImage();
+                final BufferedImage image = h.exportImage();
                 ImageIO.write(image, "png", new File(fileName));
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
-            } catch (InterruptedException e1) {
+            } catch (final InterruptedException e1) {
                 e1.printStackTrace();
             }
         } else {
-            SimplePlot plot = new SimplePlot();
+            final SimplePlot plot = new SimplePlot();
             plot.addData(0, summedToneScaleHistogram);
             plot.save(fileName);
         }
     }
 
     @Override
-    public void plot(String fileName, String title) {
+    public void plot(final String fileName, String title) {
         title = title == null ? "" : title;
-        SimplePlot plot = new SimplePlot(title);
+        final SimplePlot plot = new SimplePlot(title);
         double startingValue = getStart();
         double stoppingValue = getStop();
         boolean valuesStarted = false;
-        for (double key : keySet()) {
-            long count = getCount(key);
+        for (final double key : keySet()) {
+            final long count = getCount(key);
             if (count != 0L) {
                 stoppingValue = key;
             }
@@ -200,7 +200,7 @@ public class AmbitusHistogram extends Histogram {
             }
         }
         plot.setXRange(startingValue, stoppingValue);
-        for (double current : keySet()) {
+        for (final double current : keySet()) {
             if (current >= startingValue && current <= stoppingValue) {
                 plot.addData(0, current, getCount(current));
             }

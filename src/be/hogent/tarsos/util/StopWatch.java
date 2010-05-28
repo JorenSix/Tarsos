@@ -10,12 +10,12 @@ public final class StopWatch {
     /**
      * Conversion factor between ns and ms.
      */
-    private static final int NS_TO_MS = 1000;
+    private static final int NS_TO_MS = 1000000;
 
     /**
      * Number of ticks between start and stop in ns (10^-9 s).
      */
-    private final transient long ticks;
+    private transient long ticks;
 
     /**
      * Create and start the stop watch.
@@ -38,5 +38,17 @@ public final class StopWatch {
      */
     public long nanoTicksPassed() {
         return Math.abs(System.nanoTime() - ticks);
+    }
+
+    /**
+     * Starts or restarts the stopwatch.
+     */
+    public void start() {
+        ticks = System.nanoTime();
+    }
+
+    @Override
+    public String toString() {
+        return ticksPassed() + "ms";
     }
 }

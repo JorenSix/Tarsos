@@ -1,14 +1,17 @@
 package be.hogent.tarsos.apps;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import java.util.logging.LogManager;
 
 import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.util.Log;
 
 /**
  * This is the starting point of the Tarsos application suite. It's main task is
@@ -20,11 +23,6 @@ import be.hogent.tarsos.util.Configuration;
 public final class Tarsos {
 
     /**
-     * Logs messages.
-     */
-    private static final Logger LOG = Logger.getLogger(Tarsos.class.getName());
-
-    /**
      * A map of applications, maps the name of the application to the instance.
      */
     private final transient Map<String, AbstractTarsosApp> applications;
@@ -34,10 +32,19 @@ public final class Tarsos {
      */
     private Tarsos() {
         applications = new HashMap<String, AbstractTarsosApp>();
-        Configuration.createRequiredDirectories();
-        // default confiuration
-        // logging configuration, ...
         // create needed directories, ...
+        Configuration.createRequiredDirectories();
+
+        try {
+            // configure logging
+            String propertiesFile = "/be/hogent/tarsos/util/logging.properties";
+            InputStream stream = Log.class.getResourceAsStream(propertiesFile);
+            LogManager.getLogManager().readConfiguration(stream);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -50,7 +57,6 @@ public final class Tarsos {
      */
     public void registerApplication(final String name, final AbstractTarsosApp application) {
         applications.put(name, application);
-        LOG.fine("Registering " + name);
     }
 
     /**
@@ -115,6 +121,7 @@ public final class Tarsos {
         applicationList.add(new PitchTable());
         applicationList.add(new MidiToWav());
         applicationList.add(new AudioToScala());
+
 
         for (AbstractTarsosApp application : applicationList) {
             instance.registerApplication(application.name(), application);
