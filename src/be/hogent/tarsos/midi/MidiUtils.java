@@ -189,12 +189,14 @@ public class MidiUtils {
             return setDeviceControl(targetDevice, MASTER_COARSE_TUNING, value);
         }
 
-        public static SysexMessage setGlobalParameter(final int targetDevice, final short[] slotpath, final byte[] parameter,
+        public static SysexMessage setGlobalParameter(final int targetDevice, final int[] slotpath,
+                final byte[] parameter,
                 final int value) throws IOException, InvalidMidiDataException {
             return setGlobalParameter(targetDevice, slotpath, parameter, new byte[] { (byte) value });
         }
 
-        public static SysexMessage setGlobalParameter(final int targetDevice, final short[] slotpath, final byte[] parameter,
+        public static SysexMessage setGlobalParameter(final int targetDevice, final int[] slotpath,
+                final byte[] parameter,
                 final byte[] value) throws IOException, InvalidMidiDataException {
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
@@ -205,7 +207,7 @@ public class MidiUtils {
             baos.write((byte) parameter.length);
             baos.write((byte) value.length);
             for (int i = 0; i < slotpath.length; i++) {
-                final short x = slotpath[0];
+                final int x = slotpath[0];
                 // The unsigned right shift operator ">>>" shifts a zero into
                 // the leftmost position
                 baos.write((byte) (x >>> 8));
@@ -234,7 +236,7 @@ public class MidiUtils {
 
             public static final int REVERB_TYPE_PLATE = 8;
 
-            private static final short[] SLOTPATH_EFFECT_REVERB = new short[] { (short) 0x0101 };
+            private static final int[] SLOTPATH_EFFECT_REVERB = new int[] { 0x0101 };
 
             private static final byte[] REVERB_TYPE = new byte[] { (byte) 0x00 };
 
@@ -265,7 +267,7 @@ public class MidiUtils {
 
             public static final int CHORUS_TYPE_FLANGER = 5;
 
-            private static final short[] SLOTPATH_EFFECT_CHORUS = new short[] { (short) 0x0102 };
+            private static final int[] SLOTPATH_EFFECT_CHORUS = new int[] { 0x0102 };
 
             private static final byte[] CHORUS_TYPE = new byte[] { (byte) 0x00 };
 
