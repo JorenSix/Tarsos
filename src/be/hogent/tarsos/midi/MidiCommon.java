@@ -39,16 +39,19 @@ import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 
+import be.hogent.tarsos.apps.Tarsos;
+
 /** Utility methods for MIDI examples. */
-public class MidiCommon {
+public final class MidiCommon {
+
     private MidiCommon() {
     }
 
-    public static void listDevices(boolean bForInput, boolean bForOutput) {
+    public static void listDevices(final boolean bForInput, final boolean bForOutput) {
         listDevices(bForInput, bForOutput, false);
     }
 
-    public static void listDevices(boolean bForInput, boolean bForOutput, boolean bVerbose) {
+    public static void listDevices(final boolean bForInput, final boolean bForOutput, final boolean bVerbose) {
         if (bForInput && !bForOutput) {
             out("Available MIDI IN Devices:");
         } else if (!bForInput && bForOutput) {
@@ -57,12 +60,12 @@ public class MidiCommon {
             out("Available MIDI Devices:");
         }
 
-        MidiDevice.Info[] aInfos = MidiSystem.getMidiDeviceInfo();
+        final MidiDevice.Info[] aInfos = MidiSystem.getMidiDeviceInfo();
         for (int i = 0; i < aInfos.length; i++) {
             try {
-                MidiDevice device = MidiSystem.getMidiDevice(aInfos[i]);
-                boolean bAllowsInput = device.getMaxTransmitters() != 0;
-                boolean bAllowsOutput = device.getMaxReceivers() != 0;
+                final MidiDevice device = MidiSystem.getMidiDevice(aInfos[i]);
+                final boolean bAllowsInput = device.getMaxTransmitters() != 0;
+                final boolean bAllowsOutput = device.getMaxReceivers() != 0;
                 if ((bAllowsInput && bForInput) || (bAllowsOutput && bForOutput)) {
                     if (bVerbose) {
                         out("" + i + "  " + (bAllowsInput ? "IN " : "   ")
@@ -73,7 +76,7 @@ public class MidiCommon {
                         out("" + i + "  " + aInfos[i].getName());
                     }
                 }
-            } catch (MidiUnavailableException e) {
+            } catch (final MidiUnavailableException e) {
                 e.printStackTrace();
                 // device is obviously not available...
                 // out(e);
@@ -99,18 +102,18 @@ public class MidiCommon {
      * @return A MidiDevice.Info object matching the passed device name or null
      *         if none could be found.
      */
-    public static MidiDevice.Info getMidiDeviceInfo(String strDeviceName, boolean bForOutput) {
-        MidiDevice.Info[] aInfos = MidiSystem.getMidiDeviceInfo();
+    public static MidiDevice.Info getMidiDeviceInfo(final String strDeviceName, final boolean bForOutput) {
+        final MidiDevice.Info[] aInfos = MidiSystem.getMidiDeviceInfo();
         for (int i = 0; i < aInfos.length; i++) {
             if (aInfos[i].getName().equals(strDeviceName)) {
                 try {
-                    MidiDevice device = MidiSystem.getMidiDevice(aInfos[i]);
-                    boolean bAllowsInput = device.getMaxTransmitters() != 0;
-                    boolean bAllowsOutput = device.getMaxReceivers() != 0;
+                    final MidiDevice device = MidiSystem.getMidiDevice(aInfos[i]);
+                    final boolean bAllowsInput = device.getMaxTransmitters() != 0;
+                    final boolean bAllowsOutput = device.getMaxReceivers() != 0;
                     if ((bAllowsOutput && bForOutput) || (bAllowsInput && !bForOutput)) {
                         return aInfos[i];
                     }
-                } catch (MidiUnavailableException e) {
+                } catch (final MidiUnavailableException e) {
                     e.printStackTrace();
                 }
             }
@@ -129,16 +132,16 @@ public class MidiCommon {
      * @return A MidiDevice.Info object of the specified index or null if none
      *         could be found.
      */
-    public static MidiDevice.Info getMidiDeviceInfo(int index) {
-        MidiDevice.Info[] aInfos = MidiSystem.getMidiDeviceInfo();
+    public static MidiDevice.Info getMidiDeviceInfo(final int index) {
+        final MidiDevice.Info[] aInfos = MidiSystem.getMidiDeviceInfo();
         if ((index < 0) || (index >= aInfos.length)) {
             return null;
         }
         return aInfos[index];
     }
 
-    private static void out(String strMessage) {
-        System.out.println(strMessage);
+    private static void out(final String strMessage) {
+        Tarsos.println(strMessage);
     }
 }
 

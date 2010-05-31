@@ -180,9 +180,9 @@ public final class AmbitusHistogram extends Histogram {
         }
     }
 
+
     @Override
-    public void plot(final String fileName, String title) {
-        title = title == null ? "" : title;
+    public void plot(final String fileName, final String title) {
         final SimplePlot plot = new SimplePlot(title);
         double startingValue = getStart();
         double stoppingValue = getStop();

@@ -23,19 +23,17 @@ public abstract class AbstractTarsosApp {
      * @param args
      *            The arguments to start the program.
      */
-    public void run(final String... args) {
-
-    }
+    public abstract void run(final String... args);
 
     /**
      * @return The name of the parameter used to start the application.
      */
-    abstract String name();
+    public abstract String name();
 
     /**
      * @return The short description of the application. What purpose it serves.
      */
-    abstract String description();
+    public abstract String description();
 
     /**
      * Parses arguments, adds and checks for help option an prints command line
@@ -51,12 +49,12 @@ public abstract class AbstractTarsosApp {
      */
     protected final OptionSet parse(final String[] args, final OptionParser parser,
             final AbstractTarsosApp application) {
-        Tarsos instance = Tarsos.getInstance();
+        final Tarsos instance = Tarsos.getInstance();
         parser.acceptsAll(Arrays.asList("h", "?", "help"), "Show help");
         OptionSet options = null;
         try {
             options = parser.parse(args);
-        } catch (OptionException e) {
+        } catch (final OptionException e) {
             final String message = e.getMessage();
             instance.print(message);
             instance.print("");
@@ -81,14 +79,14 @@ public abstract class AbstractTarsosApp {
      *            The command line argument parser.
      */
     protected final void printHelp(final OptionParser parser) {
-        Tarsos instance = Tarsos.getInstance();
+        final Tarsos instance = Tarsos.getInstance();
         instance.print("Application description");
         instance.print("-----------------------");
         instance.print(description());
         instance.print("");
         try {
             parser.printHelpOn(System.out);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             LOG.log(Level.SEVERE, "Could not print to STD OUT. How quaint.", e1);
         }
     }

@@ -11,33 +11,35 @@ import be.hogent.tarsos.util.SimplePlot;
 public class Intersection implements HistogramCorrelation {
 
     @Override
-    public double correlation(Histogram thisHistogram, int displacement, Histogram otherHistogram) {
+    public double correlation(final Histogram thisHistogram, final int displacement,
+            final Histogram otherHistogram) {
 
         // number of bins (classes)
-        int numberOfClasses = thisHistogram.getNumberOfClasses();
+        final int numberOfClasses = thisHistogram.getNumberOfClasses();
         // start value
-        double start = thisHistogram.getStart();
+        final double start = thisHistogram.getStart();
         // stop value
-        double stop = thisHistogram.getStop();
+        final double stop = thisHistogram.getStop();
         // classWidth
-        double classWidth = thisHistogram.getClassWidth();
+        final double classWidth = thisHistogram.getClassWidth();
 
+        int actualDisplacement = displacement;
         // make displacement positive
-        if (displacement < 0) {
-            displacement = ((displacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
+        if (actualDisplacement < 0) {
+            actualDisplacement = ((actualDisplacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
         }
 
         // matching area, displaced
         double matchingArea = 0.0;
 
         for (double current = start + classWidth / 2; current <= stop; current += classWidth) {
-            double displacedValue = (current + displacement * classWidth) % (numberOfClasses * classWidth);
+            final double displacedValue = (current + actualDisplacement * classWidth) % (numberOfClasses * classWidth);
             matchingArea += Math
-                    .min(thisHistogram.getCount(current), otherHistogram.getCount(displacedValue));
+            .min(thisHistogram.getCount(current), otherHistogram.getCount(displacedValue));
         }
 
         // the biggest area under the curve
-        double biggestHistogramArea = Math.max(thisHistogram.getSumFreq(), otherHistogram.getSumFreq());
+        final double biggestHistogramArea = Math.max(thisHistogram.getSumFreq(), otherHistogram.getSumFreq());
 
         double correlation = 0.0;
 
@@ -48,34 +50,36 @@ public class Intersection implements HistogramCorrelation {
         return correlation;
     }
 
-    public void plotCorrelation(Histogram thisHistogram, int displacement, Histogram otherHistogram) {
+    public void plotCorrelation(final Histogram thisHistogram, final int displacement,
+            final Histogram otherHistogram) {
         // number of bins (classes)
-        int numberOfClasses = thisHistogram.getNumberOfClasses();
+        final int numberOfClasses = thisHistogram.getNumberOfClasses();
         // start value
-        double start = thisHistogram.getStart();
+        final double start = thisHistogram.getStart();
         // stop value
-        double stop = thisHistogram.getStop();
+        final double stop = thisHistogram.getStop();
         // classWidth
-        double classWidth = thisHistogram.getClassWidth();
+        final double classWidth = thisHistogram.getClassWidth();
 
+        int actualDisplacement = displacement;
         // make displacement positive
-        if (displacement < 0) {
-            displacement = ((displacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
+        if (actualDisplacement < 0) {
+            actualDisplacement = ((actualDisplacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
         }
 
         // matching area, displaced
         double matchingArea = 0.0;
 
-        SimplePlot correlationPlot = new SimplePlot();
+        final SimplePlot correlationPlot = new SimplePlot();
         // plots the first histogram
         correlationPlot.addData(0, thisHistogram);
         // plots the other (displaced) histogram
-        correlationPlot.addData(1, otherHistogram, displacement);
+        correlationPlot.addData(1, otherHistogram, actualDisplacement);
 
         // Visualize the intersection using impulses
         for (double current = start + classWidth / 2; current <= stop; current += classWidth) {
-            double displacedValue = (current + displacement * classWidth) % (numberOfClasses * classWidth);
-            double areaAdded = Math.min(thisHistogram.getCount(current), otherHistogram
+            final double displacedValue = (current + actualDisplacement * classWidth) % (numberOfClasses * classWidth);
+            final double areaAdded = Math.min(thisHistogram.getCount(current), otherHistogram
                     .getCount(displacedValue));
             matchingArea += areaAdded;
             for (int i = 0; i < areaAdded; i++) {

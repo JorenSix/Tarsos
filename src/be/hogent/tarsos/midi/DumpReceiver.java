@@ -70,11 +70,11 @@ public class DumpReceiver implements Receiver {
     private final PrintStream m_printStream;
     private final boolean m_bPrintTimeStampAsTicks;
 
-    public DumpReceiver(PrintStream printStream) {
+    public DumpReceiver(final PrintStream printStream) {
         this(printStream, false);
     }
 
-    public DumpReceiver(PrintStream printStream, boolean bPrintTimeStampAsTicks) {
+    public DumpReceiver(final PrintStream printStream, final boolean bPrintTimeStampAsTicks) {
         m_printStream = printStream;
         m_bPrintTimeStampAsTicks = bPrintTimeStampAsTicks;
     }
@@ -82,7 +82,7 @@ public class DumpReceiver implements Receiver {
     public void close() {
     }
 
-    public void send(MidiMessage message, long lTimeStamp) {
+    public void send(final MidiMessage message, final long lTimeStamp) {
         String strMessage = null;
         if (message instanceof ShortMessage) {
             strMessage = decodeMessage((ShortMessage) message);
@@ -106,7 +106,7 @@ public class DumpReceiver implements Receiver {
         m_printStream.println(strTimeStamp + strMessage);
     }
 
-    public String decodeMessage(ShortMessage message) {
+    public String decodeMessage(final ShortMessage message) {
         String strMessage = null;
         switch (message.getCommand()) {
         case 0x80:
@@ -143,14 +143,14 @@ public class DumpReceiver implements Receiver {
             strMessage = SYSTEM_MESSAGE_TEXT[message.getChannel()];
             switch (message.getChannel()) {
             case 0x1:
-                int nQType = (message.getData1() & 0x70) >> 4;
+                final int nQType = (message.getData1() & 0x70) >> 4;
                 int nQData = message.getData1() & 0x0F;
                 if (nQType == 7) {
                     nQData = nQData & 0x1;
                 }
                 strMessage += QUARTER_FRAME_MESSAGE_TEXT[nQType] + nQData;
                 if (nQType == 7) {
-                    int nFrameType = (message.getData1() & 0x06) >> 1;
+                    final int nFrameType = (message.getData1() & 0x06) >> 1;
                     strMessage += ", frame type: " + FRAME_TYPE_TEXT[nFrameType];
                 }
                 break;
@@ -173,8 +173,8 @@ public class DumpReceiver implements Receiver {
             break;
         }
         if (message.getCommand() != 0xF0) {
-            int nChannel = message.getChannel() + 1;
-            String strChannel = "channel " + nChannel + ": ";
+            final int nChannel = message.getChannel() + 1;
+            final String strChannel = "channel " + nChannel + ": ";
             strMessage = strChannel + strMessage;
         }
         smCount++;
@@ -182,8 +182,8 @@ public class DumpReceiver implements Receiver {
         return "[" + getHexString(message) + "] " + strMessage;
     }
 
-    public String decodeMessage(SysexMessage message) {
-        byte[] abData = message.getData();
+    public String decodeMessage(final SysexMessage message) {
+        final byte[] abData = message.getData();
         String strMessage = null;
         // System.out.println("sysex status: " + message.getStatus());
         if (message.getStatus() == SysexMessage.SYSTEM_EXCLUSIVE) {
@@ -197,54 +197,54 @@ public class DumpReceiver implements Receiver {
         return strMessage;
     }
 
-    public String decodeMessage(MetaMessage message) {
+    public String decodeMessage(final MetaMessage message) {
 
-        byte[] abData = message.getData();
+        final byte[] abData = message.getData();
         String strMessage = null;
         // System.out.println("data array length: " + abData.length);
         switch (message.getType()) {
         case 0:
-            int nSequenceNumber = ((abData[0] & 0xFF) << 8) | (abData[1] & 0xFF);
+            final int nSequenceNumber = ((abData[0] & 0xFF) << 8) | (abData[1] & 0xFF);
             strMessage = "Sequence Number: " + nSequenceNumber;
             break;
 
         case 1:
-            String strText = new String(abData);
+            final String strText = new String(abData);
             strMessage = "Text Event: " + strText;
             break;
 
         case 2:
-            String strCopyrightText = new String(abData);
+            final String strCopyrightText = new String(abData);
             strMessage = "Copyright Notice: " + strCopyrightText;
             break;
 
         case 3:
-            String strTrackName = new String(abData);
+            final String strTrackName = new String(abData);
             strMessage = "Sequence/Track Name: " + strTrackName;
             break;
 
         case 4:
-            String strInstrumentName = new String(abData);
+            final String strInstrumentName = new String(abData);
             strMessage = "Instrument Name: " + strInstrumentName;
             break;
 
         case 5:
-            String strLyrics = new String(abData);
+            final String strLyrics = new String(abData);
             strMessage = "Lyric: " + strLyrics;
             break;
 
         case 6:
-            String strMarkerText = new String(abData);
+            final String strMarkerText = new String(abData);
             strMessage = "Marker: " + strMarkerText;
             break;
 
         case 7:
-            String strCuePointText = new String(abData);
+            final String strCuePointText = new String(abData);
             strMessage = "Cue Point: " + strCuePointText;
             break;
 
         case 0x20:
-            int nChannelPrefix = abData[0] & 0xFF;
+            final int nChannelPrefix = abData[0] & 0xFF;
             strMessage = "MIDI Channel Prefix: " + nChannelPrefix;
             break;
 
@@ -253,7 +253,7 @@ public class DumpReceiver implements Receiver {
             break;
 
         case 0x51:
-            int nTempo = ((abData[0] & 0xFF) << 16) | ((abData[1] & 0xFF) << 8) | (abData[2] & 0xFF); // tempo
+            final int nTempo = ((abData[0] & 0xFF) << 16) | ((abData[1] & 0xFF) << 8) | (abData[2] & 0xFF); // tempo
             // in
             // microseconds
             // per
@@ -277,17 +277,17 @@ public class DumpReceiver implements Receiver {
             break;
 
         case 0x59:
-            String strGender = (abData[1] == 1) ? "minor" : "major";
+            final String strGender = (abData[1] == 1) ? "minor" : "major";
             strMessage = "Key Signature: " + KEYSIGNATURES[abData[0] + 7] + " " + strGender;
             break;
 
         case 0x7F:
-            String strDataDump = getHexString(abData);
+            final String strDataDump = getHexString(abData);
             strMessage = "Sequencer-Specific Meta event: " + strDataDump;
             break;
 
         default:
-            String strUnknownDump = getHexString(abData);
+            final String strUnknownDump = getHexString(abData);
             strMessage = "unknown Meta event: " + strUnknownDump;
             break;
 
@@ -295,34 +295,35 @@ public class DumpReceiver implements Receiver {
         return strMessage;
     }
 
-    public static String getKeyName(int nKeyNumber) {
+    public static String getKeyName(final int nKeyNumber) {
         if (nKeyNumber > 127) {
             return "illegal value";
         } else {
-            int nNote = nKeyNumber % 12;
-            int nOctave = nKeyNumber / 12;
+            final int nNote = nKeyNumber % 12;
+            final int nOctave = nKeyNumber / 12;
             return KEYNAMES[nNote] + (nOctave - 1);
         }
     }
 
-    public static int get14bitValue(int nLowerPart, int nHigherPart) {
+    public static int get14bitValue(final int nLowerPart, final int nHigherPart) {
         return (nLowerPart & 0x7F) | ((nHigherPart & 0x7F) << 7);
     }
 
     // convert from microseconds per quarter note to beats per minute and vice
     // versa
-    private static float convertTempo(float value) {
+    private static float convertTempo(final float value) {
+        float actualValue = value;
         if (value <= 0) {
-            value = 0.1f;
+            actualValue = 0.1f;
         }
-        return 60000000.0f / value;
+        return 60000000.0f / actualValue;
     }
 
     private static char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
         'E', 'F' };
 
-    public static String getHexString(byte[] aByte) {
-        StringBuffer sbuf = new StringBuffer(aByte.length * 3 + 2);
+    public static String getHexString(final byte[] aByte) {
+        final StringBuffer sbuf = new StringBuffer(aByte.length * 3 + 2);
         for (int i = 0; i < aByte.length; i++) {
             sbuf.append(' ');
             sbuf.append(hexDigits[(aByte[i] & 0xF0) >> 4]);
@@ -337,14 +338,14 @@ public class DumpReceiver implements Receiver {
         return new String(sbuf);
     }
 
-    private static String intToHex(int i) {
+    private static String intToHex(final int i) {
         return "" + hexDigits[(i & 0xF0) >> 4] + hexDigits[i & 0x0F];
     }
 
-    public static String getHexString(ShortMessage sm) {
+    public static String getHexString(final ShortMessage sm) {
         // bug in J2SDK 1.4.1
         // return getHexString(sm.getMessage());
-        int status = sm.getStatus();
+        final int status = sm.getStatus();
         String res = intToHex(sm.getStatus());
         // if one-byte message, return
         switch (status) {
@@ -365,14 +366,13 @@ public class DumpReceiver implements Receiver {
         }
         res += ' ' + intToHex(sm.getData1());
         // if 2-byte message, return
-        switch (status) {
-        case 0xF1: // MTC Quarter Frame
-        case 0xF3: // Song Select
+        //0xF1: MTC Quarter Frame
+        //0xF3: // Song Select
+        if(status == 0xF3 || status == 0xF1){
             return res;
         }
-        switch (sm.getCommand()) {
-        case 0xC0:
-        case 0xD0:
+
+        if (sm.getCommand() == 0xC0 || sm.getCommand() == 0xD0) {
             return res;
         }
         // 3-byte messages left

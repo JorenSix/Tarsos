@@ -9,14 +9,14 @@ import java.util.List;
  * 
  * @author Joren Six
  */
-public class AudioFile {
+public final class AudioFile {
 
     /**
      * Where to save the transcoded files.
      */
-    public static final String TRANSCODED_AUDIO_DIRECTORY = Configuration
-            .get(ConfKey.transcoded_audio_directory);
-    private static final String ORIGINAL_AUDIO_DIRECTORY = Configuration.get(ConfKey.audio_directory);
+    public static final String TRANSCODED_AUDIO_DIR = Configuration
+    .get(ConfKey.transcoded_audio_directory);
+    private static final String ORIGINAL_AUDIO_DIR = Configuration.get(ConfKey.audio_directory);
 
     private final String path;
 
@@ -26,7 +26,7 @@ public class AudioFile {
      * @param path
      *            the path for the audio file
      */
-    public AudioFile(String path) {
+    public AudioFile(final String path) {
         this.path = path;
         if (AudioTranscoder.transcodingRequired(transcodedPath())) {
             AudioTranscoder.transcode(path, transcodedPath());
@@ -37,9 +37,9 @@ public class AudioFile {
      * @return the path of the transcoded audio file.
      */
     public String transcodedPath() {
-        String baseName = FileUtils.basename(FileUtils.sanitizedFileName(path));
-        String fileName = baseName + "." + Configuration.get(ConfKey.transcoded_audio_format);
-        return FileUtils.combine(TRANSCODED_AUDIO_DIRECTORY, fileName);
+        final String baseName = FileUtils.basename(FileUtils.sanitizedFileName(path));
+        final String fileName = baseName + "." + Configuration.get(ConfKey.transcoded_audio_format);
+        return FileUtils.combine(TRANSCODED_AUDIO_DIR, fileName);
     }
 
     /**
@@ -69,11 +69,11 @@ public class AudioFile {
      *            the datasets to find AudioFiles for
      * @return a list of AudioFiles
      */
-    public static List<AudioFile> audioFiles(String... datasets) {
-        List<AudioFile> files = new ArrayList<AudioFile>();
-        for (String dataset : datasets) {
-            for (String originalFile : FileUtils.glob(FileUtils.combine(ORIGINAL_AUDIO_DIRECTORY, dataset),
-                    ".*\\..*")) {
+    public static List<AudioFile> audioFiles(final String... datasets) {
+        final List<AudioFile> files = new ArrayList<AudioFile>();
+        for (final String dataset : datasets) {
+            for (final String originalFile : FileUtils.glob(FileUtils.combine(ORIGINAL_AUDIO_DIR, dataset),
+            ".*\\..*")) {
                 files.add(new AudioFile(originalFile));
             }
         }

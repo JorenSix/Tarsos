@@ -2,6 +2,7 @@ package be.hogent.tarsos.pitch;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
@@ -28,6 +29,12 @@ import be.hogent.tarsos.util.FileUtils;
  * @author Joren Six
  */
 public class IPEMPitchDetection implements PitchDetector {
+    /**
+     * Log messages.
+     */
+    private static final Logger LOG = Logger.getLogger(IPEMPitchDetection.class.getName());
+
+
 
     private final String name = "ipem";
     private final AudioFile file;
@@ -38,14 +45,14 @@ public class IPEMPitchDetection implements PitchDetector {
      * @param file
      *            the file to detect pitch for
      */
-    public IPEMPitchDetection(AudioFile file) {
+    public IPEMPitchDetection(final AudioFile file) {
         this.file = file;
         this.samples = new ArrayList<Sample>();
 
         // check files and copy them if needed
-        String[] files = { "ipem_pitch_detection.sh", "libsndfile.dll", "pitchdetection.exe" };
-        for (String ipemFile : files) {
-            String target = FileUtils.combine(FileUtils.getRuntimePath(), ipemFile);
+        final String[] files = { "ipem_pitch_detection.sh", "libsndfile.dll", "pitchdetection.exe" };
+        for (final String ipemFile : files) {
+            final String target = FileUtils.combine(FileUtils.getRuntimePath(), ipemFile);
             if (!FileUtils.exists(target)) {
                 FileUtils.copyFileFromJar("/be/hogent/tarsos/pitch/data/" + ipemFile, target);
             }
@@ -55,16 +62,16 @@ public class IPEMPitchDetection implements PitchDetector {
     @Override
     public void executePitchDetection() {
 
-        String transcodedBaseName = FileUtils.basename(file.transcodedPath());
+        final String transcodedBaseName = FileUtils.basename(file.transcodedPath());
 
         FileUtils.writeFile(transcodedBaseName + "\n", "lijst.txt");
 
-        String annotationsDirectory = Configuration.get(ConfKey.raw_ipem_annotations_directory);
-        String csvFileName = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory,
+        final String annotationsDirectory = Configuration.get(ConfKey.raw_ipem_annotations_directory);
+        final String csvFileName = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory,
                 transcodedBaseName + ".txt");
         String command = null;
 
-        String audioDirectory = FileUtils.combine(AudioFile.TRANSCODED_AUDIO_DIRECTORY, "") + "/";
+        String audioDirectory = FileUtils.combine(AudioFile.TRANSCODED_AUDIO_DIR, "") + "/";
         String outputDirectory = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory) + "/";
 
         if (System.getProperty("os.name").contains("indows")) {
@@ -85,20 +92,20 @@ public class IPEMPitchDetection implements PitchDetector {
             Execute.command(command, null);
         }
 
-        List<Double> probabilities = new ArrayList<Double>();
-        List<Double> pitches = new ArrayList<Double>();
+        final List<Double> probabilities = new ArrayList<Double>();
+        final List<Double> pitches = new ArrayList<Double>();
         long start = 0;
-        double minimumAcceptableProbability = 0.05;
+        final double minimumAcceptableProbability = 0.05;
 
-        List<String[]> csvData = FileUtils.readCSVFile(csvFileName, " ", 12);
+        final List<String[]> csvData = FileUtils.readCSVFile(csvFileName, " ", 12);
 
-        for (String[] row : csvData) {
+        for (final String[] row : csvData) {
             for (int index = 0; index < 6; index++) {
                 Double probability = 0.0;
                 try {
                     probability = Double.parseDouble(row[index * 2 + 1]);
-                } catch (NumberFormatException e) {
-                    // ignore number format exception
+                } catch (final NumberFormatException e) {
+                    LOG.info("Ignored incorrectly formatted number: " + row[index * 2 + 1]);
                 }
 
                 Double pitch = row[index * 2].equals("-1.#IND00") || row[index * 2].equals("-1.#QNAN0") ? 0.0
@@ -117,7 +124,7 @@ public class IPEMPitchDetection implements PitchDetector {
                     pitches.add(pitch);
                 }
             }
-            Sample sample = new Sample(start, pitches, probabilities, minimumAcceptableProbability);
+            final Sample sample = new Sample(start, pitches, probabilities, minimumAcceptableProbability);
             sample.source = PitchDetectionMode.IPEM;
             samples.add(sample);
             start += 10;

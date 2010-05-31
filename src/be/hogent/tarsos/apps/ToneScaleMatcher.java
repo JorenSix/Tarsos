@@ -30,18 +30,18 @@ public final class ToneScaleMatcher {
     private ToneScaleMatcher() {
     }
 
-    public static void main(String... args) {
-        LongOpt[] longopts = new LongOpt[3];
+    public static void main(final String... args) {
+        final LongOpt[] longopts = new LongOpt[3];
         longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
         longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
         longopts[2] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
-        Getopt g = new Getopt("tonescalematcher", args, "-i:h:d", longopts);
+        final Getopt g = new Getopt("tonescalematcher", args, "-i:h:d", longopts);
 
         String detector = "IPEM";
         String inputFile = null;
         int c;
         while ((c = g.getopt()) != -1) {
-            String arg = g.getOptarg();
+            final String arg = g.getOptarg();
             switch (c) {
             case 'i':
                 inputFile = arg;
@@ -64,36 +64,36 @@ public final class ToneScaleMatcher {
         }
 
         double[] peaks = new ScalaFile(inputFile).getPitches();
-        ToneScaleHistogram needleToneScale = ToneScaleHistogram.createToneScale(peaks, null, null, null);
+        final ToneScaleHistogram needleToneScale = ToneScaleHistogram.createToneScale(peaks, null, null, null);
 
-        String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
-        String globDirectory = FileUtils.combine(FileUtils.getRuntimePath(), "audio");
-        List<String> inputFiles = FileUtils.glob(globDirectory, pattern);
+        final String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
+        final String globDirectory = FileUtils.combine(FileUtils.getRuntimePath(), "audio");
+        final List<String> inputFiles = FileUtils.glob(globDirectory, pattern);
         // two priority queues with info about same histograms
-        TreeMap<Double, ToneScaleHistogram> toneScaleCorrelations = new TreeMap<Double, ToneScaleHistogram>();
-        TreeMap<Double, String> fileNameCorrelations = new TreeMap<Double, String>();
+        final TreeMap<Double, ToneScaleHistogram> toneScaleCorrelations = new TreeMap<Double, ToneScaleHistogram>();
+        final TreeMap<Double, String> fileNameCorrelations = new TreeMap<Double, String>();
 
-        for (String file : inputFiles) {
-            AudioFile audioFile = new AudioFile(file);
-            PitchDetector pitchDetector = detector.equals("AUBIO") ? new AubioPitchDetection(audioFile,
+        for (final String file : inputFiles) {
+            final AudioFile audioFile = new AudioFile(file);
+            final PitchDetector pitchDetector = detector.equals("AUBIO") ? new AubioPitchDetection(audioFile,
                     PitchDetectionMode.AUBIO_YIN) : new IPEMPitchDetection(audioFile);
             pitchDetector.executePitchDetection();
 
-            List<Sample> samples = pitchDetector.getSamples();
-            AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
-            ToneScaleHistogram toneScaleHistogram = ambitusHistogram.toneScaleHistogram();
+            final List<Sample> samples = pitchDetector.getSamples();
+            final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
+            final ToneScaleHistogram toneScaleHistogram = ambitusHistogram.toneScaleHistogram();
             toneScaleHistogram.gaussianSmooth(1.0);
-            List<Peak> detectedPeaks = PeakDetector.detect(toneScaleHistogram, 10, 0.8);
+            final List<Peak> detectedPeaks = PeakDetector.detect(toneScaleHistogram, 10, 0.8);
             peaks = new double[detectedPeaks.size()];
             for (int i = 0; i < detectedPeaks.size(); i++) {
                 peaks[i] = detectedPeaks.get(i).getPosition();
             }
-            ToneScaleHistogram hayStackHistogram = ToneScaleHistogram
+            final ToneScaleHistogram hayStackHistogram = ToneScaleHistogram
             .createToneScale(peaks, null, null, null);
 
-            int displacementForOptimalCorrelation = needleToneScale
+            final int displacementForOptimalCorrelation = needleToneScale
             .displacementForOptimalCorrelation(hayStackHistogram);
-            Double correlation = needleToneScale.correlationWithDisplacement(
+            final Double correlation = needleToneScale.correlationWithDisplacement(
                     displacementForOptimalCorrelation, hayStackHistogram);
 
             toneScaleCorrelations.put(correlation, hayStackHistogram);
@@ -102,33 +102,33 @@ public final class ToneScaleMatcher {
 
         // print all correlations in descending order
         // best match first
-        System.out.println("correlation\tfile");
-        for (Double key : toneScaleCorrelations.descendingKeySet()) {
-            System.out.println(key + "\t" + fileNameCorrelations.get(key));
+        Tarsos.println("correlation\tfile");
+        for (final Double key : toneScaleCorrelations.descendingKeySet()) {
+            Tarsos.println(key + "\t" + fileNameCorrelations.get(key));
         }
 
         // plot best correlation
         if (toneScaleCorrelations.size() > 0) {
-            double bestCorrelation = toneScaleCorrelations.descendingKeySet().first();
-            ToneScaleHistogram hayStackHistogram = toneScaleCorrelations.get(bestCorrelation);
+            final double bestCorrelation = toneScaleCorrelations.descendingKeySet().first();
+            final ToneScaleHistogram hayStackHistogram = toneScaleCorrelations.get(bestCorrelation);
             needleToneScale.plotCorrelation(hayStackHistogram, CorrelationMeasure.INTERSECTION);
         }
     }
 
     private static void printHelp() {
-        System.out.println("");
-        System.out
+        Tarsos.println("");
+        Tarsos
         .println("Find a file in the audio directory with the best match for the defined tone scale.");
-        System.out.println("");
-        System.out.println("-----------------------");
-        System.out.println("");
-        System.out.println("java -jar tonescalematcher.jar [--in in.slc] [--help]");
-        System.out.println("");
-        System.out.println("-----------------------");
-        System.out.println("");
-        System.out.println("--in in.scl\t\tThe scala file with the tone scale.");
-        System.out.println("--detector AUBIO|IPEM the pitch detector.");
-        System.out.println("--help\t\tPrints this information");
-        System.out.println("");
+        Tarsos.println("");
+        Tarsos.println("-----------------------");
+        Tarsos.println("");
+        Tarsos.println("java -jar tonescalematcher.jar [--in in.slc] [--help]");
+        Tarsos.println("");
+        Tarsos.println("-----------------------");
+        Tarsos.println("");
+        Tarsos.println("--in in.scl\t\tThe scala file with the tone scale.");
+        Tarsos.println("--detector AUBIO|IPEM the pitch detector.");
+        Tarsos.println("--help\t\tPrints this information");
+        Tarsos.println("");
     }
 }

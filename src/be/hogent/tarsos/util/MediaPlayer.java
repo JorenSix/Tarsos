@@ -11,6 +11,8 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import be.hogent.tarsos.apps.Tarsos;
+
 public class MediaPlayer implements Runnable {
     File file;
     AudioInputStream in;
@@ -21,28 +23,27 @@ public class MediaPlayer implements Runnable {
     boolean playing;
     boolean notYetEOF;
 
-    public MediaPlayer(String fileName) throws IOException, UnsupportedAudioFileException,
-            LineUnavailableException {
+    public MediaPlayer(final String fileName) throws IOException, UnsupportedAudioFileException,
+    LineUnavailableException {
         file = new File(fileName);
         in = AudioSystem.getAudioInputStream(file);
-        AudioFormat format = in.getFormat();
-        AudioFormat.Encoding formatEncoding = format.getEncoding();
+        final AudioFormat format = in.getFormat();
+        final AudioFormat.Encoding formatEncoding = format.getEncoding();
         if (!(formatEncoding.equals(AudioFormat.Encoding.PCM_SIGNED) || formatEncoding
                 .equals(AudioFormat.Encoding.PCM_UNSIGNED))) {
             throw new UnsupportedAudioFileException(file.getName() + " is not PCM audio");
         }
-        System.out.println("got PCM format");
+        Tarsos.println("got PCM format");
         frameSize = format.getFrameSize();
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-        System.out.println("got info");
+        final DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+        Tarsos.println("got info");
         line = (SourceDataLine) AudioSystem.getLine(info);
-        System.out.println("got line");
+        Tarsos.println("got line");
         line.open();
-        System.out.println("opened line");
+        Tarsos.println("opened line");
         playThread = new Thread(this);
         playing = false;
         notYetEOF = true;
-
     }
 
     public void run() {
@@ -60,7 +61,7 @@ public class MediaPlayer implements Runnable {
                     }
                     // how many frames did we get,
                     // and how many are left over?
-                    int leftover = bytesRead % frameSize;
+                    final int leftover = bytesRead % frameSize;
                     // send to line
                     line.write(buffer, readPoint, bytesRead - leftover);
                     // save the leftover bytes
@@ -71,15 +72,15 @@ public class MediaPlayer implements Runnable {
                     // Thread.yield();
                     try {
                         Thread.sleep(10);
-                    } catch (InterruptedException ie) {
+                    } catch (final InterruptedException ie) {
                         ie.printStackTrace();
                     }
                 }
             } // while notYetEOF
-            System.out.println("reached eof");
+            Tarsos.println("reached eof");
             line.drain();
             line.stop();
-        } catch (IOException ioe) {
+        } catch (final IOException ioe) {
             ioe.printStackTrace();
         }
     } // run

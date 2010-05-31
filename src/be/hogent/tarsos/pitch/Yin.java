@@ -8,6 +8,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import be.hogent.tarsos.apps.Tarsos;
 import be.hogent.tarsos.util.SimplePlot;
 
 import com.sun.media.sound.AudioFloatInputStream;
@@ -132,8 +133,8 @@ public final class Yin {
      */
     private float parabolicInterpolation(final int tauEstimate) {
         float s0, s1, s2;
-        int x0 = (tauEstimate < 1) ? tauEstimate : tauEstimate - 1;
-        int x2 = (tauEstimate + 1 < yinBuffer.length) ? tauEstimate + 1 : tauEstimate;
+        final int x0 = (tauEstimate < 1) ? tauEstimate : tauEstimate - 1;
+        final int x2 = (tauEstimate + 1 < yinBuffer.length) ? tauEstimate + 1 : tauEstimate;
         if (x0 == tauEstimate) {
             return (yinBuffer[tauEstimate] <= yinBuffer[x2]) ? tauEstimate : x2;
         }
@@ -234,25 +235,25 @@ public final class Yin {
     public static void processStream(final AudioFloatInputStream afis,
             final DetectedPitchHandler detectedPitchHandler)
     throws UnsupportedAudioFileException, IOException {
-        AudioFormat format = afis.getFormat();
-        float sampleRate = format.getSampleRate();
-        double frameSize = format.getFrameSize();
-        double frameRate = format.getFrameRate();
+        final AudioFormat format = afis.getFormat();
+        final float sampleRate = format.getSampleRate();
+        final double frameSize = format.getFrameSize();
+        final double frameRate = format.getFrameRate();
         float time = 0;
         // number of bytes / frameSize * frameRate gives the number of seconds
         // because we use float buffers there is a factor 2: 2 bytes per float?
         // Seems to be correct but a float uses 4 bytes: confused programmer is
         // confused.
-        float timeCalculationDivider = (float) (frameSize * frameRate / 2);
+        final float timeCalculationDivider = (float) (frameSize * frameRate / 2);
         long floatsProcessed = 0;
         yinInstance = new Yin(sampleRate, 2048);
-        int bufferStepSize = yinInstance.bufferSize - yinInstance.overlapSize;
+        final int bufferStepSize = yinInstance.bufferSize - yinInstance.overlapSize;
 
         // read full buffer
         boolean hasMoreBytes = afis.read(yinInstance.inputBuffer, 0, yinInstance.bufferSize) != -1;
         floatsProcessed += yinInstance.inputBuffer.length;
         while (hasMoreBytes && yinInstance.running) {
-            float pitch = yinInstance.getPitch();
+            final float pitch = yinInstance.getPitch();
             time = floatsProcessed / timeCalculationDivider;
             if (detectedPitchHandler != null) {
                 detectedPitchHandler.handleDetectedPitch(time, pitch);
@@ -300,7 +301,7 @@ public final class Yin {
             final int overlap) throws IOException {
         assert overlap < audioBuffer.length;
 
-        int bufferStepSize = audioBuffer.length - overlap;
+        final int bufferStepSize = audioBuffer.length - overlap;
 
         for (int i = 0; i < bufferStepSize; i++) {
             audioBuffer[i] = audioBuffer[i + overlap];
@@ -349,12 +350,12 @@ public final class Yin {
         }
     }
 
-    public static void main(String... args) throws UnsupportedAudioFileException, IOException {
+    public static void main(final String... args) throws UnsupportedAudioFileException, IOException {
         final SimplePlot p = new SimplePlot("Pitch tracking");
         Yin.processFile("../Tarsos/audio/pitch_check/flute.novib.mf.C5B5.wav", new DetectedPitchHandler() {
             @Override
             public void handleDetectedPitch(final float time, final float pitch) {
-                System.out.println(time + "\t" + pitch);
+                Tarsos.println(time + "\t" + pitch);
                 double plotPitch = pitch;
                 if (plotPitch == -1) {
                     plotPitch = 0;
@@ -367,8 +368,8 @@ public final class Yin {
 
     public static final DetectedPitchHandler PRINT_DETECTED_PITCH_HANDLER = new DetectedPitchHandler() {
         @Override
-        public void handleDetectedPitch(float time, float pitch) {
-            System.out.println(time + "\t" + pitch);
+        public void handleDetectedPitch(final float time, final float pitch) {
+            Tarsos.println(time + "\t" + pitch);
         }
     };
 }

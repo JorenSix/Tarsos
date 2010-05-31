@@ -21,8 +21,8 @@ import java.util.logging.Logger;
  * 
  * @author Joren Six
  */
-public class AudioTranscoder {
-    private static Logger log = Logger.getLogger(AudioTranscoder.class.getName());
+public final class AudioTranscoder {
+    private static final Logger LOG = Logger.getLogger(AudioTranscoder.class.getName());
 
     // makes sure no instances of AudioTranscoder are created.
     private AudioTranscoder() {
@@ -41,13 +41,13 @@ public class AudioTranscoder {
      * default is set to 44.1kHz
      */
     private static final Integer DEFAULT_SAMPLING_RATE = Configuration
-            .getInt(ConfKey.transcoded_audio_sampling_rate); // Hertz
+    .getInt(ConfKey.transcoded_audio_sampling_rate); // Hertz
 
     /**
      * The number of channels used int he transcoded file.
      */
     private static final Integer DEFAULT_NUMBER_OF_CHANNELS = Configuration
-            .getInt(ConfKey.transcoded_audio_number_of_channels); // Mono
+    .getInt(ConfKey.transcoded_audio_number_of_channels); // Mono
 
     /**
      * Transcode the source file to target using the requested number of
@@ -63,7 +63,7 @@ public class AudioTranscoder {
      *             if the source file can not be read or the target file is not
      *             writable.
      */
-    public static void transcode(String source, String target) {
+    public static void transcode(final String source, final String target) {
         transcode(source, target, DEFAULT_NUMBER_OF_CHANNELS, DEFAULT_SAMPLING_RATE);
     }
 
@@ -86,9 +86,9 @@ public class AudioTranscoder {
      *             if the source file can not be read or the target file is not
      *             writable.
      */
-    public static void transcode(String source, String target, Integer channels, Integer samplingRate) {
-        File sourceFile = new File(source);
-        File targetFile = new File(target);
+    public static void transcode(final String source, final String target, final Integer channels, final Integer samplingRate) {
+        final File sourceFile = new File(source);
+        final File targetFile = new File(target);
 
         // sanity checks
         if (!sourceFile.exists()) {
@@ -104,24 +104,24 @@ public class AudioTranscoder {
         // if transcoding is enabled transcode
         if (Configuration.getBoolean(ConfKey.transcode_audio)) {
             try {
-                Encoder e = new Encoder();
-                EncodingAttributes attributes = new EncodingAttributes();
-                AudioAttributes audioAttributes = new AudioAttributes();
+                final Encoder e = new Encoder();
+                final EncodingAttributes attributes = new EncodingAttributes();
+                final AudioAttributes audioAttributes = new AudioAttributes();
                 audioAttributes.setChannels(channels);
                 audioAttributes.setSamplingRate(samplingRate);
                 audioAttributes.setCodec(TARGET_CODEC);
                 attributes.setAudioAttributes(audioAttributes);
                 attributes.setFormat(TARGET_FORMAT);
                 e.encode(sourceFile, targetFile, attributes);
-                log.info("Successfully transcoded " + source + " to " + target);
-            } catch (IllegalArgumentException e1) {
-                log.severe("Incorrect encoding parameters");
+                LOG.info("Successfully transcoded " + source + " to " + target);
+            } catch (final IllegalArgumentException e1) {
+                LOG.severe("Incorrect encoding parameters");
                 e1.printStackTrace();
-            } catch (InputFormatException e1) {
-                log.severe("Unknown input file format: " + source);
+            } catch (final InputFormatException e1) {
+                LOG.severe("Unknown input file format: " + source);
                 e1.printStackTrace();
-            } catch (EncoderException e1) {
-                log.severe("Problems occured while transcoding " + source + ". Check output: " + target
+            } catch (final EncoderException e1) {
+                LOG.severe("Problems occured while transcoding " + source + ". Check output: " + target
                         + " message " + e1.getMessage());
             }
         } else { // if transcoding is disabled: copy the audio
@@ -140,7 +140,7 @@ public class AudioTranscoder {
      * @return false if the file is already transcoded as per the requested
      *         parameters, false otherwise.
      */
-    public static boolean transcodingRequired(String target) {
+    public static boolean transcodingRequired(final String target) {
         return transcodingRequired(target, DEFAULT_NUMBER_OF_CHANNELS, DEFAULT_SAMPLING_RATE);
     }
 
@@ -160,20 +160,20 @@ public class AudioTranscoder {
      * @return false if the file is already transcoded as per the requested
      *         parameters, false otherwise.
      */
-    public static boolean transcodingRequired(String target, Integer channels, Integer samplingRate) {
-        File targetFile = new File(target);
+    public static boolean transcodingRequired(final String target, final Integer channels, final Integer samplingRate) {
+        final File targetFile = new File(target);
         // if the file does not exist transcoding is always required
         boolean transcodingRequired = !targetFile.exists();
         // if the file exists, check the format
         // or skip the check (depending on the configuration)
         if (targetFile.exists() && !Configuration.getBoolean(ConfKey.skip_transcoded_audio_format_check)) {
-            AudioInfo info = getInfo(target);
-            int currentSamplingRate = info.getSamplingRate();
-            int currentNumberOfChannels = info.getChannels();
-            String currentDecoder = info.getDecoder();
-            boolean samplingRateMatches = currentSamplingRate == samplingRate;
-            boolean numberOfChannelsMatches = currentNumberOfChannels == channels;
-            boolean codecMatches = currentDecoder.equalsIgnoreCase(TARGET_CODEC);
+            final AudioInfo info = getInfo(target);
+            final int currentSamplingRate = info.getSamplingRate();
+            final int currentNumberOfChannels = info.getChannels();
+            final String currentDecoder = info.getDecoder();
+            final boolean samplingRateMatches = currentSamplingRate == samplingRate;
+            final boolean numberOfChannelsMatches = currentNumberOfChannels == channels;
+            final boolean codecMatches = currentDecoder.equalsIgnoreCase(TARGET_CODEC);
             transcodingRequired = !(samplingRateMatches && numberOfChannelsMatches && codecMatches);
         }
         return transcodingRequired;
@@ -187,16 +187,16 @@ public class AudioTranscoder {
      *            the file to get the info for
      * @return the info for the file.
      */
-    public static AudioInfo getInfo(String file) {
+    public static AudioInfo getInfo(final String file) {
         AudioInfo info = null;
         try {
-            Encoder e = new Encoder();
+            final Encoder e = new Encoder();
             info = e.getInfo(new File(file)).getAudio();
-        } catch (InputFormatException e1) {
-            log.severe("Unknown input file format: " + file);
+        } catch (final InputFormatException e1) {
+            LOG.severe("Unknown input file format: " + file);
             e1.printStackTrace();
-        } catch (EncoderException e1) {
-            log.warning("Could not get information about:" + file);
+        } catch (final EncoderException e1) {
+            LOG.warning("Could not get information about:" + file);
         }
         return info;
     }

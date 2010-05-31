@@ -80,7 +80,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
      * @param numberOfKeysPerOctave
      *            the number of keys per octave
      */
-    public VirtualKeyboard(int numberOfKeysPerOctave) {
+    public VirtualKeyboard(final int numberOfKeysPerOctave) {
         // default: 7 octaves
         // number of keys smaller than VirtualKeyboard.NUMBER_OF_MIDI_KEYS
         this(
@@ -99,7 +99,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
      *            the total number of keys used. E.g. 12 keys per octave and 4
      *            octaves = 48 keys
      */
-    public VirtualKeyboard(int numberOfKeysPerOctave, int numberOfKeys) {
+    public VirtualKeyboard(final int numberOfKeysPerOctave, final int numberOfKeys) {
         super();
         setFocusable(true);
 
@@ -112,37 +112,37 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) {
+            public void mousePressed(final MouseEvent e) {
                 grabFocus();
-                Point p = e.getPoint();
+                final Point p = e.getPoint();
                 currentlyPressedMidiNote = getMidiNote(p.x, p.y);
                 sendNoteMessage(currentlyPressedMidiNote, true);
             }
 
             @Override
-            public void mouseReleased(MouseEvent e) {
+            public void mouseReleased(final MouseEvent e) {
                 sendNoteMessage(currentlyPressedMidiNote, false);
                 currentlyPressedMidiNote = -1;
             }
         });
 
         addFocusListener(new FocusListener() {
-            public void focusGained(FocusEvent e) {
+            public void focusGained(final FocusEvent e) {
                 repaint();
             }
 
-            public void focusLost(FocusEvent e) {
+            public void focusLost(final FocusEvent e) {
                 allKeysOff(); // is this behavior wanted?
                 repaint();
             }
         });
 
         addKeyListener(new KeyListener() {
-            public void keyPressed(KeyEvent e) {
-                int pressedKeyChar = e.getKeyChar();
+            public void keyPressed(final KeyEvent e) {
+                final int pressedKeyChar = e.getKeyChar();
                 for (int i = 0; i < VirtualKeyboard.mappedKeys.length(); i++) {
                     if (VirtualKeyboard.mappedKeys.charAt(i) == pressedKeyChar) {
-                        int midiKey = i + lowestAssignedKey;
+                        final int midiKey = i + lowestAssignedKey;
                         if (midiKey < VirtualKeyboard.this.numberOfKeys && !keyDown[midiKey]) {
                             sendNoteMessage(midiKey, true);
                         }
@@ -151,11 +151,11 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
                 }
             }
 
-            public void keyReleased(KeyEvent e) {
-                char pressedKeyChar = e.getKeyChar();
+            public void keyReleased(final KeyEvent e) {
+                final char pressedKeyChar = e.getKeyChar();
                 for (int i = 0; i < VirtualKeyboard.mappedKeys.length(); i++) {
                     if (VirtualKeyboard.mappedKeys.charAt(i) == pressedKeyChar) {
-                        int midiKey = i + lowestAssignedKey;
+                        final int midiKey = i + lowestAssignedKey;
                         if (keyDown[midiKey]) {
                             sendNoteMessage(midiKey, false);
                         }
@@ -164,7 +164,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
                 }
             }
 
-            public void keyTyped(KeyEvent e) {
+            public void keyTyped(final KeyEvent e) {
                 if (e.getKeyChar() == '-') {
                     lowestAssignedKey -= VirtualKeyboard.this.numberOfKeysPerOctave;
                     if (lowestAssignedKey < 0) {
@@ -183,10 +183,10 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
         });
     }
 
-    protected boolean isKeyDown(int midiKey) {
+    protected boolean isKeyDown(final int midiKey) {
         // midikey should be smaller than 128
         if (midiKey >= VirtualKeyboard.NUMBER_OF_MIDI_KEYS) {
-            throw new Error("Requested invalid midi key: " + midiKey);
+            throw new IllegalArgumentException("Requested invalid midi key: " + midiKey);
         }
 
         return keyDown[midiKey];
@@ -202,7 +202,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
      *            <code>true</code> for NOTE_ON messages, <code>false</code> for
      *            NOTE_OFF
      */
-    protected void sendNoteMessage(int midiKey, boolean sendOnMessage) {
+    protected void sendNoteMessage(final int midiKey, final boolean sendOnMessage) {
         // do not send note on messages to pressed keys
         if (sendOnMessage && keyDown[midiKey]) {
             return;
@@ -213,13 +213,13 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
         }
 
         try {
-            ShortMessage sm = new ShortMessage();
-            int command = sendOnMessage ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
-            int velocity = sendOnMessage ? VirtualKeyboard.VELOCITY : 0;
+            final ShortMessage sm = new ShortMessage();
+            final int command = sendOnMessage ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
+            final int velocity = sendOnMessage ? VirtualKeyboard.VELOCITY : 0;
             sm.setMessage(command, VirtualKeyboard.CHANNEL, midiKey, velocity);
 
             send(sm, -1);
-        } catch (InvalidMidiDataException e1) {
+        } catch (final InvalidMidiDataException e1) {
             e1.printStackTrace();
         }
         // mark key correctly
@@ -244,7 +244,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
     }
 
     @Override
-    public void setReceiver(Receiver receiver) {
+    public void setReceiver(final Receiver receiver) {
         this.recveiver = receiver;
     }
 
@@ -257,7 +257,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
     }
 
     @Override
-    public void send(MidiMessage message, long timeStamp) {
+    public void send(final MidiMessage message, final long timeStamp) {
         // acts as a "MIDI cable" sends the received messages trough
         if (recveiver != null) {
             recveiver.send(message, timeStamp);
@@ -265,9 +265,9 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 
         // implements Receiver send: makes sure the right keys are marked
         if (message instanceof ShortMessage) {
-            ShortMessage sm = (ShortMessage) message;
-            boolean correctChannel = sm.getChannel() == VirtualKeyboard.CHANNEL;
-            boolean noteOnOrOff = sm.getCommand() == ShortMessage.NOTE_ON
+            final ShortMessage sm = (ShortMessage) message;
+            final boolean correctChannel = sm.getChannel() == VirtualKeyboard.CHANNEL;
+            final boolean noteOnOrOff = sm.getCommand() == ShortMessage.NOTE_ON
             || sm.getCommand() == ShortMessage.NOTE_OFF;
             if (correctChannel && noteOnOrOff) {
                 keyDown[sm.getData1()] = (sm.getCommand() == ShortMessage.NOTE_ON) && (sm.getData2() != 0);
@@ -287,7 +287,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
      * @return a <code>VirtualKeyboard</code> using the best representation
      *         available.
      */
-    public static VirtualKeyboard createVirtualKeyboard(int numberOfKeysPerOctave) {
+    public static VirtualKeyboard createVirtualKeyboard(final int numberOfKeysPerOctave) {
         VirtualKeyboard keyboard = null;
         switch (numberOfKeysPerOctave) {
         case 12:

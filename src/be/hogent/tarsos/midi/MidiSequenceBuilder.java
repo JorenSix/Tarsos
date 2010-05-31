@@ -2,6 +2,8 @@ package be.hogent.tarsos.midi;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaEventListener;
@@ -21,37 +23,39 @@ import be.hogent.tarsos.pitch.PitchConverter;
 
 /**
  * Utility class to generate a sequence of MIDI events.
- * 
  * @author Joren Six
  */
 public class MidiSequenceBuilder {
-    private Sequence sequence;
-    private Track track;
+
+    /**
+     * Log messages.
+     */
+    private static final Logger LOG = Logger.getLogger(MidiSequenceBuilder.class.getName());
+
+    private static final int VELOCITY = 64;
+
+    private final Sequence sequence;
+    private final Track track;
     private int currentTicks;
 
-    private final int VELOCITY = 64;
 
-    public MidiSequenceBuilder() {
-        try {
-            sequence = new Sequence(Sequence.PPQ, 1);
-            track = sequence.createTrack();
-            currentTicks = 0;
-        } catch (InvalidMidiDataException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+
+    public MidiSequenceBuilder() throws InvalidMidiDataException {
+        sequence = new Sequence(Sequence.PPQ, 1);
+        track = sequence.createTrack();
+        currentTicks = 0;
     }
 
-    public void addNote(int midiKey, int numberOfTicks) {
+    public void addNote(final int midiKey, final int numberOfTicks) {
         track.add(createNoteEvent(ShortMessage.NOTE_ON, midiKey, VELOCITY, currentTicks));
         currentTicks = numberOfTicks + currentTicks;
         track.add(createNoteEvent(ShortMessage.NOTE_OFF, midiKey, 0, currentTicks));
     }
 
-    public void addNoteByFrequency(double frequency, int numberOfTicks) {
-        int closestMidiNumber = (int) Math.round(69 + 12 * Math.log(frequency / 440.0) / Math.log(2.0));
-        double frequencyClosestMidiNumber = Math.pow(2.0, (closestMidiNumber - 69.0) / 12.0) * 440.0;
-        double deviationInCents = 1200 * Math.log(frequency / frequencyClosestMidiNumber) / Math.log(2.0);
+    public void addNoteByFrequency(final double frequency, final int numberOfTicks) {
+        final int closestMidiNumber = (int) Math.round(69 + 12 * Math.log(frequency / 440.0) / Math.log(2.0));
+        final double frequencyClosestMidiNumber = Math.pow(2.0, (closestMidiNumber - 69.0) / 12.0) * 440.0;
+        final double deviationInCents = 1200 * Math.log(frequency / frequencyClosestMidiNumber) / Math.log(2.0);
         assert deviationInCents <= 50;
         // System.out.println("Requested: " + frequency + "Hz; Midi key " +
         // closestMidiNumber + " frequency: " + frequencyClosestMidiNumber +
@@ -59,20 +63,23 @@ public class MidiSequenceBuilder {
         this.addNoteByDeviationInCents(closestMidiNumber, numberOfTicks, deviationInCents);
     }
 
-    public void addNoteByAbsoluteCents(double absoluteCents, int numberOfTicks) {
-        double frequency = PitchConverter.absoluteCentToHertz(absoluteCents);
+    public void addNoteByAbsoluteCents(final double absoluteCents, final int numberOfTicks) {
+        final double frequency = PitchConverter.absoluteCentToHertz(absoluteCents);
         this.addNoteByFrequency(frequency, numberOfTicks);
     }
 
-    public void addNoteByDeviationInCents(int midiKey, int numberOfTicks, double deviationInCents) {
-        midiKey = midiKey + (int) (deviationInCents / 100);
-        deviationInCents = deviationInCents % 100;
-        track.add(createPitchBendEvent(deviationInCents, currentTicks));
-        addNote(midiKey, numberOfTicks);
+    public void addNoteByDeviationInCents(final int midiKey, final int numberOfTicks, final double deviationInCents) {
+        // E.G. midiKey = 69 ;deviation in cents is -105.0
+        // actualMidiKey = 69 - 1 =68
+        final int actualMidiKey = midiKey + (int) (deviationInCents / 100);
+        // midiKeyDeviation = -5;
+        final double midiKeyDeviation = deviationInCents % 100;
+        track.add(createPitchBendEvent(midiKeyDeviation, currentTicks));
+        addNote(actualMidiKey, numberOfTicks);
         track.add(createPitchBendEvent(0.0, currentTicks));
     }
 
-    private MidiEvent createPitchBendEvent(double deviationInCents, int startTick) {
+    private MidiEvent createPitchBendEvent(final double deviationInCents, final int startTick) {
         int bendFactorInMidi = 0;
         // 16384 values for 400 cents
         bendFactorInMidi = (int) (deviationInCents * (16384.0 / 400.0));
@@ -82,12 +89,8 @@ public class MidiSequenceBuilder {
         return createPitchBendEvent(bendFactorInMidi, (long) startTick);
     }
 
-    public void export(String fileName) {
-        try {
-            MidiSystem.write(sequence, 0, new File(fileName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void export(final String fileName) throws IOException {
+        MidiSystem.write(sequence, 0, new File(fileName));
     }
 
     public void play() throws MidiUnavailableException, InvalidMidiDataException {
@@ -119,8 +122,8 @@ public class MidiSequenceBuilder {
          */
         synthesizer = MidiSystem.getSynthesizer();
         synthesizer.open();
-        Receiver synthReceiver = synthesizer.getReceiver();
-        Transmitter seqTransmitter = sequencer.getTransmitter();
+        final Receiver synthReceiver = synthesizer.getReceiver();
+        final Transmitter seqTransmitter = sequencer.getTransmitter();
         seqTransmitter.setReceiver(synthReceiver);
 
         /*
@@ -130,7 +133,7 @@ public class MidiSequenceBuilder {
          * 47 is end of track. Thanks to Espen Riskedal for finding this trick.
          */
         sequencer.addMetaEventListener(new MetaEventListener() {
-            public void meta(MetaMessage event) {
+            public void meta(final MetaMessage event) {
                 if (event.getType() == 47) {
                     sequencer.close();
                     if (synthesizer != null) {
@@ -163,75 +166,50 @@ public class MidiSequenceBuilder {
      * 101 00 MSB Bn 64 00 ; 100 00 LSB Bn 06 18 ; 06 24 MSB Bn 26 00 ; 38 00
      * LSB </pre>
      */
-    private MidiEvent createPitchBendEvent(int bendFactor, long startTick) {
+    private MidiEvent createPitchBendEvent(final int bendFactor, final long startTick) {
 
-        ShortMessage message = new ShortMessage();
+        final ShortMessage message = new ShortMessage();
 
         // -8191 <= bendfactor <= +8192
-        bendFactor += 8191;
-        if (0 > bendFactor || bendFactor >= 16384) {
-            throw new IllegalArgumentException("bendFactor invalid:  -8191 <= bendFactor <= +8192");
+        final int actualBendFactor = bendFactor + 8191;
+        if (0 > actualBendFactor || actualBendFactor >= 16384) {
+            throw new IllegalArgumentException("BendFactor " + bendFactor
+                    + " invalid:  -8191 <= bendFactor <= +8192");
         }
 
-        String binary = toBinaryString(bendFactor);
-        int msb = Integer.parseInt(binary.substring(0, 7), 2);
-        int lsb = Integer.parseInt(binary.substring(7, 14), 2);
+        final String binary = toBinaryString(actualBendFactor);
+        final int msb = Integer.parseInt(binary.substring(0, 7), 2);
+        final int lsb = Integer.parseInt(binary.substring(7, 14), 2);
 
         try {
             message.setMessage(ShortMessage.PITCH_BEND, 0, lsb, msb);
-        } catch (InvalidMidiDataException e) {
-            e.printStackTrace();
-            throw new Error(e);
+        } catch (final InvalidMidiDataException e) {
+            LOG.log(Level.SEVERE, "Invalid midi data", e);
+            // TODO: Add throws or re-throw exception?
+            // Will this exception ever occur?
         }
         return new MidiEvent(message, startTick);
     }
 
-    private static String toBinaryString(int i) {
-        String binary = Integer.toBinaryString(i);
-        while (binary.length() < 14) {
-            binary = "0" + binary;
+    private static String toBinaryString(final int integer) {
+        final String binary = Integer.toBinaryString(integer);
+        final StringBuffer buffer = new StringBuffer(binary);
+        while (buffer.length() < 14) {
+            buffer.insert(0, '0');
         }
-        return binary;
+        return buffer.toString();
     }
 
-    private MidiEvent createNoteEvent(int nCommand, int nKey, int nVelocity, long lTick) {
-        ShortMessage message = new ShortMessage();
+    private MidiEvent createNoteEvent(final int nCommand, final int nKey, final int nVelocity, final long lTick) {
+        final ShortMessage message = new ShortMessage();
         try {
             message.setMessage(nCommand, 0, // always on channel 1
                     nKey, nVelocity);
-        } catch (InvalidMidiDataException e) {
-            e.printStackTrace();
+        } catch (final InvalidMidiDataException e) {
+            LOG.log(Level.SEVERE, "Invalid midi data", e);
+            // TODO: Add throws or re-throw exception?
+            // Will this exception ever occur?
         }
-        MidiEvent event = new MidiEvent(message, lTick);
-        return event;
-    }
-
-    public static void main(String[] args) {
-        MidiSequenceBuilder builder = new MidiSequenceBuilder();
-
-        for (int i = 0; i < 10; i++) {
-            for (int j = 40; j < 80; j++) {
-                builder.addNote(j, 1);
-            }
-            for (int j = 80; j > 40; j++) {
-                builder.addNote(j, 1);
-            }
-        }
-
-        builder.addNote(69, 3);
-        builder.addNoteByFrequency(440, 3);
-        builder.addNoteByDeviationInCents(68, 3, 100);
-        builder.addNoteByDeviationInCents(72, 3, -300);
-        builder.addNoteByDeviationInCents(73, 3, -400);
-        builder.addNoteByDeviationInCents(62, 3, 700);
-
-        try {
-            builder.export("test.midi");
-            builder.play();
-        } catch (MidiUnavailableException e) {
-            e.printStackTrace();
-        } catch (InvalidMidiDataException e) {
-            e.printStackTrace();
-        }
+        return new MidiEvent(message, lTick);
     }
 }

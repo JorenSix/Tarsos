@@ -15,7 +15,6 @@ import javax.sound.midi.SysexMessage;
  * exception. <a
  * href="https://gervill.dev.java.net/source/browse/gervill/src.demos/"> Gervill
  * source code</a>
- * 
  * @author Karl Helgason
  */
 public class MidiUtils {
@@ -35,22 +34,22 @@ public class MidiUtils {
      * @throws InvalidMidiDataException
      *             if something goes awry.
      */
-    public static void sendTuningChange(Receiver recv, int channel, int tuningpreset)
-            throws InvalidMidiDataException {
+    public static void sendTuningChange(final Receiver recv, final int channel, final int tuningpreset)
+    throws InvalidMidiDataException {
         // Data Entry
-        ShortMessage sm1 = new ShortMessage();
+        final ShortMessage sm1 = new ShortMessage();
         sm1.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x64, 03);
-        ShortMessage sm2 = new ShortMessage();
+        final ShortMessage sm2 = new ShortMessage();
         sm2.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x65, 00);
         // Tuning program 19
-        ShortMessage sm3 = new ShortMessage();
+        final ShortMessage sm3 = new ShortMessage();
         sm3.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x06, tuningpreset);
 
         // Data Increment
-        ShortMessage sm4 = new ShortMessage();
+        final ShortMessage sm4 = new ShortMessage();
         sm4.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x60, 0x7F);
         // Data Decrement
-        ShortMessage sm5 = new ShortMessage();
+        final ShortMessage sm5 = new ShortMessage();
         sm5.setMessage(ShortMessage.CONTROL_CHANGE, channel, 0x61, 0x7F);
 
         recv.send(sm1, -1);
@@ -72,15 +71,15 @@ public class MidiUtils {
      * @throws IOException
      * @throws InvalidMidiDataException
      */
-    public static void sendTunings(Receiver recv, int bank, int preset, String name, double[] tunings)
-            throws IOException, InvalidMidiDataException {
+    public static void sendTunings(final Receiver recv, final int bank, final int preset, final String name, final double[] tunings)
+    throws IOException, InvalidMidiDataException {
         assert tunings.length == 128;
-        int[] itunings = new int[128];
+        final int[] itunings = new int[128];
         for (int i = 0; i < itunings.length; i++) {
             itunings[i] = (int) (tunings[i] * 16384.0 / 100.0);
         }
 
-        SysexMessage msg = MidiUtils.MidiTuningStandard.keyBasedTuningDump(MidiUtils.ALL_DEVICES, bank,
+        final SysexMessage msg = MidiUtils.MidiTuningStandard.keyBasedTuningDump(MidiUtils.ALL_DEVICES, bank,
                 preset, name, itunings);
         recv.send(msg, -1);
     }
@@ -107,34 +106,34 @@ public class MidiUtils {
 
         private static final byte GENERAL_MIDI_2_ON = 0x03;
 
-        private static SysexMessage setGeneralMidiMessage(int targetDevice, byte type) throws IOException,
-                InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        private static SysexMessage setGeneralMidiMessage(final int targetDevice, final byte type) throws IOException,
+        InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_NON_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(GENERAL_MIDI_MESSAGES);
             baos.write(type);
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
 
         }
 
-        public static SysexMessage gmSystemOff(int targetDevice) throws IOException, InvalidMidiDataException {
+        public static SysexMessage gmSystemOff(final int targetDevice) throws IOException, InvalidMidiDataException {
             return setGeneralMidiMessage(targetDevice, GENERAL_MIDI_OFF);
         }
 
-        public static SysexMessage gmSystemOn(int targetDevice) throws IOException, InvalidMidiDataException {
+        public static SysexMessage gmSystemOn(final int targetDevice) throws IOException, InvalidMidiDataException {
             return setGeneralMidiMessage(targetDevice, GENERAL_MIDI_1_ON);
         }
 
-        public static SysexMessage gm1SystemOn(int targetDevice) throws IOException, InvalidMidiDataException {
+        public static SysexMessage gm1SystemOn(final int targetDevice) throws IOException, InvalidMidiDataException {
             return setGeneralMidiMessage(targetDevice, GENERAL_MIDI_1_ON);
         }
 
-        public static SysexMessage gm2SystemOn(int targetDevice) throws IOException, InvalidMidiDataException {
+        public static SysexMessage gm2SystemOn(final int targetDevice) throws IOException, InvalidMidiDataException {
             return setGeneralMidiMessage(targetDevice, GENERAL_MIDI_2_ON);
         }
     }
@@ -153,9 +152,9 @@ public class MidiUtils {
 
         private static final byte[] GLOBAL_PARAMETER_CONTROL = new byte[] { (byte) 0x05 };
 
-        private static SysexMessage setDeviceControl(int targetDevice, int control, int value)
-                throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        private static SysexMessage setDeviceControl(final int targetDevice, final int control, final int value)
+        throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(DEVICE_CONTROL);
@@ -163,41 +162,41 @@ public class MidiUtils {
             baos.write((byte) (value % 128));
             baos.write((byte) (value / 128));
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
 
         }
 
-        public static SysexMessage setMasterVolume(int targetDevice, int value) throws IOException,
-                InvalidMidiDataException {
+        public static SysexMessage setMasterVolume(final int targetDevice, final int value) throws IOException,
+        InvalidMidiDataException {
             return setDeviceControl(targetDevice, MASTER_VOLUME, value);
         }
 
-        public static SysexMessage setMasterBalance(int targetDevice, int value) throws IOException,
-                InvalidMidiDataException {
+        public static SysexMessage setMasterBalance(final int targetDevice, final int value) throws IOException,
+        InvalidMidiDataException {
             return setDeviceControl(targetDevice, MASTER_BALANCE, value);
         }
 
-        public static SysexMessage setMasterFineTuning(int targetDevice, int value) throws IOException,
-                InvalidMidiDataException {
+        public static SysexMessage setMasterFineTuning(final int targetDevice, final int value) throws IOException,
+        InvalidMidiDataException {
             return setDeviceControl(targetDevice, MASTER_FINE_TUNING, value);
         }
 
-        public static SysexMessage setMasterCoarseTuning(int targetDevice, int value) throws IOException,
-                InvalidMidiDataException {
+        public static SysexMessage setMasterCoarseTuning(final int targetDevice, final int value) throws IOException,
+        InvalidMidiDataException {
             return setDeviceControl(targetDevice, MASTER_COARSE_TUNING, value);
         }
 
-        public static SysexMessage setGlobalParameter(int targetDevice, short[] slotpath, byte[] parameter,
-                int value) throws IOException, InvalidMidiDataException {
+        public static SysexMessage setGlobalParameter(final int targetDevice, final short[] slotpath, final byte[] parameter,
+                final int value) throws IOException, InvalidMidiDataException {
             return setGlobalParameter(targetDevice, slotpath, parameter, new byte[] { (byte) value });
         }
 
-        public static SysexMessage setGlobalParameter(int targetDevice, short[] slotpath, byte[] parameter,
-                byte[] value) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage setGlobalParameter(final int targetDevice, final short[] slotpath, final byte[] parameter,
+                final byte[] value) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(DEVICE_CONTROL);
@@ -206,15 +205,17 @@ public class MidiUtils {
             baos.write((byte) parameter.length);
             baos.write((byte) value.length);
             for (int i = 0; i < slotpath.length; i++) {
-                short x = slotpath[0];
+                final short x = slotpath[0];
+                // The unsigned right shift operator ">>>" shifts a zero into
+                // the leftmost position
                 baos.write((byte) (x >>> 8));
                 baos.write((byte) x);
             }
             baos.write(parameter);
             baos.write(value);
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
         }
@@ -239,13 +240,13 @@ public class MidiUtils {
 
             private static final byte[] REVERB_TIME = new byte[] { (byte) 0x01 };
 
-            public static SysexMessage setReverbType(int targetDevice, int reverbType) throws IOException,
-                    InvalidMidiDataException {
+            public static SysexMessage setReverbType(final int targetDevice, final int reverbType) throws IOException,
+            InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_REVERB, REVERB_TYPE, reverbType);
             }
 
-            public static SysexMessage setReverbTime(int targetDevice, int reverbTime) throws IOException,
-                    InvalidMidiDataException {
+            public static SysexMessage setReverbTime(final int targetDevice, final int reverbTime) throws IOException,
+            InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_REVERB, REVERB_TIME, reverbTime);
             }
         }
@@ -276,28 +277,28 @@ public class MidiUtils {
 
             private static final byte[] CHORUS_SEND_TO_REVERB = new byte[] { (byte) 0x04 };
 
-            public static SysexMessage setChorusType(int targetDevice, int reverbType) throws IOException,
-                    InvalidMidiDataException {
+            public static SysexMessage setChorusType(final int targetDevice, final int reverbType) throws IOException,
+            InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_CHORUS, CHORUS_TYPE, reverbType);
             }
 
-            public static SysexMessage setChorusModRate(int targetDevice, int reverbType) throws IOException,
-                    InvalidMidiDataException {
+            public static SysexMessage setChorusModRate(final int targetDevice, final int reverbType) throws IOException,
+            InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_CHORUS, CHORUS_MOD_RATE, reverbType);
             }
 
-            public static SysexMessage setChorusModDepth(int targetDevice, int reverbType)
-                    throws IOException, InvalidMidiDataException {
+            public static SysexMessage setChorusModDepth(final int targetDevice, final int reverbType)
+            throws IOException, InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_CHORUS, CHORUS_MOD_DEPTH, reverbType);
             }
 
-            public static SysexMessage setChorusFeedback(int targetDevice, int reverbType)
-                    throws IOException, InvalidMidiDataException {
+            public static SysexMessage setChorusFeedback(final int targetDevice, final int reverbType)
+            throws IOException, InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_CHORUS, CHORUS_FEEDBACK, reverbType);
             }
 
-            public static SysexMessage setChorusSendToReverb(int targetDevice, int reverbType)
-                    throws IOException, InvalidMidiDataException {
+            public static SysexMessage setChorusSendToReverb(final int targetDevice, final int reverbType)
+            throws IOException, InvalidMidiDataException {
                 return setGlobalParameter(targetDevice, SLOTPATH_EFFECT_CHORUS, CHORUS_SEND_TO_REVERB,
                         reverbType);
             }
@@ -314,15 +315,15 @@ public class MidiUtils {
 
         private static final byte[] BASIC_MESSAGE = new byte[] { (byte) 0x01 };
 
-        public static SysexMessage setKeyBasedControl(int targetDevice, int midi_channel, int key_number,
-                int control, int value) throws IOException, InvalidMidiDataException {
+        public static SysexMessage setKeyBasedControl(final int targetDevice, final int midi_channel, final int key_number,
+                final int control, final int value) throws IOException, InvalidMidiDataException {
             return setKeyBasedControl(targetDevice, midi_channel, key_number, new int[] { control },
                     new int[] { value });
         }
 
-        public static SysexMessage setKeyBasedControl(int targetDevice, int midi_channel, int key_number,
-                int[] controls, int[] values) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage setKeyBasedControl(final int targetDevice, final int midi_channel, final int key_number,
+                final int[] controls, final int[] values) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(KEY_BASED_INSTRUMENT_CONTROL);
@@ -334,8 +335,8 @@ public class MidiUtils {
                 baos.write((byte) values[i]);
             }
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
         }
@@ -351,9 +352,9 @@ public class MidiUtils {
 
         private static final byte[] CONTROLLER_CONTROL_CHANGE = new byte[] { (byte) 0x03 };
 
-        public static SysexMessage setControllerDestinationForChannelPressure(int targetDevice, int channel,
-                int[] controls, int[] ranges) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage setControllerDestinationForChannelPressure(final int targetDevice, final int channel,
+                final int[] controls, final int[] ranges) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(CONTROLLER_DESTINATION_SETTINGS);
@@ -364,15 +365,15 @@ public class MidiUtils {
                 baos.write((byte) ranges[i]);
             }
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
         }
 
-        public static SysexMessage setControllerDestinationForPolyPressure(int targetDevice, int channel,
-                int[] controls, int[] ranges) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage setControllerDestinationForPolyPressure(final int targetDevice, final int channel,
+                final int[] controls, final int[] ranges) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(CONTROLLER_DESTINATION_SETTINGS);
@@ -383,15 +384,15 @@ public class MidiUtils {
                 baos.write((byte) ranges[i]);
             }
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
         }
 
-        public static SysexMessage setControllerDestinationForControlChange(int targetDevice, int channel,
-                byte control, int[] controls, int[] ranges) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage setControllerDestinationForControlChange(final int targetDevice, final int channel,
+                final byte control, final int[] controls, final int[] ranges) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(CONTROLLER_DESTINATION_SETTINGS);
@@ -403,8 +404,8 @@ public class MidiUtils {
                 baos.write((byte) ranges[i]);
             }
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
         }
@@ -438,9 +439,9 @@ public class MidiUtils {
 
         private static final byte[] SCALE_OCTAVE_TUNING_2BYTE_FORM = new byte[] { (byte) 0x09 };
 
-        public static SysexMessage scaleOctaveTuning1ByteForm(int targetDevice, boolean realtime,
-                boolean[] channels, int[] tuning) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage scaleOctaveTuning1ByteForm(final int targetDevice, final boolean realtime,
+                final boolean[] channels, final int[] tuning) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             if (realtime) {
                 baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             } else {
@@ -474,15 +475,15 @@ public class MidiUtils {
                 baos.write((byte) (tuning[i] + 64));
             }
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
         }
 
-        public static SysexMessage scaleOctaveTuning2ByteForm(int targetDevice, boolean realtime,
-                boolean[] channels, int[] tuning) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage scaleOctaveTuning2ByteForm(final int targetDevice, final boolean realtime,
+                final boolean[] channels, final int[] tuning) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             if (realtime) {
                 baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             } else {
@@ -513,18 +514,18 @@ public class MidiUtils {
             }
             baos.write((byte) channelmask);
             for (int i = 0; i < 12; i++) {
-                int t = tuning[i] + 8192;
+                final int t = tuning[i] + 8192;
                 baos.write((byte) (t / 128));
                 baos.write((byte) (t % 128));
             }
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
         }
 
-        private static void setTuningChecksum(byte[] data) {
+        private static void setTuningChecksum(final byte[] data) {
             int x = data[1] & 0xFF;
             for (int i = 2; i < data.length - 2; i++) {
                 x = x ^ (data[i] & 0xFF);
@@ -532,21 +533,25 @@ public class MidiUtils {
             data[data.length - 2] = (byte) (x & 127);
         }
 
-        public static SysexMessage scaleOctaveTuningDump1ByteForm(int targetDevice, int bank, int preset,
-                String name, int[] tuning) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage scaleOctaveTuningDump1ByteForm(final int targetDevice, final int bank, final int preset,
+                final String name, final int[] tuning) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_NON_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(MIDI_TUNING_STANDARD);
             baos.write(SCALE_OCTAVE_TUNING_DUMP_1BYTE_FORM);
             baos.write((byte) bank);
             baos.write((byte) preset);
+
+            final byte[] namebytes;
             if (name.length() > 16) {
-                name = name.substring(0, 16);
+                namebytes = name.substring(0, 16).getBytes("ASCII");
+            } else {
+                namebytes = name.getBytes("ASCII");
             }
-            byte[] namebytes = name.getBytes("ASCII");
+
             baos.write(namebytes);
-            byte space_char = " ".getBytes()[0];
+            final byte space_char = " ".getBytes()[0];
             for (int i = namebytes.length; i < 16; i++) {
                 baos.write(space_char);
             }
@@ -555,49 +560,51 @@ public class MidiUtils {
             }
             baos.write(0);
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             setTuningChecksum(data);
             sysex.setMessage(data, data.length);
             return sysex;
         }
 
-        public static SysexMessage scaleOctaveTuningDump2ByteForm(int targetDevice, int bank, int preset,
-                String name, int[] tuning) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage scaleOctaveTuningDump2ByteForm(final int targetDevice, final int bank, final int preset,
+                final String name, final int[] tuning) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_NON_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(MIDI_TUNING_STANDARD);
             baos.write(SCALE_OCTAVE_TUNING_DUMP_2BYTE_FORM);
             baos.write((byte) bank);
             baos.write((byte) preset);
+            final byte[] namebytes;
             if (name.length() > 16) {
-                name = name.substring(0, 16);
+                namebytes = name.substring(0, 16).getBytes("ASCII");
+            } else {
+                namebytes = name.getBytes("ASCII");
             }
-            byte[] namebytes = name.getBytes("ASCII");
             baos.write(namebytes);
-            byte space_char = " ".getBytes()[0];
+            final byte space_char = " ".getBytes()[0];
             for (int i = namebytes.length; i < 16; i++) {
                 baos.write(space_char);
             }
             for (int i = 0; i < 12; i++) {
-                int t = tuning[i] + 8192;
+                final int t = tuning[i] + 8192;
                 baos.write((byte) (t / 128));
                 baos.write((byte) (t % 128));
             }
             baos.write(0);
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             setTuningChecksum(data);
             sysex.setMessage(data, data.length);
             return sysex;
         }
 
-        public static SysexMessage singleNoteTuningChange(int targetDevice, boolean realtime, int bank,
-                int preset, int[] key_numbers, int[] key_tunings) throws IOException,
+        public static SysexMessage singleNoteTuningChange(final int targetDevice, final boolean realtime, final int bank,
+                final int preset, final int[] key_numbers, final int[] key_tunings) throws IOException,
                 InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             if (realtime) {
                 baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             } else {
@@ -612,22 +619,22 @@ public class MidiUtils {
             for (int i = 0; i < key_numbers.length; i++) {
 
                 baos.write((byte) key_numbers[i]);
-                int t = key_tunings[i];
+                final int t = key_tunings[i];
                 baos.write((byte) ((t / 16384) % 128));
                 baos.write((byte) ((t / 128) % 128));
                 baos.write((byte) (t % 128));
 
             }
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
         }
 
-        public static SysexMessage singleNoteTuningChange(int targetDevice, int preset, int[] key_numbers,
-                int[] key_tunings) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage singleNoteTuningChange(final int targetDevice, final int preset, final int[] key_numbers,
+                final int[] key_tunings) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(MIDI_TUNING_STANDARD);
@@ -637,79 +644,83 @@ public class MidiUtils {
             for (int i = 0; i < key_numbers.length; i++) {
 
                 baos.write((byte) key_numbers[i]);
-                int t = key_tunings[i];
+                final int t = key_tunings[i];
                 baos.write((byte) ((t / 16384) % 128));
                 baos.write((byte) ((t / 128) % 128));
                 baos.write((byte) (t % 128));
 
             }
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             sysex.setMessage(data, data.length);
             return sysex;
         }
 
-        public static SysexMessage keyBasedTuningDump(int targetDevice, int preset, String name, int[] tunings)
-                throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage keyBasedTuningDump(final int targetDevice, final int preset, final String name, final int[] tunings)
+        throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_NON_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(MIDI_TUNING_STANDARD);
             baos.write(BULK_TUNING_DUMP);
             baos.write((byte) preset);
+            final byte[] namebytes;
             if (name.length() > 16) {
-                name = name.substring(0, 16);
+                namebytes = name.substring(0, 16).getBytes("ASCII");
+            } else {
+                namebytes = name.getBytes("ASCII");
             }
-            byte[] namebytes = name.getBytes("ASCII");
             baos.write(namebytes);
-            byte space_char = " ".getBytes()[0];
+            final byte space_char = " ".getBytes()[0];
             for (int i = namebytes.length; i < 16; i++) {
                 baos.write(space_char);
             }
             for (int i = 0; i < 128; i++) {
-                int t = tunings[i];
+                final int t = tunings[i];
                 baos.write((byte) ((t / 16384) % 128));
                 baos.write((byte) ((t / 128) % 128));
                 baos.write((byte) (t % 128));
             }
             baos.write(0);
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             setTuningChecksum(data);
             sysex.setMessage(data, data.length);
             return sysex;
         }
 
-        public static SysexMessage keyBasedTuningDump(int targetDevice, int bank, int preset, String name,
-                int[] tunings) throws IOException, InvalidMidiDataException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        public static SysexMessage keyBasedTuningDump(final int targetDevice, final int bank, final int preset, final String name,
+                final int[] tunings) throws IOException, InvalidMidiDataException {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             baos.write(UNIVERSAL_NON_REALTIME_SYSEX_HEADER);
             baos.write((byte) targetDevice);
             baos.write(MIDI_TUNING_STANDARD);
             baos.write(KEY_BASED_TUNING_DUMP);
             baos.write((byte) bank);
             baos.write((byte) preset);
+            final byte[] namebytes;
             if (name.length() > 16) {
-                name = name.substring(0, 16);
+                namebytes = name.substring(0, 16).getBytes("ASCII");
+            } else {
+                namebytes = name.getBytes("ASCII");
             }
-            byte[] namebytes = name.getBytes("ASCII");
             baos.write(namebytes);
-            byte space_char = " ".getBytes()[0];
+            final byte space_char = " ".getBytes()[0];
             for (int i = namebytes.length; i < 16; i++) {
                 baos.write(space_char);
             }
             for (int i = 0; i < 128; i++) {
-                int t = tunings[i];
+                final int t = tunings[i];
                 baos.write((byte) ((t / 16384) % 128));
                 baos.write((byte) ((t / 128) % 128));
                 baos.write((byte) (t % 128));
             }
             baos.write(0);
             baos.write(EOX);
-            SysexMessage sysex = new SysexMessage();
-            byte[] data = baos.toByteArray();
+            final SysexMessage sysex = new SysexMessage();
+            final byte[] data = baos.toByteArray();
             setTuningChecksum(data);
             sysex.setMessage(data, data.length);
             return sysex;

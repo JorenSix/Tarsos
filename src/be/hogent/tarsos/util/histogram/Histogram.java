@@ -300,24 +300,25 @@ public class Histogram implements Cloneable {
      *            the value to get the key to
      * @return the key closest to the value
      */
-    private double valueToKey(double value) {
+    private double valueToKey(final double value) {
         // TODO remove the value below zero limitation
         // by changing the wraps modulo calculation and test
         if (value < 0) {
             throw new IllegalArgumentException("Currently no values below zero are accepted");
         }
 
+        double roundedValue = value;
         if (wraps) {
             final double interval = stop - start;
-            while (value < freqTable.firstKey()) {
-                value = preventRoundingErrors(value + interval);
+            while (roundedValue < freqTable.firstKey()) {
+                roundedValue = preventRoundingErrors(roundedValue + interval);
             }
-            value = preventRoundingErrors(start + ((value - start) % interval));
+            roundedValue = preventRoundingErrors(start + ((roundedValue - start) % interval));
         }
 
-        assert validValue(value);
+        assert validValue(roundedValue);
 
-        final double numberOfClasses = Math.floor((value + start) / classWidth);
+        final double numberOfClasses = Math.floor((roundedValue + start) / classWidth);
         final double offset = classWidth / 2 - start;
         final double key = preventRoundingErrors(numberOfClasses * classWidth + offset);
         assert key >= freqTable.firstKey();
@@ -332,10 +333,10 @@ public class Histogram implements Cloneable {
      *            the value to lookup.
      * @return the frequency of v.
      */
-    public final long getCount(double value) {
-        value = valueToKey(value);
+    public final long getCount(final double value) {
+        final double key = valueToKey(value);
         long result = 0;
-        final Long count = freqTable.get(value);
+        final Long count = freqTable.get(key);
         if (count != null) {
             result = count.longValue();
         }
@@ -351,9 +352,9 @@ public class Histogram implements Cloneable {
      * @param count
      *            the number of items in the bin
      */
-    public final void setCount(double value, final long count) {
-        value = valueToKey(value);
-        freqTable.put(value, count);
+    public final void setCount(final double value, final long count) {
+        final double key = valueToKey(value);
+        freqTable.put(key, count);
     }
 
     /**
@@ -836,8 +837,7 @@ public class Histogram implements Cloneable {
      */
     @Override
     public Histogram clone() throws CloneNotSupportedException {
-        super.clone();
-        final Histogram clone = new Histogram(this);
+        final Histogram clone = (Histogram) super.clone();
         for (final double key : this.freqTable.keySet()) {
             clone.setCount(key, this.getCount(key));
         }

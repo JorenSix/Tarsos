@@ -9,32 +9,34 @@ package be.hogent.tarsos.util.histogram;
 public class CityBlockDistance implements HistogramCorrelation {
 
     @Override
-    public double correlation(Histogram thisHistogam, int displacement, Histogram otherHistogram) {
+    public double correlation(final Histogram thisHistogam, final int displacement, final Histogram otherHistogram) {
         // number of bins (classes)
-        int numberOfClasses = thisHistogam.getNumberOfClasses();
+        final int numberOfClasses = thisHistogam.getNumberOfClasses();
         // start value
-        double start = thisHistogam.getStart();
+        final double start = thisHistogam.getStart();
         // stop value
-        double stop = thisHistogam.getStop();
+        final double stop = thisHistogam.getStop();
         // classWidth
-        double classWidth = thisHistogam.getClassWidth();
+        final double classWidth = thisHistogam.getClassWidth();
 
+        int actualDisplacement = displacement;
         // make displacement positive
-        if (displacement < 0) {
-            displacement = ((displacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
+        if (actualDisplacement < 0) {
+            actualDisplacement = ((actualDisplacement % numberOfClasses) + numberOfClasses) % numberOfClasses;
         }
 
         double distance = 0.0;
 
         for (double current = start + classWidth / 2; current <= stop; current += classWidth) {
-            double displacedValue = (current + displacement * classWidth) % (numberOfClasses * classWidth);
+            final double displacedValue = (current + actualDisplacement * classWidth)
+                    % (numberOfClasses * classWidth);
             distance += Math.abs(thisHistogam.getCount(current) - otherHistogram.getCount(displacedValue));
         }
 
         return -1 * (distance / thisHistogam.getSumFreq()) + 1;
     }
 
-    public void plotCorrelation(Histogram thisHistogram, int displacement, Histogram otherHistogram) {
+    public void plotCorrelation(final Histogram thisHistogram, final int displacement, final Histogram otherHistogram) {
         new Intersection().plotCorrelation(thisHistogram, displacement, otherHistogram);
     }
 

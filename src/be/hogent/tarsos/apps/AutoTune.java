@@ -3,6 +3,8 @@ package be.hogent.tarsos.apps;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -19,34 +21,38 @@ import com.sun.media.sound.AudioFloatConverter;
 import com.sun.media.sound.AudioFloatInputStream;
 
 public final class AutoTune {
+    /**
+     * Log messages.
+     */
+    private static final Logger LOG = Logger.getLogger(AutoTune.class.getName());
 
     /**
      * Choose a Mixer device using CLI.
      */
     public static int chooseDevice() {
+        int deviceIndex = -1;
         try {
-            javax.sound.sampled.Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+            final javax.sound.sampled.Mixer.Info[] mixers = AudioSystem.getMixerInfo();
             for (int i = 0; i < mixers.length; i++) {
-                javax.sound.sampled.Mixer.Info mixerinfo = mixers[i];
+                final javax.sound.sampled.Mixer.Info mixerinfo = mixers[i];
                 if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0) {
-                    System.out.println(i + " " + mixerinfo.toString());
+                    Tarsos.println(i + " " + mixerinfo.toString());
                 }
             }
             // choose MIDI input device
-            System.out.print("Choose the Mixer device: ");
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            int deviceIndex = Integer.parseInt(br.readLine());
-            return deviceIndex;
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid number, please try again");
-            return chooseDevice();
-        } catch (IOException e) {
-            e.printStackTrace();
+            Tarsos.println("Choose the Mixer device: ");
+            final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            deviceIndex = Integer.parseInt(br.readLine());
+        } catch (final NumberFormatException e) {
+            Tarsos.println("Invalid number, please try again");
+            deviceIndex = chooseDevice();
+        } catch (final IOException e) {
+            LOG.log(Level.SEVERE, "Exception while reading from STD IN.", e);
         }
-        return -1;
+        return deviceIndex;
     }
 
-    public static void main(String... args) throws LineUnavailableException {
+    public static void main(final String... args) throws LineUnavailableException {
         new Thread(new AudioProcessor(chooseDevice())).start();
     }
 
@@ -61,23 +67,24 @@ public final class AutoTune {
         private SourceDataLine line;
 
         private Speaker() {
-            DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-            if (!AudioSystem.isLineSupported(info)) {
-                throw new Error("Line not supported");
-            }
+            final DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+
 
             // Obtain and open the line.
             try {
+                if (!AudioSystem.isLineSupported(info)) {
+                    throw new LineUnavailableException("Line not supported");
+                }
                 line = (SourceDataLine) AudioSystem.getLine(info);
                 line.open(format);
                 line.start();
-            } catch (LineUnavailableException ex) {
-                System.out.println("Line not available.");
+            } catch (final LineUnavailableException ex) {
+                LOG.log(Level.SEVERE, "Line not available", ex);
             }
         }
 
         public void write(final float[] originalData, final int start, final int end) {
-            byte[] convertedData = new byte[originalData.length * 2];
+            final byte[] convertedData = new byte[originalData.length * 2];
             converter.toByteArray(originalData, convertedData);
             line.write(convertedData, start, end - start);
         }
@@ -92,17 +99,17 @@ public final class AutoTune {
 
         float sampleRate = 44100;
 
-        private AudioProcessor(int inputDevice) throws LineUnavailableException {
+        private AudioProcessor(final int inputDevice) throws LineUnavailableException {
             speaker = new Speaker();
-            javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[inputDevice];
-            Mixer mixer = AudioSystem.getMixer(selected);
-            AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, false);
-            DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
-            TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
-            int numberOfSamples = (int) (0.1 * sampleRate);
+            final javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[inputDevice];
+            final Mixer mixer = AudioSystem.getMixer(selected);
+            final AudioFormat format = new AudioFormat(sampleRate, 16, 1, true, false);
+            final DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
+            final TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
+            final int numberOfSamples = (int) (0.1 * sampleRate);
             line.open(format, numberOfSamples);
             line.start();
-            AudioInputStream stream = new AudioInputStream(line);
+            final AudioInputStream stream = new AudioInputStream(line);
             afis = AudioFloatInputStream.getInputStream(stream);
 
             audioBuffer = new float[2048];
@@ -147,7 +154,7 @@ public final class AutoTune {
                     }
                     hasMoreBytes = afis.read(audioBuffer, audioBuffer.length - 1024, 1024) != -1;
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         }

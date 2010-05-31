@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
  * @author Joren Six
  */
 public class FileUtils {
-    static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
+    private static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
 
 
 
@@ -150,16 +150,16 @@ public class FileUtils {
         try {
             final File file = new File(name);
             if (!file.exists()) {
-                throw new Error("File " + name + " does not exist");
+                throw new IllegalArgumentException("File " + name + " does not exist");
             }
             fileReader = new FileReader(file);
-            final BufferedReader in = new BufferedReader(fileReader);
-            String inputLine = in.readLine();
+            final BufferedReader reader = new BufferedReader(fileReader);
+            String inputLine = reader.readLine();
             while (inputLine != null) {
                 contents.append(inputLine).append("\n");
-                inputLine = in.readLine();
+                inputLine = reader.readLine();
             }
-            in.close();
+            reader.close();
         } catch (final IOException i1) {
             LOG.severe("Can't open file:" + name);
         }
@@ -179,18 +179,18 @@ public class FileUtils {
         URLConnection connection;
         try {
             connection = url.openConnection();
-            final BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine;
-            while ((inputLine = in.readLine()) != null) {
+            inputLine = reader.readLine();
+            while (inputLine != null) {
                 contents.append(new String(inputLine.getBytes(), "UTF-8")).append("\n");
+                inputLine = reader.readLine();
             }
-            in.close();
+            reader.close();
         } catch (final IOException e) {
             LOG.severe("Error while reading file " + path + " from jar: " + e.getMessage());
-            e.printStackTrace();
         } catch (final NullPointerException e) {
             LOG.severe("Error while reading file " + path + " from jar: " + e.getMessage());
-            e.printStackTrace();
         }
         return contents.toString();
     }
@@ -202,63 +202,64 @@ public class FileUtils {
      */
     public static void copyFileFromJar(final String source, final String target) {
         try {
-            final InputStream in = new FileUtils().getClass().getResourceAsStream(source);
+            final InputStream inputStream = new FileUtils().getClass().getResourceAsStream(source);
             OutputStream out;
             out = new FileOutputStream(target);
             final byte[] buffer = new byte[4096];
-            int r;
-            while ((r = in.read(buffer)) != -1) {
-                out.write(buffer, 0, r);
+            int len = inputStream.read(buffer);
+            while (len != -1) {
+                out.write(buffer, 0, len);
+                len = inputStream.read(buffer);
             }
             out.close();
-            in.close();
+            inputStream.close();
         } catch (final FileNotFoundException e) {
-            LOG.severe("File not found: " + e.getMessage());
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "File not found: " + e.getMessage(), e);
         } catch (final IOException e) {
-            LOG.severe("Exception while copying file from jar" + e.getMessage());
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Exception while copying file from jar" + e.getMessage(), e);
         }
     }
 
     /**
      * Reads a CSV-file from disk. The separator can be chosen.
-     * 
      * @param fileName
      *            the filename, an exception if thrown if the file does not
      *            exist
      * @param separator
      *            the separator, e.g. ";" or ","
-     * @param expectedNumberOfColumns
+     * @param expectedColumns
      *            The expected number of columns, user -1 if the number is
      *            unknown. An exception is thrown if there is a row with an
      *            unexpected row length.
      * @return a List of string arrays. The data of the CSV-file can be found in
      *         the arrays. Each row corresponds with an array.
      */
-    public static List<String[]> readCSVFile(final String fileName, final String separator, final int expectedNumberOfColumns) {
+    public static List<String[]> readCSVFile(final String fileName, final String separator, final int expectedColumns) {
         final List<String[]> data = new ArrayList<String[]>();
         FileReader fileReader = null;
 
         try {
             final File file = new File(fileName);
             if (!file.exists()) {
-                throw new Error("File '" + fileName + "' does not exist");
+                throw new IllegalArgumentException("File '" + fileName + "' does not exist");
             }
             fileReader = new FileReader(file);
             final BufferedReader in = new BufferedReader(fileReader);
             String inputLine;
             int lineNumber = 0;
-            while ((inputLine = in.readLine()) != null) {
+            inputLine = in.readLine();
+            while (inputLine != null) {
                 lineNumber++;
                 final String[] row = inputLine.split(separator);
-                if (expectedNumberOfColumns == -1 || expectedNumberOfColumns == row.length) {
+                if (expectedColumns == -1 || expectedColumns == row.length) {
                     data.add(row);
                 } else {
-                    throw new Error("Unexpected row length (line " + lineNumber + " ). " + "Expected:"
-                            + expectedNumberOfColumns + " real " + row.length
+                    throw new AssertionError("Unexpected row length (line " + lineNumber + " ). "
+                            + "Expected:"
+                            + expectedColumns + " real " + row.length
                             + ". CVS-file incorrectly formatted?");
                 }
+                inputLine = in.readLine();
             }
             in.close();
         } catch (final IOException i1) {
@@ -271,18 +272,18 @@ public class FileUtils {
         boolean acceptRow(String[] row);
     }
 
-    public static RowFilter ACCEPT_ALL_ROWFILTER = new RowFilter() {
+    public static final RowFilter ACCEPT_ALL_ROWFILTER = new RowFilter() {
         @Override
         public boolean acceptRow(final String[] row) {
             return true;
         }
     };
 
-    public static List<String> readColumnFromCSVData(final List<String[]> data, final int columnIndex, RowFilter filter) {
-        filter = filter == null ? ACCEPT_ALL_ROWFILTER : filter;
+    public static List<String> readColumnFromCSVData(final List<String[]> data, final int columnIndex, final RowFilter filter) {
+        final RowFilter actualFilter = filter == null ? ACCEPT_ALL_ROWFILTER : filter;
         final List<String> columnData = new ArrayList<String>();
         for (final String[] row : data) {
-            if (filter.acceptRow(row)) {
+            if (actualFilter.acceptRow(row)) {
                 columnData.add(row[columnIndex]);
             }
         }
@@ -515,7 +516,7 @@ public class FileUtils {
                 }
             } catch (final IOException e) {
                 // ignore
-                e.printStackTrace();
+                LOG.log(Level.INFO, "Ignored exception while copying files", e);
             }
         }
     }

@@ -37,12 +37,12 @@ public final class Tarsos {
 
         try {
             // configure logging
-            String propertiesFile = "/be/hogent/tarsos/util/logging.properties";
-            InputStream stream = Log.class.getResourceAsStream(propertiesFile);
+            final String propertiesFile = "/be/hogent/tarsos/util/logging.properties";
+            final InputStream stream = Log.class.getResourceAsStream(propertiesFile);
             LogManager.getLogManager().readConfiguration(stream);
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }
@@ -78,7 +78,7 @@ public final class Tarsos {
                 applications.get(subcommand).run(subcommandArgs);
             } else {
                 print("Unknown subcommand. Valid subcommands:");
-                for (String key : applications.keySet()) {
+                for (final String key : applications.keySet()) {
                     print("\t" + key);
                 }
             }
@@ -123,7 +123,7 @@ public final class Tarsos {
         applicationList.add(new AudioToScala());
 
 
-        for (AbstractTarsosApp application : applicationList) {
+        for (final AbstractTarsosApp application : applicationList) {
             instance.registerApplication(application.name(), application);
         }
 
@@ -138,5 +138,15 @@ public final class Tarsos {
     void print(final String info) {
         final PrintStream standardOut = System.out;
         standardOut.println(info);
+    }
+
+    /**
+     * Prints info to a stream (console).
+     * 
+     * @param info
+     *            The information to print.
+     */
+    public static void println(final String info) {
+        getInstance().print(info);
     }
 }
