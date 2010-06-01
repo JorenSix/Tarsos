@@ -169,6 +169,15 @@ public final class Configuration {
     }
 
     /**
+     * See the other set method.
+     * @param key
+     * @param value
+     */
+    public static void set(final ConfKey key, final Object value) {
+        set(key, value.toString());
+    }
+
+    /**
      * Sanitizes each configured value. Is called every time when a
      * configuration is written or read.
      * @param key
@@ -224,3 +233,4 @@ public final class Configuration {
         }
     }
 }
+
