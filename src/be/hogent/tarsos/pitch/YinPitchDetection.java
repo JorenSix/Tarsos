@@ -18,7 +18,7 @@ public class YinPitchDetection implements PitchDetector {
     private final AudioFile file;
     private final List<Sample> samples;
 
-    public YinPitchDetection(AudioFile audioFile) {
+    public YinPitchDetection(final AudioFile audioFile) {
         this.file = audioFile;
         this.samples = new ArrayList<Sample>();
     }
@@ -29,14 +29,14 @@ public class YinPitchDetection implements PitchDetector {
             Yin.processFile(file.path(), new DetectedPitchHandler() {
                 @Override
                 public void handleDetectedPitch(final float time, final float pitch) {
-                    long start = (long) time * 1000;
-                    Sample s = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
+                    final long start = (long) (time * 1000);
+                    final Sample s = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
                     samples.add(s);
                 }
             });
-        } catch (UnsupportedAudioFileException e) {
+        } catch (final UnsupportedAudioFileException e) {
             LOG.log(Level.SEVERE, "Unsupported audio file: " + file.basename() + " " + e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.log(Level.SEVERE, "Exception while reading audio file: " + file.basename() + " "
                     + e.getMessage(), e);
         }
