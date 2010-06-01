@@ -49,15 +49,14 @@ public abstract class AbstractTarsosApp {
      */
     protected final OptionSet parse(final String[] args, final OptionParser parser,
             final AbstractTarsosApp application) {
-        final Tarsos instance = Tarsos.getInstance();
         parser.acceptsAll(Arrays.asList("h", "?", "help"), "Show help");
         OptionSet options = null;
         try {
             options = parser.parse(args);
         } catch (final OptionException e) {
             final String message = e.getMessage();
-            instance.print(message);
-            instance.print("");
+            Tarsos.println(message);
+            Tarsos.println("");
             printHelp(parser);
         }
         return options;
@@ -79,16 +78,14 @@ public abstract class AbstractTarsosApp {
      *            The command line argument parser.
      */
     protected final void printHelp(final OptionParser parser) {
-        final Tarsos instance = Tarsos.getInstance();
-        instance.print("Application description");
-        instance.print("-----------------------");
-        instance.print(description());
-        instance.print("");
+        Tarsos.println("Application description");
+        Tarsos.println("-----------------------");
+        Tarsos.println(description());
+        Tarsos.println("");
         try {
             parser.printHelpOn(System.out);
         } catch (final IOException e1) {
             LOG.log(Level.SEVERE, "Could not print to STD OUT. How quaint.", e1);
         }
     }
-
 }

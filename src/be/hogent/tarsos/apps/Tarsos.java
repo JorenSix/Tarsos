@@ -42,8 +42,10 @@ public final class Tarsos {
             LogManager.getLogManager().readConfiguration(stream);
         } catch (final SecurityException e) {
             e.printStackTrace();
+            // a bit hard to log, logging is not working yet :(
         } catch (final IOException e) {
             e.printStackTrace();
+            // a bit hard to log, logging is not working yet :(
         }
     }
 
@@ -121,6 +123,7 @@ public final class Tarsos {
         applicationList.add(new PitchTable());
         applicationList.add(new MidiToWav());
         applicationList.add(new AudioToScala());
+        applicationList.add(new DetectPitch());
 
 
         for (final AbstractTarsosApp application : applicationList) {
@@ -135,7 +138,7 @@ public final class Tarsos {
      * @param info
      *            the information to print.
      */
-    void print(final String info) {
+    private void print(final String info) {
         final PrintStream standardOut = System.out;
         standardOut.println(info);
     }

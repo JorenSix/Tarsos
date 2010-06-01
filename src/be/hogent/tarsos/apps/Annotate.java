@@ -36,45 +36,45 @@ public final class Annotate extends AbstractTarsosApp {
      */
     private void annotateInputFile(final String inputFile, final PitchDetectionMode detectionMode) {
 
-        AudioFile audioFile = new AudioFile(inputFile);
+        final AudioFile audioFile = new AudioFile(inputFile);
 
-        PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
+        final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
 
         pitchDetector.executePitchDetection();
-        String baseName = audioFile.basename();
-        String directory = FileUtils.combine("annotations", baseName);
+        final String baseName = audioFile.basename();
+        final String directory = FileUtils.combine("annotations", baseName);
         FileUtils.mkdirs(directory);
 
-        String prefix = baseName + "_" + pitchDetector.getName();
+        final String prefix = baseName + "_" + pitchDetector.getName();
 
-        List<Sample> samples = pitchDetector.getSamples();
-        AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
-        String ambitusTextFileName = FileUtils.combine(directory, prefix + "_ambitus.txt");
-        String ambitusPNGFileName = FileUtils.combine(directory, prefix + "_ambitus.png");
-        String coloredToneScalePNGFileName = prefix + "_tone_scale_colored.png";
+        final List<Sample> samples = pitchDetector.getSamples();
+        final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
+        final String ambitusTextFileName = FileUtils.combine(directory, prefix + "_ambitus.txt");
+        final String ambitusPNGFileName = FileUtils.combine(directory, prefix + "_ambitus.png");
+        final String coloredToneScalePNGFileName = prefix + "_tone_scale_colored.png";
         ambitusHistogram.plotToneScaleHistogram(FileUtils.combine(directory, coloredToneScalePNGFileName),
                 true);
         ambitusHistogram.export(ambitusTextFileName);
         ambitusHistogram.plot(ambitusPNGFileName, "Ambitus " + baseName + " " + pitchDetector.getName());
-        ToneScaleHistogram toneScaleHistogram = ambitusHistogram.toneScaleHistogram();
-        String toneScaleTextFileName = FileUtils.combine(directory, prefix + "_tone_scale.txt");
-        String toneScalePNGFileName = FileUtils.combine(directory, prefix + "_tone_scale.png");
+        final ToneScaleHistogram toneScaleHistogram = ambitusHistogram.toneScaleHistogram();
+        final String toneScaleTextFileName = FileUtils.combine(directory, prefix + "_tone_scale.txt");
+        final String toneScalePNGFileName = FileUtils.combine(directory, prefix + "_tone_scale.png");
         toneScaleHistogram.export(toneScaleTextFileName);
         toneScaleHistogram.plot(toneScalePNGFileName, "Tone scale " + baseName + " "
                 + pitchDetector.getName());
 
         toneScaleHistogram.gaussianSmooth(1.0);
-        List<Peak> peaks = PeakDetector.detect(toneScaleHistogram, 15, 0.8);
-        Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
-        String peaksTitle = prefix + "_peaks_" + 1.0 + "_" + 15 + "_" + 0.8;
-        SimplePlot p = new SimplePlot(peaksTitle);
-        p.addData(0, toneScaleHistogram);
-        p.addData(1, peakHistogram);
-        p.save(FileUtils.combine(directory, peaksTitle + ".png"));
+        final List<Peak> peaks = PeakDetector.detect(toneScaleHistogram, 15, 0.8);
+        final Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
+        final String peaksTitle = prefix + "_peaks_" + 1.0 + "_" + 15 + "_" + 0.8;
+        final SimplePlot plot = new SimplePlot(peaksTitle);
+        plot.addData(0, toneScaleHistogram);
+        plot.addData(1, peakHistogram);
+        plot.save(FileUtils.combine(directory, peaksTitle + ".png"));
         ToneScaleHistogram.exportPeaksToScalaFileFormat(FileUtils.combine(directory, peaksTitle + ".scl"),
                 peaksTitle, peaks);
 
-        SignalPowerExtractor powerExtractor = new SignalPowerExtractor(audioFile);
+        final SignalPowerExtractor powerExtractor = new SignalPowerExtractor(audioFile);
         powerExtractor.saveTextFile(FileUtils.combine(directory, prefix + "_power.txt"));
         powerExtractor.saveWaveFormPlot(FileUtils.combine(directory, prefix + "_wave.png"));
     }
@@ -82,18 +82,18 @@ public final class Annotate extends AbstractTarsosApp {
     @Override
     public void run(final String... args) {
 
-        OptionParser parser = new OptionParser();
-        OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate").withRequiredArg().ofType(
+        final OptionParser parser = new OptionParser();
+        final OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate").withRequiredArg().ofType(
                 File.class)
                 .withValuesSeparatedBy(' ').defaultsTo(new File("in.wav"));
-        OptionSpec<PitchDetectionMode> detectionModeSpec = parser.accepts("detector", "The detector to use")
+        final OptionSpec<PitchDetectionMode> detectionModeSpec = parser.accepts("detector", "The detector to use")
         .withRequiredArg().ofType(PitchDetectionMode.class)
         .defaultsTo(PitchDetectionMode.TARSOS_YIN);
 
-        OptionSet options = parse(args, parser, this);
+        final OptionSet options = parse(args, parser, this);
 
-        String inputFile = options.valueOf(fileSpec).getAbsolutePath();
-        PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
+        final String inputFile = options.valueOf(fileSpec).getAbsolutePath();
+        final PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
 
         if (isHelpOptionSet(options)) {
             printHelp(parser);
