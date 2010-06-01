@@ -36,7 +36,7 @@ public class Sample implements Comparable<Sample> {
      * @param probabilities
      *            the probabilities corresponding with the pitches
      */
-    public Sample(long start, List<Double> pitches, List<Double> probabilities) {
+    public Sample(final long start, final List<Double> pitches, final List<Double> probabilities) {
         this(start, pitches, probabilities, 0);
     }
 
@@ -53,11 +53,11 @@ public class Sample implements Comparable<Sample> {
      *            the minimum accepted probability for each pitch, values with a
      *            lower probability are discarded.
      */
-    public Sample(long start, List<Double> pitches, List<Double> probabilities,
-            double minimumAcceptableProbability) {
+    public Sample(final long start, final List<Double> pitches, final List<Double> probabilities,
+            final double minimumAcceptableProbability) {
         this(start);
         for (int i = 0; i < probabilities.size(); i++) {
-            Double probability = probabilities.get(i);
+            final Double probability = probabilities.get(i);
             if (probability >= minimumAcceptableProbability) {
                 this.pitches.add(pitches.get(i));
                 this.probabilities.add(probability);
@@ -75,7 +75,7 @@ public class Sample implements Comparable<Sample> {
      * @param pitch
      *            the pitch
      */
-    public Sample(long start, double pitch) {
+    public Sample(final long start, final double pitch) {
         this(start);
         this.pitches.add(pitch);
         this.probabilities.add(1.0);
@@ -87,7 +87,7 @@ public class Sample implements Comparable<Sample> {
      * @param start
      *            the starting time
      */
-    public Sample(long start) {
+    public Sample(final long start) {
         this.start = start;
         this.pitches = new ArrayList<Double>();
         this.probabilities = new ArrayList<Double>();
@@ -104,24 +104,24 @@ public class Sample implements Comparable<Sample> {
      *            percentage is greater than or equal to 2% (0.02)
      * @return a reduced list without harmonics
      */
-    public List<Double> getPitchesWithoutHarmonicsIn(PitchUnit unit, double errorPercentage) {
+    public List<Double> getPitchesWithoutHarmonicsIn(final PitchUnit unit, final double errorPercentage) {
 
         if (pitches.size() == 1) {
             return pitches;
         }
 
-        int numberOfHarmonicsToRemove = 5;
-        List<Double> pitches = new ArrayList<Double>(this.pitches);
-        List<Double> pitchesWithoutHarmonics = new ArrayList<Double>();
+        final int numberOfHarmonicsToRemove = 5;
+        final List<Double> pitches = new ArrayList<Double>(this.pitches);
+        final List<Double> pitchesWithoutHarmonics = new ArrayList<Double>();
         Collections.sort(pitches);
-        for (Double pitch : pitches) {
+        for (final Double pitch : pitches) {
             boolean pitchIsHarmonic = false;
             for (int i = 2; i <= numberOfHarmonicsToRemove; i++) {
-                Double pitchToCheck = pitch / i;
-                Double deviation = pitchToCheck * errorPercentage;
-                Double maxPitchLimit = pitchToCheck + deviation;
-                Double minPitchLimit = pitchToCheck - deviation;
-                for (Double pitchToCheckWith : pitches) {
+                final Double pitchToCheck = pitch / i;
+                final Double deviation = pitchToCheck * errorPercentage;
+                final Double maxPitchLimit = pitchToCheck + deviation;
+                final Double minPitchLimit = pitchToCheck - deviation;
+                for (final Double pitchToCheckWith : pitches) {
                     if (maxPitchLimit >= pitchToCheckWith && pitchToCheckWith >= minPitchLimit) {
                         // System.out.println(pitch + " is harmonic of " +
                         // pitchToCheckWith + ": " + maxPitchLimit + " >= " +
@@ -144,7 +144,7 @@ public class Sample implements Comparable<Sample> {
      *            the other unit
      * @return each pitch converted to the requested unit
      */
-    public List<Double> getPitchesIn(PitchUnit unit) {
+    public List<Double> getPitchesIn(final PitchUnit unit) {
         return PitchFunctions.convertHertzTo(unit, pitches);
     }
 
@@ -168,14 +168,14 @@ public class Sample implements Comparable<Sample> {
      */
     public final void removeUniquePitches(final Sample other, final double errorPercentage) {
         // TODO use another scale instead of simple percentages.
-        ListIterator<Double> thisPitchIterator = pitches.listIterator();
+        final ListIterator<Double> thisPitchIterator = pitches.listIterator();
         while (thisPitchIterator.hasNext()) {
-            Double thisPitch = thisPitchIterator.next();
-            Double deviation = thisPitch * errorPercentage;
-            Double maxPitchLimit = thisPitch + deviation;
-            Double minPitchLimit = thisPitch - deviation;
+            final Double thisPitch = thisPitchIterator.next();
+            final Double deviation = thisPitch * errorPercentage;
+            final Double maxPitchLimit = thisPitch + deviation;
+            final Double minPitchLimit = thisPitch - deviation;
             boolean removeThisPitch = !other.pitches.isEmpty();
-            for (Double otherPitch : other.pitches) {
+            for (final Double otherPitch : other.pitches) {
                 if (maxPitchLimit >= otherPitch && otherPitch >= minPitchLimit) {
                     removeThisPitch = false;
                 }
@@ -189,12 +189,12 @@ public class Sample implements Comparable<Sample> {
     public final double returnMatchingPitch(final Sample other, final double errorPercentage) {
         double matchingPitch = Double.NEGATIVE_INFINITY;
         if (!pitches.isEmpty()) {
-            Double thisPitch = pitches.get(0);
-            Double deviation = thisPitch * errorPercentage;
-            Double maxPitchLimit = thisPitch + deviation;
-            Double minPitchLimit = thisPitch - deviation;
+            final Double thisPitch = pitches.get(0);
+            final Double deviation = thisPitch * errorPercentage;
+            final Double maxPitchLimit = thisPitch + deviation;
+            final Double minPitchLimit = thisPitch - deviation;
 
-            for (Double otherPitch : other.pitches) {
+            for (final Double otherPitch : other.pitches) {
                 if (maxPitchLimit >= otherPitch && otherPitch >= minPitchLimit) {
                     matchingPitch = (otherPitch + thisPitch) / 2;
                     break;
@@ -206,9 +206,9 @@ public class Sample implements Comparable<Sample> {
     }
 
     public static AmbitusHistogram ambitusHistogram(final List<Sample> samples) {
-        AmbitusHistogram ambitusHistogram = new AmbitusHistogram();
-        for (Sample sample : samples) {
-            for (Double pitch : sample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS)) {
+        final AmbitusHistogram ambitusHistogram = new AmbitusHistogram();
+        for (final Sample sample : samples) {
+            for (final Double pitch : sample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS)) {
                 ambitusHistogram.add(pitch);
             }
         }
@@ -218,7 +218,7 @@ public class Sample implements Comparable<Sample> {
     @Override
     public int compareTo(final Sample o) {
         // starttime first
-        int startCompare = Long.valueOf(start).compareTo(Long.valueOf(o.start));
+        final int startCompare = Long.valueOf(start).compareTo(Long.valueOf(o.start));
         // then order by source name
         return startCompare == 0 ? source.toString().compareTo(o.source.toString()) : startCompare;
     }
@@ -228,10 +228,24 @@ public class Sample implements Comparable<Sample> {
         boolean isEqual = false;
 
         if (o != null && o instanceof Sample) {
-            Sample sample = (Sample) o;
+            final Sample sample = (Sample) o;
             isEqual = start == sample.start && source.equals(sample.source);
         }
         return isEqual;
+    }
+
+    @Override
+    public final String toString() {
+        final String separator = "\t";
+        final StringBuilder sb = new StringBuilder();
+        sb.append(getStart() / 1000.0);
+        sb.append(separator);
+        final List<Double> hertzValues = this.getPitchesIn(PitchUnit.HERTZ);
+        for (final Double hertz : hertzValues) {
+            sb.append(hertz);
+            sb.append(separator);
+        }
+        return sb.toString();
     }
 
     @Override
