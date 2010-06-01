@@ -3,6 +3,7 @@ package be.hogent.tarsos.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import be.hogent.tarsos.apps.Tarsos;
@@ -16,7 +17,6 @@ public final class Execute {
 
     /**
      * Executes a command and returns the exit value of the process.
-     * 
      * @param command
      *            the command to execute
      * @param redirectOutputToFile
@@ -27,23 +27,31 @@ public final class Execute {
      */
     public static int command(final String command, final String redirectOutputToFile) {
         int exitValue = -1;
+        BufferedReader stdout = null;
         try {
             final String[] cmd = buildCommand(command, redirectOutputToFile);
             LOG.info("Executing " + cmd[0] + " " + cmd[1] + " " + cmd[2]);
             final Runtime rt = Runtime.getRuntime();
             final Process proc = rt.exec(cmd);
-            final BufferedReader stdout = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-            while ((line = stdout.readLine()) != null) {
+            stdout = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line = stdout.readLine();
+            while (line != null) {
                 Tarsos.println(line);
+                line = stdout.readLine();
             }
             exitValue = proc.waitFor();
         } catch (final IOException e) {
-            LOG.severe("Error while communicating with process");
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Error while communicating with process", e);
         } catch (final InterruptedException e) {
-            LOG.severe("Process interuppted");
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Process interuppted", e);
+        } finally {
+            try {
+                stdout.close();
+            } catch (final IOException e) {
+                LOG.log(Level.SEVERE, "Could not close communication channel with proc.", e);
+            } catch (final NullPointerException e) {
+                LOG.log(Level.SEVERE, "Failed to initialize communication channel with proc.", e);
+            }
         }
         if (exitValue != 0) {
             LOG.warning("Process stopped with exit value: " + exitValue);
@@ -54,7 +62,6 @@ public final class Execute {
     /**
      * Executes a command and returns the exit value of the process. Redirect
      * STDOUT the process to STDOUT of this process.
-     * 
      * @param command
      *            the command to execute
      * @return the exit value of the process. 0 means everything went OK. Other
@@ -66,7 +73,6 @@ public final class Execute {
 
     /**
      * Checks if the external command is available in the path.
-     * 
      * @param command
      *            the command to check
      * @return <code>true</code> if the command is available, false otherwise.

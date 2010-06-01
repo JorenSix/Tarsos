@@ -299,10 +299,11 @@ public class FileUtils {
         final String separator = "\t";
 
         FileWriter fileWriter = null;
+        PrintWriter output = null;
         try {
             fileWriter = new FileWriter(filename + ".csv");
             final BufferedWriter outputStream = new BufferedWriter(fileWriter);
-            final PrintWriter output = new PrintWriter(outputStream);
+            output = new PrintWriter(outputStream);
 
             if (header != null) {
                 // HEADERS
@@ -333,9 +334,10 @@ public class FileUtils {
                 output.println("");
             }
             outputStream.flush();
-            outputStream.close();
         } catch (final IOException i1) {
             LOG.severe("Can't open file:" + filename);
+        } finally {
+            output.close();
         }
     }
 

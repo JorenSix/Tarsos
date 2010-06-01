@@ -22,19 +22,19 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
      */
     public VirtualKeyboard19() {
         super(19, 19 * 5); // 19*5 = 95
-        VirtualKeyboard19.mappedKeys = "qézs\"edrf(tg§yhèujikçolàp";
+        // VirtualKeyboard19.mappedKeys = "qézs\"edrf(tg§yhèujikçolàp";
     }
 
     @Override
-    public int getMidiNote(int x, int y) {
-        int w = getWidth();
-        int h = getHeight();
-        float nw = w / 47f;
+    public int getMidiNote(final int x, final int y) {
+        final int w = getWidth();
+        final int h = getHeight();
+        final float nw = w / 47f;
 
-        int wn = (int) (x / nw);
-        int oct = wn / 7;
+        final int wn = (int) (x / nw);
+        final int oct = wn / 7;
         int n = oct * 19;
-        int nb = wn % 7;
+        final int nb = wn % 7;
         if (nb == 1) {
             n += 3;
         }
@@ -54,23 +54,23 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
             n += 17;
         }
         if (y < h * 4.0 / 7.0) {
-            int xb = x - (int) (oct * 7 * nw);
+            final int xb = x - (int) (oct * 7 * nw);
             float cx = 0;
-            float black_note_width = nw * 0.7f;
+            final float black_note_width = nw * 0.7f;
             for (int b = 0; b < 19; b++) {
-                boolean a = !(b == 0 || b == 3 || b == 6 || b == 8 || b == 11 || b == 14 || b == 17);
+                final boolean a = !(b == 0 || b == 3 || b == 6 || b == 8 || b == 11 || b == 14 || b == 17);
                 if (!a) {
                     cx += nw;
                 } else {
                     if (b == 7 || b == 18) {
-                        float cstart = cx - (black_note_width / 2);
-                        float cend = cstart + black_note_width;
+                        final float cstart = cx - (black_note_width / 2);
+                        final float cend = cstart + black_note_width;
                         if (xb > cstart && xb < cend) {
                             return oct * 19 + b;
                         }
                     } else {
-                        float cstart = cx - (black_note_width / 2);
-                        float cend = cstart + black_note_width;
+                        final float cstart = cx - (black_note_width / 2);
+                        final float cend = cstart + black_note_width;
                         if (xb > cstart && xb < cend) {
                             if (y > (h * 4.0 / 7.0) / 2.0) {
                                 return oct * 19 + b + 1;
@@ -93,21 +93,21 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void paint(final Graphics g) {
         super.paint(g);
-        Graphics2D g2 = (Graphics2D) g;
+        final Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        int w = getWidth();
-        int h = getHeight();
+        final int w = getWidth();
+        final int h = getHeight();
 
-        float nw = w / 47f;
+        final float nw = w / 47f;
         float cx = 0;
-        Rectangle2D rect = new Rectangle2D.Double();
+        final Rectangle2D rect = new Rectangle2D.Double();
         for (int i = 0; i < 128; i++) {
-            int b = i % 19;
-            boolean a = !(b == 0 || b == 3 || b == 6 || b == 8 || b == 11 || b == 14 || b == 17);
+            final int b = i % 19;
+            final boolean a = !(b == 0 || b == 3 || b == 6 || b == 8 || b == 11 || b == 14 || b == 17);
             if (!a) {
                 rect.setRect(cx, 0, nw, h);
                 if (isKeyDown(i)) {
@@ -122,7 +122,7 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
                 if (hasFocus() && (i >= lowestAssignedKey)) {
                     if (i - lowestAssignedKey < mappedKeys.length()) {
                         g2.setColor(Color.GRAY);
-                        char k = mappedKeys.charAt(i - lowestAssignedKey);
+                        final char k = mappedKeys.charAt(i - lowestAssignedKey);
                         g2.drawString("" + k, cx + 2, h - 4);
                     }
                 }
@@ -131,11 +131,11 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
             }
         }
         cx = 0;
-        float black_note_width = nw * 0.7f;
+        final float black_note_width = nw * 0.7f;
         int black_note_pos = 0;
         for (int i = 0; i < 128; i++) {
-            int b = i % 19;
-            boolean a = !(b == 0 || b == 3 || b == 6 || b == 8 || b == 11 || b == 14 || b == 17);
+            final int b = i % 19;
+            final boolean a = !(b == 0 || b == 3 || b == 6 || b == 8 || b == 11 || b == 14 || b == 17);
             if (!a) {
                 cx += nw;
                 black_note_pos = 0;
@@ -156,7 +156,7 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
                     if (hasFocus() && (i >= lowestAssignedKey)) {
                         if (i - lowestAssignedKey < mappedKeys.length()) {
                             g2.setColor(Color.LIGHT_GRAY);
-                            char k = mappedKeys.charAt(i - lowestAssignedKey);
+                            final char k = mappedKeys.charAt(i - lowestAssignedKey);
                             g2.drawString("" + k, cx - (black_note_width / 2) + 1, (h * 4.0f / 7.0f) - 3);
                         }
                     }
@@ -175,7 +175,7 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
                         if (hasFocus() && (i >= lowestAssignedKey)) {
                             if (i - lowestAssignedKey < mappedKeys.length()) {
                                 g2.setColor(Color.LIGHT_GRAY);
-                                char k = mappedKeys.charAt(i - lowestAssignedKey);
+                                final char k = mappedKeys.charAt(i - lowestAssignedKey);
                                 g2.drawString("" + k, cx - (black_note_width / 2) + 1, (h * 2.0f / 7.0f) - 5);
                             }
                         }
@@ -198,7 +198,7 @@ public class VirtualKeyboard19 extends VirtualKeyboard {
                                 && (i >= lowestAssignedKey && i - lowestAssignedKey < mappedKeys.length())) {
 
                             g2.setColor(Color.LIGHT_GRAY);
-                            char k = mappedKeys.charAt(i - lowestAssignedKey);
+                            final char k = mappedKeys.charAt(i - lowestAssignedKey);
                             g2.drawString("" + k, cx - (black_note_width / 2) + 1, (h * 4.0f / 7.0f) - 3);
 
                         }

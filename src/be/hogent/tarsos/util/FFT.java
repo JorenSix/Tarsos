@@ -223,36 +223,39 @@ public class FFT {
 
         // Perform Factor-4 Decomposition with 3 * complex operators and 8 +/-
         // complex operators
-        private static void calcF4F(final int fftFrameSize, final float[] data, int i, int nstep, final float[] w) {
+        private static void calcF4F(final int fftFrameSize, final float[] data, final int i, final int nstep,
+                final float[] w) {
             final int fftFrameSize2 = fftFrameSize << 1; // 2*fftFrameSize;
             // Factor-4 Decomposition
+            int actualNStep = nstep;
+            int t = i;
 
             final int w_len = w.length >> 1;
-            while (nstep < fftFrameSize2) {
+            while (actualNStep < fftFrameSize2) {
 
-                if (nstep << 2 == fftFrameSize2) {
+                if (actualNStep << 2 == fftFrameSize2) {
                     // Goto Factor-4 Final Decomposition
                     // calcF4E(data, i, nstep, -1, w);
-                    calcF4FE(fftFrameSize, data, i, nstep, w);
+                    calcF4FE(fftFrameSize, data, t, actualNStep, w);
                     return;
                 }
-                final int jmax = nstep;
-                final int nnstep = nstep << 1;
+                final int jmax = actualNStep;
+                final int nnstep = actualNStep << 1;
                 if (nnstep == fftFrameSize2) {
                     // Factor-4 Decomposition not possible
-                    calcF2E(fftFrameSize, data, i, nstep, w);
+                    calcF2E(fftFrameSize, data, t, actualNStep, w);
                     return;
                 }
-                nstep <<= 2;
-                int ii = i + jmax;
-                int iii = i + w_len;
+                actualNStep <<= 2;
+                int ii = t + jmax;
+                int iii = t + w_len;
 
                 {
-                    i += 2;
+                    t += 2;
                     ii += 2;
                     iii += 2;
 
-                    for (int n = 0; n < fftFrameSize2; n += nstep) {
+                    for (int n = 0; n < fftFrameSize2; n += actualNStep) {
                         int m = n + jmax;
 
                         float datam1_r = data[m];
@@ -312,8 +315,8 @@ public class FFT {
                 }
 
                 for (int j = 2; j < jmax; j += 2) {
-                    final float wr = w[i++];
-                    final float wi = w[i++];
+                    final float wr = w[t++];
+                    final float wi = w[t++];
                     final float wr1 = w[ii++];
                     final float wi1 = w[ii++];
                     final float wwr1 = w[iii++];
@@ -322,7 +325,7 @@ public class FFT {
                     // precomputed!!!
                     // float wwi1 = wr * wi1 + wi * wr1;
 
-                    for (int n = j; n < fftFrameSize2; n += nstep) {
+                    for (int n = j; n < fftFrameSize2; n += actualNStep) {
                         int m = n + jmax;
 
                         float datam1_r = data[m];
@@ -380,45 +383,47 @@ public class FFT {
                     }
                 }
 
-                i += jmax << 1;
+                t += jmax << 1;
 
             }
 
-            calcF2E(fftFrameSize, data, i, nstep, w);
+            calcF2E(fftFrameSize, data, t, actualNStep, w);
 
         }
 
         // Perform Factor-4 Decomposition with 3 * complex operators and 8 +/-
         // complex operators
-        private static void calcF4I(final int fftFrameSize, final float[] data, int i, int nstep, final float[] w) {
+        private static void calcF4I(final int fftFrameSize, final float[] data, final int i, final int nstep,
+                final float[] w) {
             final int fftFrameSize2 = fftFrameSize << 1; // 2*fftFrameSize;
             // Factor-4 Decomposition
-
+            int t = i;
+            int actualNStep = nstep;
             final int w_len = w.length >> 1;
-            while (nstep < fftFrameSize2) {
+            while (actualNStep < fftFrameSize2) {
 
-                if (nstep << 2 == fftFrameSize2) {
+                if (actualNStep << 2 == fftFrameSize2) {
                     // Goto Factor-4 Final Decomposition
                     // calcF4E(data, i, nstep, 1, w);
-                    calcF4IE(fftFrameSize, data, i, nstep, w);
+                    calcF4IE(fftFrameSize, data, t, actualNStep, w);
                     return;
                 }
-                final int jmax = nstep;
-                final int nnstep = nstep << 1;
+                final int jmax = actualNStep;
+                final int nnstep = actualNStep << 1;
                 if (nnstep == fftFrameSize2) {
                     // Factor-4 Decomposition not possible
-                    calcF2E(fftFrameSize, data, i, nstep, w);
+                    calcF2E(fftFrameSize, data, t, actualNStep, w);
                     return;
                 }
-                nstep <<= 2;
-                int ii = i + jmax;
-                int iii = i + w_len;
+                actualNStep <<= 2;
+                int ii = t + jmax;
+                int iii = t + w_len;
                 {
-                    i += 2;
+                    t += 2;
                     ii += 2;
                     iii += 2;
 
-                    for (int n = 0; n < fftFrameSize2; n += nstep) {
+                    for (int n = 0; n < fftFrameSize2; n += actualNStep) {
                         int m = n + jmax;
 
                         float datam1_r = data[m];
@@ -478,8 +483,8 @@ public class FFT {
 
                 }
                 for (int j = 2; j < jmax; j += 2) {
-                    final float wr = w[i++];
-                    final float wi = w[i++];
+                    final float wr = w[t++];
+                    final float wi = w[t++];
                     final float wr1 = w[ii++];
                     final float wi1 = w[ii++];
                     final float wwr1 = w[iii++];
@@ -488,7 +493,7 @@ public class FFT {
                     // precomputed!!!
                     // float wwi1 = wr * wi1 + wi * wr1;
 
-                    for (int n = j; n < fftFrameSize2; n += nstep) {
+                    for (int n = j; n < fftFrameSize2; n += actualNStep) {
                         int m = n + jmax;
 
                         float datam1_r = data[m];
@@ -547,36 +552,40 @@ public class FFT {
                     }
                 }
 
-                i += jmax << 1;
+                t += jmax << 1;
 
             }
 
-            calcF2E(fftFrameSize, data, i, nstep, w);
+            calcF2E(fftFrameSize, data, t, actualNStep, w);
 
         }
 
         // Perform Factor-4 Decomposition with 3 * complex operators and 8 +/-
         // complex operators
-        private static void calcF4FE(final int fftFrameSize, final float[] data, int i, int nstep, final float[] w) {
+        private static void calcF4FE(final int fftFrameSize, final float[] data, final int i,
+                final int nstep,
+                final float[] w) {
             final int fftFrameSize2 = fftFrameSize << 1; // 2*fftFrameSize;
             // Factor-4 Decomposition
+            int t = i;
+            int actualNStep = nstep;
 
             final int w_len = w.length >> 1;
-            while (nstep < fftFrameSize2) {
+            while (actualNStep < fftFrameSize2) {
 
-                final int jmax = nstep;
-                final int nnstep = nstep << 1;
+                final int jmax = actualNStep;
+                final int nnstep = actualNStep << 1;
                 if (nnstep == fftFrameSize2) {
                     // Factor-4 Decomposition not possible
-                    calcF2E(fftFrameSize, data, i, nstep, w);
+                    calcF2E(fftFrameSize, data, t, actualNStep, w);
                     return;
                 }
-                nstep <<= 2;
-                int ii = i + jmax;
-                int iii = i + w_len;
+                actualNStep <<= 2;
+                int ii = t + jmax;
+                int iii = t + w_len;
                 for (int n = 0; n < jmax; n += 2) {
-                    final float wr = w[i++];
-                    final float wi = w[i++];
+                    final float wr = w[t++];
+                    final float wi = w[t++];
                     final float wr1 = w[ii++];
                     final float wi1 = w[ii++];
                     final float wwr1 = w[iii++];
@@ -642,7 +651,7 @@ public class FFT {
 
                 }
 
-                i += jmax << 1;
+                t += jmax << 1;
 
             }
 
@@ -650,26 +659,31 @@ public class FFT {
 
         // Perform Factor-4 Decomposition with 3 * complex operators and 8 +/-
         // complex operators
-        private static void calcF4IE(final int fftFrameSize, final float[] data, int i, int nstep, final float[] w) {
+        private static void calcF4IE(final int fftFrameSize, final float[] data, final int i,
+                final int nstep,
+                final float[] w) {
             final int fftFrameSize2 = fftFrameSize << 1; // 2*fftFrameSize;
             // Factor-4 Decomposition
 
-            final int w_len = w.length >> 1;
-            while (nstep < fftFrameSize2) {
+            int t = i;
+            int actualNStep = nstep;
 
-                final int jmax = nstep;
-                final int nnstep = nstep << 1;
+            final int w_len = w.length >> 1;
+            while (actualNStep < fftFrameSize2) {
+
+                final int jmax = actualNStep;
+                final int nnstep = actualNStep << 1;
                 if (nnstep == fftFrameSize2) {
                     // Factor-4 Decomposition not possible
-                    calcF2E(fftFrameSize, data, i, nstep, w);
+                    calcF2E(fftFrameSize, data, t, actualNStep, w);
                     return;
                 }
-                nstep <<= 2;
-                int ii = i + jmax;
-                int iii = i + w_len;
+                actualNStep <<= 2;
+                int ii = t + jmax;
+                int iii = t + w_len;
                 for (int n = 0; n < jmax; n += 2) {
-                    final float wr = w[i++];
-                    final float wi = w[i++];
+                    final float wr = w[t++];
+                    final float wi = w[t++];
                     final float wr1 = w[ii++];
                     final float wi1 = w[ii++];
                     final float wwr1 = w[iii++];
@@ -735,7 +749,7 @@ public class FFT {
 
                 }
 
-                i += jmax << 1;
+                t += jmax << 1;
 
             }
 
