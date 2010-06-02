@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.logging.LogManager;
 
 import be.hogent.tarsos.util.Configuration;
-import be.hogent.tarsos.util.Log;
 
 /**
  * This is the starting point of the Tarsos application suite. It's main task is
@@ -38,7 +37,7 @@ public final class Tarsos {
         try {
             // configure logging
             final String propertiesFile = "/be/hogent/tarsos/util/logging.properties";
-            final InputStream stream = Log.class.getResourceAsStream(propertiesFile);
+            final InputStream stream = Tarsos.class.getResourceAsStream(propertiesFile);
             LogManager.getLogManager().readConfiguration(stream);
         } catch (final SecurityException e) {
             e.printStackTrace();
