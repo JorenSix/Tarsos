@@ -59,6 +59,13 @@ public class FFT {
         return modulus;
     }
 
+    public void modulus(final float[] data, final float[] amplitudes) {
+        assert data.length == amplitudes.length / 2;
+        for (int i = 0; i < amplitudes.length; i++) {
+            amplitudes[i] = modulus(data, i);
+        }
+    }
+
     /*
      * Copyright 2007 Sun Microsystems, Inc. All Rights Reserved. DO NOT ALTER
      * OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER. This code is free
@@ -817,4 +824,5 @@ public class FFT {
 
         }
     }
+
 }
