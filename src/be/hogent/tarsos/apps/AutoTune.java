@@ -56,7 +56,7 @@ public final class AutoTune {
         new Thread(new AudioProcessor(chooseDevice())).start();
     }
 
-    private static class Speaker {
+    public static class Speaker {
         private static final float SAMPLERATE = 44100;
         private static final int CHANNELS = 1;
         private static final int BITS = 16;
@@ -66,7 +66,7 @@ public final class AutoTune {
 
         private SourceDataLine line;
 
-        private Speaker() {
+        public Speaker() {
             final DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
 
 
