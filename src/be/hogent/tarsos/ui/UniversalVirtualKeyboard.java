@@ -24,16 +24,16 @@ public class UniversalVirtualKeyboard extends VirtualKeyboard {
 
     private static final long serialVersionUID = -3017076399911747736L;
 
-    public UniversalVirtualKeyboard(int numberOfKeysPerOctave) {
+    public UniversalVirtualKeyboard(final int numberOfKeysPerOctave) {
         super(numberOfKeysPerOctave);
     }
 
     @Override
-    protected int getMidiNote(int x, int y) {
-        int w = getWidth();
-        float nw = w / (float) numberOfKeys;
-        int wn = (int) (x / nw);
-        int oct = wn / numberOfKeysPerOctave;
+    protected int getMidiNote(final int x, final int y) {
+        final int w = getWidth();
+        final float nw = w / (float) numberOfKeys;
+        final int wn = (int) (x / nw);
+        final int oct = wn / numberOfKeysPerOctave;
         int n = oct * numberOfKeysPerOctave + wn % numberOfKeysPerOctave;
         if (n < 0) {
             n = 0;
@@ -45,18 +45,18 @@ public class UniversalVirtualKeyboard extends VirtualKeyboard {
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void paint(final Graphics g) {
         super.paint(g);
-        Graphics2D g2 = (Graphics2D) g;
+        final Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        int w = getWidth();
-        int h = getHeight();
+        final int w = getWidth();
+        final int h = getHeight();
 
-        float nw = w / (float) numberOfKeys;
+        final float nw = w / (float) numberOfKeys;
         float cx = 0;
-        Rectangle2D rect = new Rectangle2D.Double();
+        final Rectangle2D rect = new Rectangle2D.Double();
         for (int i = 0; i < numberOfKeys; i++) {
 
             rect.setRect(cx, 0, nw, h);
@@ -76,7 +76,7 @@ public class UniversalVirtualKeyboard extends VirtualKeyboard {
             if (i >= lowestAssignedKey) {
                 if (i - lowestAssignedKey < VirtualKeyboard.mappedKeys.length()) {
                     g2.setColor(Color.GRAY);
-                    char keyChar = VirtualKeyboard.mappedKeys.charAt(i - lowestAssignedKey);
+                    final char keyChar = VirtualKeyboard.mappedKeys.charAt(i - lowestAssignedKey);
                     g2.drawString("" + keyChar, cx + 2, h - 4);
                 }
             }

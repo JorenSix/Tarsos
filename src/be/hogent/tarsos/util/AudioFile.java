@@ -6,7 +6,6 @@ import java.util.List;
 /**
  * Represents an audio file. Facilitates transcoding, handling of path names and
  * data sets.
- * 
  * @author Joren Six
  */
 public final class AudioFile {
