@@ -56,7 +56,7 @@ public final class AutoTune {
         new Thread(new AudioProcessor(chooseDevice())).start();
     }
 
-    public static class Speaker {
+    public static final class Speaker {
         private static final float SAMPLERATE = 44100;
         private static final int CHANNELS = 1;
         private static final int BITS = 16;

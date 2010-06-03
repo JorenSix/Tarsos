@@ -17,7 +17,7 @@ import com.sun.media.sound.AudioFloatInputStream;
  * 
  * @author Joren Six
  */
-public class SignalPowerExtractor {
+public final class SignalPowerExtractor {
 
     private final AudioFile audioFile;
     private static final double READ_WINDOW = 0.01; // seconds

@@ -13,7 +13,7 @@ import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.pure.Yin.DetectedPitchHandler;
 import be.hogent.tarsos.util.AudioFile;
 
-public class TarsosPitchDetection implements PitchDetector {
+public final class TarsosPitchDetection implements PitchDetector {
     private static final Logger LOG = Logger.getLogger(TarsosPitchDetection.class.getName());
     private static final String NAME = "tarsos_yin";
 

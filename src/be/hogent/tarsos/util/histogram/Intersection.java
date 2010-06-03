@@ -8,7 +8,7 @@ import be.hogent.tarsos.util.SimplePlot;
  * 
  * @author Joren Six
  */
-public class Intersection implements HistogramCorrelation {
+public final class Intersection implements HistogramCorrelation {
 
     @Override
     public double correlation(final Histogram thisHistogram, final int displacement,

@@ -12,7 +12,7 @@ import javax.sound.midi.Transmitter;
  * 
  * @author Joren Six
  */
-public class TransmitterSink implements Transmitter {
+public final class TransmitterSink implements Transmitter {
 
     private final Transmitter[] transmitters;
 
@@ -22,7 +22,7 @@ public class TransmitterSink implements Transmitter {
 
     @Override
     public void close() {
-        for (Transmitter transmitter : transmitters) {
+        for (final Transmitter transmitter : transmitters) {
             transmitter.close();
         }
     }
@@ -44,7 +44,7 @@ public class TransmitterSink implements Transmitter {
 
     @Override
     public void setReceiver(final Receiver receiver) {
-        for (Transmitter transmitter : transmitters) {
+        for (final Transmitter transmitter : transmitters) {
             transmitter.setReceiver(receiver);
         }
     }

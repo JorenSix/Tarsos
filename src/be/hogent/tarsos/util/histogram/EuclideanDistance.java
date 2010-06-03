@@ -5,7 +5,7 @@ package be.hogent.tarsos.util.histogram;
  * 
  * @author Joren Six
  */
-public class EuclideanDistance implements HistogramCorrelation {
+public final class EuclideanDistance implements HistogramCorrelation {
 
     public double correlation(final Histogram thisHistogam, final int displacement,
             final Histogram otherHistogram) {

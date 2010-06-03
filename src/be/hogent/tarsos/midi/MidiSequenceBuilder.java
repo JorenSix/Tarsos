@@ -25,7 +25,7 @@ import be.hogent.tarsos.pitch.PitchConverter;
  * Utility class to generate a sequence of MIDI events.
  * @author Joren Six
  */
-public class MidiSequenceBuilder {
+public final class MidiSequenceBuilder {
 
     /**
      * Log messages.

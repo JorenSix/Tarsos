@@ -42,7 +42,7 @@ import javax.sound.midi.SysexMessage;
 /**
  * Displays the file format information of a MIDI file.
  */
-public class DumpReceiver implements Receiver {
+public final class DumpReceiver implements Receiver {
 
     public static long seByteCount = 0;
     public static long smByteCount = 0;

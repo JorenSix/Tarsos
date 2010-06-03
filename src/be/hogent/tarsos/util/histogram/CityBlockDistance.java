@@ -6,7 +6,7 @@ package be.hogent.tarsos.util.histogram;
  * 
  * @author Joren Six
  */
-public class CityBlockDistance implements HistogramCorrelation {
+public final class CityBlockDistance implements HistogramCorrelation {
 
     @Override
     public double correlation(final Histogram thisHistogam, final int displacement, final Histogram otherHistogram) {
@@ -29,7 +29,7 @@ public class CityBlockDistance implements HistogramCorrelation {
 
         for (double current = start + classWidth / 2; current <= stop; current += classWidth) {
             final double displacedValue = (current + actualDisplacement * classWidth)
-                    % (numberOfClasses * classWidth);
+            % (numberOfClasses * classWidth);
             distance += Math.abs(thisHistogam.getCount(current) - otherHistogram.getCount(displacedValue));
         }
 

@@ -13,7 +13,7 @@ import be.hogent.tarsos.util.histogram.AmbitusHistogram;
  * 
  * @author Joren Six
  */
-public class Sample implements Comparable<Sample> {
+public final class Sample implements Comparable<Sample> {
 
     private long start;
     private final List<Double> pitches; // in Hz

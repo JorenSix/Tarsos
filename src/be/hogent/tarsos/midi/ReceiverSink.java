@@ -10,7 +10,7 @@ import javax.sound.midi.Receiver;
  * command line, a LOG file,... or to build a MIDI file from any input
  * @author Joren Six
  */
-public class ReceiverSink implements Receiver {
+public final class ReceiverSink implements Receiver {
 
     private final Receiver[] receivers;
     private final boolean ignoreTiming;
@@ -26,7 +26,7 @@ public class ReceiverSink implements Receiver {
 
     @Override
     public void close() {
-        for (Receiver receiver : receivers) {
+        for (final Receiver receiver : receivers) {
             receiver.close();
         }
     }
@@ -37,7 +37,7 @@ public class ReceiverSink implements Receiver {
         if (ignoreTiming) {
             actualTimeStamp = -1;
         }
-        for (Receiver receiver : receivers) {
+        for (final Receiver receiver : receivers) {
             receiver.send(message, actualTimeStamp);
         }
     }

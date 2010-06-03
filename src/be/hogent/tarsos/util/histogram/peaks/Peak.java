@@ -5,7 +5,7 @@ package be.hogent.tarsos.util.histogram.peaks;
  * 
  * @author Joren Six
  */
-public class Peak {
+public final class Peak {
     private final double position;
     private final double height;
 
@@ -17,7 +17,7 @@ public class Peak {
      * @param height
      *            the height of the peak
      */
-    public Peak(double position, double height) {
+    public Peak(final double position, final double height) {
         this.position = position;
         this.height = height;
     }

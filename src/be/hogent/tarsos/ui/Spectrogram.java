@@ -45,7 +45,7 @@ import com.sun.media.sound.AudioFloatInputStream;
  *         href="http://forums.sun.com/thread.jspa?threadID=5284602">this
  *         thread.</a>
  */
-public class Spectrogram extends JComponent {
+public final class Spectrogram extends JComponent {
 
     private static final long serialVersionUID = -7760501261506593771L;
 

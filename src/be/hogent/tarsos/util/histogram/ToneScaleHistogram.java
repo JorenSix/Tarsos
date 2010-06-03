@@ -51,7 +51,7 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
  *         do not end on an octave (mostly ambitus descriptions of an
  *         instrument).
  */
-public class ToneScaleHistogram extends Histogram {
+public final class ToneScaleHistogram extends Histogram {
     private static final Logger LOG = Logger.getLogger(ToneScaleHistogram.class.getName());
 
     /**

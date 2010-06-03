@@ -15,7 +15,7 @@ import be.hogent.tarsos.util.AudioFile;
  * one in ms and the oters in Hz.
  * @author Joren Six
  */
-public class DetectPitch extends AbstractTarsosApp {
+public final class DetectPitch extends AbstractTarsosApp {
 
     @Override
     public String description() {

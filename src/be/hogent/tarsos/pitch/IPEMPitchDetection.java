@@ -28,7 +28,7 @@ import be.hogent.tarsos.util.FileUtils;
  * 
  * @author Joren Six
  */
-public class IPEMPitchDetection implements PitchDetector {
+public final class IPEMPitchDetection implements PitchDetector {
     /**
      * Log messages.
      */

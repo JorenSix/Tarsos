@@ -13,7 +13,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.hogent.tarsos.apps.Tarsos;
 
-public class MediaPlayer implements Runnable {
+public final class MediaPlayer implements Runnable {
     File file;
     AudioInputStream in;
     SourceDataLine line;

@@ -14,7 +14,7 @@ import javax.imageio.ImageIO;
 import ptolemy.plot.Plot;
 import be.hogent.tarsos.util.histogram.Histogram;
 
-public class SimplePlot {
+public final class SimplePlot {
 
     /**
      * Log messages.

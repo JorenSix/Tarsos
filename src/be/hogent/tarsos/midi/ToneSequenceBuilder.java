@@ -30,7 +30,7 @@ import be.hogent.tarsos.util.SignalPowerExtractor;
  * time (monophonic).
  * @author Joren Six
  */
-public class ToneSequenceBuilder {
+public final class ToneSequenceBuilder {
 
     /**
      * A list of frequencies.
@@ -71,13 +71,13 @@ public class ToneSequenceBuilder {
      *            the starttime in seconds of the tone. The tone stops when the
      *            next one starts. The last tone is never played.
      */
-    public void addTone(double frequency, double realTime) {
+    public void addTone(final double frequency, final double realTime) {
         frequencies.add(frequency);
         realTimes.add(realTime);
         powers.add(0.75);
     }
 
-    public void addTone(double frequency, double realTime, double power) {
+    public void addTone(final double frequency, final double realTime, final double power) {
         frequencies.add(frequency);
         realTimes.add(realTime);
         realTimes.add(realTime);
@@ -104,7 +104,7 @@ public class ToneSequenceBuilder {
      *             rights to write in the temporary directory.
      */
     private URL sineWaveURL() throws IOException {
-        File sineWaveFile = new File(FileUtils.combine(FileUtils.temporaryDirectory(), "sin20ms.wav"));
+        final File sineWaveFile = new File(FileUtils.combine(FileUtils.temporaryDirectory(), "sin20ms.wav"));
         if (!sineWaveFile.exists()) {
             FileUtils.copyFileFromJar("be.hogent.tarsos.midi.sin20ms.wav", sineWaveFile.getAbsolutePath());
         }
@@ -114,16 +114,16 @@ public class ToneSequenceBuilder {
     public void playAnnotations(final int smootFilterWindowSize) {
         try {
             writeFile(null, smootFilterWindowSize);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (SinkIsFullException e) {
+        } catch (final SinkIsFullException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (BufferNotAvailableException e) {
+        } catch (final BufferNotAvailableException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -155,7 +155,7 @@ public class ToneSequenceBuilder {
      * @throws InterruptedException
      * @throws BufferNotAvailableException
      */
-    public void writeFile(String fileName, int smootFilterWindowSize) throws IOException,
+    public void writeFile(final String fileName, final int smootFilterWindowSize) throws IOException,
     SinkIsFullException, InterruptedException, BufferNotAvailableException {
         // invariant: at any time the lists are equal in length
         assert frequencies.size() == realTimes.size();
@@ -165,21 +165,21 @@ public class ToneSequenceBuilder {
             powers = PitchFunctions.medianFilter(powers, smootFilterWindowSize);
         }
 
-        URL sine50Hz44100 = sineWaveURL();
+        final URL sine50Hz44100 = sineWaveURL();
 
-        float baseFreqWavFile = 50;
-        float srate = 44100.f;
-        int bufferSize = 1024;
-        LoopBuffer tone = new LoopBuffer(srate, bufferSize, sine50Hz44100);
+        final float baseFreqWavFile = 50;
+        final float srate = 44100.f;
+        final int bufferSize = 1024;
+        final LoopBuffer tone = new LoopBuffer(srate, bufferSize, sine50Hz44100);
         SourcePlayer player;
         if (fileName != null) {
-            String rawFileName = fileName + ".raw";
+            final String rawFileName = fileName + ".raw";
             player = new SourcePlayer(bufferSize, srate, rawFileName);
         } else {
             player = new SourcePlayer(bufferSize, srate);
         }
 
-        Mixer mixer = new Mixer(bufferSize, 1);
+        final Mixer mixer = new Mixer(bufferSize, 1);
         player.addSource(mixer);
         mixer.addSource(tone);
         tone.setSpeed(0f / baseFreqWavFile);
@@ -188,7 +188,7 @@ public class ToneSequenceBuilder {
         }
 
         for (int i = 0; i < frequencies.size(); i++) {
-            double freq = frequencies.get(i) == -1.0 ? 0.0 : frequencies.get(i);
+            final double freq = frequencies.get(i) == -1.0 ? 0.0 : frequencies.get(i);
             tone.setSpeed((float) freq / baseFreqWavFile);
             mixer.setGain(0, (float) (1.41421 * Math.log(powers.get(i).floatValue()) / Math.log(1.6)));
             if (fileName == null) {
@@ -201,7 +201,7 @@ public class ToneSequenceBuilder {
         }
 
         if (fileName != null) {
-            String rawFileName = fileName + ".raw";
+            final String rawFileName = fileName + ".raw";
             convertRawToWav(srate, rawFileName, fileName);
             new File(rawFileName).deleteOnExit();
         }
@@ -212,17 +212,17 @@ public class ToneSequenceBuilder {
      * 
      * @throws IOException
      */
-    private void convertRawToWav(double srate, String rawFileName, String wavFileName) throws IOException {
-        FileInputStream inStream = new FileInputStream(new File(rawFileName));
-        File out = new File(wavFileName);
-        int bytesAvailable = inStream.available();
-        int sampleSizeInBits = 16;
-        int channels = 1;
-        boolean signed = false;
-        boolean bigEndian = false;
-        AudioFormat audioFormat = new AudioFormat((float) srate, sampleSizeInBits, channels, signed,
+    private void convertRawToWav(final double srate, final String rawFileName, final String wavFileName) throws IOException {
+        final FileInputStream inStream = new FileInputStream(new File(rawFileName));
+        final File out = new File(wavFileName);
+        final int bytesAvailable = inStream.available();
+        final int sampleSizeInBits = 16;
+        final int channels = 1;
+        final boolean signed = false;
+        final boolean bigEndian = false;
+        final AudioFormat audioFormat = new AudioFormat((float) srate, sampleSizeInBits, channels, signed,
                 bigEndian);
-        AudioInputStream audioInputStream = new AudioInputStream(inStream, audioFormat, bytesAvailable / 2);
+        final AudioInputStream audioInputStream = new AudioInputStream(inStream, audioFormat, bytesAvailable / 2);
         AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, out);
         audioInputStream.close();
         inStream.close();
@@ -240,17 +240,17 @@ public class ToneSequenceBuilder {
      */
     public static void saveAsWav(final String csvFileName, final CSVFileHandler handler,
             final int smootFilterWindowSize) {
-        String correctedFileName = new File(csvFileName).getAbsolutePath();
+        final String correctedFileName = new File(csvFileName).getAbsolutePath();
         try {
-            ToneSequenceBuilder builder = new ToneSequenceBuilder();
-            List<String[]> rows = FileUtils.readCSVFile(correctedFileName, handler.getSeparator(), handler
+            final ToneSequenceBuilder builder = new ToneSequenceBuilder();
+            final List<String[]> rows = FileUtils.readCSVFile(correctedFileName, handler.getSeparator(), handler
                     .getNumberOfExpectedColumn());
-            for (String[] row : rows) {
+            for (final String[] row : rows) {
                 handler.handleRow(builder, row);
             }
             builder.writeFile("data/generated_audio/" + FileUtils.basename(correctedFileName) + ".wav",
                     smootFilterWindowSize);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
         }
     }
@@ -317,8 +317,8 @@ public class ToneSequenceBuilder {
 
         @Override
         public void handleRow(final ToneSequenceBuilder builder, final String[] row) {
-            double realTime = Double.parseDouble(row[0]) / SAMPLERATE;
-            double frequency = REFFREQUENCY * Math.pow(2.0, Double.parseDouble(row[1]) / CENTSINOCTAVE);
+            final double realTime = Double.parseDouble(row[0]) / SAMPLERATE;
+            final double frequency = REFFREQUENCY * Math.pow(2.0, Double.parseDouble(row[1]) / CENTSINOCTAVE);
             if (extr == null) {
                 builder.addTone(frequency, realTime);
             } else {
@@ -337,7 +337,7 @@ public class ToneSequenceBuilder {
         }
 
         @Override
-        public void setExtractor(SignalPowerExtractor extractor) {
+        public void setExtractor(final SignalPowerExtractor extractor) {
             extr = extractor;
         }
     }
@@ -347,8 +347,8 @@ public class ToneSequenceBuilder {
 
         @Override
         public void handleRow(final ToneSequenceBuilder builder, final String[] row) {
-            double realTime = Double.parseDouble(row[0]);
-            double frequency = Double.parseDouble(row[1]);
+            final double realTime = Double.parseDouble(row[0]);
+            final double frequency = Double.parseDouble(row[1]);
             if (extr == null) {
                 builder.addTone(frequency, realTime);
             } else {
@@ -367,7 +367,7 @@ public class ToneSequenceBuilder {
         }
 
         @Override
-        public void setExtractor(SignalPowerExtractor extractor) {
+        public void setExtractor(final SignalPowerExtractor extractor) {
             extr = extractor;
         }
     };
@@ -383,7 +383,7 @@ public class ToneSequenceBuilder {
         @Override
         public void handleRow(final ToneSequenceBuilder builder, final String[] row) {
             sampleNumber++;
-            double realTime = sampleNumber / 100.0; // 100 Hz sample frequency
+            final double realTime = sampleNumber / 100.0; // 100 Hz sample frequency
             // (every 10 ms)
             double frequency = 0.0;
             try {
@@ -393,7 +393,7 @@ public class ToneSequenceBuilder {
                 } else {
                     builder.addTone(frequency, realTime, extr.powerAt(realTime, true));
                 }
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 LOG.warning("Ignored invalid formatted number: " + row[0]);
             }
         }
@@ -409,7 +409,7 @@ public class ToneSequenceBuilder {
         }
 
         @Override
-        public void setExtractor(SignalPowerExtractor extractor) {
+        public void setExtractor(final SignalPowerExtractor extractor) {
             extr = extractor;
         }
     }

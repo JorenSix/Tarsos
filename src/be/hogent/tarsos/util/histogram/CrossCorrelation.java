@@ -7,7 +7,7 @@ package be.hogent.tarsos.util.histogram;
  * 
  * @author Joren Six
  */
-public class CrossCorrelation implements HistogramCorrelation {
+public final class CrossCorrelation implements HistogramCorrelation {
     public double correlation(final Histogram thisHistogam, final int displacement,
             final Histogram otherHistogram) {
         // number of bins (classes)

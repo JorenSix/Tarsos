@@ -24,14 +24,14 @@ import be.hogent.tarsos.util.FileUtils;
  * 
  * @author Joren Six
  */
-public class AubioPitchDetection implements PitchDetector {
+public final class AubioPitchDetection implements PitchDetector {
 
     private final AudioFile file;
     private final PitchDetectionMode pitchDetectionMode;
     private final List<Sample> samples;
     private final String name;
 
-    public AubioPitchDetection(AudioFile file, PitchDetectionMode pitchDetectionMode) {
+    public AubioPitchDetection(final AudioFile file, final PitchDetectionMode pitchDetectionMode) {
         this.file = file;
         this.pitchDetectionMode = pitchDetectionMode;
         this.samples = new ArrayList<Sample>();
@@ -40,21 +40,21 @@ public class AubioPitchDetection implements PitchDetector {
 
     @Override
     public void executePitchDetection() {
-        String annotationsDirectory = Configuration.get(ConfKey.raw_aubio_annotations_directory);
-        String csvFileName = FileUtils.combine(annotationsDirectory, this.name + "_" + file.basename()
+        final String annotationsDirectory = Configuration.get(ConfKey.raw_aubio_annotations_directory);
+        final String csvFileName = FileUtils.combine(annotationsDirectory, this.name + "_" + file.basename()
                 + ".txt");
 
         if (!FileUtils.exists(csvFileName)) {
-            String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.getDetectionModeName()
+            final String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.getDetectionModeName()
             + "  -s -70  -i " + file.transcodedPath();
             Execute.command(command, csvFileName);
         }
 
-        List<String[]> csvData = FileUtils.readCSVFile(csvFileName, "\t", 2);
-        for (String[] row : csvData) {
-            long start = (long) (Double.parseDouble(row[0]) * 1000);
-            Double pitch = Double.parseDouble(row[1]);
-            Sample sample = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
+        final List<String[]> csvData = FileUtils.readCSVFile(csvFileName, "\t", 2);
+        for (final String[] row : csvData) {
+            final long start = (long) (Double.parseDouble(row[0]) * 1000);
+            final Double pitch = Double.parseDouble(row[1]);
+            final Sample sample = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
             switch (pitchDetectionMode) {
             case AUBIO_YIN:
                 sample.source = PitchDetectionMode.AUBIO_YIN;

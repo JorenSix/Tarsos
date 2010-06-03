@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
@@ -25,6 +27,11 @@ import be.hogent.tarsos.util.SimplePlot;
  * @author Joren Six
  */
 public final class AmbitusHistogram extends Histogram {
+
+    /**
+     * Log messages.
+     */
+    private static final Logger LOG = Logger.getLogger(AmbitusHistogram.class.getName());
 
     private final List<ToneScaleHistogram> toneScaleHistogramPerOctave = new ArrayList<ToneScaleHistogram>();
 
@@ -169,9 +176,9 @@ public final class AmbitusHistogram extends Histogram {
                 final BufferedImage image = h.exportImage();
                 ImageIO.write(image, "png", new File(fileName));
             } catch (final IOException e) {
-                e.printStackTrace();
-            } catch (final InterruptedException e1) {
-                e1.printStackTrace();
+                LOG.log(Level.SEVERE, "Could not write plot.", e);
+            } catch (final InterruptedException e) {
+                LOG.log(Level.SEVERE, "Thread interrupted.", e);
             }
         } else {
             final SimplePlot plot = new SimplePlot();

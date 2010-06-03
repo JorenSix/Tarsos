@@ -227,7 +227,7 @@ public class Histogram implements Cloneable {
      *            inside the interval using a modulo calculation.
      * @return the number of items in bin with index i
      */
-    public long getCountForClass(final int i) {
+    public final long getCountForClass(final int i) {
         return getCount(getKeyForClass(i));
     }
 
@@ -236,7 +236,7 @@ public class Histogram implements Cloneable {
      *         Use histogram methods instead. For performance reasons it is not
      *         wrapped in an immutable set so handle with care.
      */
-    public Set<Double> keySet() {
+    public final Set<Double> keySet() {
         return freqTable.keySet();
     }
 

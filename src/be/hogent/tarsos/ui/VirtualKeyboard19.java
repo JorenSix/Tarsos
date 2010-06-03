@@ -14,7 +14,7 @@ import java.awt.geom.Rectangle2D;
  * 
  * @author Joren Six
  */
-public class VirtualKeyboard19 extends VirtualKeyboard {
+public final class VirtualKeyboard19 extends VirtualKeyboard {
 
     private static final long serialVersionUID = 3155583325975723313L;
 

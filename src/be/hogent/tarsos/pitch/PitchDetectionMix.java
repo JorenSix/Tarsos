@@ -9,7 +9,7 @@ import java.util.List;
  * 
  * @author Joren Six
  */
-public class PitchDetectionMix implements PitchDetector {
+public final class PitchDetectionMix implements PitchDetector {
     List<PitchDetector> detectors;
 
     private final List<Sample> samples;
@@ -28,17 +28,17 @@ public class PitchDetectionMix implements PitchDetector {
      *            detected with AUBIO_YIN and the next sample of 101HZ detected with
      *            AUBIO_SCHMITT is accepted when pitchDeviation >= 0.01
      */
-    public PitchDetectionMix(List<PitchDetector> detectors, double pitchDeviation) {
+    public PitchDetectionMix(final List<PitchDetector> detectors, final double pitchDeviation) {
         this.detectors = detectors;
         this.pitchDeviation = pitchDeviation;
 
-        List<String> names = new ArrayList<String>();
-        for (PitchDetector detector : detectors) {
+        final List<String> names = new ArrayList<String>();
+        for (final PitchDetector detector : detectors) {
             names.add(detector.getName());
         }
         Collections.sort(names);
-        StringBuilder sb = new StringBuilder();
-        for (String name : names) {
+        final StringBuilder sb = new StringBuilder();
+        for (final String name : names) {
             sb.append(name).append("_");
         }
         name = "mix_" + sb.toString() + pitchDeviation;
@@ -49,14 +49,14 @@ public class PitchDetectionMix implements PitchDetector {
     @Override
     public void executePitchDetection() {
 
-        for (PitchDetector detector : detectors) {
+        for (final PitchDetector detector : detectors) {
             if (detector.getSamples().size() == 0) {
                 detector.executePitchDetection();
             }
         }
 
-        List<Sample> allSamples = new ArrayList<Sample>();
-        for (PitchDetector detector : detectors) {
+        final List<Sample> allSamples = new ArrayList<Sample>();
+        for (final PitchDetector detector : detectors) {
             allSamples.addAll(detector.getSamples());
         }
 
@@ -65,10 +65,10 @@ public class PitchDetectionMix implements PitchDetector {
 
         // accept some samples
         for (int i = 0; i < allSamples.size() - 1; i++) {
-            Sample currentSample = allSamples.get(i);
-            Sample nextSample = allSamples.get(i + 1);
+            final Sample currentSample = allSamples.get(i);
+            final Sample nextSample = allSamples.get(i + 1);
             if (currentSample.source != nextSample.source) {
-                double pitch = currentSample.returnMatchingPitch(nextSample, pitchDeviation);
+                final double pitch = currentSample.returnMatchingPitch(nextSample, pitchDeviation);
 
                 if (pitch > 0) {
                     samples.add(new Sample((nextSample.getStart() + nextSample.getStart()) / 2, pitch));

@@ -9,13 +9,13 @@ import be.hogent.tarsos.pitch.PitchUnit;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.util.StopWatch;
 
-public class PlotThread extends Thread {
+public final class PlotThread extends Thread {
 
     // private String title;
     private final List<Sample> samples;
     private final StopWatch watch;
 
-    public PlotThread(String title, List<Sample> samples, StopWatch watch) {
+    public PlotThread(final String title, final List<Sample> samples, final StopWatch watch) {
         // this.title = title;
         this.samples = samples;
         this.watch = watch;
@@ -25,7 +25,7 @@ public class PlotThread extends Thread {
     public void run() {
         // TODO Auto-generated method stub
 
-        Plot livePlot = new Plot();
+        final Plot livePlot = new Plot();
         livePlot.setSize(1024, 786);
         // livePlot.setTitle(title);
         livePlot.setPointsPersistence(3000);
@@ -34,7 +34,7 @@ public class PlotThread extends Thread {
         livePlot.setYRange(2000, 6000);
         // livePlot.setYLog(true);
 
-        Iterator<Sample> sampleIterator = samples.iterator();
+        final Iterator<Sample> sampleIterator = samples.iterator();
         Sample currentSample = sampleIterator.next();
 
         new PlotApplication(livePlot);
@@ -42,9 +42,9 @@ public class PlotThread extends Thread {
         for (long currentTick = 0; currentTick <= samples.get(samples.size() - 1).getStart(); currentTick += 100) {
 
             while (sampleIterator.hasNext() && currentSample.getStart() <= currentTick) {
-                for (Double pitch : currentSample
+                for (final Double pitch : currentSample
                         .getPitchesWithoutHarmonicsIn(PitchUnit.ABSOLUTE_CENTS, 0.07)) {
-                    double yValue = pitch;
+                    final double yValue = pitch;
                     livePlot.addPoint(1, currentTick, yValue, false);
                 }
                 currentSample = sampleIterator.next();
@@ -59,7 +59,7 @@ public class PlotThread extends Thread {
                 if (numberOfTicksToSleep > 0) {
                     try {
                         Thread.sleep(numberOfTicksToSleep);
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
