@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -22,31 +24,29 @@ import be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor;
  */
 public final class Spectrum extends JFrame implements AudioProcessor {
 
-    private static final int BAR_WIDTH = 1;// pixels
-    private static final int BAR_MAX_HEIGHT = 400;// pixels
+
     /**
      */
     private static final long serialVersionUID = 2799646800090116812L;
 
-    private final BufferedImage buffer;
-    private final Graphics2D bufferGraphics;
-    private final BufferedImage imageEven;
-    private final Graphics2D imageEvenGraphics;
+    private BufferedImage buffer;
+    private Graphics2D bufferGraphics;
 
     private final FFT fft;
     private final float[] amplitudes;
     private final float[] hightWaterMarks;
 
+    private int barWidth;// pixels
+    private int barMaxHeight;
+
     public Spectrum(final AudioFile audioFile, final int bins) throws UnsupportedAudioFileException,
     IOException, LineUnavailableException {
 
-
-        this.setSize(new Dimension(bins * BAR_WIDTH / 2, BAR_MAX_HEIGHT));
+        this.setSize(new Dimension(640, 400));
+        barWidth = getWidth() / bins;
+        barMaxHeight = getHeight();// pixels
         this.setVisible(true);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        imageEven = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
-        imageEvenGraphics = imageEven.createGraphics();
 
         buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         bufferGraphics = buffer.createGraphics();
@@ -60,6 +60,22 @@ public final class Spectrum extends JFrame implements AudioProcessor {
         final RealTimeAudioProcessor rtap = new RealTimeAudioProcessor(audioFile.transcodedPath(), bins * 4);
         rtap.addAudioProcessor(this);
         new Thread(rtap).start();
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(final ComponentEvent e) {
+                frameWasResized(e);
+            }
+
+            private void frameWasResized(final ComponentEvent e) {
+                barWidth = getWidth() / bins;
+                barMaxHeight = getHeight();
+                buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+                bufferGraphics = buffer.createGraphics();
+                bufferGraphics.setColor(Color.BLACK);
+                bufferGraphics.clearRect(0, 0, getWidth(), getHeight());
+            }
+        });
     }
 
     @Override
@@ -69,34 +85,31 @@ public final class Spectrum extends JFrame implements AudioProcessor {
 
     @Override
     public void proccess(final float[] audioBuffer) {
-        imageEvenGraphics.setColor(Color.BLACK);
-        imageEvenGraphics.clearRect(0, 0, getWidth(), getHeight());
+        bufferGraphics.setColor(Color.BLACK);
+        bufferGraphics.clearRect(0, 0, getWidth(), getHeight());
 
         fft.forwardTransform(audioBuffer);
         fft.modulus(audioBuffer, amplitudes);
-        imageEvenGraphics.setColor(Color.BLUE);
 
         for (int i = 0; i < amplitudes.length / 2; i++) {
-            imageEvenGraphics.setColor(Color.BLUE);
+            bufferGraphics.setColor(Color.BLUE);
             final int height = (int) (Math.log1p(amplitudes[i]) * 50);
             hightWaterMarks[i] = Math.max(height, hightWaterMarks[i]);
 
-            imageEvenGraphics.fillRect(i * BAR_WIDTH + BAR_WIDTH, BAR_MAX_HEIGHT - height, BAR_WIDTH,
+            bufferGraphics.fillRect(i * barWidth + barWidth, barMaxHeight - height, barWidth,
                     height);
-            imageEvenGraphics.setColor(Color.RED);
-            imageEvenGraphics.fillRect(i * BAR_WIDTH + BAR_WIDTH,
-                    (int) (BAR_MAX_HEIGHT - hightWaterMarks[i]),
-                    BAR_WIDTH, 2);
+            bufferGraphics.setColor(Color.RED);
+            bufferGraphics.fillRect(i * barWidth + barWidth, (int) (barMaxHeight - hightWaterMarks[i]),
+                    barWidth, 2);
             hightWaterMarks[i] = hightWaterMarks[i] - 1;
         }
-        bufferGraphics.drawImage(imageEven, 0, 0, null);
         // bufferGraphics.setColor(Color.WHITE);
         repaint();
     }
 
     public static void main(final String... args) throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
-        final AudioFile f = new AudioFile("flute.novib.mf.C5B5.wav");
-        new Spectrum(f, 1024);
+        final AudioFile f = new AudioFile("audio/MR.1975.26.43-4.wav");
+        new Spectrum(f, 32);
     }
 }
