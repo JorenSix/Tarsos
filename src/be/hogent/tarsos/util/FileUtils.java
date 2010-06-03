@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  * Exports a DatabaseResult to a CSV-file.
  * @author Joren Six
  */
-public class FileUtils {
+public final class FileUtils {
     private static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
 
 

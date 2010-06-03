@@ -3,10 +3,9 @@ package be.hogent.tarsos.util;
 /**
  * Wrapper for calling a hopefully Fast Fourier transform. Makes it easy to
  * switch FFT algorithm with minimal overhead.
- * 
  * @author Joren Six
  */
-public class FFT {
+public final class FFT {
     /**
      * Forward FFT.
      */
@@ -23,7 +22,6 @@ public class FFT {
 
     /**
      * Computes forward DFT.
-     * 
      * @param data
      *            data to transform.
      */
@@ -33,7 +31,6 @@ public class FFT {
 
     /**
      * Computes inverse DFT.
-     * 
      * @param data
      *            data to transform
      */
@@ -45,22 +42,29 @@ public class FFT {
      * Returns the modulus of the element at index i. The modulus, magnitude or
      * absolute value is (a²+b²) ^ 0.5 with a being the real part and b the
      * imaginary part of a complex number.
-     * 
      * @param data
      *            The FFT transformed data.
-     * @param i
+     * @param index
      *            The index of the element.
      * @return The modulus, magnitude or absolute value of the element at index
      *         i
      */
-    public float modulus(final float[] data, final int i) {
-        float modulus = data[i] * data[i] + data[i + data.length / 2] * data[i + data.length / 2];
-        modulus = (float) Math.pow(modulus, 0.5);
-        return modulus;
+    public float modulus(final float[] data, final int index) {
+        final float modulus = data[index] * data[index] + data[index + data.length / 2]
+                                                               * data[index + data.length / 2];
+        return (float) Math.pow(modulus, 0.5);
     }
 
+    /**
+     * Calculates the the modulus for each element in data and stores the result
+     * in amplitudes.
+     * @param data
+     *            The input data.
+     * @param amplitudes
+     *            The output modulus info or amplitude.
+     */
     public void modulus(final float[] data, final float[] amplitudes) {
-        assert data.length == amplitudes.length / 2;
+        assert data.length / 2 == amplitudes.length;
         for (int i = 0; i < amplitudes.length; i++) {
             amplitudes[i] = modulus(data, i);
         }

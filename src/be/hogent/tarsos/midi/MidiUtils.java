@@ -17,7 +17,7 @@ import javax.sound.midi.SysexMessage;
  * source code</a>
  * @author Karl Helgason
  */
-public class MidiUtils {
+public final class MidiUtils {
 
     private MidiUtils() {
     }
@@ -94,7 +94,7 @@ public class MidiUtils {
 
     private static final byte[] EOX = new byte[] { (byte) 0xF7 };
 
-    public static class GeneralMidiMessages {
+    public final static class GeneralMidiMessages {
         private GeneralMidiMessages() {
         }
 

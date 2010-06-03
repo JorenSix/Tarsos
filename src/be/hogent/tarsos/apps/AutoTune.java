@@ -90,7 +90,7 @@ public final class AutoTune {
         }
     }
 
-    private static class AudioProcessor implements Runnable {
+    private final static class AudioProcessor implements Runnable {
 
         AudioFloatInputStream afis;
         float[] audioBuffer;
