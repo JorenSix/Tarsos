@@ -495,10 +495,13 @@ public class Histogram implements Cloneable {
      */
     public double getCumPct(final Double v) {
         final long sumFreq = getSumFreq();
+        final double cumPercentage;
         if (sumFreq == 0) {
-            return Double.NaN;
+            cumPercentage = Double.NaN;
+        } else {
+            cumPercentage = (double) getCumFreq(v) / (double) sumFreq;
         }
-        return (double) getCumFreq(v) / (double) sumFreq;
+        return cumPercentage;
     }
 
     /**
@@ -544,10 +547,13 @@ public class Histogram implements Cloneable {
      */
     public double getPct(final Double v) {
         final long sumFreq = getSumFreq();
+        double percentage;
         if (sumFreq == 0) {
-            return Double.NaN;
+            percentage =  Double.NaN;
+        } else {
+            percentage = (double) getCount(v) / (double) sumFreq;
         }
-        return (double) getCount(v) / (double) sumFreq;
+        return percentage;
     }
 
     /**
@@ -627,7 +633,7 @@ public class Histogram implements Cloneable {
             final Iterator<Double> iter = freqTable.keySet().iterator();
             while (iter.hasNext()) {
                 final Double value = iter.next();
-                outBuffer.append(value).append("\t").append("\t|");
+                outBuffer.append(value).append("\t\t|");
                 for (int i = 0; i < getPct(value) * 100; i++) {
                     outBuffer.append('x');
                 }
@@ -856,7 +862,7 @@ public class Histogram implements Cloneable {
      */
     public static Histogram mean(final List<Histogram> histograms) {
         Histogram mean = null;
-        if (histograms.size() != 0) {
+        if (!histograms.isEmpty()) {
             final Histogram first = histograms.get(0);
             mean = new Histogram(first);
             for (final double key : first.freqTable.keySet()) {
