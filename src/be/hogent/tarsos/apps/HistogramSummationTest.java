@@ -7,7 +7,7 @@ import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
-import be.hogent.tarsos.pitch.YinPitchDetection;
+import be.hogent.tarsos.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
@@ -20,7 +20,7 @@ public final class HistogramSummationTest {
      */
     public static void main(String[] args) {
         AudioFile audioFile = new AudioFile("audio\\maghreb\\4_ABERDAG___LA_DANSE.wav");
-        PitchDetector pitchDetector = new YinPitchDetection(audioFile);
+        PitchDetector pitchDetector = new TarsosPitchDetection(audioFile);
         pitchDetector.executePitchDetection();
         List<Sample> samples = pitchDetector.getSamples();
         AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);

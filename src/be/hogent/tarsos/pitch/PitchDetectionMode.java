@@ -74,7 +74,7 @@ public enum PitchDetectionMode {
             detector = new IPEMPitchDetection(audioFile);
             break;
         case TARSOS_YIN:
-            detector = new YinPitchDetection(audioFile);
+            detector = new TarsosPitchDetection(audioFile);
             break;
         default:
             detector = new AubioPitchDetection(audioFile, this);

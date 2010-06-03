@@ -11,14 +11,14 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import be.hogent.tarsos.pitch.Yin.DetectedPitchHandler;
 import be.hogent.tarsos.util.AudioFile;
 
-public class YinPitchDetection implements PitchDetector {
-    private static final Logger LOG = Logger.getLogger(YinPitchDetection.class.getName());
+public class TarsosPitchDetection implements PitchDetector {
+    private static final Logger LOG = Logger.getLogger(TarsosPitchDetection.class.getName());
     private static final String NAME = "tarsos_yin";
 
     private final AudioFile file;
     private final List<Sample> samples;
 
-    public YinPitchDetection(final AudioFile audioFile) {
+    public TarsosPitchDetection(final AudioFile audioFile) {
         this.file = audioFile;
         this.samples = new ArrayList<Sample>();
     }
