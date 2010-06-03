@@ -1,4 +1,4 @@
-package be.hogent.tarsos.pitch;
+package be.hogent.tarsos.pitch.pure;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,7 +8,9 @@ import java.util.logging.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import be.hogent.tarsos.pitch.Yin.DetectedPitchHandler;
+import be.hogent.tarsos.pitch.PitchDetector;
+import be.hogent.tarsos.pitch.Sample;
+import be.hogent.tarsos.pitch.pure.Yin.DetectedPitchHandler;
 import be.hogent.tarsos.util.AudioFile;
 
 public class TarsosPitchDetection implements PitchDetector {

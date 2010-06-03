@@ -7,7 +7,7 @@ import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
-import be.hogent.tarsos.pitch.TarsosPitchDetection;
+import be.hogent.tarsos.pitch.pure.TarsosPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;

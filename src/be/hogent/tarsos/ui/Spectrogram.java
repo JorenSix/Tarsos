@@ -34,7 +34,7 @@ import be.hogent.tarsos.apps.Tarsos;
 import be.hogent.tarsos.pitch.Pitch;
 import be.hogent.tarsos.pitch.PitchConverter;
 import be.hogent.tarsos.pitch.PitchUnit;
-import be.hogent.tarsos.pitch.Yin;
+import be.hogent.tarsos.pitch.pure.Yin;
 import be.hogent.tarsos.util.FFT;
 
 import com.sun.media.sound.AudioFloatInputStream;

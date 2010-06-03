@@ -1,5 +1,6 @@
 package be.hogent.tarsos.pitch;
 
+import be.hogent.tarsos.pitch.pure.TarsosPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
 
 /**

@@ -1,4 +1,4 @@
-package be.hogent.tarsos.pitch;
+package be.hogent.tarsos.pitch.pure;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,6 @@ import com.sun.media.sound.AudioFloatInputStream;
  * "http://recherche.ircam.fr/equipes/pcm/cheveign/ps/2002_JASA_YIN_proof.pdf"
  * >the AUBIO_YIN paper.</a> Implementation based on <a
  * href="http://aubio.org">aubio</a>
- * 
  * @author Joren Six
  */
 public final class Yin {

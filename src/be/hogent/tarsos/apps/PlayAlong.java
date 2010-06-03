@@ -32,7 +32,7 @@ import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.PitchUnit;
 import be.hogent.tarsos.pitch.Sample;
-import be.hogent.tarsos.pitch.TarsosPitchDetection;
+import be.hogent.tarsos.pitch.pure.TarsosPitchDetection;
 import be.hogent.tarsos.ui.PianoTestFrame;
 import be.hogent.tarsos.ui.VirtualKeyboard;
 import be.hogent.tarsos.util.AudioFile;
