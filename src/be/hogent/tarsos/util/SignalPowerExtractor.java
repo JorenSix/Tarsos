@@ -1,8 +1,10 @@
 package be.hogent.tarsos.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -14,30 +16,69 @@ import com.sun.media.sound.AudioFloatInputStream;
 /**
  * An utility class to calculate and access the power of an audio file at any
  * given time.
- * 
  * @author Joren Six
  */
 public final class SignalPowerExtractor {
 
+    /**
+     * The sample rate for the power calculations. A sample is a point where the
+     * waveform or power is calculated. E.g. a song of 300sec long at 10 Hz =>
+     * 3000 measurements takes place.
+     */
+    private static final int POWER_SAMPLE_RATE = 10;
+
+    /**
+     * Log messages.
+     */
+    private static final Logger LOG = Logger.getLogger(SignalPowerExtractor.class.getName());
+
     private final AudioFile audioFile;
-    private static final double READ_WINDOW = 0.01; // seconds
+
     private double[] linearPowerArray;
-    double maxLinearPower = -1;
-    double minLinearPower = Double.MAX_VALUE;
+    private double maxLinearPower = -1;
+    private double minLinearPower = Double.MAX_VALUE;
+    private final double readWindow; // seconds
+
+    private final double sampleRate;
+    private final double frameSize;
+    private final double frameRate;
+    private final double audioLengtInSecs;
 
     /**
      * Create a new power extractor.
-     * 
      * @param audioFile
      *            The audio file to extract power from.
      */
     public SignalPowerExtractor(final AudioFile audioFile) {
         this.audioFile = audioFile;
+        AudioInputStream ais = null;
+        final File inputFile = new File(audioFile.transcodedPath());
+        AudioFormat format = null;
+        try {
+            ais = AudioSystem.getAudioInputStream(inputFile);
+            format = ais.getFormat();
+        } catch (final UnsupportedAudioFileException e) {
+            LOG.log(Level.SEVERE, e.getLocalizedMessage(), e);
+        } catch (final IOException e) {
+            LOG.log(Level.SEVERE, e.getLocalizedMessage(), e);
+        } finally {
+            try {
+                ais.close();
+            } catch (final IOException e) {
+                LOG.log(Level.SEVERE, "Failed to close audio input stream.", e);
+            } catch (final NullPointerException e) {
+                LOG.log(Level.SEVERE, "Failed to initialize audio input stream.", e);
+            }
+        }
+        sampleRate = format.getSampleRate();
+        frameSize = format.getFrameSize();
+        frameRate = format.getFrameRate();
+        audioLengtInSecs = inputFile.length() / (frameSize * frameRate);
+        readWindow = 1.0 / POWER_SAMPLE_RATE;
     }
 
     /**
      * Returns the relative power [0.0;1.0] at the given time.
-     * 
      * @param seconds
      *            the time to get the relative power for.
      * @return A number between 0 and 1 inclusive that shows the relative power
@@ -64,7 +105,7 @@ public final class SignalPowerExtractor {
      * Calculates an index value for the power array from a number of seconds.
      */
     private int secondsToIndex(final double seconds) {
-        return (int) (seconds / READ_WINDOW);
+        return (int) Math.ceil(seconds / readWindow);
     }
 
     /**
@@ -72,20 +113,14 @@ public final class SignalPowerExtractor {
      * max linear power.
      */
     private void extractPower() {
-        final File inputFile = new File(audioFile.path());
-        AudioInputStream ais;
+        final File inputFile = new File(audioFile.transcodedPath());
+        AudioInputStream ais = null;
         try {
             ais = AudioSystem.getAudioInputStream(inputFile);
             final AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
-            final AudioFormat format = ais.getFormat();
 
-            final double sampleRate = format.getSampleRate();
-            final double frameSize = format.getFrameSize();
-            final double frameRate = format.getFrameRate();
-            final double audioFileLengtInSeconds = inputFile.length() / (frameSize * frameRate);
-
-            linearPowerArray = new double[secondsToIndex(audioFileLengtInSeconds) + 1];
-            final int readAmount = (int) (READ_WINDOW * sampleRate);
+            linearPowerArray = new double[secondsToIndex(audioLengtInSecs) + 1];
+            final int readAmount = (int) (readWindow * sampleRate);
             final float[] buffer = new float[readAmount];
 
             int index = 0;
@@ -97,76 +132,84 @@ public final class SignalPowerExtractor {
                 index++;
             }
         } catch (final UnsupportedAudioFileException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, e.getLocalizedMessage(), e);
         } catch (final IOException e) {
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, e.getLocalizedMessage(), e);
+        } finally {
+            try {
+                ais.close();
+            } catch (final IOException e) {
+                LOG.log(Level.SEVERE, "Failed to close audio input stream.", e);
+            } catch (final NullPointerException e) {
+                LOG.log(Level.SEVERE, "Failed to initialize audio input stream.", e);
+            }
         }
     }
 
     /**
      * Creates a wave from plot.
-     * 
-     * @param waveFormPlotFileName
+     * @param waveFormPlot
      *            The file to save to.
      */
-    public void saveWaveFormPlot(final String waveFormPlotFileName) {
+    public void saveWaveFormPlot(final String waveFormPlot) {
         try {
-            final File inputFile = new File(audioFile.path());
-            AudioInputStream ais;
-            ais = AudioSystem.getAudioInputStream(inputFile);
-            final AudioFormat format = ais.getFormat();
-            final double frameSize = format.getFrameSize();
-            final double frameRate = format.getFrameRate();
+            final File inputFile = new File(audioFile.transcodedPath());
+            final FileInputStream file = new FileInputStream(inputFile);
             final double timeFactor = 2.0 / (frameSize * frameRate);
+            final SimplePlot plot = new SimplePlot("Waveform " + audioFile.basename());
 
-            final RandomAccessFile file = new RandomAccessFile(new File(audioFile.path()), "r");
-            final SimplePlot p = new SimplePlot("Waveform " + audioFile.basename());
-            p.setSize(4000, 500);
+            plot.setSize(3000, 500);
             // skip header (44 bytes, fixed length)
             for (int i = 0; i < 44; i++) {
                 file.read();
             }
-            int i1, index = 0;
-            while ((i1 = file.read()) != -1) {
-                final byte b1 = (byte) i1;
-                final byte b2 = (byte) file.read();
-                if (index % 3 == 0) { // write the power only every 10 bytes
-                    final double power = (b2 << 8 | b1 & 0xFF) / 32767.0;
-                    final double seconds = index * timeFactor;
-                    p.addData(seconds, power);
-                }
-                index++;
+
+            int intByte;
+            int index = 0;
+            // read a window at a time (in bytes)
+            int bufferSize = (int) (readWindow / timeFactor);
+            // make buffer size even so byteBuffer[0] and 1 are correctly
+            // aligned.
+            if (bufferSize % 2 != 0) {
+                bufferSize++;
             }
-            p.save(waveFormPlotFileName);
+            final byte[] byteBuffer = new byte[bufferSize];
+            intByte = file.read(byteBuffer);
+            index = bufferSize;
+
+            while (intByte != -1) {
+                final double seconds = index * timeFactor;
+                final double power = (byteBuffer[0] << 8 | byteBuffer[1] & 0xFF) / 32767.0;
+                plot.addData(seconds, power);
+                index += bufferSize;
+                intByte = file.read(byteBuffer);
+            }
+            plot.save(waveFormPlot);
         } catch (final IOException e) {
-            e.printStackTrace();
-        } catch (final UnsupportedAudioFileException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.log(Level.SEVERE, "Failed to write audio file.", e);
         }
     }
 
     /**
      * Creates a text file with relative power values for each sample.
-     * 
      * @param textFileName
      *            where to save the text file?
      */
-    public void saveTextFile(final String textFileName) {
+    public void saveTextFile(final String textFileName, final boolean relative) {
         if (linearPowerArray == null) {
             extractPower();
         }
-
-        final StringBuilder sb = new StringBuilder("Time (in seconds);Power\n");
+        final StringBuilder stringBuilder = new StringBuilder("Time (in seconds);Power\n");
         for (int index = 0; index < linearPowerArray.length; index++) {
-            sb.append(index * READ_WINDOW).append(";").append(linearPowerArray[index]).append("\n");
+            final double seconds = index * readWindow;
+            stringBuilder.append(seconds).append(";").append(powerAt(seconds, relative))
+            .append("\n");
         }
-        FileUtils.writeFile(sb.toString(), textFileName);
+        FileUtils.writeFile(stringBuilder.toString(), textFileName);
     }
 
     /**
      * Creates a 'power plot' of the signal.
-     * 
      * @param powerPlotFileName
      *            where to save the plot.
      */
@@ -180,7 +223,7 @@ public final class SignalPowerExtractor {
             // prevents negative infinity
             final double power = linearToDecibel(linearPowerArray[index] == 0.0 ? 0.00000000000001
                     : linearPowerArray[index]);
-            final double timeInSeconds = index * READ_WINDOW;
+            final double timeInSeconds = index * readWindow;
             plot.addData(0, timeInSeconds, power);
             plot.addData(1, timeInSeconds, silenceTreshold);
         }
@@ -189,7 +232,6 @@ public final class SignalPowerExtractor {
 
     /**
      * Calculates the local (linear) energy of an audio buffer.
-     * 
      * @param buffer
      *            The audio buffer.
      * @return The local (linear) energy of an audio buffer.
@@ -204,7 +246,6 @@ public final class SignalPowerExtractor {
 
     /**
      * Returns the dBSPL for a buffer.
-     * 
      * @param buffer
      *            The buffer with audio information.
      * @return The dBSPL level for the buffer.
@@ -217,7 +258,6 @@ public final class SignalPowerExtractor {
 
     /**
      * Converts a linear to a dB value.
-     * 
      * @param value
      *            The value to convert.
      * @return The converted value.
@@ -228,7 +268,6 @@ public final class SignalPowerExtractor {
 
     /**
      * Checks if the dBSPL level in the buffer falls below a certain threshold.
-     * 
      * @param buffer
      *            The buffer with audio information.
      * @param silenceThreshold
