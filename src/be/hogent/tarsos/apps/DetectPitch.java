@@ -19,7 +19,8 @@ public final class DetectPitch extends AbstractTarsosApp {
 
     @Override
     public String description() {
-        return "Detects pitch for an input file using a pitch detector. Outputs two columns, one in ms and the oters in Hz.";
+        return "Detects pitch for an input file"
+                + " using a pitch detector. Outputs two columns, one in ms and the oters in Hz.";
     }
 
     @Override

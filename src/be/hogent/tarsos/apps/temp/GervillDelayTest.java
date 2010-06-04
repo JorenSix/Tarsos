@@ -8,7 +8,7 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
 import javax.swing.JFrame;
 
-import be.hogent.tarsos.apps.PlayAlong;
+import be.hogent.tarsos.apps.Tarsos;
 import be.hogent.tarsos.midi.DumpReceiver;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
@@ -17,10 +17,10 @@ public final class GervillDelayTest {
 
     public static void main(String[] args) throws Exception {
         Receiver recv;
-        MidiDevice outputDevice = PlayAlong.chooseDevice(false, true);
+        MidiDevice outputDevice = Tarsos.chooseDevice(false, true);
         outputDevice.open();
         recv = outputDevice.getReceiver();
-        MidiDevice midiInputDevice = PlayAlong.chooseDevice(true, false);
+        MidiDevice midiInputDevice = Tarsos.chooseDevice(true, false);
         midiInputDevice.open();
         Transmitter midiInputTransmitter = midiInputDevice.getTransmitter();
 

@@ -29,7 +29,6 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import be.hogent.tarsos.apps.PlayAlong;
 import be.hogent.tarsos.apps.Tarsos;
 import be.hogent.tarsos.pitch.Pitch;
 import be.hogent.tarsos.pitch.PitchConverter;
@@ -78,7 +77,7 @@ public final class Spectrogram extends JComponent {
     public Spectrogram(final int mixerIndex) throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
 
-        outputDevice = PlayAlong.chooseDevice(false, true);
+        outputDevice = Tarsos.chooseDevice(false, true);
         try {
             outputDevice.open();
             final ShortMessage sm = new ShortMessage();
