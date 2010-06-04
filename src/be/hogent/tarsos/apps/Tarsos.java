@@ -123,6 +123,8 @@ public final class Tarsos {
         applicationList.add(new MidiToWav());
         applicationList.add(new AudioToScala());
         applicationList.add(new DetectPitch());
+        applicationList.add(new AnnotationSynth());
+        applicationList.add(new PowerExtractor());
 
 
         for (final AbstractTarsosApp application : applicationList) {
