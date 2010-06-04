@@ -1,15 +1,25 @@
 package be.hogent.tarsos.apps;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.MidiDevice.Info;
+
+import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.util.Configuration;
 
 /**
@@ -26,6 +36,7 @@ public final class Tarsos {
      */
     private final transient Map<String, AbstractTarsosApp> applications;
 
+    private final Logger log;
     /**
      * Create a new Tarsos application instance.
      */
@@ -46,6 +57,7 @@ public final class Tarsos {
             e.printStackTrace();
             // a bit hard to log, logging is not working yet :(
         }
+        log = Logger.getLogger(Tarsos.class.getName());
     }
 
     /**
@@ -125,6 +137,7 @@ public final class Tarsos {
         applicationList.add(new DetectPitch());
         applicationList.add(new AnnotationSynth());
         applicationList.add(new PowerExtractor());
+        applicationList.add(new TuneMidiSynth());
 
 
         for (final AbstractTarsosApp application : applicationList) {
@@ -142,6 +155,51 @@ public final class Tarsos {
     private void print(final String info) {
         final PrintStream standardOut = System.out;
         standardOut.println(info);
+    }
+
+    /**
+     * Choose a MIDI device using a CLI. If an invalid device number is given
+     * the user is requested to choose another one.
+     * 
+     * @param inputDevice
+     *            is the MIDI device needed for input of events? E.G. a keyboard
+     * @param outputDevice
+     *            is the MIDI device needed to send events to? E.g. a (software)
+     *            synthesizer.
+     * @return the chosen MIDI device
+     */
+    public static MidiDevice chooseDevice(final boolean inputDevice, final boolean outputDevice) {
+        MidiDevice device = null;
+        try {
+            // choose MIDI input device
+            MidiCommon.listDevices(inputDevice, outputDevice);
+            final String deviceType = (inputDevice ? " IN " : "") + (outputDevice ? " OUT " : "");
+            println("Choose the MIDI" + deviceType + "device: ");
+            final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            final int deviceIndex = Integer.parseInt(br.readLine());
+            println("");
+            final Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[deviceIndex];
+
+            device = MidiSystem.getMidiDevice(midiDeviceInfo);
+            if ((device.getMaxTransmitters() == 0 == inputDevice)
+                    && (device.getMaxReceivers() == 0 == outputDevice)) {
+                println("Invalid choise, please try again");
+                device = chooseDevice(inputDevice, outputDevice);
+            }
+        } catch (final NumberFormatException e) {
+            println("Invalid number, please try again");
+            device = chooseDevice(inputDevice, outputDevice);
+        } catch (final IOException e) {
+            getInstance().log.log(Level.SEVERE, "Exception while reading from STD IN.", e);
+        } catch (final MidiUnavailableException e) {
+            println("The device is not available ( " + e.getMessage()
+                    + " ), please choose another device.");
+            device = chooseDevice(inputDevice, outputDevice);
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            println("Number out of bounds, please try again");
+            device = chooseDevice(inputDevice, outputDevice);
+        }
+        return device;
     }
 
     /**
