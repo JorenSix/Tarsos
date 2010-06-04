@@ -3,13 +3,10 @@ package be.hogent.tarsos.apps;
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.sound.midi.InvalidMidiDataException;
@@ -47,51 +44,6 @@ public final class PlayAlong {
      * Log messages.
      */
     private static final Logger LOG = Logger.getLogger(PlayAlong.class.getName());
-
-    /**
-     * Choose a MIDI device using a CLI. If an invalid device number is given
-     * the user is requested to choose another one.
-     * 
-     * @param inputDevice
-     *            is the MIDI device needed for input of events? E.G. a keyboard
-     * @param outputDevice
-     *            is the MIDI device needed to send events to? E.g. a (software)
-     *            synthesizer.
-     * @return the chosen MIDI device
-     */
-    public static MidiDevice chooseDevice(final boolean inputDevice, final boolean outputDevice) {
-        MidiDevice device = null;
-        try {
-            // choose MIDI input device
-            MidiCommon.listDevices(inputDevice, outputDevice);
-            final String deviceType = (inputDevice ? " IN " : "") + (outputDevice ? " OUT " : "");
-            Tarsos.println("Choose the MIDI" + deviceType + "device: ");
-            final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            final int deviceIndex = Integer.parseInt(br.readLine());
-            Tarsos.println("");
-            final Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[deviceIndex];
-
-            device = MidiSystem.getMidiDevice(midiDeviceInfo);
-            if ((device.getMaxTransmitters() == 0 == inputDevice)
-                    && (device.getMaxReceivers() == 0 == outputDevice)) {
-                Tarsos.println("Invalid choise, please try again");
-                device = chooseDevice(inputDevice, outputDevice);
-            }
-        } catch (final NumberFormatException e) {
-            Tarsos.println("Invalid number, please try again");
-            device = chooseDevice(inputDevice, outputDevice);
-        } catch (final IOException e) {
-            LOG.log(Level.SEVERE, "Exception while reading from STD IN.", e);
-        } catch (final MidiUnavailableException e) {
-            Tarsos.println("The device is not available ( " + e.getMessage()
-                    + " ), please choose another device.");
-            device = chooseDevice(inputDevice, outputDevice);
-        } catch (final ArrayIndexOutOfBoundsException e) {
-            Tarsos.println("Number out of bounds, please try again");
-            device = chooseDevice(inputDevice, outputDevice);
-        }
-        return device;
-    }
 
     public static void main(final String[] args) throws MidiUnavailableException, InterruptedException,
     IOException {
@@ -179,7 +131,7 @@ public final class PlayAlong {
 
             MidiDevice virtualMidiInputDevice;
             if (device == -1) {
-                virtualMidiInputDevice = chooseDevice(true, false);
+                virtualMidiInputDevice = Tarsos.chooseDevice(true, false);
             } else {
                 final Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[device];
                 virtualMidiInputDevice = MidiSystem.getMidiDevice(midiDeviceInfo);
