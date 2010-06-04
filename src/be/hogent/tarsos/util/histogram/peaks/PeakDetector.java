@@ -25,16 +25,13 @@ public final class PeakDetector {
      *         other histograms (files)
      */
     public static Histogram newPeakDetection(final List<Peak> peaks) {
-        double[] peakPositionsDouble = new double[peaks.size()];
-        double[] peakWidths = null;
-        double[] peakHeights = new double[peaks.size()];
-        double[] peakStandardDeviations = null;
+        final double[] peakPositionsDouble = new double[peaks.size()];
+        final double[] peakHeights = new double[peaks.size()];
         for (int i = 0; i < peaks.size(); i++) {
             peakPositionsDouble[i] = peaks.get(i).getPosition();
             peakHeights[i] = peaks.get(i).getHeight();
         }
-        return ToneScaleHistogram.createToneScale(peakPositionsDouble, peakHeights, peakWidths,
-                peakStandardDeviations);
+        return ToneScaleHistogram.createToneScale(peakPositionsDouble, peakHeights);
     }
 
     /**
@@ -49,11 +46,11 @@ public final class PeakDetector {
      */
     public static List<Peak> detect(final Histogram histogram, final int windowSize,
             final double meanFactorThreshold) {
-        double[] peakFunctionValues = new double[histogram.getNumberOfClasses()];
-        PeakScore differenceScore = new DifferenceScore(histogram, windowSize);
-        PeakScore localHeightScore = new LocalHeightScore();
+        final double[] peakFunctionValues = new double[histogram.getNumberOfClasses()];
+        final PeakScore differenceScore = new DifferenceScore(histogram, windowSize);
+        final PeakScore localHeightScore = new LocalHeightScore();
         for (int i = 0; i < histogram.getNumberOfClasses(); i++) {
-            double score = differenceScore.score(histogram, i, 1);
+            final double score = differenceScore.score(histogram, i, 1);
             // If the peak is a real peak according to the difference score,
             // then set the height score value.
             if (score != 0) {
@@ -63,7 +60,7 @@ public final class PeakDetector {
 
         // add the peaks to a list if the value is bigger than a threshold
         // value.
-        List<Integer> peakPositions = new ArrayList<Integer>();
+        final List<Integer> peakPositions = new ArrayList<Integer>();
         for (int i = 0; i < histogram.getNumberOfClasses(); i++) {
             if (peakFunctionValues[i] > meanFactorThreshold) {
                 peakPositions.add(i);
@@ -76,10 +73,10 @@ public final class PeakDetector {
         // Remove peaks that are to close to each other.
         // If peaks are closer than the window size they are too close.
         // The one with the smallest value is removed.
-        List<Integer> elementsToRemove = new ArrayList<Integer>();
+        final List<Integer> elementsToRemove = new ArrayList<Integer>();
         for (int i = 0; i < peakPositions.size(); i++) {
-            int firstPeakIndex = peakPositions.get(i);
-            int secndPeakIndex = peakPositions.get((i + 1) % peakPositions.size());
+            final int firstPeakIndex = peakPositions.get(i);
+            final int secndPeakIndex = peakPositions.get((i + 1) % peakPositions.size());
             if (Math.abs(secndPeakIndex - firstPeakIndex) <= windowSize) {
                 elementsToRemove
                 .add(histogram.getCount(firstPeakIndex) > histogram.getCount(secndPeakIndex) ? peakPositions
@@ -90,10 +87,10 @@ public final class PeakDetector {
         peakPositions.removeAll(elementsToRemove);
 
         // wrap the peaks in objects.
-        List<Peak> peaks = new ArrayList<Peak>();
+        final List<Peak> peaks = new ArrayList<Peak>();
         for (int i = 0; i < peakPositions.size(); i++) {
-            double position = histogram.getKeyForClass(peakPositions.get(i));
-            double height = histogram.getCountForClass(peakPositions.get(i));
+            final double position = histogram.getKeyForClass(peakPositions.get(i));
+            final double height = histogram.getCountForClass(peakPositions.get(i));
             peaks.add(new Peak(position, height));
         }
         return peaks;

@@ -130,7 +130,6 @@ public final class ToneScaleHistogram extends Histogram {
      * > an automatic pitch analysis method for Turkish maqam music</a>. The
      * theoretic scale can be used to search for similar tone scales using
      * histogram correlation. <br>
-     * 
      * @param peaks
      *            the position of the peaks. The position is defined in cents.
      * @param heights
