@@ -45,15 +45,15 @@ public final class PowerExtractor extends AbstractTarsosApp {
         if (isHelpOptionSet(options)) {
             printHelp(parser);
         } else {
-            List<AudioFile> audioFiles = new ArrayList<AudioFile>();
-            for (File inputFile : options.valuesOf(inputSpec)) {
+            final List<AudioFile> audioFiles = new ArrayList<AudioFile>();
+            for (final File inputFile : options.valuesOf(inputSpec)) {
                 audioFiles.add(new AudioFile(inputFile.getAbsolutePath()));
             }
             SignalPowerExtractor spex;
-            for (AudioFile file : audioFiles) {
+            for (final AudioFile file : audioFiles) {
                 spex = new SignalPowerExtractor(file);
                 spex.savePowerPlot("power_" + file.basename() + ".png", SILENCELEVEL);
-                spex.saveTextFile("power_" + file.basename() + ".txt");
+                spex.saveTextFile("power_" + file.basename() + ".txt", true);
                 spex.saveWaveFormPlot("waveform_" + file.basename() + ".png");
             }
         }

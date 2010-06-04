@@ -75,7 +75,7 @@ public final class Annotate extends AbstractTarsosApp {
                 peaksTitle, peaks);
 
         final SignalPowerExtractor powerExtractor = new SignalPowerExtractor(audioFile);
-        powerExtractor.saveTextFile(FileUtils.combine(directory, prefix + "_power.txt"));
+        powerExtractor.saveTextFile(FileUtils.combine(directory, prefix + "_power.txt"), true);
         powerExtractor.saveWaveFormPlot(FileUtils.combine(directory, prefix + "_wave.png"));
     }
 
