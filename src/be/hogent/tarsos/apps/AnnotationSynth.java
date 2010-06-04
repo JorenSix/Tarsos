@@ -72,7 +72,7 @@ public final class AnnotationSynth extends AbstractTarsosApp {
         final OptionSet options = parse(args, parser, this);
 
         if (isHelpOptionSet(options)) {
-            isHelpOptionSet(options);
+            printHelp(parser);
         } else {
             final CSVFileHandler handler = options.valueOf(annoFormatSpec).getCvsFileHandler();
             final File outputFile = options.valueOf(outputSpec);
@@ -92,12 +92,12 @@ public final class AnnotationSynth extends AbstractTarsosApp {
                         handler.handleRow(builder, row);
                         line = stdIn.readLine();
                     }
-                } catch (IOException e1) {
+                } catch (final IOException e1) {
                     LOG.log(Level.SEVERE, "Could not read from standard input.", e1);
                 }
             } else {
                 final List<String[]> rows = FileUtils.readCSVFile(inputFile.getAbsolutePath(), separator, -1);
-                for (String[] row : rows) {
+                for (final String[] row : rows) {
                     handler.handleRow(builder, row);
                 }
             }
@@ -107,7 +107,7 @@ public final class AnnotationSynth extends AbstractTarsosApp {
             } else {
                 try {
                     builder.writeFile(outputFile.getAbsolutePath(), filterSize);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.log(Level.SEVERE, "Could not write: " + outputFile + "\n", e);
                 }
             }
