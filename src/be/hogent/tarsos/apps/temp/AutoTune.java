@@ -1,4 +1,4 @@
-package be.hogent.tarsos.apps;
+package be.hogent.tarsos.apps.temp;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,6 +15,7 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
+import be.hogent.tarsos.apps.Tarsos;
 import be.hogent.tarsos.util.FFT;
 
 import com.sun.media.sound.AudioFloatConverter;

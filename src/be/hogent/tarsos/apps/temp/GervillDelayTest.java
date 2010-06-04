@@ -1,4 +1,4 @@
-package be.hogent.tarsos.apps;
+package be.hogent.tarsos.apps.temp;
 
 import java.util.Random;
 
@@ -8,6 +8,7 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
 import javax.swing.JFrame;
 
+import be.hogent.tarsos.apps.PlayAlong;
 import be.hogent.tarsos.midi.DumpReceiver;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;

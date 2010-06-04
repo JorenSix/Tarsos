@@ -1,4 +1,4 @@
-package be.hogent.tarsos.apps;
+package be.hogent.tarsos.apps.temp;
 
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
@@ -6,6 +6,7 @@ import gnu.getopt.LongOpt;
 import java.util.List;
 import java.util.TreeMap;
 
+import be.hogent.tarsos.apps.Tarsos;
 import be.hogent.tarsos.pitch.AubioPitchDetection;
 import be.hogent.tarsos.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.pitch.PitchDetectionMode;

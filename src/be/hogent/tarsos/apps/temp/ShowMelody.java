@@ -1,4 +1,4 @@
-package be.hogent.tarsos.apps;
+package be.hogent.tarsos.apps.temp;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
