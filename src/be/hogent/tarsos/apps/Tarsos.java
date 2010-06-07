@@ -36,28 +36,29 @@ public final class Tarsos {
      */
     private final transient Map<String, AbstractTarsosApp> applications;
 
-    private final Logger log;
+    /**
+     * Properties file that defines the logging behavior.
+     */
+    private static final String LOG_PROPS = "/be/hogent/tarsos/util/logging.properties";
+
     /**
      * Create a new Tarsos application instance.
      */
     private Tarsos() {
         applications = new HashMap<String, AbstractTarsosApp>();
-        // create needed directories, ...
-        Configuration.createRequiredDirectories();
-
+        Logger log = Logger.getLogger(Tarsos.class.getName());
         try {
             // configure logging
-            final String propertiesFile = "/be/hogent/tarsos/util/logging.properties";
-            final InputStream stream = Tarsos.class.getResourceAsStream(propertiesFile);
+            final InputStream stream = Tarsos.class.getResourceAsStream(LOG_PROPS);
             LogManager.getLogManager().readConfiguration(stream);
+            log = Logger.getLogger(Tarsos.class.getName());
+            // create needed directories, ...
+            Configuration.createRequiredDirectories();
         } catch (final SecurityException e) {
-            e.printStackTrace();
-            // a bit hard to log, logging is not working yet :(
+            log.log(Level.SEVERE, e.getLocalizedMessage(), e);
         } catch (final IOException e) {
-            e.printStackTrace();
-            // a bit hard to log, logging is not working yet :(
+            log.log(Level.SEVERE, e.getLocalizedMessage(), e);
         }
-        log = Logger.getLogger(Tarsos.class.getName());
     }
 
     /**
@@ -160,7 +161,6 @@ public final class Tarsos {
     /**
      * Choose a MIDI device using a CLI. If an invalid device number is given
      * the user is requested to choose another one.
-     * 
      * @param inputDevice
      *            is the MIDI device needed for input of events? E.G. a keyboard
      * @param outputDevice
@@ -175,8 +175,8 @@ public final class Tarsos {
             MidiCommon.listDevices(inputDevice, outputDevice);
             final String deviceType = (inputDevice ? " IN " : "") + (outputDevice ? " OUT " : "");
             println("Choose the MIDI" + deviceType + "device: ");
-            final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            final int deviceIndex = Integer.parseInt(br.readLine());
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+            final int deviceIndex = Integer.parseInt(bufferedReader.readLine());
             println("");
             final Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[deviceIndex];
 
@@ -190,7 +190,8 @@ public final class Tarsos {
             println("Invalid number, please try again");
             device = chooseDevice(inputDevice, outputDevice);
         } catch (final IOException e) {
-            getInstance().log.log(Level.SEVERE, "Exception while reading from STD IN.", e);
+            Logger.getLogger(Tarsos.class.getName()).log(Level.SEVERE,
+                    "Exception while reading from STD IN.", e);
         } catch (final MidiUnavailableException e) {
             println("The device is not available ( " + e.getMessage()
                     + " ), please choose another device.");
@@ -204,7 +205,6 @@ public final class Tarsos {
 
     /**
      * Prints info to a stream (console).
-     * 
      * @param info
      *            The information to print.
      */
