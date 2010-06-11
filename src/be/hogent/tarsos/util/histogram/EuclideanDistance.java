@@ -41,10 +41,11 @@ public final class EuclideanDistance implements HistogramCorrelation {
      * tarsos.util.histogram.HistogramCorrelation#plotCorrelation(tarsos.util
      * .histogram.Histogram, int, tarsos.util.histogram.Histogram)
      */
-    public void plotCorrelation(final Histogram thisHistogram, final int displacement, final Histogram otherHistogram) {
+    public void plotCorrelation(final Histogram thisHistogram, final int displacement,
+            final Histogram otherHistogram, final String fileName, final String title) {
         // for the moment this plots the intersection (not the euclidean
         // distance)
-        new Intersection().plotCorrelation(thisHistogram, displacement, otherHistogram);
+        new Intersection().plotCorrelation(thisHistogram, displacement, otherHistogram, fileName, title);
     }
 
 }

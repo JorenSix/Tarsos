@@ -33,7 +33,6 @@ import be.hogent.tarsos.apps.Tarsos;
 import be.hogent.tarsos.pitch.Pitch;
 import be.hogent.tarsos.pitch.PitchConverter;
 import be.hogent.tarsos.pitch.PitchUnit;
-import be.hogent.tarsos.pitch.pure.Yin;
 import be.hogent.tarsos.util.FFT;
 
 import com.sun.media.sound.AudioFloatInputStream;
@@ -172,7 +171,9 @@ public final class Spectrogram extends JComponent {
         double maxAmplitude = 0.0;
         int pitchIndex = -1;
 
-        final boolean bufferRead = Yin.slideBuffer(afis, audioDataBuffer, audioDataBuffer.length - 1024);
+        final boolean bufferRead = false; // Yin.slideBuffer(afis,
+                                          // audioDataBuffer,
+                                          // audioDataBuffer.length - 1024);
         if (bufferRead) {
 
             final float pitch = detectPitch();
@@ -288,7 +289,7 @@ public final class Spectrogram extends JComponent {
         for (int i = 0; i < 1024; i++) {
             yinBuffer[i] = audioDataBuffer[i];
         }
-        return Yin.processBuffer(yinBuffer, (float) sampleRate);
+        return 0.0f;// Yin.processBuffer(yinBuffer, (float) sampleRate);
     }
 
     public static void main(final String[] args) throws UnsupportedAudioFileException, IOException,

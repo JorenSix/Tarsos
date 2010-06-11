@@ -5,12 +5,17 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import be.hogent.tarsos.pitch.PitchConverter;
+import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
 /**
  * A representation of a scala file.
  * @author Joren Six
  */
 public final class ScalaFile {
+    /**
+     * Log messages.
+     */
+    private static final Logger LOG = Logger.getLogger(ScalaFile.class.getName());
 
     /**
      * The octave is 1200 cents.
@@ -54,6 +59,17 @@ public final class ScalaFile {
     }
 
     /**
+     * Create a new Scala file object.
+     * @param desc
+     *            The description of the tone scale.
+     * @param notes
+     *            The pitches (notes) used in the scale.
+     */
+    public ScalaFile(final String desc, final double[] notes) {
+        this(desc, notes, null);
+    }
+
+    /**
      * Reads a Scala file from disk and returns a new instance.
      * <p>
      * The <a href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala
@@ -74,7 +90,7 @@ public final class ScalaFile {
         final List<String> validPitchRows = new ArrayList<String>();
         String descriptionLine = "";
         int numberOfDataLines = 0;
-        for (String line : lines) {
+        for (final String line : lines) {
             final boolean isComment = line.trim().startsWith("!");
             // Skip comments.
             if (isComment) {
@@ -114,9 +130,13 @@ public final class ScalaFile {
     }
 
     /**
-     * Log messages.
+     * Builds a tone scale histogram using the pitches defined in this scala
+     * file.
+     * @return A ToneScaleHistogram using the correct pitches.
      */
-    private static final Logger LOG = Logger.getLogger(ScalaFile.class.getName());
+    public ToneScaleHistogram buildHistogram() {
+        return ToneScaleHistogram.createToneScale(pitches);
+    }
 
     /**
      * Parses a row from a scala file and returns a double value representing

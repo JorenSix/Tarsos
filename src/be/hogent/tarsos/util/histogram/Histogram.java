@@ -1139,7 +1139,6 @@ public class Histogram implements Cloneable {
      * Return the correlation of this histogram with another one. By default it
      * uses the {@link CorrelationMeasure#INTERSECTION INTERSECTION} correlation
      * measure.
-     * 
      * @param otherHistogram
      *            the other histogram
      * @return the correlation the computed correlation
@@ -1170,9 +1169,11 @@ public class Histogram implements Cloneable {
         return optimalDisplacement;
     }
 
-    public void plotCorrelation(final Histogram otherHistogram, final CorrelationMeasure correlationMeasure) {
+    public void plotCorrelation(final Histogram otherHistogram, final CorrelationMeasure correlationMeasure,
+            final String fileName, final String title) {
         final int displacement = displacementForOptimalCorrelation(otherHistogram);
-        correlationMeasure.getHistogramCorrelation().plotCorrelation(this, displacement, otherHistogram);
+        correlationMeasure.getHistogramCorrelation().plotCorrelation(this, displacement, otherHistogram,
+                fileName, title);
     }
 
     // -----------------------------------------------------------

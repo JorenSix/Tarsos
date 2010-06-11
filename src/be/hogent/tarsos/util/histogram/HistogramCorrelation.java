@@ -31,5 +31,6 @@ public interface HistogramCorrelation {
      * @param otherHistogram
      *            the second (not displaced) histogram
      */
-    void plotCorrelation(Histogram thisHistogram, int displacement, Histogram otherHistogram);
+    void plotCorrelation(Histogram thisHistogram, int displacement, Histogram otherHistogram,
+            String fileName, String title);
 }

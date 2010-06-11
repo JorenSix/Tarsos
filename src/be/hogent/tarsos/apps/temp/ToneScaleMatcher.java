@@ -18,7 +18,6 @@ import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
-import be.hogent.tarsos.util.histogram.CorrelationMeasure;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
@@ -112,7 +111,8 @@ public final class ToneScaleMatcher {
         if (toneScaleCorrelations.size() > 0) {
             final double bestCorrelation = toneScaleCorrelations.descendingKeySet().first();
             final ToneScaleHistogram hayStackHistogram = toneScaleCorrelations.get(bestCorrelation);
-            needleToneScale.plotCorrelation(hayStackHistogram, CorrelationMeasure.INTERSECTION);
+            // needleToneScale.plotCorrelation(hayStackHistogram,
+            // CorrelationMeasure.INTERSECTION);
         }
     }
 

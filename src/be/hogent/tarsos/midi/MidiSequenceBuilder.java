@@ -185,7 +185,6 @@ public final class MidiSequenceBuilder {
             message.setMessage(ShortMessage.PITCH_BEND, 0, lsb, msb);
         } catch (final InvalidMidiDataException e) {
             LOG.log(Level.SEVERE, "Invalid midi data", e);
-            // TODO: Add throws or re-throw exception?
             // Will this exception ever occur?
         }
         return new MidiEvent(message, startTick);
@@ -200,14 +199,14 @@ public final class MidiSequenceBuilder {
         return buffer.toString();
     }
 
-    private MidiEvent createNoteEvent(final int nCommand, final int nKey, final int nVelocity, final long lTick) {
+    private MidiEvent createNoteEvent(final int nCommand, final int nKey, final int nVelocity,
+            final long lTick) {
         final ShortMessage message = new ShortMessage();
         try {
             message.setMessage(nCommand, 0, // always on channel 1
                     nKey, nVelocity);
         } catch (final InvalidMidiDataException e) {
             LOG.log(Level.SEVERE, "Invalid midi data", e);
-            // TODO: Add throws or re-throw exception?
             // Will this exception ever occur?
         }
         return new MidiEvent(message, lTick);

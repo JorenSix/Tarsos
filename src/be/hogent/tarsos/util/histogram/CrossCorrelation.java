@@ -35,7 +35,8 @@ public final class CrossCorrelation implements HistogramCorrelation {
         return distance / numberOfClasses;
     }
 
-    public void plotCorrelation(final Histogram thisHistogram, final int displacement, final Histogram otherHistogram) {
-        new Intersection().plotCorrelation(thisHistogram, displacement, otherHistogram);
+    public void plotCorrelation(final Histogram thisHistogram, final int displacement,
+            final Histogram otherHistogram, final String fileName, final String title) {
+        new Intersection().plotCorrelation(thisHistogram, displacement, otherHistogram, fileName, title);
     }
 }

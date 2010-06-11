@@ -51,7 +51,7 @@ public final class Intersection implements HistogramCorrelation {
     }
 
     public void plotCorrelation(final Histogram thisHistogram, final int displacement,
-            final Histogram otherHistogram) {
+            final Histogram otherHistogram, final String fileName, final String title) {
         // number of bins (classes)
         final int numberOfClasses = thisHistogram.getNumberOfClasses();
         // start value
@@ -70,7 +70,7 @@ public final class Intersection implements HistogramCorrelation {
         // matching area, displaced
         double matchingArea = 0.0;
 
-        final SimplePlot correlationPlot = new SimplePlot();
+        final SimplePlot correlationPlot = new SimplePlot(title);
         // plots the first histogram
         correlationPlot.addData(0, thisHistogram);
         // plots the other (displaced) histogram
@@ -87,7 +87,7 @@ public final class Intersection implements HistogramCorrelation {
             }
         }
 
-        correlationPlot.save();
+        correlationPlot.save(fileName);
 
     }
 }

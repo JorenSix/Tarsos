@@ -9,7 +9,8 @@ package be.hogent.tarsos.util.histogram;
 public final class CityBlockDistance implements HistogramCorrelation {
 
     @Override
-    public double correlation(final Histogram thisHistogam, final int displacement, final Histogram otherHistogram) {
+    public double correlation(final Histogram thisHistogam, final int displacement,
+            final Histogram otherHistogram) {
         // number of bins (classes)
         final int numberOfClasses = thisHistogam.getNumberOfClasses();
         // start value
@@ -36,8 +37,9 @@ public final class CityBlockDistance implements HistogramCorrelation {
         return -1 * (distance / thisHistogam.getSumFreq()) + 1;
     }
 
-    public void plotCorrelation(final Histogram thisHistogram, final int displacement, final Histogram otherHistogram) {
-        new Intersection().plotCorrelation(thisHistogram, displacement, otherHistogram);
+    public void plotCorrelation(final Histogram thisHistogram, final int displacement,
+            final Histogram otherHistogram, final String fileName, final String title) {
+        new Intersection().plotCorrelation(thisHistogram, displacement, otherHistogram, fileName, title);
     }
 
 }

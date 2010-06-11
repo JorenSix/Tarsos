@@ -93,7 +93,7 @@ public final class ToneScaleHistogram extends Histogram {
             for (int i = 0; i < peaks.size(); i++) {
                 notes[i] = peaks.get(i).getPosition();
             }
-            final ScalaFile scalaFile = new ScalaFile(toneScaleName, notes, null);
+            final ScalaFile scalaFile = new ScalaFile(toneScaleName, notes);
             scalaFile.write(fileName);
         }
     }

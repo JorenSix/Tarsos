@@ -139,6 +139,7 @@ public final class Tarsos {
         applicationList.add(new AnnotationSynth());
         applicationList.add(new PowerExtractor());
         applicationList.add(new TuneMidiSynth());
+        applicationList.add(new Rank());
 
 
         for (final AbstractTarsosApp application : applicationList) {

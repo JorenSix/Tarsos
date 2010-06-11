@@ -86,7 +86,7 @@ public final class PlayAlong {
         }
 
         final AudioFile fileToPlayAlongWith = new AudioFile(fileName);
-        PitchDetector detector = new TarsosPitchDetection(fileToPlayAlongWith);
+        PitchDetector detector = new TarsosPitchDetection(fileToPlayAlongWith, PitchDetectionMode.TARSOS_YIN);
         if (detectorString.equals("AUBIO")) {
             detector = new AubioPitchDetection(fileToPlayAlongWith, PitchDetectionMode.AUBIO_YIN);
         } else if (detectorString.equals("IPEM")) {
