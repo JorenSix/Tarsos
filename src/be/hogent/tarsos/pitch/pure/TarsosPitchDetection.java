@@ -158,31 +158,32 @@ public final class TarsosPitchDetection implements PitchDetector {
     }
 
     /**
-     * This comment is not really up to date. Beware! Here be dragons. Slides a
-     * buffer with an overlap and reads new data from the stream. to the correct
-     * place in the buffer. E.g. with a buffer size of 9 and overlap of 3.
-     * 
+     * Slides a buffer with an overlap and reads new data from the stream. to
+     * the correct place in the buffer. E.g. with a buffer size of 9 and overlap
+     * of 3.
      * <pre>
-     *      | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+     *      | 0 | 1 | 3 | 3 | 4  | 5  | 6  | 7  | 8  |
      *                        |
      *                Slide (9 - 3 = 6)
      *                        |
      *                        v
-     *      | _ | _ | _ | _ | _ | _ | 8 | 7 | 6 |
+     *      | 6 | 7 | 8 | _ | _  | _  | _  | _  | _  |
      *                        |
-     *        Fill from 0 to 9 - 3 = 6 exclusive
+     *        Fill from 3 to (3+6) exclusive
      *                        |
      *                        v
-     *      | 14| 13| 12| 11| 10| 9 | 8 | 7 | 6 |
+     *      | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
      * </pre>
-     * 
      * @param audioInputStream
      *            The stream to read audio data from.
      * @param audioBuffer
-     *            The buffer to read audio data to.
+     *            The buffer to read audio data to. If consecutive buffers are
+     *            read and an overlap is wanted it should contain the previous
+     *            window.
      * @param overlap
-     *            The overlap: the number of elements that remain in the buffer
-     *            after this method is finished.
+     *            The overlap: the number of elements that are copied in the
+     *            buffer from the previous buffer. Overlap should be smaller
+     *            (strict) than the buffer size and can be zero.
      * @return True if the stream can deliver more data, false otherwise.
      * @throws IOException
      *             When something goes wrong while reading the stream. In

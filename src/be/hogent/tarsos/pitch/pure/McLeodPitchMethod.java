@@ -28,7 +28,9 @@ import java.util.List;
  * For the moment this implementation uses the inefficient way of calculating
  * the pitch. It uses <code>O(Ww)</code> with W the window size in samples and w
  * the desired number of ACF coefficients. The implementation can be optimized
- * to <code>O((W+w)log(W+w))</code> by using an FFT to calculate the AFC.
+ * to <code>O((W+w)log(W+w))</code> by using an <abbr
+ * title="Fast Fourier Transform">FFT</abbr> to calculate the <abbr
+ * title="Auto-Correlation Function">ACF</abbr>.
  * </p>
  * @author Joren Six
  */
@@ -62,7 +64,8 @@ public final class McLeodPitchMethod implements PurePitchDetector {
     private final float sampleRate;
 
     /**
-     *Contains a normalized square difference value for each delay (tau).
+     *Contains a normalized square difference function value for each delay
+     * (tau).
      */
     private final float[] nsdf;
 
