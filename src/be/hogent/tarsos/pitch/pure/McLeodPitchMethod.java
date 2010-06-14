@@ -122,6 +122,10 @@ public final class McLeodPitchMethod implements PurePitchDetector {
     }
 
 
+    /*
+     * (non-Javadoc)
+     * @see be.hogent.tarsos.pitch.pure.PurePitchDetector#getPitch(float[])
+     */
     public float getPitch(final float[] audioBuffer) {
         final float pitch;
 
@@ -192,7 +196,7 @@ public final class McLeodPitchMethod implements PurePitchDetector {
      * bit more curvaceous.
      * </p>
      * <pre>
-     *       y
+     *     nsdf(x)
      *       ^
      *       |
      * f(x)  |------ ^
@@ -205,21 +209,21 @@ public final class McLeodPitchMethod implements PurePitchDetector {
      *            a  x b  c
      * </pre>
      * @param tau
-     *            The b value in the drawing is the tau value.
+     *            The delay tau, b value in the drawing is the tau value.
      */
     private void prabolicInterpolation(final int tau) {
-        final float fa = nsdf[tau - 1];
-        final float fb = nsdf[tau];
-        final float fc = nsdf[tau + 1];
-        final float b = tau;
-        final float bottom = fc + fa - 2 * fb;
+        final float nsdfa = nsdf[tau - 1];
+        final float nsdfb = nsdf[tau];
+        final float nsdfc = nsdf[tau + 1];
+        final float bValue = tau;
+        final float bottom = nsdfc + nsdfa - 2 * nsdfb;
         if (bottom == 0.0) {
-            turningPointX = b;
-            turningPointY = fb;
+            turningPointX = bValue;
+            turningPointY = nsdfb;
         } else {
-            final float delta = fa - fc;
-            turningPointX = b + delta / (2 * bottom);
-            turningPointY = fb - delta * delta / (8 * bottom);
+            final float delta = nsdfa - nsdfc;
+            turningPointX = bValue + delta / (2 * bottom);
+            turningPointY = nsdfb - delta * delta / (8 * bottom);
         }
     }
 
