@@ -86,9 +86,7 @@ public final class Annotate extends AbstractTarsosApp {
         final OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate").withRequiredArg().ofType(
                 File.class)
                 .withValuesSeparatedBy(' ').defaultsTo(new File("in.wav"));
-        final OptionSpec<PitchDetectionMode> detectionModeSpec = parser.accepts("detector", "The detector to use")
-        .withRequiredArg().ofType(PitchDetectionMode.class)
-        .defaultsTo(PitchDetectionMode.TARSOS_YIN);
+        final OptionSpec<PitchDetectionMode> detectionModeSpec = createDetectionModeSpec(parser);
 
         final OptionSet options = parse(args, parser, this);
 

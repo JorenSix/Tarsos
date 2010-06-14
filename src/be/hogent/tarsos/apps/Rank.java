@@ -55,9 +55,7 @@ public final class Rank extends AbstractTarsosApp {
         .withRequiredArg().ofType(File.class)
         .withValuesSeparatedBy(' ');
 
-        final OptionSpec<PitchDetectionMode> detectionModeSpec = parser.accepts("detector",
-        "The detector to use").withRequiredArg().ofType(PitchDetectionMode.class).defaultsTo(
-                PitchDetectionMode.TARSOS_YIN);
+        final OptionSpec<PitchDetectionMode> detectionModeSpec = createDetectionModeSpec(parser);
 
         final OptionSet options = parse(args, parser, this);
 

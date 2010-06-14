@@ -20,7 +20,7 @@ public final class DetectPitch extends AbstractTarsosApp {
     @Override
     public String description() {
         return "Detects pitch for an input file"
-                + " using a pitch detector. Outputs two columns, one in ms and the oters in Hz.";
+        + " using a pitch detector. Outputs two columns, one in ms and the oters in Hz.";
     }
 
     @Override
@@ -33,9 +33,7 @@ public final class DetectPitch extends AbstractTarsosApp {
         final OptionParser parser = new OptionParser();
         final OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate").withRequiredArg()
         .ofType(File.class).withValuesSeparatedBy(' ').defaultsTo(new File("in.wav"));
-        final OptionSpec<PitchDetectionMode> detectionModeSpec = parser.accepts("detector",
-        "The detector to use").withRequiredArg().ofType(PitchDetectionMode.class).defaultsTo(
-                PitchDetectionMode.TARSOS_YIN);
+        final OptionSpec<PitchDetectionMode> detectionModeSpec = createDetectionModeSpec(parser);
 
         final OptionSet options = parse(args, parser, this);
 

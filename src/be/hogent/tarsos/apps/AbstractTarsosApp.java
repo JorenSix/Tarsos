@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 
 /**
  * @author Joren Six
@@ -70,6 +72,24 @@ public abstract class AbstractTarsosApp {
      */
     protected final boolean isHelpOptionSet(final OptionSet options) {
         return options == null || options.has("help");
+    }
+
+    /**
+     * Creates an optionspec for a pitch detector.
+     * @param parser
+     *            The parser to add an option to.
+     * @return An OptionSpec with a correct name and a clear description.
+     */
+    protected final OptionSpec<PitchDetectionMode> createDetectionModeSpec(final OptionParser parser) {
+        final StringBuilder names = new StringBuilder();
+        for (final PitchDetectionMode modes : PitchDetectionMode.values()) {
+            names.append(modes.name()).append(" | ");
+        }
+        final String descr = "The detector to use [" + names.toString() + "]";
+        return parser.accepts("detector", descr
+        ).withRequiredArg().ofType(PitchDetectionMode.class).defaultsTo(
+                PitchDetectionMode.TARSOS_YIN);
+
     }
 
     /**
