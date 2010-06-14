@@ -152,9 +152,10 @@ public final class SignalPowerExtractor {
      *            The file to save to.
      */
     public void saveWaveFormPlot(final String waveFormPlot) {
+        FileInputStream file = null;
         try {
             final File inputFile = new File(audioFile.transcodedPath());
-            final FileInputStream file = new FileInputStream(inputFile);
+            file = new FileInputStream(inputFile);
             final double timeFactor = 2.0 / (frameSize * frameRate);
             final SimplePlot plot = new SimplePlot("Waveform " + audioFile.basename());
 
@@ -187,6 +188,14 @@ public final class SignalPowerExtractor {
             plot.save(waveFormPlot);
         } catch (final IOException e) {
             LOG.log(Level.SEVERE, "Failed to write audio file.", e);
+        } finally {
+            try {
+                file.close();
+            } catch (final IOException e) {
+                LOG.log(Level.SEVERE, "Failed to close audio file.", e);
+            } catch (final NullPointerException e) {
+                LOG.log(Level.SEVERE, "Failed to initialize audio file stream.", e);
+            }
         }
     }
 
