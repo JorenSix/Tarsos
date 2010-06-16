@@ -43,20 +43,20 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 
     /**
      * Overlap defines how much two audio buffers following each other should
-     * overlap (in samples).
+     * overlap (in samples). 75% overlap is advised in the MPM article.
      */
-    public static final int OVERLAP = 512;
+    public static final int OVERLAP = 768;
 
     /**
      * Defines the relative size the chosen peak (pitch) has. 0.93 means: choose
      * the first peak that is higher than 93% of the highest peak detected. 93%
      * is the default value used in the Tartini user interface.
      */
-    private static double CUTOFF = 0.93;
+    private static final double CUTOFF = 0.93;
     /**
      * For performance reasons, peaks below this cutoff are not even considered.
      */
-    private static double SMALL_CUTOFF = 0.5;
+    private static final double SMALL_CUTOFF = 0.5;
 
     /**
      * The audio sample rate. Most audio has a sample rate of 44.1kHz.
@@ -89,7 +89,7 @@ public final class McLeodPitchMethod implements PurePitchDetector {
      * A list of estimates of the amplitudes corresponding with the period
      * estimates.
      */
-    private final List<Float> amplitudeEstimates = new ArrayList<Float>();
+    private final List<Float> ampEstimates = new ArrayList<Float>();
 
     /**
      * Initializes the normalized square difference value array and stores the
@@ -112,12 +112,12 @@ public final class McLeodPitchMethod implements PurePitchDetector {
     private void normalizedSquareDifference(final float[] audioBuffer) {
         for (int tau = 0; tau < audioBuffer.length; tau++) {
             float acf = 0;
-            float m = 0;
+            float divisorM = 0;
             for (int i = 0; i < audioBuffer.length - tau; i++) {
                 acf += audioBuffer[i] * audioBuffer[i + tau];
-                m += audioBuffer[i] * audioBuffer[i] + audioBuffer[i + tau] * audioBuffer[i + tau];
+                divisorM += audioBuffer[i] * audioBuffer[i] + audioBuffer[i + tau] * audioBuffer[i + tau];
             }
-            nsdf[tau] = 2 * acf / m;
+            nsdf[tau] = 2 * acf / divisorM;
         }
     }
 
@@ -132,7 +132,7 @@ public final class McLeodPitchMethod implements PurePitchDetector {
         //0. Clear previous results (should be faster than initializing again?)
         maxPositions.clear();
         periodEstimates.clear();
-        amplitudeEstimates.clear();
+        ampEstimates.clear();
 
         // 1. Calculate the normalized square difference for each Tau value.
         normalizedSquareDifference(audioBuffer);
@@ -146,7 +146,7 @@ public final class McLeodPitchMethod implements PurePitchDetector {
                 // calculates turningPointX and Y
                 prabolicInterpolation(tau);
                 // store the turning points
-                amplitudeEstimates.add(turningPointY);
+                ampEstimates.add(turningPointY);
                 periodEstimates.add(turningPointX);
                 // remember the highest amplitude
                 highestAmplitude = Math.max(highestAmplitude, turningPointY);
@@ -164,8 +164,8 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 
             // find first period above or equal to cutoff
             int periodIndex = 0;
-            for (int i = 0; i < amplitudeEstimates.size(); i++) {
-                if (amplitudeEstimates.get(i) >= cutoff) {
+            for (int i = 0; i < ampEstimates.size(); i++) {
+                if (ampEstimates.get(i) >= cutoff) {
                     periodIndex = i;
                     break;
                 }
