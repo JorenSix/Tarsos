@@ -131,7 +131,7 @@ public final class PlayAlong {
 
             MidiDevice virtualMidiInputDevice;
             if (device == -1) {
-                virtualMidiInputDevice = Tarsos.chooseDevice(true, false);
+                virtualMidiInputDevice = Tarsos.chooseMidiDevice(true, false);
             } else {
                 final Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[device];
                 virtualMidiInputDevice = MidiSystem.getMidiDevice(midiDeviceInfo);

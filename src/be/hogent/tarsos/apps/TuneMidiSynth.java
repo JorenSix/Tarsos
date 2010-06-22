@@ -119,7 +119,7 @@ public final class TuneMidiSynth extends AbstractTarsosApp {
             final Info deviceInfo = MidiSystem.getMidiDeviceInfo()[midiDeviceIndex];
             midiDevice = MidiSystem.getMidiDevice(deviceInfo);
         } else {
-            midiDevice = Tarsos.chooseDevice(inputDevice, outputDevice);
+            midiDevice = Tarsos.chooseMidiDevice(inputDevice, outputDevice);
         }
         return midiDevice;
     }

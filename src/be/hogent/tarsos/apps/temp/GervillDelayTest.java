@@ -17,10 +17,10 @@ public final class GervillDelayTest {
 
     public static void main(String[] args) throws Exception {
         Receiver recv;
-        MidiDevice outputDevice = Tarsos.chooseDevice(false, true);
+        MidiDevice outputDevice = Tarsos.chooseMidiDevice(false, true);
         outputDevice.open();
         recv = outputDevice.getReceiver();
-        MidiDevice midiInputDevice = Tarsos.chooseDevice(true, false);
+        MidiDevice midiInputDevice = Tarsos.chooseMidiDevice(true, false);
         midiInputDevice.open();
         Transmitter midiInputTransmitter = midiInputDevice.getTransmitter();
 

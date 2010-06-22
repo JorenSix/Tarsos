@@ -18,6 +18,8 @@ import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.MidiDevice.Info;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Mixer;
 
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.util.Configuration;
@@ -169,7 +171,7 @@ public final class Tarsos {
      *            synthesizer.
      * @return the chosen MIDI device
      */
-    public static MidiDevice chooseDevice(final boolean inputDevice, final boolean outputDevice) {
+    public static MidiDevice chooseMidiDevice(final boolean inputDevice, final boolean outputDevice) {
         MidiDevice device = null;
         try {
             // choose MIDI input device
@@ -185,23 +187,53 @@ public final class Tarsos {
             if ((device.getMaxTransmitters() == 0 == inputDevice)
                     && (device.getMaxReceivers() == 0 == outputDevice)) {
                 println("Invalid choise, please try again");
-                device = chooseDevice(inputDevice, outputDevice);
+                device = chooseMidiDevice(inputDevice, outputDevice);
             }
         } catch (final NumberFormatException e) {
             println("Invalid number, please try again");
-            device = chooseDevice(inputDevice, outputDevice);
+            device = chooseMidiDevice(inputDevice, outputDevice);
         } catch (final IOException e) {
             Logger.getLogger(Tarsos.class.getName()).log(Level.SEVERE,
                     "Exception while reading from STD IN.", e);
         } catch (final MidiUnavailableException e) {
             println("The device is not available ( " + e.getMessage()
                     + " ), please choose another device.");
-            device = chooseDevice(inputDevice, outputDevice);
+            device = chooseMidiDevice(inputDevice, outputDevice);
         } catch (final ArrayIndexOutOfBoundsException e) {
             println("Number out of bounds, please try again");
-            device = chooseDevice(inputDevice, outputDevice);
+            device = chooseMidiDevice(inputDevice, outputDevice);
         }
         return device;
+    }
+
+    /**
+     * Choose a Mixer device using CLI.
+     */
+    public static Mixer chooseMixerDevice() {
+        Mixer mixer = null;
+        try {
+            final Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+            for (int i = 0; i < mixers.length; i++) {
+                final javax.sound.sampled.Mixer.Info mixerinfo = mixers[i];
+                if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0) {
+                    Tarsos.println(i + " " + mixerinfo.toString());
+                }
+            }
+            Tarsos.println("Choose the Mixer device: ");
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            final int deviceIndex = Integer.parseInt(reader.readLine());
+            mixer = AudioSystem.getMixer(mixers[deviceIndex]);
+        } catch (final NumberFormatException e) {
+            Tarsos.println("Invalid number, please try again");
+            mixer = chooseMixerDevice();
+        } catch (final ArrayIndexOutOfBoundsException e) {
+            println("Number out of bounds, please try again");
+            mixer = chooseMixerDevice();
+        } catch (final IOException e) {
+            Logger.getLogger(Tarsos.class.getName()).log(Level.SEVERE,
+                    "Exception while reading from STD IN.", e);
+        }
+        return mixer;
     }
 
     /**
