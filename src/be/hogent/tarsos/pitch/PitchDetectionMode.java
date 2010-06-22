@@ -43,7 +43,12 @@ public enum PitchDetectionMode {
     /**
      * The pure java MPM (Tartini pitch tracker) implementation of Tarsos.
      */
-    TARSOS_MPM("tarsos_yin");
+    TARSOS_MPM("tarsos_yin"),
+
+    /**
+     * The pure java Meta pitch tracker, uses MPM and YIN in the background.
+     */
+    TARSOS_META("tarsos_meta");
 
 
     /**
