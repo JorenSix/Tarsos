@@ -39,24 +39,29 @@ public final class McLeodPitchMethod implements PurePitchDetector {
     /**
      * The expected size of an audio buffer (in samples).
      */
-    public static final int BUFFER_SIZE = 1024;
+    public static final int DEFAULT_BUFFER_SIZE = 1024;
 
     /**
      * Overlap defines how much two audio buffers following each other should
      * overlap (in samples). 75% overlap is advised in the MPM article.
      */
-    public static final int OVERLAP = 768;
+    public static final int DEFAULT_OVERLAP = 768;
 
     /**
      * Defines the relative size the chosen peak (pitch) has. 0.93 means: choose
      * the first peak that is higher than 93% of the highest peak detected. 93%
      * is the default value used in the Tartini user interface.
      */
-    private static final double CUTOFF = 0.93;
+    private static final double DEFAULT_CUTOFF = 0.93;
     /**
      * For performance reasons, peaks below this cutoff are not even considered.
      */
     private static final double SMALL_CUTOFF = 0.5;
+
+    /**
+     * Defines the relative size the chosen peak (pitch) has.
+     */
+    private final double cutoff;
 
     /**
      * The audio sample rate. Most audio has a sample rate of 44.1kHz.
@@ -70,7 +75,7 @@ public final class McLeodPitchMethod implements PurePitchDetector {
     private final float[] nsdf;
 
     /**
-     * The x and y coordinate of the top of the curve.
+     * The x and y coordinate of the top of the curve (nsdf).
      */
     private float turningPointX, turningPointY;
 
@@ -98,8 +103,17 @@ public final class McLeodPitchMethod implements PurePitchDetector {
      *            The sample rate of the audio to check.
      */
     public McLeodPitchMethod(final float audioSampleRate) {
+        this(audioSampleRate, DEFAULT_BUFFER_SIZE, DEFAULT_CUTOFF);
+    }
+
+    public McLeodPitchMethod(final float audioSampleRate, final int audioBufferSize) {
+        this(audioSampleRate, audioBufferSize, DEFAULT_CUTOFF);
+    }
+
+    public McLeodPitchMethod(final float audioSampleRate, final int audioBufferSize, final double cutoffMPM) {
         this.sampleRate = audioSampleRate;
-        nsdf = new float[BUFFER_SIZE];
+        nsdf = new float[audioBufferSize];
+        this.cutoff = cutoffMPM;
     }
 
     /**
@@ -127,7 +141,7 @@ public final class McLeodPitchMethod implements PurePitchDetector {
      * @see be.hogent.tarsos.pitch.pure.PurePitchDetector#getPitch(float[])
      */
     public float getPitch(final float[] audioBuffer) {
-        final float pitch;
+        float pitch;
 
         //0. Clear previous results (should be faster than initializing again?)
         maxPositions.clear();
@@ -160,12 +174,12 @@ public final class McLeodPitchMethod implements PurePitchDetector {
             // use the overall maximum to calculate a cutoff.
             // The cutoff value is based on the highest value and a relative
             // threshold.
-            final double cutoff = CUTOFF * highestAmplitude;
+            final double actualCutoff = cutoff * highestAmplitude;
 
             // find first period above or equal to cutoff
             int periodIndex = 0;
             for (int i = 0; i < ampEstimates.size(); i++) {
-                if (ampEstimates.get(i) >= cutoff) {
+                if (ampEstimates.get(i) >= actualCutoff) {
                     periodIndex = i;
                     break;
                 }
@@ -228,7 +242,6 @@ public final class McLeodPitchMethod implements PurePitchDetector {
     }
 
 
-
     /**
      * <p>
      * Implementation based on the GPL'ED code of <a
@@ -262,7 +275,6 @@ public final class McLeodPitchMethod implements PurePitchDetector {
     private void peakPicking() {
 
         int pos = 0;
-
         int curMaxPos = 0;
 
         // find the first negative zero crossing

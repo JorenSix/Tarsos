@@ -41,14 +41,14 @@ public final class TarsosPitchDetection implements PitchDetector {
     @Override
     public void executePitchDetection() {
         try {
-            processFile(file.path(), new DetectedPitchHandler() {
+            processFile(file.path(), detectionMode, new DetectedPitchHandler() {
                 @Override
                 public void handleDetectedPitch(final float time, final float pitch) {
                     final long start = (long) (time * 1000);
                     final Sample s = pitch == -1 ? new Sample(start) : new Sample(start, pitch);
                     samples.add(s);
                 }
-            }, detectionMode);
+            });
         } catch (final UnsupportedAudioFileException e) {
             LOG.log(Level.SEVERE, "Unsupported audio file: " + file.basename() + " " + e.getMessage(), e);
         } catch (final IOException e) {
@@ -62,8 +62,10 @@ public final class TarsosPitchDetection implements PitchDetector {
         final String name;
         if (PitchDetectionMode.TARSOS_MPM == detectionMode) {
             name = "tarsos_mpm";
-        } else {
+        } else if (PitchDetectionMode.TARSOS_YIN == detectionMode) {
             name = "tarsos_yin";
+        } else {
+            name = "tarsos_meta";
         }
         return name;
     }
@@ -86,8 +88,8 @@ public final class TarsosPitchDetection implements PitchDetector {
      * @throws IOException
      *             If there is an error reading the file.
      */
-    public static void processFile(final String fileName, final DetectedPitchHandler detectedPitchHandler,
-            final PitchDetectionMode detectionMode)
+    public static void processFile(final String fileName, final PitchDetectionMode detectionMode,
+            final DetectedPitchHandler detectedPitchHandler)
     throws UnsupportedAudioFileException, IOException {
         final AudioInputStream ais = AudioSystem.getAudioInputStream(new File(fileName));
         final AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
@@ -129,12 +131,16 @@ public final class TarsosPitchDetection implements PitchDetector {
 
         if (PitchDetectionMode.TARSOS_MPM == detectionMode) {
             pureDetector = new McLeodPitchMethod(sampleRate);
-            bufferSize = McLeodPitchMethod.BUFFER_SIZE;
-            overlapSize = McLeodPitchMethod.OVERLAP;
-        } else {
+            bufferSize = McLeodPitchMethod.DEFAULT_BUFFER_SIZE;
+            overlapSize = McLeodPitchMethod.DEFAULT_OVERLAP;
+        } else if (PitchDetectionMode.TARSOS_YIN == detectionMode) {
             pureDetector = new Yin(sampleRate);
             bufferSize = Yin.BUFFER_SIZE;
             overlapSize = Yin.OVERLAP;
+        } else {
+            bufferSize = Yin.BUFFER_SIZE;
+            overlapSize = Yin.OVERLAP;
+            pureDetector = new MetaPitchDetector(sampleRate);
         }
 
         final int bufferStepSize = bufferSize - overlapSize;
@@ -196,8 +202,8 @@ public final class TarsosPitchDetection implements PitchDetector {
 
         final int bufferStepSize = audioBuffer.length - overlap;
 
-        for (int i = 0; i < bufferStepSize; i++) {
-            audioBuffer[i] = audioBuffer[i + overlap];
+        for (int i = 0; i < overlap; i++) {
+            audioBuffer[i] = audioBuffer[i + bufferStepSize];
         }
 
         return audioInputStream.read(audioBuffer, overlap, bufferStepSize) != -1;
@@ -206,7 +212,8 @@ public final class TarsosPitchDetection implements PitchDetector {
     public static void main(final String... args) throws UnsupportedAudioFileException, IOException {
         final StopWatch start = new StopWatch();
         final SimplePlot p = new SimplePlot("Pitch tracking");
-        processFile("../Tarsos/audio/pitch_check/flute.novib.mf.C5B5.wav", new DetectedPitchHandler() {
+        processFile("../Tarsos/audio/pitch_check/flute.novib.mf.C5B5.wav", PitchDetectionMode.TARSOS_MPM,
+                new DetectedPitchHandler() {
             @Override
             public void handleDetectedPitch(final float time, final float pitch) {
                 Tarsos.println(time + "\t" + pitch);
@@ -216,7 +223,7 @@ public final class TarsosPitchDetection implements PitchDetector {
                 }
                 p.addData(time, plotPitch);
             }
-        }, PitchDetectionMode.TARSOS_MPM);
+        });
         p.save();
         Tarsos.println(" " + start.ticksPassed() / 1000.0);
     }
