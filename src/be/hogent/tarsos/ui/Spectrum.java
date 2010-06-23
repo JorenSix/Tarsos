@@ -93,7 +93,7 @@ public final class Spectrum extends JFrame implements AudioProcessor {
 
         for (int i = 0; i < amplitudes.length / 2; i++) {
             bufferGraphics.setColor(Color.BLUE);
-            final int height = (int) (Math.log1p(amplitudes[i]) * 50);
+            final int height = (int) (Math.log1p(amplitudes[i]) * 80);
             hightWaterMarks[i] = Math.max(height, hightWaterMarks[i]);
 
             bufferGraphics.fillRect(i * barWidth + barWidth, barMaxHeight - height, barWidth,
@@ -103,13 +103,13 @@ public final class Spectrum extends JFrame implements AudioProcessor {
                     barWidth, 2);
             hightWaterMarks[i] = hightWaterMarks[i] - 1;
         }
-        // bufferGraphics.setColor(Color.WHITE);
+
         repaint();
     }
 
     public static void main(final String... args) throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
         final AudioFile f = new AudioFile("audio/MR.1975.26.43-4.wav");
-        new Spectrum(f, 32);
+        new Spectrum(f, 256);
     }
 }

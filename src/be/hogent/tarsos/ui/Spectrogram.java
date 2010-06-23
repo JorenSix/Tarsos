@@ -7,19 +7,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.ShortMessage;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
@@ -30,9 +23,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import be.hogent.tarsos.apps.Tarsos;
-import be.hogent.tarsos.pitch.Pitch;
 import be.hogent.tarsos.pitch.PitchConverter;
-import be.hogent.tarsos.pitch.PitchUnit;
 import be.hogent.tarsos.util.FFT;
 
 import com.sun.media.sound.AudioFloatInputStream;
@@ -68,26 +59,12 @@ public final class Spectrogram extends JComponent {
     AudioFloatInputStream afis;
     double sampleRate;
     private final FFT fft;
-    private final MidiDevice outputDevice;
-    int currentKeyDown;
+
     double[] amplitudes = new double[H];
     String lastDetectedNote = "";
 
-    public Spectrogram(final int mixerIndex) throws UnsupportedAudioFileException, IOException,
+    public Spectrogram(final Mixer mixer) throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
-
-        outputDevice = Tarsos.chooseDevice(false, true);
-        try {
-            outputDevice.open();
-            final ShortMessage sm = new ShortMessage();
-            sm.setMessage(ShortMessage.PROGRAM_CHANGE, VirtualKeyboard.CHANNEL, 72, 0);
-            outputDevice.getReceiver().send(sm, -1);
-        } catch (final MidiUnavailableException e) {
-            // Unable to open midi device
-            e.printStackTrace();
-        } catch (final InvalidMidiDataException e) {
-            e.printStackTrace();
-        }
 
         // the image shown on even runs trough the x axis
         imageEven = new BufferedImage(W, H, BufferedImage.TYPE_INT_RGB);
@@ -100,8 +77,6 @@ public final class Spectrogram extends JComponent {
 
         sampleRate = 44100;
 
-        final javax.sound.sampled.Mixer.Info selected = AudioSystem.getMixerInfo()[mixerIndex];
-        final Mixer mixer = AudioSystem.getMixer(selected);
         final AudioFormat format = new AudioFormat((float) sampleRate, 16, 1, true, false);
         final DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
         final TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
@@ -172,14 +147,13 @@ public final class Spectrogram extends JComponent {
         int pitchIndex = -1;
 
         final boolean bufferRead = false; // Yin.slideBuffer(afis,
-                                          // audioDataBuffer,
-                                          // audioDataBuffer.length - 1024);
+        // audioDataBuffer,
+        // audioDataBuffer.length - 1024);
         if (bufferRead) {
 
-            final float pitch = detectPitch();
+            final float pitch = 0.0f;
             if (pitch != -1) {
                 pitchIndex = frequencyToBin(pitch);
-                pitchToMidiOut(pitch);
             }
 
             final float[] transformBuffer = new float[audioDataBuffer.length * 2];
@@ -225,78 +199,12 @@ public final class Spectrogram extends JComponent {
         repaint();
     }
 
-    /**
-     * Sends a NOTE_ON or NOTE_OFF message on the requested key.
-     * 
-     * @param midiKey
-     *            The midi key to send the message for
-     *            [0,VirtualKeyboard.NUMBER_OF_MIDI_KEYS[
-     * @param sendOnMessage
-     *            <code>true</code> for NOTE_ON messages, <code>false</code> for
-     *            NOTE_OFF
-     */
-    private void sendNoteMessage(final int midiKey, final boolean sendOnMessage) {
-        // do not send note on messages to pressed keys
-        if (sendOnMessage && currentKeyDown == midiKey) {
-            return;
-        }
-        // do not send note off messages to keys that are not pressed
-        if (!sendOnMessage && currentKeyDown != midiKey) {
-            return;
-        }
-
-        try {
-            final ShortMessage sm = new ShortMessage();
-            final int command = sendOnMessage ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
-            sm.setMessage(command, VirtualKeyboard.CHANNEL, midiKey, 125);
-            outputDevice.getReceiver().send(sm, -1);
-        } catch (final InvalidMidiDataException e1) {
-            e1.printStackTrace();
-        } catch (final MidiUnavailableException e) {
-            e.printStackTrace();
-        }
-        // mark key correctly
-        currentKeyDown = sendOnMessage ? midiKey : -1;
-    }
-
-    private void pitchToMidiOut(final double pitch) {
-        final double midiCentValue = PitchConverter.hertzToMidiCent(pitch);
-        int newKeyDown = -1;
-        // 'musical' pitch detected ?
-        if (Math.abs(midiCentValue - (int) midiCentValue) < 0.3 && midiCentValue < 128 && midiCentValue >= 0) {
-            newKeyDown = (int) midiCentValue;
-            lastDetectedNote = "Name: " + Pitch.getInstance(PitchUnit.HERTZ, pitch).noteName()
-            + "\nFrequency: " + ((int) pitch) + "Hz \t" + " MIDI note:"
-            + PitchConverter.hertzToMidiCent(pitch);
-        }
-        // if no pitch detected
-        // send note off
-        if (newKeyDown == -1 && currentKeyDown != -1) {
-            sendNoteMessage(currentKeyDown, false);
-        } else if (currentKeyDown != newKeyDown) {
-            // if different pitch than previous detected send note off and on
-            if (currentKeyDown != -1) {
-                sendNoteMessage(currentKeyDown, false);
-            }
-            sendNoteMessage(newKeyDown, true);
-            currentKeyDown = newKeyDown;
-        }
-    }
-
-    private final float[] yinBuffer = new float[1024];
-
-    private float detectPitch() {
-        for (int i = 0; i < 1024; i++) {
-            yinBuffer[i] = audioDataBuffer[i];
-        }
-        return 0.0f;// Yin.processBuffer(yinBuffer, (float) sampleRate);
-    }
 
     public static void main(final String[] args) throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
         final JPanel panel = new JPanel(new BorderLayout());
 
-        final Spectrogram spectogram = new Spectrogram(chooseDevice());
+        final Spectrogram spectogram = new Spectrogram(Tarsos.chooseMixerDevice());
         spectogram.setPreferredSize(new Dimension(W, H / 2));
         panel.add(spectogram, BorderLayout.CENTER);
         final JFrame frame = new JFrame("Spectrogram");
@@ -309,29 +217,5 @@ public final class Spectrogram extends JComponent {
         frame.setVisible(true);
     }
 
-    /**
-     * Choose a Mixer device using CLI.
-     */
-    public static int chooseDevice() {
-        try {
-            final javax.sound.sampled.Mixer.Info[] mixers = AudioSystem.getMixerInfo();
-            for (int i = 0; i < mixers.length; i++) {
-                final javax.sound.sampled.Mixer.Info mixerinfo = mixers[i];
-                if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0) {
-                    Tarsos.println(i + " " + mixerinfo.toString());
-                }
-            }
-            // choose MIDI input device
-            Tarsos.println("Choose the Mixer device: ");
-            final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            final int deviceIndex = Integer.parseInt(br.readLine());
-            return deviceIndex;
-        } catch (final NumberFormatException e) {
-            Tarsos.println("Invalid number, please try again");
-            return chooseDevice();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
+
 }
