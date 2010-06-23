@@ -30,7 +30,6 @@ public final class RealTimeAudioProcessor implements Runnable {
      */
     private static final Logger LOG = Logger.getLogger(RealTimeAudioProcessor.class.getName());
 
-
     /**
      * The audio stream (in bytes), conversion to float happens at the last
      * moment.
@@ -87,15 +86,17 @@ public final class RealTimeAudioProcessor implements Runnable {
      */
     public void addAudioProcessor(final AudioProcessor audioProcessor) {
         audioProcessors.add(audioProcessor);
+        LOG.fine("Added an audioprocessor to the list of processors: " + audioProcessor.toString());
     }
 
     @Override
     public void run() {
         try {
             final AudioFormat format = audioInputStream.getFormat();
+
             final AudioFloatConverter converter = AudioFloatConverter.getConverter(format);
-            // 4 bytes for a float:
-            final byte[] audioByteBuffer = new byte[audioBuffer.length * 2 * 2];
+            // bytes for a float:
+            final byte[] audioByteBuffer = new byte[audioBuffer.length * format.getSampleSizeInBits() / 8];
             int bytesRead;
             bytesRead = audioInputStream.read(audioByteBuffer);
             while (bytesRead != -1) {
@@ -119,6 +120,7 @@ public final class RealTimeAudioProcessor implements Runnable {
                 }
                 bytesRead = audioInputStream.read(audioByteBuffer);
             }
+            line.close();
         } catch (final IOException e) {
             LOG.log(Level.SEVERE, "Error while reading data from audio stream.", e);
         }
