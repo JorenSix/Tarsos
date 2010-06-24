@@ -69,10 +69,16 @@ public final class RealTimeAudioProcessor implements Runnable {
     public RealTimeAudioProcessor(final String fileName, final int audioBufferSize)
     throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
+        this(AudioSystem.getAudioInputStream(new File(fileName)), audioBufferSize);
+    }
+
+    public RealTimeAudioProcessor(final AudioInputStream stream, final int audioBufferSize)
+    throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+
         audioBuffer = new float[audioBufferSize];
         audioProcessors = new ArrayList<AudioProcessor>();
+        audioInputStream = stream;
 
-        audioInputStream = AudioSystem.getAudioInputStream(new File(fileName));
         final AudioFormat format = audioInputStream.getFormat();
         final DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
         line = (SourceDataLine) AudioSystem.getLine(info);
@@ -101,6 +107,9 @@ public final class RealTimeAudioProcessor implements Runnable {
             bytesRead = audioInputStream.read(audioByteBuffer);
             while (bytesRead != -1) {
                 converter.toFloatArray(audioByteBuffer, audioBuffer);
+                // converter.toFloatArray(in_buff, out_buff, out_offset,
+                // out_len)
+
                 // The variable line is the Java Sound object that actually
                 // makes the sound.
                 // The write method on line is interesting because it blocks
@@ -120,6 +129,9 @@ public final class RealTimeAudioProcessor implements Runnable {
                 }
                 bytesRead = audioInputStream.read(audioByteBuffer);
             }
+            for (final AudioProcessor processor : audioProcessors) {
+                processor.processingFinished();
+            }
             line.close();
         } catch (final IOException e) {
             LOG.log(Level.SEVERE, "Error while reading data from audio stream.", e);
@@ -138,5 +150,10 @@ public final class RealTimeAudioProcessor implements Runnable {
          *            The buffer containing the audio information using floats.
          */
         void proccess(final float[] audioBuffer);
+
+        /**
+         * Notify the AudioProcessor that no more data is available.
+         */
+        void processingFinished();
     }
 }

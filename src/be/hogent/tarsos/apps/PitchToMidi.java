@@ -7,12 +7,14 @@ import java.io.IOException;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
 import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Track;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.DataLine;
@@ -21,23 +23,54 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.TargetDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import be.hogent.tarsos.pitch.Pitch;
+import be.hogent.tarsos.pitch.PitchConverter;
 import be.hogent.tarsos.pitch.PitchUnit;
-import be.hogent.tarsos.pitch.pure.MetaPitchDetector;
 import be.hogent.tarsos.pitch.pure.PurePitchDetector;
+import be.hogent.tarsos.pitch.pure.Yin;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FFT;
+import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.RealTimeAudioProcessor;
+import be.hogent.tarsos.util.SignalPowerExtractor;
 import be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor;
 
 /**
  * @author Joren Six
  */
-public class PitchToMidi extends AbstractTarsosApp implements AudioProcessor {
+public class PitchToMidi extends AbstractTarsosApp {
 
-    PurePitchDetector pure;
-    Receiver receiver;
-    FFT fft;
+    /**
+     * The number of MIDI keys.
+     */
+    private static final int MIDI_NUMBERS = 128;
+
+    private Receiver receiver;
+    private Sequence sequence;
+    private Sequencer sequencer;
+
+    private final boolean[] keyOn;
+    private final boolean[] previousKeys;
+    private final int[] velocities;
+
+    int bufferCount = 0;
+
+    private boolean toFile;
+
+    private Track track;
+
+    String outputMidi;
+
+
+    public PitchToMidi() {
+        track = null;
+        keyOn = new boolean[MIDI_NUMBERS];
+        velocities = new int[MIDI_NUMBERS];
+        previousKeys = new boolean[MIDI_NUMBERS];
+    }
 
     /*
      * (non-Javadoc)
@@ -52,7 +85,6 @@ public class PitchToMidi extends AbstractTarsosApp implements AudioProcessor {
 
     /*
      * (non-Javadoc)
-     * 
      * @see be.hogent.tarsos.apps.AbstractTarsosApp#name()
      */
     @Override
@@ -60,144 +92,265 @@ public class PitchToMidi extends AbstractTarsosApp implements AudioProcessor {
         return "pitch_to_midi";
     }
 
-    Sequence sequence;
-    Sequencer sequencer;
 
     /*
      * (non-Javadoc)
-     * 
      * @see be.hogent.tarsos.apps.AbstractTarsosApp#run(java.lang.String[])
      */
     @Override
     public void run(final String... args) {
 
-        final float samplingRate = 44100.0f;
+        final OptionParser parser = new OptionParser();
+        toFile = false;
+        boolean fromFile = false;
 
-        pure = new MetaPitchDetector(samplingRate);
+        String inputAudio = null;
 
+        final OptionSpec spec = parser.accepts("pitch");
 
+        final OptionSet options = parse(args, parser, this);
 
-        try {
-
-            final boolean toFile = true;
-            if (toFile) {
-                sequencer = MidiSystem.getSequencer();
-                sequencer.open();
-                receiver = sequencer.getReceiver();
-                sequence = new Sequence(Sequence.PPQ, 20, 1);
-                sequencer.setSequence(sequence);
-                sequencer.recordDisable(sequence.getTracks()[0]);
-
-                sequencer.startRecording();
+        if (options.nonOptionArguments().size() == 1) {
+            final String fileName = options.nonOptionArguments().get(0);
+            if (FileUtils.extension(fileName).toUpperCase().contains("MID")) {
+                outputMidi = fileName;
+                toFile = true;
             } else {
-                final MidiDevice synth = Tarsos.chooseMidiDevice(false,true);
-                synth.open();
-                receiver = synth.getReceiver();
+                inputAudio = fileName;
+                fromFile = true;
             }
-
-            final boolean fromFile = true;
-            final RealTimeAudioProcessor proc;
-            if (!fromFile) {
-                final Mixer mixer = Tarsos.chooseMixerDevice();
-                final AudioFormat format = new AudioFormat(samplingRate, 16, 1,true, false);
-                final DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
-                final TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
-                final int numberOfSamples = (int) (0.1 * samplingRate);
-                line.open(format, numberOfSamples);
-                line.start();
-                final AudioInputStream stream = new AudioInputStream(line);
-                proc = new RealTimeAudioProcessor(stream, 2048);
-            }else{
-                final String path = new AudioFile("spraak_kort.wav").transcodedPath();
-                proc = new RealTimeAudioProcessor(path, 2048);
+        } else if (options.nonOptionArguments().size() == 2) {
+            String fileName = options.nonOptionArguments().get(0);
+            if (FileUtils.extension(fileName).toUpperCase().contains("MID")) {
+                outputMidi = fileName;
+                toFile = true;
+            } else {
+                inputAudio = fileName;
+                fromFile = true;
             }
-            proc.addAudioProcessor(this);
+            fileName = options.nonOptionArguments().get(1);
+            if (FileUtils.extension(fileName).toUpperCase().contains("MID")) {
+                outputMidi = fileName;
+                toFile = true;
+            } else {
+                inputAudio = fileName;
+                fromFile = true;
+            }
+        }
 
-            fft = new FFT(1024);
-            keyOn = new boolean[128];
-            velocities = new int[128];
-            previousKeys = new boolean[128];
-            new Thread(proc).start();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                PitchToMidi.this.cleanup();
+            }
+        });
+
+        if (isHelpOptionSet(options)) {
+            printHelp(parser);
+        } else {
+            final boolean doCompleteFFT = !options.has(spec);
+            try {
+                if (toFile) {
+                    sequencer = MidiSystem.getSequencer();
+                    sequence = new Sequence(Sequence.PPQ, 40, 1);
+
+                    sequencer.setSequence(sequence);
+                    sequencer.open();
+                    track = sequence.getTracks()[0];
+                    sequencer.recordEnable(track, 1);
+                    sequencer.startRecording();
+
+                    receiver = sequencer.getReceiver();
+                } else {
+                    final MidiDevice synth = Tarsos.chooseMidiDevice(false, true);
+                    synth.open();
+                    receiver = synth.getReceiver();
+                }
+
+                final int samplesPerBuffer;
+
+                final AudioProcessor processor;
+                final float samplingRate = 44100.0f;
+                if (doCompleteFFT) {
+                    samplesPerBuffer = 2048;
+                    processor = new FFTAudioProcessor(samplingRate);
+                } else {
+                    samplesPerBuffer = 1024;
+                    processor = new PitchAudioProcessor(samplingRate);
+                }
 
 
+                final RealTimeAudioProcessor proc;
+                if (!fromFile) {
+                    final Mixer mixer = Tarsos.chooseMixerDevice();
+                    final AudioFormat format = new AudioFormat(samplingRate, 16, 1, true, false);
+                    final DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
+                    final TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
+                    final int numberOfSamples = (int) (0.1 * samplingRate);
+                    line.open(format, numberOfSamples);
+                    line.start();
+                    final AudioInputStream stream = new AudioInputStream(line);
+                    proc = new RealTimeAudioProcessor(stream, samplesPerBuffer);
+                } else {
+                    final String path = new AudioFile(inputAudio).transcodedPath();
+                    proc = new RealTimeAudioProcessor(path, samplesPerBuffer);
+                }
 
-        } catch (final LineUnavailableException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final UnsupportedAudioFileException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final MidiUnavailableException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final InvalidMidiDataException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+                proc.addAudioProcessor(processor);
+
+                final Thread thread = new Thread(proc);
+                thread.start();
+                thread.join();
+            } catch (final LineUnavailableException e) {
+                e.printStackTrace();
+            } catch (final UnsupportedAudioFileException e) {
+                e.printStackTrace();
+            } catch (final IOException e) {
+                e.printStackTrace();
+            } catch (final MidiUnavailableException e) {
+                e.printStackTrace();
+            } catch (final InvalidMidiDataException e) {
+                e.printStackTrace();
+            } catch (final InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    float maxAmpl = 1;
-    float minAmpl = 0;
-    int i = 0;
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#proccess(
-     * float[])
-     */
-    @Override
-    public void proccess(final float[] audioBuffer) {
-        /*
-         * final float pitch = pure.getPitch(audioBuffer); final double
-         * midiCentValue = PitchConverter.hertzToMidiCent(pitch); // 'musical'
-         * pitch detected ? if (Math.abs(midiCentValue - (int) midiCentValue) <
-         * 0.3 && midiCentValue < 128 && midiCentValue >= 0) { final String
-         * lastDetectedNote = "Name: " + Pitch.getInstance(PitchUnit.HERTZ,
-         * pitch).noteName() + "\t Frequency: " + ((int) pitch) + "Hz \t" +
-         * " MIDI note:" + PitchConverter.hertzToMidiCent(pitch);
-         * Tarsos.println(lastDetectedNote); }
-         */
-        fft.forwardTransform(audioBuffer);
-        final float[] amplitudes = new float[1024];
-        fft.modulus(audioBuffer, amplitudes);
-        for (int i = 0; i < amplitudes.length; i++) {
-            final float ampl = (float) Math.log1p(amplitudes[i]);
-            amplitudes[i] = ampl;
-            maxAmpl = Math.max(maxAmpl, ampl);
-            minAmpl = Math.min(minAmpl, ampl);
-        }
-        maxAmpl = maxAmpl - minAmpl;
-        for (int i = 0; i < amplitudes.length; i++) {
-            amplitudes[i] = 127 * (amplitudes[i] - minAmpl) / maxAmpl;
-        }
+    private class FFTAudioProcessor implements AudioProcessor {
+        private final int SIZE = 1024;
 
         // piano keys go from MIDI number 21 to 108
-        for (int i = 25; i < 108; i++) {
-            final Pitch pitchObj = Pitch.getInstance(PitchUnit.MIDI_KEY, i);
-            final double pitchInHz = pitchObj.getPitch(PitchUnit.HERTZ);
-            final int bin = (int) (pitchInHz * 1024.0 / 44100.0);
-            keyOn[i] = amplitudes[bin] > 15;
-            velocities[i] = (int) amplitudes[bin];
+        private final int MAX_MIDI_VELOCITY = 108;
+        private final int MIN_MIDI_VELOCITY = 15;
+        private final int START_MIDI_KEY = 25;
+        private final int STOP_MIDI_KEY = 108;
+
+        float maxAmpl = 1;
+        float minAmpl = 0;
+        private final FFT fft;
+
+        public FFTAudioProcessor(final float sampleRate) {
+            fft = new FFT(SIZE);
         }
 
-        sendNoteMessages();
+        /*
+         * (non-Javadoc)
+         * @see
+         * be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#proccess
+         * (float[])
+         */
+        @Override
+        public void proccess(final float[] audioBuffer) {
+            fft.forwardTransform(audioBuffer);
+            final float[] amplitudes = new float[SIZE];
+            fft.modulus(audioBuffer, amplitudes);
+            for (int i = 0; i < amplitudes.length; i++) {
+                final float ampl = (float) Math.log1p(amplitudes[i]);
+                amplitudes[i] = ampl;
+                maxAmpl = Math.max(maxAmpl, ampl);
+                minAmpl = Math.min(minAmpl, ampl);
+            }
+            maxAmpl = maxAmpl - minAmpl;
+            for (int i = 0; i < amplitudes.length; i++) {
+                amplitudes[i] = MAX_MIDI_VELOCITY * (amplitudes[i] - minAmpl) / maxAmpl;
+            }
 
-        i++;
+            // piano keys go from MIDI number 21 to 108
+            for (int i = START_MIDI_KEY; i < STOP_MIDI_KEY; i++) {
+                final Pitch pitchObj = Pitch.getInstance(PitchUnit.MIDI_KEY, i);
+                final double pitchInHz = pitchObj.getPitch(PitchUnit.HERTZ);
+                final int bin = (int) (pitchInHz * 1024.0 / 44100.0);
+                keyOn[i] = amplitudes[bin] > MIN_MIDI_VELOCITY;
+                velocities[i] = (int) amplitudes[bin];
+            }
 
-        if (i % 1000 == 0) {
-            Tarsos.println(i * 1024.0 / 44100.0 + "s");
+            sendNoteMessages();
+
+            bufferCount++;
+
+            if (bufferCount % 1000 == 0) {
+                Tarsos.println(bufferCount * 1024.0 / 44100.0 + "s");
+            }
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @seebe.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#
+         * processingFinished()
+         */
+        @Override
+        public void processingFinished() {
+            cleanup();
         }
     }
 
-    boolean[] keyOn;
-    boolean[] previousKeys;
-    int[] velocities;
+    private class PitchAudioProcessor implements AudioProcessor {
+        private final PurePitchDetector pure;
 
+        public PitchAudioProcessor(final double sampleRate) {
+            pure = new Yin((float) sampleRate);
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see
+         * be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#proccess
+         * (float[])
+         */
+        @Override
+        public void proccess(final float[] audioBuffer) {
+            final float pitch = pure.getPitch(audioBuffer);
+            final double midiCentValue = PitchConverter.hertzToMidiCent(pitch);
+            final int midiKey = (int) midiCentValue;
+            // 'musical' pitch detected ?
+            if (Math.abs(midiCentValue - midiKey) < 0.3 && midiCentValue < 128 && midiCentValue >= 0) {
+                final String lastDetectedNote = "Name: "
+                    + Pitch.getInstance(PitchUnit.HERTZ, pitch).noteName() + "\t Frequency: "
+                    + ((int) pitch) + "Hz \t" + " MIDI note:" + PitchConverter.hertzToMidiCent(pitch);
+                Tarsos.println(lastDetectedNote);
+                for (int i = 0; i < 128; i++) {
+                    keyOn[i] = false;
+                    velocities[i] = 0;
+                }
+                keyOn[midiKey] = true;
+
+                // SPL is defined in db: 0 db = max => 128-SPL gives a MIDI
+                // velocity
+                velocities[midiKey] = 128 + (int) SignalPowerExtractor.soundPressureLevel(audioBuffer);
+                sendNoteMessages();
+            }
+        }
+
+        /*
+         * (non-Javadoc)
+         * @seebe.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#
+         * processingFinished()
+         */
+        @Override
+        public void processingFinished() {
+            cleanup();
+        }
+    }
+
+    public void cleanup() {
+        try {
+            if (toFile) {
+                sequencer.stopRecording();
+                MidiSystem.write(sequence, 0, new File(outputMidi));
+                sequencer.stop();
+            }
+            receiver.close();
+        } catch (final IOException e) {
+            // ignore
+        } catch (final IllegalStateException e) {
+            // ignore
+        } catch (final NullPointerException e) {
+            // ignore
+        }
+    }
 
     public void sendNoteMessages() {
         for (int i = 0; i < keyOn.length; i++) {
@@ -207,35 +360,30 @@ public class PitchToMidi extends AbstractTarsosApp implements AudioProcessor {
                 final int command = keyOn[i] ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
                 final int velocity = keyOn[i] ? velocities[i] : 0;
                 try {
-                    sm.setMessage(command, 2, i, velocity);
+                    sm.setMessage(command, 1, i, velocity);
                 } catch (final InvalidMidiDataException e) {
                     e.printStackTrace();
                 }
-                receiver.send(sm, -1);
+                final double seconds = bufferCount * 1024.0 / 44100.0;
+                // 40 = the number of ticks per quarter note if the division
+                // type is PPQ
+                // 120 BPM => 2 BPS (second)
+
+                final double ticksPerSecond = 40 * (120 / 60.0);
+                final long ticks = (long) (seconds * ticksPerSecond);
+
+                if (toFile) {
+                    track.add(new MidiEvent(sm, ticks * 2));
+                } else {
+                    receiver.send(sm, -1);
+                }
             }
             previousKeys[i] = keyOn[i];
         }
     }
 
     public static void main(final String... args) throws IOException {
-        new PitchToMidi().run(args);
+        new PitchToMidi().run("--pitch");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seebe.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#
-     * processingFinished()
-     */
-    @Override
-    public void processingFinished() {
-        try {
-            sequencer.stopRecording();
-            MidiSystem.write(sequence, 0, new File("ttm.midi"));
-        } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
 }

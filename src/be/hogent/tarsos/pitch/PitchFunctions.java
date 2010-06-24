@@ -158,7 +158,7 @@ public final class PitchFunctions {
      * </p>
      * <p>
      * n must be odd! The function is defined as:<br>
-     * f(i) = median( list(i-n/2) .. list(i+n/2) )<br>
+     * f(bufferCount) = median( list(bufferCount-n/2) .. list(bufferCount+n/2) )<br>
      * </p>
      * 
      * <pre>

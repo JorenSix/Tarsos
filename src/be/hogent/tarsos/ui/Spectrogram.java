@@ -203,7 +203,6 @@ public final class Spectrogram extends JComponent {
     public static void main(final String[] args) throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
         final JPanel panel = new JPanel(new BorderLayout());
-
         final Spectrogram spectogram = new Spectrogram(Tarsos.chooseMixerDevice());
         spectogram.setPreferredSize(new Dimension(W, H / 2));
         panel.add(spectogram, BorderLayout.CENTER);
@@ -216,6 +215,4 @@ public final class Spectrogram extends JComponent {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
-
-
 }

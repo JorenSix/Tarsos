@@ -53,7 +53,7 @@ public final class PlayAlong {
         longopts[2] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
         longopts[3] = new LongOpt("midi_in", LongOpt.NO_ARGUMENT, null, 'm');
 
-        final Getopt g = new Getopt("playalong", args, "-i:d:h:m", longopts);
+        final Getopt g = new Getopt("playalong", args, "-bufferCount:d:h:m", longopts);
         int device = -1;
         String detectorString = "TARSOS";
         String fileName = null;

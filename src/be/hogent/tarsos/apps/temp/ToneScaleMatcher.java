@@ -35,7 +35,7 @@ public final class ToneScaleMatcher {
         longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
         longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
         longopts[2] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
-        final Getopt g = new Getopt("tonescalematcher", args, "-i:h:d", longopts);
+        final Getopt g = new Getopt("tonescalematcher", args, "-bufferCount:h:d", longopts);
 
         String detector = "IPEM";
         String inputFile = null;

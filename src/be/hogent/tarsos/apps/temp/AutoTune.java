@@ -137,11 +137,11 @@ public final class AutoTune {
                      * int originalBin = (int) (pitch * audioBuffer.length /
                      * SAMPLERATE); int newBin = (int) (1760 audioBuffer.length
                      * / SAMPLERATE); int diff = newBin - originalBin; if(diff >
-                     * 0) for(int i = audioBuffer.length - 1; i >= 0 ; i--){
-                     * audioBuffer[i] = i - diff >= 0 ? audioBuffer[i-diff] : 0;
-                     * } else for(int i = 0; i < audioBuffer.length ; i++){
-                     * audioBuffer[i] = i-diff < audioBuffer.length ?
-                     * audioBuffer[i-diff] : 0; }
+                     * 0) for(int bufferCount = audioBuffer.length - 1; bufferCount >= 0 ; bufferCount--){
+                     * audioBuffer[bufferCount] = bufferCount - diff >= 0 ? audioBuffer[bufferCount-diff] : 0;
+                     * } else for(int bufferCount = 0; bufferCount < audioBuffer.length ; bufferCount++){
+                     * audioBuffer[bufferCount] = bufferCount-diff < audioBuffer.length ?
+                     * audioBuffer[bufferCount-diff] : 0; }
                      */
                     // inverse fft
                     fft.backwardsTransform(audioBuffer);

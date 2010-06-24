@@ -200,32 +200,32 @@ public class Histogram implements Cloneable {
     }
 
     /**
-     * Returns the key for class with index i.
-     * @param i
-     *            a class index. If i lays outside the interval
+     * Returns the key for class with index bufferCount.
+     * @param bufferCount
+     *            a class index. If bufferCount lays outside the interval
      *            <code>[0,getNumberOfClasses()[</code> it is mapped to a value
      *            inside the interval using a modulo calculation.
-     * @return the key for class with index i
+     * @return the key for class with index bufferCount
      */
     public final double getKeyForClass(final int i) {
         int classIndex = i;
-        while (classIndex < 0) { // make sure i is positive
+        while (classIndex < 0) { // make sure bufferCount is positive
             classIndex += getNumberOfClasses();
         }
-        // make sure i is within range
+        // make sure bufferCount is within range
         classIndex = classIndex % getNumberOfClasses();
         final double key = getStart() + classIndex * getClassWidth() + getClassWidth() / 2.0;
         return preventRoundingErrors(key);
     }
 
     /**
-     * Returns the number of items in class with index i.
+     * Returns the number of items in class with index bufferCount.
      * 
-     * @param i
-     *            a class index. If i lays outside the interval
+     * @param bufferCount
+     *            a class index. If bufferCount lays outside the interval
      *            <code>[0,getNumberOfClasses()[</code> it is mapped to a value
      *            inside the interval using a modulo calculation.
-     * @return the number of items in bin with index i
+     * @return the number of items in bin with index bufferCount
      */
     public final long getCountForClass(final int i) {
         return getCount(getKeyForClass(i));
@@ -894,11 +894,11 @@ public class Histogram implements Cloneable {
      * <p>
      * The histogram is smoothed by averaging over a moving window of a size
      * specified by the method parameter: if the value of the parameter is
-     * <i>k</i> then the width of the window is <i>2*k + 1</i>. If the window
+     * <bufferCount>k</bufferCount> then the width of the window is <bufferCount>2*k + 1</bufferCount>. If the window
      * runs off the end of the histogram only those values which intersect the
      * histogram are taken into consideration. The smoothing may optionally be
      * weighted to favor the central value using a "triangular" weighting. For
-     * example, for a value of <i>k</i> equal to 2 the central bin would have
+     * example, for a value of <bufferCount>k</bufferCount> equal to 2 the central bin would have
      * weight 1/3, the adjacent bins 2/9, and the next adjacent bins 1/9.
      * <p>
      * Changes the current histogram and returns it so it is possible to chain

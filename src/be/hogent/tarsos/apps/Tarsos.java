@@ -126,7 +126,7 @@ public final class Tarsos {
      *            subcommand. E.g.
      *            <pre>
      * java -jar annotate --in blaat.wav
-     * java -jar annotate -i blaat.wav
+     * java -jar annotate -bufferCount blaat.wav
      * </pre>
      */
     public static void main(final String... args) {
@@ -142,6 +142,7 @@ public final class Tarsos {
         applicationList.add(new PowerExtractor());
         applicationList.add(new TuneMidiSynth());
         applicationList.add(new Rank());
+        applicationList.add(new PitchToMidi());
 
 
         for (final AbstractTarsosApp application : applicationList) {

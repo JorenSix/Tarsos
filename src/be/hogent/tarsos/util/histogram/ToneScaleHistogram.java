@@ -65,9 +65,9 @@ public final class ToneScaleHistogram extends Histogram {
     /**
      * Executes peak detection on this histogram and saves the scale in the <a
      * href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala scale
-     * file format</a>: <i>This file format for musical tunings is becoming a
+     * file format</a>: <bufferCount>This file format for musical tunings is becoming a
      * standard for exchange of scales, owing to the size of the scale archive
-     * of over 3700+ scales and the popularity of the Scala program.</i>
+     * of over 3700+ scales and the popularity of the Scala program.</bufferCount>
      */
     public void exportToScalaScaleFileFormat(final String fileName, final String toneScaleName) {
         final List<Peak> peaks = PeakDetector.detect(this, 15, 0.5);
@@ -77,9 +77,9 @@ public final class ToneScaleHistogram extends Histogram {
     /**
      * Saves the scale in the <a
      * href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala scale
-     * file format</a>: <i>This file format for musical tunings is becoming a
+     * file format</a>: <bufferCount>This file format for musical tunings is becoming a
      * standard for exchange of scales, owing to the size of the scale archive
-     * of over 3700+ scales and the popularity of the Scala program.</i>
+     * of over 3700+ scales and the popularity of the Scala program.</bufferCount>
      * @param fileName
      * @param toneScaleName
      * @param peaks

@@ -35,9 +35,11 @@ public final class Spectrum extends JFrame implements AudioProcessor {
     private final FFT fft;
     private final float[] amplitudes;
     private final float[] hightWaterMarks;
+    private float highestWaterMark;
 
     private int barWidth;// pixels
     private int barMaxHeight;
+
 
     public Spectrum(final AudioFile audioFile, final int bins) throws UnsupportedAudioFileException,
     IOException, LineUnavailableException {
@@ -56,6 +58,7 @@ public final class Spectrum extends JFrame implements AudioProcessor {
         fft = new FFT(bins * 2);
         amplitudes = new float[bins * 2];
         hightWaterMarks = new float[bins * 2];
+        highestWaterMark = 1;
 
         final RealTimeAudioProcessor rtap = new RealTimeAudioProcessor(audioFile.transcodedPath(), bins * 4);
         rtap.addAudioProcessor(this);
@@ -93,8 +96,10 @@ public final class Spectrum extends JFrame implements AudioProcessor {
 
         for (int i = 0; i < amplitudes.length / 2; i++) {
             bufferGraphics.setColor(Color.BLUE);
-            final int height = (int) (Math.log1p(amplitudes[i]) * 80);
+
+            final int height = (int) (20 * Math.log1p(amplitudes[i]) * getHeight() / highestWaterMark);
             hightWaterMarks[i] = Math.max(height, hightWaterMarks[i]);
+            highestWaterMark = Math.max(highestWaterMark, hightWaterMarks[i]);
 
             bufferGraphics.fillRect(i * barWidth + barWidth, barMaxHeight - height, barWidth,
                     height);
@@ -110,6 +115,15 @@ public final class Spectrum extends JFrame implements AudioProcessor {
     public static void main(final String... args) throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
         final AudioFile f = new AudioFile("audio/MR.1975.26.43-4.wav");
-        new Spectrum(f, 256);
+        new Spectrum(f, 128);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @seebe.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#
+     * processingFinished()
+     */
+    @Override
+    public void processingFinished() {
     }
 }

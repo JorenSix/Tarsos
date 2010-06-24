@@ -11,7 +11,7 @@ import java.util.List;
  * article <a href="http://miracle.otago.ac.nz/postgrads/tartini/papers/A_Smarter_Way_to_Find_Pitch.pdf"
  * >A Smarter Way to Find Pitch</a>. According to the article:
  * </p>
- * <blockquote> <i>
+ * <blockquote> <bufferCount>
  * <p>
  * A fast, accurate and robust method for finding the continuous pitch in
  * monophonic musical sounds. [It uses] a special normalized version of the
@@ -23,7 +23,7 @@ import java.util.List;
  * frequencies such as a violin and it can display pitch changes of one cent
  * reliably. MPM works well without any post processing to correct the pitch.
  * </p>
- * </i> </blockquote>
+ * </bufferCount> </blockquote>
  * <p>
  * For the moment this implementation uses the inefficient way of calculating
  * the pitch. It uses <code>O(Ww)</code> with W the window size in samples and w

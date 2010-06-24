@@ -99,13 +99,13 @@ public final class ShowMelody {
         /*
          * Histogram bestFirst = null; Histogram bestSecond = null; double
          * highestCorrelation = 0; double bestDisplacementInCents = 0; String
-         * bestFileName = ""; for(int i = 0; i < fileNames.size();i++){ for(int
-         * j = 0; j<fileNames.size();j++){ if(i!=j){ PitchDetector detector;
+         * bestFileName = ""; for(int bufferCount = 0; bufferCount < fileNames.size();bufferCount++){ for(int
+         * j = 0; j<fileNames.size();j++){ if(bufferCount!=j){ PitchDetector detector;
          * List<PitchDetector> detectors; detectors = new
          * ArrayList<PitchDetector>(); detectors.add(new AubioPitchDetection(new
-         * AudioFile(fileNames.get(i)), PitchDetectionMode.AUBIO_YIN));
+         * AudioFile(fileNames.get(bufferCount)), PitchDetectionMode.AUBIO_YIN));
          * detectors.add(new IPEMPitchDetection(new
-         * AudioFile(fileNames.get(i)))); detector = new
+         * AudioFile(fileNames.get(bufferCount)))); detector = new
          * PitchDetectionMix(detectors, 0.01); detector.executePitchDetection();
          * List<Sample> samplesI = detector.getSamples();
          * 
@@ -116,7 +116,7 @@ public final class ShowMelody {
          * PitchDetectionMix(detectors, 0.01); detector.executePitchDetection();
          * List<Sample> samplesJ = detector.getSamples(); Histogram histogramI =
          * Sample.printOctaveInformation(detector.getName() + "_" +
-         * FileUtils.basename(fileNames.get(i)) + "_octave.txt",samplesI);
+         * FileUtils.basename(fileNames.get(bufferCount)) + "_octave.txt",samplesI);
          * Histogram histogramJ =
          * Sample.printOctaveInformation(detector.getName() + "_" +
          * FileUtils.basename(fileNames.get(j)) + "_octave.txt",samplesJ);
@@ -130,9 +130,9 @@ public final class ShowMelody {
          * if(correlation > highestCorrelation){ bestFirst = histogramI;
          * bestSecond = histogramJ; bestDisplacementInCents =
          * displacementInCents; bestFileName =
-         * FileUtils.basename(fileNames.get(i)) + "_" +
+         * FileUtils.basename(fileNames.get(bufferCount)) + "_" +
          * FileUtils.basename(fileNames.get(j)); highestCorrelation =
-         * correlation; } System.out.println( fileNames.get(i) + "_" +
+         * correlation; } System.out.println( fileNames.get(bufferCount) + "_" +
          * fileNames.get(j) + "\tMax correlation:\t" + correlation +
          * "\tdisplacement:\t" + displacementInCents); } } } SimplePlot plot =
          * new SimplePlot("best_correlation_shift" + bestFileName);
@@ -192,13 +192,13 @@ public final class ShowMelody {
          * for(PitchDetector d : detectors){ d.executePitchDetection();
          * Histogram histogram = Sample.printOctaveInformation(d.getName() + "_"
          * + FileUtils.basename(fileName) + "_octave.txt",d.getSamples());
-         * histograms.add(histogram.normalize()); } for(int i =
-         * 0;i<histograms.size();i++){ for(int j = i +
+         * histograms.add(histogram.normalize()); } for(int bufferCount =
+         * 0;bufferCount<histograms.size();bufferCount++){ for(int j = bufferCount +
          * 1;j<histograms.size();j++){ double correlation =
-         * histograms.get(i).correlationWithDisplacement(0, histograms.get(j));
+         * histograms.get(bufferCount).correlationWithDisplacement(0, histograms.get(j));
          * System.out.println(FileUtils.basename(fileName) + ";" +
-         * detectors.get(i).getName()+ ";" + detectors.get(j).getName() + ";" +
-         * correlation + ";" + histograms.get(i).getEntropy()+ ";" +
+         * detectors.get(bufferCount).getName()+ ";" + detectors.get(j).getName() + ";" +
+         * correlation + ";" + histograms.get(bufferCount).getEntropy()+ ";" +
          * histograms.get(j).getEntropy()); } }
          */
     }

@@ -329,9 +329,9 @@ public final class DumpReceiver implements Receiver {
             sbuf.append(hexDigits[(aByte[i] & 0xF0) >> 4]);
             sbuf.append(hexDigits[aByte[i] & 0x0F]);
             /*
-             * byte bhigh = (byte) ((aByte[i] & 0xf0) >> 4); sbuf.append((char)
+             * byte bhigh = (byte) ((aByte[bufferCount] & 0xf0) >> 4); sbuf.append((char)
              * (bhigh > 9 ? bhigh + 'A' - 10: bhigh + '0')); byte blow = (byte)
-             * (aByte[i] & 0x0f); sbuf.append((char) (blow > 9 ? blow + 'A' -
+             * (aByte[bufferCount] & 0x0f); sbuf.append((char) (blow > 9 ? blow + 'A' -
              * 10: blow + '0'));
              */
         }

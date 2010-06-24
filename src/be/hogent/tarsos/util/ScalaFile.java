@@ -73,10 +73,10 @@ public final class ScalaFile {
      * Reads a Scala file from disk and returns a new instance.
      * <p>
      * The <a href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala
-     * scale file format</a>: <i>This file format for musical tunings is
+     * scale file format</a>: <bufferCount>This file format for musical tunings is
      * becoming a standard for exchange of scales, owing to the size of the
      * scale archive of over 3700+ scales and the popularity of the Scala
-     * program.</i>
+     * program.</bufferCount>
      * </p>
      * <p>
      * Usually it has <code>.scl</code> as extension.
@@ -180,10 +180,10 @@ public final class ScalaFile {
      * Writes a Scala file to disk. The peaks use cent values.
      * <p>
      * The <a href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala
-     * scale file format</a>: <i>This file format for musical tunings is
+     * scale file format</a>: <bufferCount>This file format for musical tunings is
      * becoming a standard for exchange of scales, owing to the size of the
      * scale archive of over 3700+ scales and the popularity of the Scala
-     * program.</i>
+     * program.</bufferCount>
      * </p>
      * <p>
      * Usually it has <code>.scl</code> as extension.

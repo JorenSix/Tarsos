@@ -13,7 +13,7 @@ import be.hogent.tarsos.util.FileUtils;
  * Calls aubio (http://aubio.org/) to execute pitch detection. Aubio should be
  * installed correctly and available in PATH. This command is called when
  * executing pitch detection: <code>
- * aubiopitch  -u freq --mode yin -s -70 -i in.wav
+ * aubiopitch  -u freq --mode yin -s -70 -bufferCount in.wav
  * </code> The output uses the frequency (Hz) unit.
  * The algorithm used is yin. The default silence threshold of -70 is used. The
  * file that is annoted is in.wav For more information see the <a
@@ -46,7 +46,7 @@ public final class AubioPitchDetection implements PitchDetector {
 
         if (!FileUtils.exists(csvFileName)) {
             final String command = "aubiopitch  -u freq --mode " + this.pitchDetectionMode.getDetectionModeName()
-            + "  -s -70  -i " + file.transcodedPath();
+            + "  -s -70  -bufferCount " + file.transcodedPath();
             Execute.command(command, csvFileName);
         }
 
