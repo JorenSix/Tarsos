@@ -150,7 +150,7 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 
         // 1. Calculate the normalized square difference for each Tau value.
         normalizedSquareDifference(audioBuffer);
-        // 2. peak picking time: time to pick some peaks
+        // 2. Peak picking time: time to pick some peaks.
         peakPicking();
 
         double highestAmplitude = Double.NEGATIVE_INFINITY;

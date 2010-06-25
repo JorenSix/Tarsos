@@ -15,21 +15,19 @@ public final class Pitch {
 
     /**
      * Create a new pitch object with a certain pitch.
-     * 
      * @param pitchInHertz
      */
-    private Pitch(double pitchInHertz) {
+    private Pitch(final double pitchInHertz) {
         this.pitchInHertz = pitchInHertz;
     }
 
     /**
      * Get the pitch value in a given unit.
-     * 
      * @param unit
      *            The requested unit.
      * @return A pitch value in the requested unit.
      */
-    public double getPitch(PitchUnit unit) {
+    public double getPitch(final PitchUnit unit) {
         double value = 0.0;
         switch (unit) {
         case ABSOLUTE_CENTS:
@@ -63,7 +61,7 @@ public final class Pitch {
      *                KEYS.
      */
     public int octaveIndex() {
-        int midiKey = (int) getPitch(PitchUnit.MIDI_KEY);
+        final int midiKey = (int) getPitch(PitchUnit.MIDI_KEY);
         return (midiKey / 12) - 1;
     }
 
@@ -78,12 +76,12 @@ public final class Pitch {
     public String noteName() {
         String name = "";
         // The x is replaced by the octave index
-        String[] noteNames = { "Cx", "C#x/Dbx", "Dx", "D#x/Ebx", "Ex", "Fx", "F#x/Gbx", "Gx", "G#x/Abx",
-                "Ax", "A#x/Bbx", "Bx" };
-        int midiKey = PitchConverter.hertzToMidiKey(pitchInHertz);
-        int noteIndex = midiKey % 12;
-        int octaveIndex = octaveIndex();
-        name = noteNames[noteIndex].replace("x", "" + octaveIndex);
+        final String[] noteNames = { "Cx", "C#x/Dbx", "Dx", "D#x/Ebx", "Ex", "Fx", "F#x/Gbx", "Gx",
+                "G#x/Abx", "Ax", "A#x/Bbx", "Bx" };
+        final int midiKey = PitchConverter.hertzToMidiKey(pitchInHertz);
+        final int noteIndex = midiKey % 12;
+        final int octaveIndex = octaveIndex();
+        name = noteNames[noteIndex].replace("x", Integer.toString(octaveIndex));
         return name;
     }
 
@@ -91,12 +89,11 @@ public final class Pitch {
      * A pitch is seen as a western musical pitch if it is less than 20 cents
      * removed from the 'correct' pitch. The correct pitch is tuned using A4 =
      * 440Hz.
-     * 
      * @return True if the pitch is western and musical, false otherwise.
      */
     public boolean isWesternMusicalPitch() {
-        double midiCent = getPitch(PitchUnit.MIDI_CENT);
-        double midiKey = getPitch(PitchUnit.MIDI_KEY);
+        final double midiCent = getPitch(PitchUnit.MIDI_CENT);
+        final double midiKey = getPitch(PitchUnit.MIDI_KEY);
         return Math.abs(midiCent - (int) midiKey) < 0.2;
     }
 
@@ -112,7 +109,7 @@ public final class Pitch {
      *                If RELATIVE_CENTS is given: Cannot convert relative cent
      *                value to absolute frequency.
      */
-    public static Pitch getInstance(PitchUnit unit, double value) {
+    public static Pitch getInstance(final PitchUnit unit, final double value) {
         double hertzValue = Double.MAX_VALUE;
         switch (unit) {
         case ABSOLUTE_CENTS:

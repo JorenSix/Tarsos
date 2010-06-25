@@ -31,9 +31,14 @@ public enum PitchDetectionMode {
     AUBIO_SCHMITT("schmitt"),
 
     /**
-     * The IPEM pitch tracker.
+     * The IPEM pitch tracker outputs six weighted pitch candidates.
      */
-    IPEM("ipem"),
+    IPEM_SIX("ipem_six"),
+
+    /**
+     * The IPEM pitch tracker outputs only one pitch candidates.
+     */
+    IPEM_ONE("ipem_one"),
 
     /**
      * The pure java YIN implementation of Tarsos.
@@ -81,8 +86,11 @@ public enum PitchDetectionMode {
     public PitchDetector getPitchDetector(final AudioFile audioFile) {
         PitchDetector detector;
         switch (this) {
-        case IPEM:
-            detector = new IPEMPitchDetection(audioFile);
+        case IPEM_SIX:
+            detector = new IPEMPitchDetection(audioFile, this);
+            break;
+        case IPEM_ONE:
+            detector = new IPEMPitchDetection(audioFile, this);
             break;
         case TARSOS_YIN:
             detector = new TarsosPitchDetection(audioFile, this);

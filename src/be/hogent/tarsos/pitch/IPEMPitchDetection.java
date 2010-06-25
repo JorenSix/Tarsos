@@ -11,7 +11,7 @@ import be.hogent.tarsos.util.Execute;
 import be.hogent.tarsos.util.FileUtils;
 
 /**
- * The IPEM Pitch detector uses an auditory model for polyphonic pitch tracking.
+ * The IPEM_SIX Pitch detector uses an auditory model for polyphonic pitch tracking.
  * More information can be found in following papers: Factors affecting music
  * retrieval in query-by-melody De Mulder, Tom; Martens, Jean; PAUWS, S;
  * VIGNOLI, F et al. IEEE TRANSACTIONS ON MULTIMEDIA (2006) Recent improvements
@@ -35,8 +35,8 @@ public final class IPEMPitchDetection implements PitchDetector {
     private static final Logger LOG = Logger.getLogger(IPEMPitchDetection.class.getName());
 
 
+    private final String name;
 
-    private final String name = "ipem";
     private final AudioFile file;
 
     private final List<Sample> samples;
@@ -45,12 +45,13 @@ public final class IPEMPitchDetection implements PitchDetector {
      * @param file
      *            the file to detect pitch for
      */
-    public IPEMPitchDetection(final AudioFile file) {
+    public IPEMPitchDetection(final AudioFile file, final PitchDetectionMode mode) {
         this.file = file;
         this.samples = new ArrayList<Sample>();
+        this.name = mode.getParametername();
 
         // check files and copy them if needed
-        final String[] files = { "ipem_pitch_detection.sh", "libsndfile.dll", "pitchdetection.exe" };
+        final String[] files = { "ipem_pitch_detection.sh", "libsndfile.dll", name + ".exe" };
         for (final String ipemFile : files) {
             final String target = FileUtils.combine(FileUtils.getRuntimePath(), ipemFile);
             if (!FileUtils.exists(target)) {
@@ -67,18 +68,18 @@ public final class IPEMPitchDetection implements PitchDetector {
         FileUtils.writeFile(transcodedBaseName + "\n", "lijst.txt");
 
         final String annotationsDirectory = Configuration.get(ConfKey.raw_ipem_annotations_directory);
-        final String csvFileName = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory,
-                transcodedBaseName + ".txt");
+        String outputDirectory = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory, name)
+        + "/";
+        final String csvFileName = FileUtils.combine(outputDirectory, transcodedBaseName + ".txt");
         String command = null;
 
         String audioDirectory = FileUtils.combine(AudioFile.TRANSCODED_AUDIO_DIR, "") + "/";
-        String outputDirectory = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory) + "/";
+
 
         if (System.getProperty("os.name").contains("indows")) {
             audioDirectory = audioDirectory.replace("/", "\\").replace(":\\", "://");
             outputDirectory = outputDirectory.replace("/", "\\").replace(":\\", "://");
-            command = "pitchdetection.exe  lijst.txt " + audioDirectory + " " + outputDirectory;
-
+            command = name + ".exe  lijst.txt " + audioDirectory + " " + outputDirectory;
         } else { // on linux use wine's Z-directory
             audioDirectory = "z://" + audioDirectory.replace("/", "\\\\");
             outputDirectory = "z://" + outputDirectory.replace("/", "\\\\");
@@ -125,7 +126,7 @@ public final class IPEMPitchDetection implements PitchDetector {
                 }
             }
             final Sample sample = new Sample(start, pitches, probabilities, minimumAcceptableProbability);
-            sample.source = PitchDetectionMode.IPEM;
+            sample.source = PitchDetectionMode.IPEM_SIX;
             samples.add(sample);
             start += 10;
 
