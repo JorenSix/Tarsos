@@ -62,11 +62,18 @@ import com.sun.media.sound.AudioSynthesizer;
  * @author Joren Six
  */
 public final class MidiToWavRenderer {
-    private final transient AudioSynthesizer synth;
+
     /**
      * Log messages.
      */
     private static final Logger LOG = Logger.getLogger(MidiToWavRenderer.class.getName());
+
+    /**
+     * The synth used to render the audio.
+     */
+    private final transient AudioSynthesizer synth;
+
+    private double[] rebasedTuning;
 
     public MidiToWavRenderer() throws MidiUnavailableException, InvalidMidiDataException, IOException {
         synth = (AudioSynthesizer) MidiSystem.getSynthesizer();
@@ -77,7 +84,7 @@ public final class MidiToWavRenderer {
         return MidiSystem.getSoundbank(soundbankFile);
     }
 
-    private double[] rebasedTuning;
+
 
     /**
      * Changes the tuning of the synth.
@@ -103,7 +110,7 @@ public final class MidiToWavRenderer {
      * @throws InvalidMidiDataException
      * @throws IOException
      */
-    public final void createWavFile(final File soundbankFile, final File midiFile, final File outputFile)
+    public void createWavFile(final File soundbankFile, final File midiFile, final File outputFile)
     throws MidiUnavailableException, InvalidMidiDataException, IOException {
         // Load soundbank
         final Soundbank soundbank = loadSoundbank(soundbankFile);
@@ -143,7 +150,8 @@ public final class MidiToWavRenderer {
      * @throws InvalidMidiDataException
      * @throws IOException
      */
-    public void createWavFile(final Sequence sequence,final File outputFile) throws MidiUnavailableException,
+    public void createWavFile(final Sequence sequence, final File outputFile)
+    throws MidiUnavailableException,
     InvalidMidiDataException, IOException {
         /*
          * Open synthesizer in pull mode in the format 96000hz 24 bit stereo
@@ -151,10 +159,10 @@ public final class MidiToWavRenderer {
          * polyphony.
          */
         final AudioFormat format = new AudioFormat(96000, 24, 2, true, false);
-        final Map<String, Object> p = new HashMap<String, Object>();
-        p.put("interpolation", "sinc");
-        p.put("max polyphony", "1024");
-        AudioInputStream stream = synth.openStream(format, p);
+        final Map<String, Object> map = new HashMap<String, Object>();
+        map.put("interpolation", "sinc");
+        map.put("max polyphony", "1024");
+        AudioInputStream stream = synth.openStream(format, map);
 
         // Play Sequence into AudioSynthesizer Receiver.
         final double total = send(sequence, synth.getReceiver());
@@ -174,22 +182,12 @@ public final class MidiToWavRenderer {
      * @return The total length of the sequence.
      */
     private double send(final Sequence seq, final Receiver recv) {
-        final float divtype = seq.getDivisionType();
         assert seq.getDivisionType() == Sequence.PPQ;
+
+        final float divtype = seq.getDivisionType();
         final Track[] tracks = seq.getTracks();
 
-        try {
-            if (rebasedTuning != null) {
-                for (int i = 0; i < 16; i++) {
-                    MidiUtils.sendTunings(recv, i, 0, "african", rebasedTuning);
-                    MidiUtils.sendTuningChange(recv, i, 0);
-                }
-            }
-        } catch (final IOException e) {
-            LOG.log(Level.SEVERE, e.getMessage(), e);
-        } catch (final InvalidMidiDataException e) {
-            LOG.log(Level.SEVERE, e.getMessage(), e);
-        }
+        tune(recv);
 
         final int[] trackspos = new int[tracks.length];
         int mpq = 500000;
@@ -223,18 +221,29 @@ public final class MidiToWavRenderer {
             lasttick = tick;
             final MidiMessage msg = selevent.getMessage();
             if (msg instanceof MetaMessage) {
-                if (divtype == Sequence.PPQ) {
-                    if (((MetaMessage) msg).getType() == 0x51) {
-                        final byte[] data = ((MetaMessage) msg).getData();
-                        mpq = ((data[0] & 0xff) << 16) | ((data[1] & 0xff) << 8) | (data[2] & 0xff);
-                    }
+                if (divtype == Sequence.PPQ && ((MetaMessage) msg).getType() == 0x51) {
+                    final byte[] data = ((MetaMessage) msg).getData();
+                    mpq = ((data[0] & 0xff) << 16) | ((data[1] & 0xff) << 8) | (data[2] & 0xff);
                 }
-            } else {
-                if (recv != null) {
-                    recv.send(msg, curtime);
-                }
+            } else if (recv != null) {
+                recv.send(msg, curtime);
             }
         }
         return curtime / 1000000.0;
+    }
+
+    private void tune(final Receiver recv) {
+        try {
+            if (rebasedTuning != null) {
+                for (int i = 0; i < 16; i++) {
+                    MidiUtils.sendTunings(recv, i, 0, "african", rebasedTuning);
+                    MidiUtils.sendTuningChange(recv, i, 0);
+                }
+            }
+        } catch (final IOException e) {
+            LOG.log(Level.SEVERE, e.getMessage(), e);
+        } catch (final InvalidMidiDataException e) {
+            LOG.log(Level.SEVERE, e.getMessage(), e);
+        }
     }
 }

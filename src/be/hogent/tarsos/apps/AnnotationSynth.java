@@ -19,7 +19,7 @@ import be.hogent.tarsos.util.FileUtils;
 /**
  * Generates audio from a set of annotations. AnnotationSynth is used to
  * sonificate pitch annotation files. For the moment it uderstands the pitch
- * files used by BOZKURT, AUBIO and IPEM. It reads the data from a file or from
+ * files used by BOZKURT, AUBIO and IPEM_SIX. It reads the data from a file or from
  * STDIN.
  * @author Joren Six
  */
@@ -33,7 +33,7 @@ public final class AnnotationSynth extends AbstractTarsosApp {
     public String description() {
         return "Generates audio from a set of annotations. AnnotationSynth is used to "
         + "sonificate pitch annotation files. For the moment it uderstands the pitch "
-        + "files used by BOZKURT, AUBIO and IPEM. It reads the data from a file or from STDIN.";
+        + "files used by BOZKURT, AUBIO and IPEM_SIX. It reads the data from a file or from STDIN.";
     }
 
     @Override
@@ -55,7 +55,7 @@ public final class AnnotationSynth extends AbstractTarsosApp {
                 File.class).defaultsTo(new File("out.wav"));
 
         final OptionSpec<AnnotationCVSFileHandlers> annoFormatSpec = parser.accepts("format",
-        "Annotation format of the input file: AUBIO|IPEM|BOZKURT").withRequiredArg().ofType(
+        "Annotation format of the input file: AUBIO|IPEM_SIX|BOZKURT").withRequiredArg().ofType(
                 AnnotationCVSFileHandlers.class).defaultsTo(AnnotationCVSFileHandlers.AUBIO);
 
         parser.accepts("listen", "Do not write a "

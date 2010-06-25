@@ -53,7 +53,7 @@ public final class AudioToScala extends AbstractTarsosApp {
         } else {
             final File inputFile = options.valueOf(fileSpec);
             final PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
-            final File scalaFile;
+            File scalaFile;
             if (options.valueOf(scalaSpec) == null) {
                 scalaFile = new File(FileUtils.basename(inputFile.getAbsolutePath()) + ".scl");
             } else {

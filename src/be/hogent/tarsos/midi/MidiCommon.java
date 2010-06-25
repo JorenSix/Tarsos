@@ -68,12 +68,12 @@ public final class MidiCommon {
                 final boolean bAllowsOutput = device.getMaxReceivers() != 0;
                 if ((bAllowsInput && bForInput) || (bAllowsOutput && bForOutput)) {
                     if (bVerbose) {
-                        out("" + i + "  " + (bAllowsInput ? "IN " : "   ")
+                        out(i + "  " + (bAllowsInput ? "IN " : "   ")
                                 + (bAllowsOutput ? "OUT " : "    ") + aInfos[i].getName() + ", "
                                 + aInfos[i].getVendor() + ", " + aInfos[i].getVersion() + ", "
                                 + aInfos[i].getDescription());
                     } else {
-                        out("" + i + "  " + aInfos[i].getName());
+                        out(i + "  " + aInfos[i].getName());
                     }
                 }
             } catch (final MidiUnavailableException e) {

@@ -89,8 +89,8 @@ public final class PlayAlong {
         PitchDetector detector = new TarsosPitchDetection(fileToPlayAlongWith, PitchDetectionMode.TARSOS_YIN);
         if (detectorString.equals("AUBIO")) {
             detector = new AubioPitchDetection(fileToPlayAlongWith, PitchDetectionMode.AUBIO_YIN);
-        } else if (detectorString.equals("IPEM")) {
-            detector = new IPEMPitchDetection(fileToPlayAlongWith);
+        } else if (detectorString.equals("IPEM_SIX")) {
+            detector = new IPEMPitchDetection(fileToPlayAlongWith, PitchDetectionMode.IPEM_SIX);
         }
 
         detector.executePitchDetection();
@@ -218,7 +218,7 @@ public final class PlayAlong {
         Tarsos.println("-----------------------");
         Tarsos.println("");
         Tarsos
-        .println("java -jar playalong.jar --in file.wav [--detector TARSOS|AUBIO|IPEM] [--midi_in 1]");
+        .println("java -jar playalong.jar --in file.wav [--detector TARSOS|AUBIO|IPEM_SIX] [--midi_in 1]");
         Tarsos.println("");
         Tarsos.println("-----------------------");
         Tarsos.println("");

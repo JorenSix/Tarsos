@@ -533,4 +533,15 @@ public final class FileUtils {
     public static boolean rm(final String fileName) {
         return new File(fileName).delete();
     }
+
+    /**
+     * Tests whether the file denoted by this abstract pathname is a directory.
+     * @param inputFile
+     *            A pathname string.
+     * @return true if and only if the file denoted by this abstract pathname
+     *         exists and is a directory; false otherwise.
+     */
+    public static boolean isDirectory(final String inputFile) {
+        return new File(inputFile).isDirectory();
+    }
 }

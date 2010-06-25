@@ -32,7 +32,7 @@ public final class HistogramSummationTest {
         ambitusHistogram = Sample.ambitusHistogram(samples);
         final ToneScaleHistogram toneScaleHistogramAbioYin = ambitusHistogram.toneScaleHistogram();
 
-        pitchDetector = new IPEMPitchDetection(audioFile);
+        pitchDetector = new IPEMPitchDetection(audioFile, PitchDetectionMode.IPEM_SIX);
         pitchDetector.executePitchDetection();
         samples = pitchDetector.getSamples();
         ambitusHistogram = Sample.ambitusHistogram(samples);

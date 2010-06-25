@@ -37,7 +37,7 @@ public final class ToneScaleMatcher {
         longopts[2] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
         final Getopt g = new Getopt("tonescalematcher", args, "-bufferCount:h:d", longopts);
 
-        String detector = "IPEM";
+        String detector = "IPEM_SIX";
         String inputFile = null;
         int c;
         while ((c = g.getopt()) != -1) {
@@ -76,7 +76,8 @@ public final class ToneScaleMatcher {
         for (final String file : inputFiles) {
             final AudioFile audioFile = new AudioFile(file);
             final PitchDetector pitchDetector = detector.equals("AUBIO") ? new AubioPitchDetection(audioFile,
-                    PitchDetectionMode.AUBIO_YIN) : new IPEMPitchDetection(audioFile);
+                    PitchDetectionMode.AUBIO_YIN) : new IPEMPitchDetection(audioFile,
+                    PitchDetectionMode.IPEM_SIX);
             pitchDetector.executePitchDetection();
 
             final List<Sample> samples = pitchDetector.getSamples();
@@ -128,7 +129,7 @@ public final class ToneScaleMatcher {
         Tarsos.println("-----------------------");
         Tarsos.println("");
         Tarsos.println("--in in.scl\t\tThe scala file with the tone scale.");
-        Tarsos.println("--detector AUBIO|IPEM the pitch detector.");
+        Tarsos.println("--detector AUBIO|IPEM_SIX the pitch detector.");
         Tarsos.println("--help\t\tPrints this information");
         Tarsos.println("");
     }

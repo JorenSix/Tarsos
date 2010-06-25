@@ -55,7 +55,7 @@ public enum ConfKey {
     generated_audio_directory(true),
 
     /**
-     * The (relative) directory to save IPEM annotations.
+     * The (relative) directory to save IPEM_SIX annotations.
      */
     raw_ipem_annotations_directory(true),
 

@@ -74,7 +74,6 @@ public class PitchToMidi extends AbstractTarsosApp {
 
     /*
      * (non-Javadoc)
-     * 
      * @see be.hogent.tarsos.apps.AbstractTarsosApp#description()
      */
     @Override
@@ -173,7 +172,7 @@ public class PitchToMidi extends AbstractTarsosApp {
                 final float samplingRate = 44100.0f;
                 if (doCompleteFFT) {
                     samplesPerBuffer = 2048;
-                    processor = new FFTAudioProcessor(samplingRate);
+                    processor = new FFTAudioProcessor(samplingRate, 1024);
                 } else {
                     samplesPerBuffer = 1024;
                     processor = new PitchAudioProcessor(samplingRate);
@@ -218,7 +217,7 @@ public class PitchToMidi extends AbstractTarsosApp {
     }
 
     private class FFTAudioProcessor implements AudioProcessor {
-        private final int SIZE = 1024;
+
 
         // piano keys go from MIDI number 21 to 108
         private final int MAX_MIDI_VELOCITY = 108;
@@ -229,9 +228,13 @@ public class PitchToMidi extends AbstractTarsosApp {
         float maxAmpl = 1;
         float minAmpl = 0;
         private final FFT fft;
+        private final float sampleRate;
+        private final int fftSize;
 
-        public FFTAudioProcessor(final float sampleRate) {
-            fft = new FFT(SIZE);
+        public FFTAudioProcessor(final float samplingRate, final int size) {
+            fft = new FFT(size);
+            this.sampleRate = samplingRate;
+            this.fftSize = size;
         }
 
         /*
@@ -243,7 +246,7 @@ public class PitchToMidi extends AbstractTarsosApp {
         @Override
         public void proccess(final float[] audioBuffer) {
             fft.forwardTransform(audioBuffer);
-            final float[] amplitudes = new float[SIZE];
+            final float[] amplitudes = new float[fftSize];
             fft.modulus(audioBuffer, amplitudes);
             for (int i = 0; i < amplitudes.length; i++) {
                 final float ampl = (float) Math.log1p(amplitudes[i]);
@@ -260,7 +263,7 @@ public class PitchToMidi extends AbstractTarsosApp {
             for (int i = START_MIDI_KEY; i < STOP_MIDI_KEY; i++) {
                 final Pitch pitchObj = Pitch.getInstance(PitchUnit.MIDI_KEY, i);
                 final double pitchInHz = pitchObj.getPitch(PitchUnit.HERTZ);
-                final int bin = (int) (pitchInHz * 1024.0 / 44100.0);
+                final int bin = (int) (pitchInHz * fftSize / sampleRate);
                 keyOn[i] = amplitudes[bin] > MIN_MIDI_VELOCITY;
                 velocities[i] = (int) amplitudes[bin];
             }
@@ -268,11 +271,6 @@ public class PitchToMidi extends AbstractTarsosApp {
             sendNoteMessages();
 
             bufferCount++;
-
-            if (bufferCount % 1000 == 0) {
-                Tarsos.println(bufferCount * 1024.0 / 44100.0 + "s");
-            }
-
         }
 
         /*
