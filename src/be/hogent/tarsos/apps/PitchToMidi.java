@@ -189,7 +189,7 @@ public class PitchToMidi extends AbstractTarsosApp {
                     line.open(format, numberOfSamples);
                     line.start();
                     final AudioInputStream stream = new AudioInputStream(line);
-                    proc = new RealTimeAudioProcessor(stream, samplesPerBuffer);
+                    proc = new RealTimeAudioProcessor(stream, samplesPerBuffer, 0, true);
                 } else {
                     final String path = new AudioFile(inputAudio).transcodedPath();
                     proc = new RealTimeAudioProcessor(path, samplesPerBuffer);
@@ -289,7 +289,7 @@ public class PitchToMidi extends AbstractTarsosApp {
         private final PurePitchDetector pure;
 
         public PitchAudioProcessor(final double sampleRate) {
-            pure = new Yin((float) sampleRate);
+            pure = new Yin((float) sampleRate, 1024, 512);
         }
 
         /*

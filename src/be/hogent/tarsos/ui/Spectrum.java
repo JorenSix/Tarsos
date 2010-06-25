@@ -7,8 +7,10 @@ import java.awt.Graphics2D;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
@@ -60,7 +62,8 @@ public final class Spectrum extends JFrame implements AudioProcessor {
         hightWaterMarks = new float[bins * 2];
         highestWaterMark = 1;
 
-        final RealTimeAudioProcessor rtap = new RealTimeAudioProcessor(audioFile.transcodedPath(), bins * 4);
+        final RealTimeAudioProcessor rtap = new RealTimeAudioProcessor(AudioSystem
+                .getAudioInputStream(new File(audioFile.transcodedPath())), bins * 4, 5, true);
         rtap.addAudioProcessor(this);
         new Thread(rtap).start();
 

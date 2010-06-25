@@ -10,21 +10,26 @@ package be.hogent.tarsos.pitch.pure;
  */
 public final class Yin implements PurePitchDetector {
     /**
-     * The expected size of an audio buffer (in samples).
+     * The default YIN threshold value. Should be around 0.10~0.15. See YIN
+     * paper for more information.
      */
-    public static final int BUFFER_SIZE = 1024;
+    private static final double DEFAULT_THRESHOLD = 0.15;
 
     /**
-     * Overlap defines how much two audio buffers following each other should
-     * overlap (in samples).
+     * The default size of an audio buffer (in samples).
      */
-    public static final int OVERLAP = 512;
+    public static final int DEFAULT_BUFFER_SIZE = 1024;
 
     /**
-     * The AUBIO_YIN threshold value. Should be around 0.10~0.15. See YIN paper
-     * for more information.
+     * The default overlap of two consecutive audio buffers (in samples).
      */
-    private static final double THRESHOLD = 0.15;
+    public static final int DEFAULT_OVERLAP = 512;
+
+
+    /**
+     * The actual YIN threshold.
+     */
+    private final double threshold;
 
     /**
      * The audio sample rate. Most audio has a sample rate of 44.1kHz.
@@ -37,9 +42,14 @@ public final class Yin implements PurePitchDetector {
      */
     private final float[] yinBuffer;
 
-    public Yin(final float audioSampleRate) {
+    public Yin(final float audioSampleRate, final int bufferSize) {
+        this(audioSampleRate, bufferSize, DEFAULT_THRESHOLD);
+    }
+
+    public Yin(final float audioSampleRate, final int bufferSize, final double yinThreshold) {
         this.sampleRate = audioSampleRate;
-        yinBuffer = new float[BUFFER_SIZE / 2];
+        this.threshold = yinThreshold;
+        yinBuffer = new float[bufferSize / 2];
     }
 
     /**
@@ -127,7 +137,7 @@ public final class Yin implements PurePitchDetector {
         // than the AUBIO implementation
         int tau = 1;
         for (tau = 1; tau < yinBuffer.length; tau++) {
-            if (yinBuffer[tau] < Yin.THRESHOLD) {
+            if (yinBuffer[tau] < threshold) {
                 while (tau + 1 < yinBuffer.length && yinBuffer[tau + 1] < yinBuffer[tau]) {
                     tau++;
                 }
@@ -137,7 +147,7 @@ public final class Yin implements PurePitchDetector {
         }
 
         // if no pitch found, tau => -1
-        if (tau == yinBuffer.length || yinBuffer[tau] >= Yin.THRESHOLD) {
+        if (tau == yinBuffer.length || yinBuffer[tau] >= threshold) {
             tau = -1;
         }
 

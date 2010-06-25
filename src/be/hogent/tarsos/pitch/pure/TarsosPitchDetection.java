@@ -76,8 +76,7 @@ public final class TarsosPitchDetection implements PitchDetector {
     }
 
     /**
-     * Annotate a file wit pitch information.
-     * 
+     * Annotate a file with pitch information.
      * @param fileName
      *            the file to annotate.
      * @param detectedPitchHandler
@@ -98,7 +97,6 @@ public final class TarsosPitchDetection implements PitchDetector {
 
     /**
      * Annotate an audio stream: useful for real-time pitch tracking.
-     * 
      * @param afis
      *            The audio stream.
      * @param detectedPitchHandler
@@ -134,12 +132,12 @@ public final class TarsosPitchDetection implements PitchDetector {
             bufferSize = McLeodPitchMethod.DEFAULT_BUFFER_SIZE;
             overlapSize = McLeodPitchMethod.DEFAULT_OVERLAP;
         } else if (PitchDetectionMode.TARSOS_YIN == detectionMode) {
-            pureDetector = new Yin(sampleRate);
-            bufferSize = Yin.BUFFER_SIZE;
-            overlapSize = Yin.OVERLAP;
+            pureDetector = new Yin(sampleRate, Yin.DEFAULT_BUFFER_SIZE);
+            bufferSize = Yin.DEFAULT_BUFFER_SIZE;
+            overlapSize = Yin.DEFAULT_OVERLAP;
         } else {
-            bufferSize = Yin.BUFFER_SIZE;
-            overlapSize = Yin.OVERLAP;
+            bufferSize = Yin.DEFAULT_BUFFER_SIZE;
+            overlapSize = Yin.DEFAULT_OVERLAP;
             pureDetector = new MetaPitchDetector(sampleRate);
         }
 

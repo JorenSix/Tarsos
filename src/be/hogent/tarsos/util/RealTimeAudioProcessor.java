@@ -23,6 +23,9 @@ import com.sun.media.sound.AudioFloatConverter;
  * Behavior.
  * @author Joren Six
  */
+/**
+ * @author Joren Six
+ */
 public final class RealTimeAudioProcessor implements Runnable {
 
     /**
@@ -39,16 +42,36 @@ public final class RealTimeAudioProcessor implements Runnable {
      * This buffer is reused again and again to store audio data using the float
      * data type.
      */
-    private final float[] audioBuffer;
+    private final float[] audioFloatBuffer;
+
+    /**
+     * This buffer is reused again and again to store audio data using the byte
+     * data type.
+     */
+    private final byte[] audioByteBuffer;
+
     /**
      * The line to send sound to. Is also used to keep everything in sync.
      */
-    private final SourceDataLine line;
+    private SourceDataLine line;
     /**
      * A list of registered audio processors. The audio processors are
      * responsible for actually doing the digital signal processing
      */
     private final List<AudioProcessor> audioProcessors;
+
+    private final boolean realTime;
+
+    final AudioFloatConverter converter;
+
+    /**
+     * The floatOverlap: the number of elements that are copied in the buffer
+     * from the previous buffer. Overlap should be smaller (strict) than the
+     * buffer size and can be zero.
+     */
+    private final int floatOverlap, floatStepSize;
+
+    private final int byteOverlap, byteStepSize;
 
     /**
      * Initialize the processor using a file and a size.
@@ -69,21 +92,37 @@ public final class RealTimeAudioProcessor implements Runnable {
     public RealTimeAudioProcessor(final String fileName, final int audioBufferSize)
     throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
-        this(AudioSystem.getAudioInputStream(new File(fileName)), audioBufferSize);
+        this(AudioSystem.getAudioInputStream(new File(fileName)), audioBufferSize, 0, true);
     }
 
-    public RealTimeAudioProcessor(final AudioInputStream stream, final int audioBufferSize)
+    public RealTimeAudioProcessor(final AudioInputStream stream, final int audioBufferSize,
+            final int bufferOverlap, final boolean play)
     throws UnsupportedAudioFileException, IOException, LineUnavailableException {
 
-        audioBuffer = new float[audioBufferSize];
+
         audioProcessors = new ArrayList<AudioProcessor>();
         audioInputStream = stream;
+        realTime = play;
 
         final AudioFormat format = audioInputStream.getFormat();
-        final DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-        line = (SourceDataLine) AudioSystem.getLine(info);
-        line.open();
-        line.start();
+        final int numberOfBytesForFloat = format.getFrameSize();
+
+        converter = AudioFloatConverter.getConverter(format);
+
+        audioFloatBuffer = new float[audioBufferSize];
+        floatOverlap = bufferOverlap;
+        floatStepSize = audioFloatBuffer.length - floatOverlap;
+
+        audioByteBuffer = new byte[audioFloatBuffer.length * numberOfBytesForFloat];
+        byteOverlap = floatOverlap * numberOfBytesForFloat;
+        byteStepSize = floatStepSize * numberOfBytesForFloat;
+
+        if (play) {
+            final DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+            line = (SourceDataLine) AudioSystem.getLine(info);
+            line.open();
+            line.start();
+        }
     }
 
     /**
@@ -98,15 +137,12 @@ public final class RealTimeAudioProcessor implements Runnable {
     @Override
     public void run() {
         try {
-            final AudioFormat format = audioInputStream.getFormat();
-
-            final AudioFloatConverter converter = AudioFloatConverter.getConverter(format);
-            // bytes for a float:
-            final byte[] audioByteBuffer = new byte[audioBuffer.length * format.getSampleSizeInBits() / 8];
             int bytesRead;
+
+            // read and play (if wanted) the first full buffer.
             bytesRead = audioInputStream.read(audioByteBuffer);
-            while (bytesRead != -1) {
-                converter.toFloatArray(audioByteBuffer, audioBuffer);
+            converter.toFloatArray(audioByteBuffer, audioFloatBuffer);
+            if (realTime) {
                 // converter.toFloatArray(in_buff, out_buff, out_offset,
                 // out_len)
 
@@ -123,11 +159,18 @@ public final class RealTimeAudioProcessor implements Runnable {
                 // Taking Java™ RIA to the Extreme with Animation, Multimedia,
                 // and Game Element
                 // Chapter 9 page 185
+
                 line.write(audioByteBuffer, 0, audioByteBuffer.length);
+            }
+            while (bytesRead != -1) {
                 for (final AudioProcessor processor : audioProcessors) {
-                    processor.proccess(audioBuffer);
+                    processor.proccess(audioFloatBuffer);
                 }
-                bytesRead = audioInputStream.read(audioByteBuffer);
+
+                bytesRead = slideBuffer();
+                if (realTime) {
+                    line.write(audioByteBuffer, byteOverlap, byteStepSize);
+                }
             }
             for (final AudioProcessor processor : audioProcessors) {
                 processor.processingFinished();
@@ -139,6 +182,45 @@ public final class RealTimeAudioProcessor implements Runnable {
     }
 
     /**
+     * Slides a buffer with an floatOverlap and reads new data from the stream.
+     * to the correct place in the buffer. E.g. with a buffer size of 9 and
+     * floatOverlap of 3.
+     * 
+     * <pre>
+     *      | 0 | 1 | 3 | 3 | 4  | 5  | 6  | 7  | 8  |
+     *                        |
+     *                Slide (9 - 3 = 6)
+     *                        |
+     *                        v
+     *      | 6 | 7 | 8 | _ | _  | _  | _  | _  | _  |
+     *                        |
+     *        Fill from 3 to (3+6) exclusive
+     *                        |
+     *                        v
+     *      | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 |
+     * </pre>
+     * 
+     * @return The number of bytes read.
+     * @throws IOException
+     *             When something goes wrong while reading the stream. In
+     *             particular, an IOException is thrown if the input stream has
+     *             been closed.
+     */
+    private int slideBuffer() throws IOException {
+        assert floatOverlap < audioFloatBuffer.length;
+
+        for (int i = 0; i < floatOverlap; i++) {
+            audioFloatBuffer[i] = audioFloatBuffer[i + floatStepSize];
+        }
+
+        final int bytesRead = audioInputStream.read(audioByteBuffer, byteOverlap, byteStepSize);
+        converter.toFloatArray(audioByteBuffer, byteOverlap, audioFloatBuffer, floatOverlap,
+                floatStepSize);
+
+        return bytesRead;
+    }
+
+    /**
      * AudioProcessors are responsible for actually doing the digital signal
      * processing. The interface is simple: a buffer with some floats.
      * @author Joren Six
@@ -146,7 +228,8 @@ public final class RealTimeAudioProcessor implements Runnable {
     public interface AudioProcessor {
         /**
          * Do the actual signal processing on a buffer.
-         * @param audioBuffer
+         * 
+         * @param audioFloatBuffer
          *            The buffer containing the audio information using floats.
          */
         void proccess(final float[] audioBuffer);

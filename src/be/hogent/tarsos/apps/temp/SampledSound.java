@@ -60,6 +60,7 @@ public final class SampledSound {
         line.open(format);
         line.start();
         line.write(byteBuffer, 0, byteBuffer.length);
+        line.drain();
         line.close();
     }
 

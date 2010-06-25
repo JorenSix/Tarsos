@@ -20,7 +20,7 @@ public final class MetaPitchDetector implements PurePitchDetector {
     private final PurePitchDetector mpm;
 
     public MetaPitchDetector(final float samplingRate) {
-        yin = new Yin(samplingRate);
+        yin = new Yin(samplingRate, 1024, 512);
         mpm = new McLeodPitchMethod(samplingRate, 1024);
     }
 
