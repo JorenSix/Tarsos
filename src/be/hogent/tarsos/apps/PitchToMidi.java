@@ -31,12 +31,12 @@ import be.hogent.tarsos.pitch.PitchConverter;
 import be.hogent.tarsos.pitch.PitchUnit;
 import be.hogent.tarsos.pitch.pure.PurePitchDetector;
 import be.hogent.tarsos.pitch.pure.Yin;
+import be.hogent.tarsos.sampled.AudioProcessor;
+import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FFT;
 import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.RealTimeAudioProcessor;
 import be.hogent.tarsos.util.SignalPowerExtractor;
-import be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor;
 
 /**
  * @author Joren Six
@@ -179,7 +179,7 @@ public class PitchToMidi extends AbstractTarsosApp {
                 }
 
 
-                final RealTimeAudioProcessor proc;
+                final AudioDispatcher proc;
                 if (!fromFile) {
                     final Mixer mixer = Tarsos.chooseMixerDevice();
                     final AudioFormat format = new AudioFormat(samplingRate, 16, 1, true, false);
@@ -189,10 +189,10 @@ public class PitchToMidi extends AbstractTarsosApp {
                     line.open(format, numberOfSamples);
                     line.start();
                     final AudioInputStream stream = new AudioInputStream(line);
-                    proc = new RealTimeAudioProcessor(stream, samplesPerBuffer, 0, true);
+                    proc = new AudioDispatcher(stream, samplesPerBuffer, 0);
                 } else {
                     final String path = new AudioFile(inputAudio).transcodedPath();
-                    proc = new RealTimeAudioProcessor(path, samplesPerBuffer);
+                    proc = AudioDispatcher.fromFile(new File(path), samplesPerBuffer);
                 }
 
                 proc.addAudioProcessor(processor);
@@ -244,7 +244,7 @@ public class PitchToMidi extends AbstractTarsosApp {
          * (float[])
          */
         @Override
-        public void proccess(final float[] audioBuffer) {
+        public void processOverlapping(final float[] audioBuffer, final byte[] audioByteBuffer) {
             fft.forwardTransform(audioBuffer);
             final float[] amplitudes = new float[fftSize];
             fft.modulus(audioBuffer, amplitudes);
@@ -283,6 +283,19 @@ public class PitchToMidi extends AbstractTarsosApp {
         public void processingFinished() {
             cleanup();
         }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see
+         * be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#processFull
+         * (float[], byte[])
+         */
+        @Override
+        public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
+            processOverlapping(audioFloatBuffer, audioByteBuffer);
+        }
+
     }
 
     private class PitchAudioProcessor implements AudioProcessor {
@@ -299,7 +312,7 @@ public class PitchToMidi extends AbstractTarsosApp {
          * (float[])
          */
         @Override
-        public void proccess(final float[] audioBuffer) {
+        public void processOverlapping(final float[] audioBuffer, final byte[] audioByteBuffer) {
             final float pitch = pure.getPitch(audioBuffer);
             final double midiCentValue = PitchConverter.hertzToMidiCent(pitch);
             final int midiKey = (int) midiCentValue;
@@ -330,6 +343,18 @@ public class PitchToMidi extends AbstractTarsosApp {
         @Override
         public void processingFinished() {
             cleanup();
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see
+         * be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#processFull
+         * (float[], byte[])
+         */
+        @Override
+        public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
+            processOverlapping(audioFloatBuffer, audioByteBuffer);
+
         }
     }
 

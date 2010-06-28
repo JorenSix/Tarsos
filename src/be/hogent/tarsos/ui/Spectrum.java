@@ -10,15 +10,17 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 
+import be.hogent.tarsos.sampled.AudioProcessor;
+import be.hogent.tarsos.sampled.BlockingAudioPlayer;
+import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FFT;
-import be.hogent.tarsos.util.RealTimeAudioProcessor;
-import be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor;
 
 /**
  * Shows a spectrum for a file.
@@ -62,8 +64,12 @@ public final class Spectrum extends JFrame implements AudioProcessor {
         hightWaterMarks = new float[bins * 2];
         highestWaterMark = 1;
 
-        final RealTimeAudioProcessor rtap = new RealTimeAudioProcessor(AudioSystem
-                .getAudioInputStream(new File(audioFile.transcodedPath())), bins * 4, 5, true);
+        final int bufferSize = bins * 4;
+        final int overlap = 0;
+
+        final AudioInputStream stream = AudioSystem.getAudioInputStream(new File(audioFile.transcodedPath()));
+        final AudioDispatcher rtap = new AudioDispatcher(stream, bufferSize, overlap);
+        rtap.addAudioProcessor(new BlockingAudioPlayer(stream.getFormat(), bufferSize, overlap));
         rtap.addAudioProcessor(this);
         new Thread(rtap).start();
 
@@ -89,13 +95,19 @@ public final class Spectrum extends JFrame implements AudioProcessor {
         g.drawImage(buffer, 0, 0, null);
     }
 
+    public static void main(final String... args) throws UnsupportedAudioFileException, IOException,
+    LineUnavailableException {
+        final AudioFile f = new AudioFile("audio/MR.1975.26.43-4.wav");
+        new Spectrum(f, 128);
+    }
+
     @Override
-    public void proccess(final float[] audioBuffer) {
+    public void processOverlapping(final float[] audioBuffer, final byte[] audioByteBuffer) {
         bufferGraphics.setColor(Color.BLACK);
         bufferGraphics.clearRect(0, 0, getWidth(), getHeight());
-
-        fft.forwardTransform(audioBuffer);
-        fft.modulus(audioBuffer, amplitudes);
+        final float[] audioBufferClone = audioBuffer.clone();
+        fft.forwardTransform(audioBufferClone);
+        fft.modulus(audioBufferClone, amplitudes);
 
         for (int i = 0; i < amplitudes.length / 2; i++) {
             bufferGraphics.setColor(Color.BLUE);
@@ -104,21 +116,16 @@ public final class Spectrum extends JFrame implements AudioProcessor {
             hightWaterMarks[i] = Math.max(height, hightWaterMarks[i]);
             highestWaterMark = Math.max(highestWaterMark, hightWaterMarks[i]);
 
-            bufferGraphics.fillRect(i * barWidth + barWidth, barMaxHeight - height, barWidth,
-                    height);
+            bufferGraphics.fillRect(i * barWidth + barWidth, barMaxHeight - height, barWidth, height);
             bufferGraphics.setColor(Color.RED);
             bufferGraphics.fillRect(i * barWidth + barWidth, (int) (barMaxHeight - hightWaterMarks[i]),
                     barWidth, 2);
             hightWaterMarks[i] = hightWaterMarks[i] - 1;
         }
 
-        repaint();
-    }
+        System.out.println(highestWaterMark + "");
 
-    public static void main(final String... args) throws UnsupportedAudioFileException, IOException,
-    LineUnavailableException {
-        final AudioFile f = new AudioFile("audio/MR.1975.26.43-4.wav");
-        new Spectrum(f, 128);
+        repaint();
     }
 
     /*
@@ -128,5 +135,16 @@ public final class Spectrum extends JFrame implements AudioProcessor {
      */
     @Override
     public void processingFinished() {
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see
+     * be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#processFull
+     * (float[], byte[])
+     */
+    @Override
+    public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
+        processOverlapping(audioFloatBuffer, audioByteBuffer);
     }
 }
