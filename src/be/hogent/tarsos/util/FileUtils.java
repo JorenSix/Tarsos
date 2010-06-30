@@ -33,6 +33,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import be.hogent.tarsos.pitch.Pitch;
+import be.hogent.tarsos.pitch.PitchUnit;
+import be.hogent.tarsos.pitch.Sample;
+
 
 /**
  * Exports a DatabaseResult to a CSV-file.
@@ -41,6 +45,40 @@ import java.util.regex.Pattern;
 public final class FileUtils {
     private static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
 
+    /**
+     * Parses files that can be exported from <a
+     * href="http://miracle.otago.ac.nz/postgrads/tartini/">The Tartini
+     * program</a>. The files look like this (with header):
+     * <pre>
+     *        Time(secs) Pitch(semi-tones)       Volume(rms)
+     *                  0                 0              -150
+     *           0.301859           72.3137          -108.931
+     *           0.325079           72.0692          -79.6062
+     *           0.348299           71.9804           -64.634
+     *           0.371519           71.9619          -59.5387
+     *           0.394739           71.9699          -59.0133
+     *           0.417959           71.9717           -59.567
+     *           0.441179           71.9854          -59.7326
+     *           0.464399            72.011          -58.6959
+     * </pre>
+     * @param fileName
+     *            The Tartini pitch file.
+     * @return
+     */
+    public static List<Sample> parseTartiniPitchFile(final String fileName) {
+        final List<Sample> samples = new ArrayList<Sample>();
+        final String contents = FileUtils.readFile(fileName);
+        final String[] lines = contents.split("\n");
+        for (int i = 1; i < lines.length; i++) {
+            final String[] data = lines[i].split(" +");
+            final double time = Double.parseDouble(data[1]);
+            final double midiCents = Double.parseDouble(data[2]);
+            final Pitch pitch = Pitch.getInstance(PitchUnit.MIDI_CENT, midiCents);
+            final Sample s = new Sample((long) (time * 1000), pitch.getPitch(PitchUnit.HERTZ));
+            samples.add(s);
+        }
+        return samples;
+    }
 
 
     public static String temporaryDirectory() {
