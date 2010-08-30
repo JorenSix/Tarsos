@@ -1,15 +1,8 @@
 package be.hogent.tarsos.midi;
 
-import jass.engine.BufferNotAvailableException;
-import jass.engine.SinkIsFullException;
-import jass.generators.LoopBuffer;
-import jass.generators.Mixer;
-import jass.render.SourcePlayer;
-
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -18,8 +11,12 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.hogent.tarsos.pitch.PitchFunctions;
+import be.hogent.tarsos.sampled.AudioDispatcher;
+import be.hogent.tarsos.sampled.BlockingAudioPlayer;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SignalPowerExtractor;
 
@@ -31,6 +28,11 @@ import be.hogent.tarsos.util.SignalPowerExtractor;
  * @author Joren Six
  */
 public final class ToneSequenceBuilder {
+
+    /**
+     * Crossfade consecutive tones for a tenth of a second to get a smooth wave.
+     */
+    private static final double FADE_TIME = 0.1;
 
     /**
      * A list of frequencies.
@@ -64,7 +66,6 @@ public final class ToneSequenceBuilder {
      * 0 seconds. The entries should be added <b>chronologically</b>! Strange
      * things will happen if you ignore this rule.
      * </p>
-     * 
      * @param frequency
      *            the frequency in Hertz of the tone to add
      * @param realTime
@@ -80,7 +81,6 @@ public final class ToneSequenceBuilder {
     public void addTone(final double frequency, final double realTime, final double power) {
         frequencies.add(frequency);
         realTimes.add(realTime);
-        realTimes.add(realTime);
         powers.add(power);
     }
 
@@ -93,23 +93,6 @@ public final class ToneSequenceBuilder {
         realTimes.clear();
     }
 
-    /**
-     * Returns a URL to a sine wave WAV file. If the file is not found it
-     * unpacks a sine wave WAV file from the jar file to a temporary directory
-     * (java.io.tmpdir).
-     * 
-     * @return the URL to the audio file.
-     * @throws IOException
-     *             when the file is not accessible or when the user has no
-     *             rights to write in the temporary directory.
-     */
-    private URL sineWaveURL() throws IOException {
-        final File sineWaveFile = new File(FileUtils.combine(FileUtils.temporaryDirectory(), "sin20ms.wav"));
-        if (!sineWaveFile.exists()) {
-            FileUtils.copyFileFromJar("be.hogent.tarsos.midi.sin20ms.wav", sineWaveFile.getAbsolutePath());
-        }
-        return sineWaveFile.toURI().toURL();
-    }
 
     public void playAnnotations(final int smootFilterWindowSize) {
         try {
@@ -117,13 +100,10 @@ public final class ToneSequenceBuilder {
         } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (final SinkIsFullException e) {
+        } catch (final UnsupportedAudioFileException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (final InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final BufferNotAvailableException e) {
+        } catch (final LineUnavailableException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -134,13 +114,7 @@ public final class ToneSequenceBuilder {
      * respective durations (start times). If the fileName the file played.
      * 
      * @param fileName
-     *            the name of the file to render. e.g. "out.wav". Also temporary
-     *            .raw file is generated: e.g. out.wav.raw. It can not be
-     *            deleted using java because the library jass keeps the file
-     *            open until garbage collection. A delete on exit is requested
-     *            but can fail. Manually deleting the raw files is advised. So
-     *            beware when generating a lot of files: temporarily you need
-     *            twice the amount of hard disk space.
+     *            The name of the file to render. e.g. "out.wav".
      * @param smootFilterWindowSize
      *            to prevent (very) sudden changes in the frequency of tones a
      *            smoothing function can be applied. The window size of the
@@ -151,12 +125,14 @@ public final class ToneSequenceBuilder {
      *            <em>median filter</em> is used.
      * @throws IOException
      *             When something goes awry.
+     * @throws UnsupportedAudioFileException
+     * @throws LineUnavailableException
      * @throws SinkIsFullException
      * @throws InterruptedException
      * @throws BufferNotAvailableException
      */
     public void writeFile(final String fileName, final int smootFilterWindowSize) throws IOException,
-    SinkIsFullException, InterruptedException, BufferNotAvailableException {
+    UnsupportedAudioFileException, LineUnavailableException {
         // invariant: at any time the lists are equal in length
         assert frequencies.size() == realTimes.size();
 
@@ -165,68 +141,60 @@ public final class ToneSequenceBuilder {
             powers = PitchFunctions.medianFilter(powers, smootFilterWindowSize);
         }
 
-        final URL sine50Hz44100 = sineWaveURL();
+        final double sampleRate = 44100.0;
+        final double lenghtInSeconds = realTimes.get(realTimes.size() - 1);
 
-        final float baseFreqWavFile = 50;
-        final float srate = 44100.f;
-        final int bufferSize = 1024;
-        final LoopBuffer tone = new LoopBuffer(srate, bufferSize, sine50Hz44100);
-        SourcePlayer player;
-        if (fileName != null) {
-            final String rawFileName = fileName + ".raw";
-            player = new SourcePlayer(bufferSize, srate, rawFileName);
-        } else {
-            player = new SourcePlayer(bufferSize, srate);
-        }
+        final int numberOfSamples = (int) (lenghtInSeconds * sampleRate);
+        final byte[] byteBuffer = new byte[numberOfSamples * 2];
+        final float[] floatBuffer = new float[numberOfSamples];
 
-        final Mixer mixer = new Mixer(bufferSize, 1);
-        player.addSource(mixer);
-        mixer.addSource(tone);
-        tone.setSpeed(0f / baseFreqWavFile);
-        if (fileName == null) {
-            player.start();
-        }
-
+        double previousTime = 0;
         for (int i = 0; i < frequencies.size(); i++) {
-            final double freq = frequencies.get(i) == -1.0 ? 0.0 : frequencies.get(i);
-            tone.setSpeed((float) freq / baseFreqWavFile);
-            mixer.setGain(0, (float) (1.41421 * Math.log(powers.get(i).floatValue()) / Math.log(1.6)));
-            if (fileName == null) {
-                if (i > 0) {
-                    Thread.sleep(Math.round((realTimes.get(i) - realTimes.get(i - 1)) * 1000));
-                }
-            } else {
-                player.advanceTime(realTimes.get(i));
+            final double frequency = frequencies.get(i);
+            final double currentTime = realTimes.get(i);
+            final double amplitude = powers.get(i);
+
+            final double twoPiF = 2 * Math.PI * frequency;
+
+            final int startSample = (int) (previousTime * sampleRate);
+            final int stopSample = (int) (currentTime * sampleRate);
+
+            // signal
+            for (int sample = startSample; sample < stopSample; sample++) {
+                final double time = sample / sampleRate;
+                final double fundamental = amplitude * Math.sin(twoPiF * time);
+                final double firstHarmonic = amplitude / 8 * Math.sin(twoPiF * 2 * time);
+                final double secondHarmonic = amplitude / 16 * Math.sin(twoPiF * 4 * time);
+                floatBuffer[sample] = (float) (fundamental + firstHarmonic + secondHarmonic);
             }
+            previousTime = currentTime;
         }
 
-        if (fileName != null) {
-            final String rawFileName = fileName + ".raw";
-            convertRawToWav(srate, rawFileName, fileName);
-            new File(rawFileName).deleteOnExit();
+        /*
+         * convert manually to PCM 16bits Little Endian, (still 44.1kHz) => 2
+         * bytes per sample.
+         */
+        for (int sample = 0; sample < numberOfSamples; sample++) {
+            final int quantizedValue = (int) (floatBuffer[sample] * 32767);
+            byteBuffer[sample * 2] = (byte) quantizedValue;
+            byteBuffer[sample * 2 + 1] = (byte) (quantizedValue >>> 8);
+        }
+
+
+        final AudioFormat audioFormat = new AudioFormat((float) sampleRate, 16, 1, true, false);
+        final ByteArrayInputStream bais = new ByteArrayInputStream(byteBuffer);
+        final AudioInputStream audioInputStream = new AudioInputStream(bais, audioFormat, numberOfSamples);
+        if (fileName == null) {
+            final AudioDispatcher dispatcher = new AudioDispatcher(audioInputStream, 1024, 0);
+            dispatcher.addAudioProcessor(new BlockingAudioPlayer(audioFormat, 1024, 0));
+            dispatcher.run();
+        } else {
+            final File out = new File(fileName);
+            AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, out);
+            audioInputStream.close();
         }
     }
 
-    /**
-     * Adds a correct header to a raw file.
-     * 
-     * @throws IOException
-     */
-    private void convertRawToWav(final double srate, final String rawFileName, final String wavFileName) throws IOException {
-        final FileInputStream inStream = new FileInputStream(new File(rawFileName));
-        final File out = new File(wavFileName);
-        final int bytesAvailable = inStream.available();
-        final int sampleSizeInBits = 16;
-        final int channels = 1;
-        final boolean signed = false;
-        final boolean bigEndian = false;
-        final AudioFormat audioFormat = new AudioFormat((float) srate, sampleSizeInBits, channels, signed,
-                bigEndian);
-        final AudioInputStream audioInputStream = new AudioInputStream(inStream, audioFormat, bytesAvailable / 2);
-        AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, out);
-        audioInputStream.close();
-        inStream.close();
-    }
 
     /**
      * Read data from a CSV-File, handle it with the handler, smooth it and save
@@ -413,5 +381,4 @@ public final class ToneSequenceBuilder {
             extr = extractor;
         }
     }
-
 }
