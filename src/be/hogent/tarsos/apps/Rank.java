@@ -102,7 +102,7 @@ public final class Rank extends AbstractTarsosApp {
         }
     }
 
-    private void iterateDirectory(final File file, final List<File> files){
+    private void iterateDirectory(final File file, final List<File> files) {
         if (file.isDirectory()) {
             for (final String child : file.list()) {
                 iterateDirectory(new File(file, child), files);

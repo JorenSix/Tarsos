@@ -13,7 +13,8 @@ import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
 public final class HistogramSummationTest {
-
+    private HistogramSummationTest() {
+    }
     /**
      * Tests if summing histograms constructed with different pitch extractors
      * is useful.

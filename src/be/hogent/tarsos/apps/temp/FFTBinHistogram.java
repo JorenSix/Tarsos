@@ -17,57 +17,59 @@ import com.sun.media.sound.AudioFloatInputStream;
 
 public final class FFTBinHistogram {
 
+    private FFTBinHistogram() {
+    }
     /**
      * @param args
      * @throws IOException
      * @throws UnsupportedAudioFileException
      */
-    public static void main(String[] args) {
-        AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test",
+    public static void main(final String[] args) {
+        final AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test",
                 "data", "power_test.wav"));
         AudioInputStream stream = null;
         try {
             stream = AudioSystem.getAudioInputStream(new File(audioFile.path()));
-            AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(stream);
+            final AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(stream);
 
-            int readAmount = 16384 / 2;
-            float[] buffer = new float[readAmount];
-            AudioFormat format = stream.getFormat();
-            double sampleRate = format.getSampleRate();
-            double[] spectrum = new double[readAmount];
+            final int readAmount = 16384 / 2;
+            final float[] buffer = new float[readAmount];
+            final AudioFormat format = stream.getFormat();
+            final double sampleRate = format.getSampleRate();
+            final double[] spectrum = new double[readAmount];
 
-            FFT fft = new FFT(format.getFrameSize());
+            final FFT fft = new FFT(format.getFrameSize());
 
             try {
                 while (afis.read(buffer, 0, readAmount) != -1) {
                     fft.forwardTransform(buffer);
 
                     for (int j = 0; j < buffer.length / 2; j += 2) {
-                        double amplitude = buffer[j] * buffer[j] + buffer[j + 1] * buffer[j + 1];
+                        final double amplitude = buffer[j] * buffer[j] + buffer[j + 1] * buffer[j + 1];
 
                         spectrum[j] = +amplitude;
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 
-            AmbitusHistogram ambitusHistogram = new AmbitusHistogram();
+            final AmbitusHistogram ambitusHistogram = new AmbitusHistogram();
 
             for (int i = 0; i < buffer.length / 2; i++) {
                 double amplitude = spectrum[i];
                 amplitude = 20.0 * Math.log1p(amplitude);
-                double pitch = i * sampleRate / buffer.length / 2;
+                final double pitch = i * sampleRate / buffer.length / 2;
                 ambitusHistogram.setCount(pitch, (long) (amplitude * 10000000));
             }
             ambitusHistogram.plot("fft amb.png", "amb fft");
             ambitusHistogram.toneScaleHistogram().plot("fft tone scale.png", "fft tone scale test");
 
-        } catch (UnsupportedAudioFileException e) {
+        } catch (final UnsupportedAudioFileException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

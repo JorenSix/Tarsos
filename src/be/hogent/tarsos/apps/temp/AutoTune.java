@@ -22,6 +22,9 @@ import com.sun.media.sound.AudioFloatConverter;
 import com.sun.media.sound.AudioFloatInputStream;
 
 public final class AutoTune {
+
+    private AutoTune() {
+    }
     /**
      * Log messages.
      */
@@ -91,7 +94,7 @@ public final class AutoTune {
         }
     }
 
-    private final static class AudioProcessor implements Runnable {
+    private static final class AudioProcessor implements Runnable {
 
         AudioFloatInputStream afis;
         float[] audioBuffer;

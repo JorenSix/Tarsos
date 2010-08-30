@@ -20,6 +20,9 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 public final class PeakExtractor {
 
+    private PeakExtractor() {
+    }
+
     private static void appendFile(final List<Peak> peaks) {
         final StringBuilder sb = new StringBuilder();
         sb.append(peaks.size()).append(";");

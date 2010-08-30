@@ -18,24 +18,26 @@ import be.hogent.tarsos.util.SimplePlot;
 import com.sun.media.sound.AudioFloatInputStream;
 
 public final class FFTTest {
+    private FFTTest() {
+    }
 
-    public static void main(String... args) throws UnsupportedAudioFileException, IOException {
-        AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test",
+    public static void main(final String... args) throws UnsupportedAudioFileException, IOException {
+        final AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test",
                 "data", "power_test.wav"));
-        AudioInputStream stream = AudioSystem.getAudioInputStream(new File(audioFile.path()));
-        AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(stream);
+        final AudioInputStream stream = AudioSystem.getAudioInputStream(new File(audioFile.path()));
+        final AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(stream);
 
-        int readAmount = 16384 / 2;
-        float[] buffer = new float[readAmount];
-        double[] bufferD = new double[readAmount];
-        SimplePlot plot = new SimplePlot();
-        AudioFormat format = stream.getFormat();
+        final int readAmount = 16384 / 2;
+        final float[] buffer = new float[readAmount];
+        final double[] bufferD = new double[readAmount];
+        final SimplePlot plot = new SimplePlot();
+        final AudioFormat format = stream.getFormat();
 
-        double sampleRate = format.getSampleRate();
+        final double sampleRate = format.getSampleRate();
 
         int index = 0;
 
-        double[] spectrum = new double[readAmount];
+        final double[] spectrum = new double[readAmount];
 
         while (afis.read(buffer, 0, readAmount) != -1) {
 
@@ -44,7 +46,7 @@ public final class FFTTest {
             }
 
             int numberOfFilledBins = 0;
-            Complex[] data = new FastFourierTransformer().transform(bufferD);
+            final Complex[] data = new FastFourierTransformer().transform(bufferD);
             double maxAmplitude = -1;
             double indexOfMostEnergyRichFrequencyBin = -1;
             for (int j = 0; j < data.length / 2; j++) {
@@ -65,14 +67,14 @@ public final class FFTTest {
              * System.out.println(index + " Is percussive"); }
              */
 
-            double mostEnergyRichPitch = indexOfMostEnergyRichFrequencyBin * sampleRate / readAmount; // in
+            final double mostEnergyRichPitch = indexOfMostEnergyRichFrequencyBin * sampleRate / readAmount; // in
             // Hz
             plot.addData(index, mostEnergyRichPitch);
             index++;
         }
         plot.save();
 
-        SimplePlot spectrumPlot = new SimplePlot();
+        final SimplePlot spectrumPlot = new SimplePlot();
         for (int i = 0; i < buffer.length / 2; i++) {
             spectrumPlot.addData(i * sampleRate / readAmount, spectrum[i]);
         }

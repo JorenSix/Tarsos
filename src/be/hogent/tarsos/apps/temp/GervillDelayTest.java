@@ -15,22 +15,25 @@ import be.hogent.tarsos.midi.ReceiverSink;
 
 public final class GervillDelayTest {
 
-    public static void main(String[] args) throws Exception {
+    private GervillDelayTest() {
+    }
+
+    public static void main(final String[] args) throws Exception {
         Receiver recv;
-        MidiDevice outputDevice = Tarsos.chooseMidiDevice(false, true);
+        final MidiDevice outputDevice = Tarsos.chooseMidiDevice(false, true);
         outputDevice.open();
         recv = outputDevice.getReceiver();
-        MidiDevice midiInputDevice = Tarsos.chooseMidiDevice(true, false);
+        final MidiDevice midiInputDevice = Tarsos.chooseMidiDevice(true, false);
         midiInputDevice.open();
-        Transmitter midiInputTransmitter = midiInputDevice.getTransmitter();
+        final Transmitter midiInputTransmitter = midiInputDevice.getTransmitter();
 
         recv = new ReceiverSink(true, recv, new DumpReceiver(System.out));
         midiInputTransmitter.setReceiver(recv);
 
-        ShortMessage msg = new ShortMessage();
+        final ShortMessage msg = new ShortMessage();
 
-        Random rnd = new Random();
-        double[] tunings = new double[128];
+        final Random rnd = new Random();
+        final double[] tunings = new double[128];
         for (int i = 1; i < 128; i++) {
             tunings[i] = i * 100 + rnd.nextDouble() * 400;
         }

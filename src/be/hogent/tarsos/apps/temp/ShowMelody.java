@@ -9,8 +9,8 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.hogent.tarsos.pitch.AubioPitchDetection;
-import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetectionMix;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.ui.PlotThread;
@@ -24,7 +24,7 @@ public final class ShowMelody {
     private ShowMelody() {
     }
 
-    public static void testTonalShiftWithinFile(String fileName) {
+    public static void testTonalShiftWithinFile(final String fileName) {
         /*
          * PitchDetector detector; detector = new IPEMPitchDetection(new
          * AudioFile(fileName)); detector.executePitchDetection(); List<Sample>
@@ -59,7 +59,7 @@ public final class ShowMelody {
          */
     }
 
-    public static void findBestTonalShift(List<String> fileNames) {
+    public static void findBestTonalShift(final List<String> fileNames) {
         /*
          * Histogram bestFirst = null; Histogram bestSecond = null; double
          * highestCorrelation = 0; double bestDisplacementInCents = 0; String
@@ -95,7 +95,7 @@ public final class ShowMelody {
          */
     }
 
-    public static void findBestMatch(List<String> fileNames) {
+    public static void findBestMatch(final List<String> fileNames) {
         /*
          * Histogram bestFirst = null; Histogram bestSecond = null; double
          * highestCorrelation = 0; double bestDisplacementInCents = 0; String
@@ -147,7 +147,7 @@ public final class ShowMelody {
     /**
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         /*
          * for(AudioFile file : AudioFile.audioFiles("formats")){ PitchDetector
          * detector; detector = new
@@ -172,7 +172,7 @@ public final class ShowMelody {
          */
     }
 
-    public static void bestDetector(String fileName) {
+    public static void bestDetector(final String fileName) {
         /*
          * List<PitchDetector> detectors; detectors = new
          * ArrayList<PitchDetector>(); detectors.add(new AubioPitchDetection(new
@@ -203,27 +203,27 @@ public final class ShowMelody {
          */
     }
 
-    public static void showMelody(String fileName) {
+    public static void showMelody(final String fileName) {
         PitchDetector detector;
-        List<PitchDetector> list = new ArrayList<PitchDetector>();
+        final List<PitchDetector> list = new ArrayList<PitchDetector>();
         list.add(new AubioPitchDetection(new AudioFile(fileName), PitchDetectionMode.AUBIO_SCHMITT));
         list.add(new AubioPitchDetection(new AudioFile(fileName), PitchDetectionMode.AUBIO_FCOMB));
         detector = new PitchDetectionMix(list, 0.05);
         detector.executePitchDetection();
-        List<Sample> samples = detector.getSamples();
+        final List<Sample> samples = detector.getSamples();
         try {
-            MediaPlayer m = new MediaPlayer(fileName);
-            StopWatch watch = new StopWatch();
-            PlotThread thread = new PlotThread(FileUtils.basename(fileName), samples, watch);
+            final MediaPlayer m = new MediaPlayer(fileName);
+            final StopWatch watch = new StopWatch();
+            final PlotThread thread = new PlotThread(FileUtils.basename(fileName), samples, watch);
             m.start();
             thread.start();
-        } catch (LineUnavailableException e) {
+        } catch (final LineUnavailableException e) {
             e.printStackTrace();
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             e.printStackTrace();
-        } catch (UnsupportedAudioFileException e) {
+        } catch (final UnsupportedAudioFileException e) {
             e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

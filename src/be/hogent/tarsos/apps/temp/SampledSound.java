@@ -19,7 +19,18 @@ import javax.sound.sampled.SourceDataLine;
  */
 public final class SampledSound {
 
-    public static void main(final String args[]) throws LineUnavailableException, IOException {
+    private SampledSound() {
+    }
+
+    /**
+     * Creates a buffer with audio information and writes it to a wav file and
+     * to a speaker.
+     * @param args
+     *            CLI arguments.
+     * @throws LineUnavailableException
+     * @throws IOException
+     */
+    public static void main(final String[] args) throws LineUnavailableException, IOException {
 
         /* Construct a buffer with sound info */
         final double sampleRate = 44100.0;

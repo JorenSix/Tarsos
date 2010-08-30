@@ -40,6 +40,9 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 public final class PlayAlong {
 
+    private PlayAlong() {
+    }
+
     /**
      * Log messages.
      */
@@ -206,7 +209,9 @@ public final class PlayAlong {
         final double[] rebasedTuning = new double[128];
         final int diff = referenceNoteMidiNumber - midiNoteClosestToReference;
         for (int i = 0; i < tuning.length; i++) {
-            rebasedTuning[i] = tuning[(i + diff) % 128];
+            if (i + diff >= 0 && i + diff < 128) {
+                rebasedTuning[i] = tuning[(i + diff) % 128];
+            }
         }
         return rebasedTuning;
     }
