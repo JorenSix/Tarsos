@@ -1,5 +1,6 @@
 package be.hogent.tarsos.sampled;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -205,6 +206,25 @@ public final class AudioDispatcher implements Runnable {
     public static AudioDispatcher fromFile(final File audioFile, final int size)
     throws UnsupportedAudioFileException, IOException {
         final AudioInputStream stream = AudioSystem.getAudioInputStream(audioFile);
+        return new AudioDispatcher(stream, size, 0);
+    }
+
+    /**
+     * Create a stream from an array of bytes and use that to create a new
+     * audioprocessor.
+     * @param byteArray
+     *            An array of bytes, containing audio information.
+     * @param audioFormat
+     *            The format of the audio represented using the bytes.
+     * @return A new audioprocessor.
+     * @throws UnsupportedAudioFileException
+     *             If the audio format is not supported.
+     */
+    public static AudioDispatcher fromByteArray(final byte[] byteArray, final AudioFormat audioFormat)
+    throws UnsupportedAudioFileException {
+        final ByteArrayInputStream bais = new ByteArrayInputStream(byteArray);
+        final int size = byteArray.length / audioFormat.getFrameSize();
+        final AudioInputStream stream = new AudioInputStream(bais, audioFormat, size);
         return new AudioDispatcher(stream, size, 0);
     }
 }

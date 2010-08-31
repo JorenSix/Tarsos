@@ -3,7 +3,6 @@ package be.hogent.tarsos.pitch;
 /**
  * A class representing pitch. Can be used to convert pitch units or to base
  * pitch interval calculations on.
- * 
  * @author Joren Six
  */
 public final class Pitch {
@@ -54,7 +53,6 @@ public final class Pitch {
     /**
      * Calculates which octave this pitch falls into. The octave index is based
      * on MIDI keys. Keys [0,11] fall in octave -1, [11,23] in octave 0,...
-     * 
      * @return The octave the pitch falls into, calculated using MIDI key.
      * @exception IllegalArgumentException
      *                If the pitch does not fall within the range of valid MIDI
@@ -68,7 +66,6 @@ public final class Pitch {
     /**
      * Returns the name of the MIDI key corresponding to the given hertzValue.
      * The MIDI key is the key returned by the convertHertzToMidiKey method.
-     * 
      * @return A note name like C3, A4 or A3#/B3b.
      * @exception IllegalArgumentException
      *                When the hertzValue is outside the valid MIDI key range.
@@ -77,7 +74,7 @@ public final class Pitch {
         String name = "";
         // The x is replaced by the octave index
         final String[] noteNames = { "Cx", "C#x/Dbx", "Dx", "D#x/Ebx", "Ex", "Fx", "F#x/Gbx", "Gx",
-                "G#x/Abx", "Ax", "A#x/Bbx", "Bx" };
+                "G#x/Abx", "Ax", "A#x/Bbx", "Bx", };
         final int midiKey = PitchConverter.hertzToMidiKey(pitchInHertz);
         final int noteIndex = midiKey % 12;
         final int octaveIndex = octaveIndex();
@@ -99,7 +96,6 @@ public final class Pitch {
 
     /**
      * Return a new pitch object using value in a certain unit.
-     * 
      * @param unit
      *            The unit of the pitch value.
      * @param value

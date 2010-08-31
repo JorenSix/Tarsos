@@ -166,7 +166,7 @@ public final class Sample implements Comparable<Sample> {
      *            <code>errorPercentage</code> is 0.05 than 95, 100 , 105 are
      *            perceived as being the same.
      */
-    public final void removeUniquePitches(final Sample other, final double errorPercentage) {
+    public void removeUniquePitches(final Sample other, final double errorPercentage) {
         // TODO use another scale instead of simple percentages.
         final ListIterator<Double> thisPitchIterator = pitches.listIterator();
         while (thisPitchIterator.hasNext()) {
@@ -186,7 +186,7 @@ public final class Sample implements Comparable<Sample> {
         }
     }
 
-    public final double returnMatchingPitch(final Sample other, final double errorPercentage) {
+    public double returnMatchingPitch(final Sample other, final double errorPercentage) {
         double matchingPitch = Double.NEGATIVE_INFINITY;
         if (!pitches.isEmpty()) {
             final Double thisPitch = pitches.get(0);
@@ -224,7 +224,7 @@ public final class Sample implements Comparable<Sample> {
     }
 
     @Override
-    public final boolean equals(final Object o) {
+    public boolean equals(final Object o) {
         boolean isEqual = false;
 
         if (o != null && o instanceof Sample) {
@@ -235,7 +235,7 @@ public final class Sample implements Comparable<Sample> {
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         final String separator = "\t";
         final StringBuilder sb = new StringBuilder();
         sb.append(getStart() / 1000.0);
@@ -249,7 +249,7 @@ public final class Sample implements Comparable<Sample> {
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return Long.valueOf(start).hashCode() + source.hashCode();
     }
 

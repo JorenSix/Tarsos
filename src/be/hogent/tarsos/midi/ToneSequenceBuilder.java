@@ -163,9 +163,19 @@ public final class ToneSequenceBuilder {
             for (int sample = startSample; sample < stopSample; sample++) {
                 final double time = sample / sampleRate;
                 final double fundamental = amplitude * Math.sin(twoPiF * time);
+                // adding some harmonics makes the sound somewhat nicer
                 final double firstHarmonic = amplitude / 8 * Math.sin(twoPiF * 2 * time);
                 final double secondHarmonic = amplitude / 16 * Math.sin(twoPiF * 4 * time);
-                floatBuffer[sample] = (float) (fundamental + firstHarmonic + secondHarmonic);
+                floatBuffer[sample] = +(float) (fundamental + firstHarmonic + secondHarmonic);
+            }
+
+            for (int sample = stopSample; (sample < stopSample + 1000) && sample < numberOfSamples; sample++) {
+                final double time = sample / sampleRate;
+                final double fundamental = amplitude * Math.sin(twoPiF * time);
+                // adding some harmonics makes the sound somewhat nicer
+                final double firstHarmonic = amplitude / 8 * Math.sin(twoPiF * 2 * time);
+                final double secondHarmonic = amplitude / 16 * Math.sin(twoPiF * 4 * time);
+                floatBuffer[sample] = +(float) (fundamental + firstHarmonic + secondHarmonic);
             }
             previousTime = currentTime;
         }

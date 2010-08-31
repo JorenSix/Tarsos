@@ -16,9 +16,9 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 
+import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.AudioProcessor;
 import be.hogent.tarsos.sampled.BlockingAudioPlayer;
-import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FFT;
 
@@ -41,7 +41,7 @@ public final class Spectrum extends JFrame implements AudioProcessor {
     private final float[] hightWaterMarks;
     private float highestWaterMark;
 
-    private int barWidth;// pixels
+    private int barWidth; // pixels
     private int barMaxHeight;
 
 
@@ -50,7 +50,7 @@ public final class Spectrum extends JFrame implements AudioProcessor {
 
         this.setSize(new Dimension(640, 400));
         barWidth = getWidth() / bins;
-        barMaxHeight = getHeight();// pixels
+        barMaxHeight = getHeight(); // pixels
         this.setVisible(true);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

@@ -447,39 +447,39 @@ public class Histogram implements Cloneable {
      * @return the proportion of values equal to v
      */
     public long getCumFreq(final Double v) {
+        long cumulativeFreq = -1;
         if (getSumFreq() == 0) {
-            return 0;
-        }
+            cumulativeFreq = 0;
+        } else if (v.compareTo(freqTable.firstKey()) < 0) {
+            cumulativeFreq = 0;
+        } else if (v.compareTo(freqTable.lastKey()) >= 0) {
+            cumulativeFreq = getSumFreq();
+        } else {
 
-        // v is less than first value
-        if (v.compareTo(freqTable.firstKey()) < 0) {
-            return 0;
-        }
+            // the frequency of this key
+            long result = 0;
+            final Long value = freqTable.get(v);
+            if (value != null) {
+                result = value.longValue();
+            }
 
-        // v is greater than the last key
-        if (v.compareTo(freqTable.lastKey()) >= 0) {
-            return getSumFreq();
-        }
-
-        // the frequency of this key
-        long result = 0;
-        final Long value = freqTable.get(v);
-        if (value != null) {
-            result = value.longValue();
-        }
-
-        // add the frequencies of values smaller than this key
-        final Iterator<Double> values = freqTable.keySet().iterator();
-        while (values.hasNext()) {
-            final Double nextValue = values.next();
-            if (v.compareTo(nextValue) > 0) {
-                result += getCount(nextValue);
-            } else {
-                return result;
+            // add the frequencies of values smaller than this key
+            final Iterator<Double> values = freqTable.keySet().iterator();
+            while (values.hasNext()) {
+                final Double nextValue = values.next();
+                if (v.compareTo(nextValue) > 0) {
+                    result += getCount(nextValue);
+                } else {
+                    cumulativeFreq = result;
+                    break;
+                }
             }
         }
-        throw new AssertionError("The key is greather than te last key but this is impossible."
-                + " It should have been returned already.");
+        if (cumulativeFreq == -1) {
+            throw new AssertionError("The key is greather than te last key but this is impossible."
+                    + " It should have been returned already.");
+        }
+        return cumulativeFreq;
     }
 
     /**
@@ -1038,9 +1038,6 @@ public class Histogram implements Cloneable {
             return this;
         }
 
-        // Create a new, identical but empty Histogram.
-        // Histogram smoothedHistogram = new Histogram(this);
-
         // Determine the number of weights (must be odd).
         int numWeights = (int) (2 * 2.58 * standardDeviation + 0.5);
         if (numWeights % 2 == 0) {
@@ -1205,12 +1202,44 @@ public class Histogram implements Cloneable {
      * @param fileName
      *            Where to save the text file.
      */
-    public void export(final String fileName) {
+    public final void export(final String fileName) {
         final StringBuilder sb = new StringBuilder();
         sb.append("key;value\n");
         for (final double key : keySet()) {
             sb.append(key).append(";").append(getCount(key)).append("\n");
         }
         FileUtils.writeFile(sb.toString(), fileName);
+    }
+
+    /**
+     * Export the histogram data as a matlab text file. The format can be read
+     * using octave or MatLab.
+     * @param fileName
+     *            Where to save the matlab (.m) file.
+     */
+    public final void exportMatLab(final String fileName) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("histogram_values = [");
+        for (final double key : keySet()) {
+            for (int i = 0; i < getCount(key); i++) {
+                sb.append(key).append(",");
+            }
+        }
+        sb.append("]\n");
+        sb.append("histo(histogram_values)");
+        FileUtils.writeFile(sb.toString(), fileName);
+    }
+
+    /**
+     * @return The maximum bin count.
+     */
+    public final long getMaxBinCount() {
+        long maxValue = -1;
+        if (!freqTable.values().isEmpty()) {
+            for (final long value : freqTable.values()) {
+                maxValue = Math.max(maxValue, value);
+            }
+        }
+        return maxValue;
     }
 }

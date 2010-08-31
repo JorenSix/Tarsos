@@ -41,6 +41,11 @@ public final class PitchSynth {
     private static final int MAX_VELOCITY = 127;
 
     /**
+     * Send note off after 250ms.
+     */
+    private static final int NOTE_OFF_AFTER = 250;
+
+    /**
      * The octave used to send relative pitch messages: If you want to hear 0
      * cents this translates to a C in the 4th octave: C4. But as we all know,
      * you should not play with C4.
@@ -122,9 +127,27 @@ public final class PitchSynth {
 
             receiver.send(pitchBendEvent.getMessage(), -1);
 
-            final ShortMessage shortMessage = new ShortMessage();
-            shortMessage.setMessage(ShortMessage.NOTE_ON, 0, pitchInMidiKey, velocity);
-            receiver.send(shortMessage, -1);
+            final ShortMessage noteOnMessage = new ShortMessage();
+            noteOnMessage.setMessage(ShortMessage.NOTE_ON, 0, pitchInMidiKey, velocity);
+
+            final ShortMessage noteOffMessage = new ShortMessage();
+            noteOffMessage.setMessage(ShortMessage.NOTE_OFF, 0, pitchInMidiKey, 0);
+
+            receiver.send(noteOnMessage, -1);
+
+            final Runnable noteOffThread = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(NOTE_OFF_AFTER);
+                    } catch (final InterruptedException e) {
+                        LOG.log(Level.WARNING, "Failed to sleep before sending NOTE OFF", e);
+                    } finally {
+                        receiver.send(noteOffMessage, -1);
+                    }
+                }
+            };
+            new Thread(noteOffThread).start();
         } catch (final InvalidMidiDataException e) {
             LOG.log(Level.WARNING, "Invalid midi data for constucted MIDI", e);
         }

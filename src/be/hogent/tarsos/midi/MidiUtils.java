@@ -94,7 +94,7 @@ public final class MidiUtils {
 
     private static final byte[] EOX = new byte[] { (byte) 0xF7 };
 
-    public final static class GeneralMidiMessages {
+    public static final class GeneralMidiMessages {
         private GeneralMidiMessages() {
         }
 
@@ -138,7 +138,10 @@ public final class MidiUtils {
         }
     }
 
-    public static class DeviceControl {
+    public static final class DeviceControl {
+
+        private DeviceControl() {
+        }
 
         private static final byte[] DEVICE_CONTROL = new byte[] { (byte) 0x04 };
 
@@ -222,7 +225,10 @@ public final class MidiUtils {
             return sysex;
         }
 
-        public static class ReverbEffect {
+        public static final class ReverbEffect {
+
+            private ReverbEffect() {
+            }
 
             public static final int REVERB_TYPE_SMALL_ROOM = 0;
 
@@ -253,7 +259,10 @@ public final class MidiUtils {
             }
         }
 
-        public static class ChorusEffect {
+        public static final class ChorusEffect {
+
+            private ChorusEffect() {
+            }
 
             public static final int CHORUS_TYPE_CHORUS1 = 0;
 
@@ -307,7 +316,10 @@ public final class MidiUtils {
         }
     }
 
-    public static class KeyBasedInstrumentControl {
+    public static final class KeyBasedInstrumentControl {
+
+        private KeyBasedInstrumentControl() {
+        }
 
         public static final int KEY_BASED_CONTORL_FINE_TUNING = 0x78;
 
@@ -344,7 +356,10 @@ public final class MidiUtils {
         }
     }
 
-    public static class DestinationSettings {
+    public static final class DestinationSettings {
+
+        private DestinationSettings() {
+        }
 
         private static final byte[] CONTROLLER_DESTINATION_SETTINGS = new byte[] { (byte) 0x09 };
 
@@ -417,7 +432,10 @@ public final class MidiUtils {
      * See: <a href="http://www.midi.org/techspecs/midituning.php">the MIDI
      * Tuning Messages specification</a>.
      */
-    public static class MidiTuningStandard {
+    public static final class MidiTuningStandard {
+
+        private MidiTuningStandard() {
+        }
 
         public static final int TUNING_A440 = 45 * 128 * 128;
 

@@ -5,13 +5,13 @@ class DerivativeAndPosition implements Comparable<DerivativeAndPosition> {
 
     // , position;
 
-    DerivativeAndPosition(double derivative, double position) {
+    DerivativeAndPosition(final double derivative, final double position) {
         this.derivative = derivative;
         // this.position = position;
     }
 
     @Override
-    public int compareTo(DerivativeAndPosition arg0) {
+    public int compareTo(final DerivativeAndPosition arg0) {
         return derivative.compareTo(arg0.derivative);
     }
 
@@ -19,7 +19,7 @@ class DerivativeAndPosition implements Comparable<DerivativeAndPosition> {
     public boolean equals(final Object other) {
         boolean isEqual = false;
         if (other != null && other instanceof DerivativeAndPosition) {
-            DerivativeAndPosition otherD = (DerivativeAndPosition) other;
+            final DerivativeAndPosition otherD = (DerivativeAndPosition) other;
             isEqual = derivative.equals(otherD.derivative);
         }
         return isEqual;
@@ -30,3 +30,4 @@ class DerivativeAndPosition implements Comparable<DerivativeAndPosition> {
         return derivative.hashCode();
     }
 }
+

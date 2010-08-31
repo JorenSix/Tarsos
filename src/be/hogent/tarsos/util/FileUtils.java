@@ -217,7 +217,8 @@ public final class FileUtils {
         URLConnection connection;
         try {
             connection = url.openConnection();
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
+            final BufferedReader reader = new BufferedReader(inputStreamReader);
             String inputLine;
             inputLine = reader.readLine();
             while (inputLine != null) {
@@ -582,4 +583,17 @@ public final class FileUtils {
     public static boolean isDirectory(final String inputFile) {
         return new File(inputFile).isDirectory();
     }
+
+    /**
+     * Checks if the name of the file (extension) is a known audio extension.
+     * @param file
+     *            The file to check.
+     * @return True if the name of the file matches
+     *         ConfKey.audio_file_name_pattern, false otherwise.
+     */
+    public static boolean isAudioFile(final File file) {
+        return file.getAbsolutePath().matches(Configuration.get(ConfKey.audio_file_name_pattern));
+    }
 }
+
+

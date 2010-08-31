@@ -79,7 +79,7 @@ public final class MidiSequenceBuilder {
         track.add(createPitchBendEvent(0.0, currentTicks));
     }
 
-    private MidiEvent createPitchBendEvent(final double deviationInCents, final int startTick) {
+    public static MidiEvent createPitchBendEvent(final double deviationInCents, final int startTick) {
         int bendFactorInMidi = 0;
         // 16384 values for 400 cents
         bendFactorInMidi = (int) (deviationInCents * (16384.0 / 400.0));
@@ -166,7 +166,7 @@ public final class MidiSequenceBuilder {
      * 101 00 MSB Bn 64 00 ; 100 00 LSB Bn 06 18 ; 06 24 MSB Bn 26 00 ; 38 00
      * LSB </pre>
      */
-    private MidiEvent createPitchBendEvent(final int bendFactor, final long startTick) {
+    public static MidiEvent createPitchBendEvent(final int bendFactor, final long startTick) {
 
         final ShortMessage message = new ShortMessage();
 

@@ -21,13 +21,28 @@ import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.SimplePlot;
 import be.hogent.tarsos.util.StopWatch;
 
+/**
+ * @author Joren Six
+ */
 public final class TarsosPitchDetection implements PitchDetector {
 
+    /**
+     * Logs exceptions.
+     */
     private static final Logger LOG = Logger.getLogger(TarsosPitchDetection.class.getName());
 
+    /**
+     * The file to process.
+     */
     private final AudioFile file;
+    /**
+     * A list of samples.
+     */
     private final List<Sample> samples;
 
+    /**
+     * Which pitch detector to use.
+     */
     private final PitchDetectionMode detectionMode;
 
     public TarsosPitchDetection(final AudioFile audioFile, final PitchDetectionMode pitchDetectionMode) {
@@ -40,7 +55,7 @@ public final class TarsosPitchDetection implements PitchDetector {
     @Override
     public void executePitchDetection() {
         try {
-            processFile(file.path(), detectionMode, new DetectedPitchHandler() {
+            processFile(file.transcodedPath(), detectionMode, new DetectedPitchHandler() {
                 @Override
                 public void handleDetectedPitch(final float time, final float pitch) {
                     final long start = (long) (time * 1000);
@@ -161,6 +176,10 @@ public final class TarsosPitchDetection implements PitchDetector {
 
     }
 
+    /**
+     * Ticks per second.
+     */
+    private static final double TICKS_PER_SEC = 1000.0;
     public static void main(final String... args) throws UnsupportedAudioFileException, IOException {
         final StopWatch start = new StopWatch();
         final SimplePlot p = new SimplePlot("Pitch tracking");
@@ -177,9 +196,12 @@ public final class TarsosPitchDetection implements PitchDetector {
             }
         });
         p.save();
-        Tarsos.println(" " + start.ticksPassed() / 1000.0);
+        Tarsos.println(" " + start.ticksPassed() / TICKS_PER_SEC);
     }
 
+    /**
+     * Prints the detected pitch to STD OUT.
+     */
     public static final DetectedPitchHandler PRINT_DETECTED_PITCH_HANDLER = new DetectedPitchHandler() {
         @Override
         public void handleDetectedPitch(final float time, final float pitch) {
