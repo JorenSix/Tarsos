@@ -15,7 +15,7 @@ import joptsimple.OptionSpec;
 import be.hogent.tarsos.midi.DumpReceiver;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
-import be.hogent.tarsos.ui.VirtualKeyboard;
+import be.hogent.tarsos.ui.virtualkeyboard.VirtualKeyboard;
 import be.hogent.tarsos.util.ScalaFile;
 
 /**

@@ -1,4 +1,4 @@
-package be.hogent.tarsos.ui;
+package be.hogent.tarsos.ui.virtualkeyboard;
 
 import java.awt.Color;
 import java.awt.Graphics;

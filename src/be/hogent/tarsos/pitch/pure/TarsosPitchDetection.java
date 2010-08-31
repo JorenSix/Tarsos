@@ -153,16 +153,18 @@ public final class TarsosPitchDetection implements PitchDetector {
 
             @Override
             public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
-                final float pitch = pureDetector.getPitch(audioFloatBuffer);
                 samplesProcessed += audioFloatBuffer.length;
-                time = samplesProcessed / sampleRate;
-                detectedPitchHandler.handleDetectedPitch(time, pitch);
+                processBuffer(audioFloatBuffer);
             }
 
             @Override
             public void processOverlapping(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
-                final float pitch = pureDetector.getPitch(audioFloatBuffer);
                 samplesProcessed += bufferStepSize;
+                processBuffer(audioFloatBuffer);
+            }
+
+            private void processBuffer(final float[] audioFloatBuffer) {
+                final float pitch = pureDetector.getPitch(audioFloatBuffer);
                 time = samplesProcessed / sampleRate;
                 detectedPitchHandler.handleDetectedPitch(time, pitch);
             }

@@ -19,6 +19,10 @@ import com.jgoodies.forms.layout.FormLayout;
 public class MidiToWav extends JFrame {
 
 
+    /**
+     */
+    private static final long serialVersionUID = -4115909001888538815L;
+
     private final DefaultListModel midiFileListModel;
 
     public MidiToWav() {
