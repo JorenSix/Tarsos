@@ -2,22 +2,10 @@ package be.hogent.tarsos.ui.virtualkeyboard;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.io.IOException;
 
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Receiver;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-
-import be.hogent.tarsos.apps.PlayAlong;
-import be.hogent.tarsos.midi.DumpReceiver;
-import be.hogent.tarsos.midi.MidiCommon;
-import be.hogent.tarsos.midi.MidiUtils;
-import be.hogent.tarsos.midi.ReceiverSink;
 
 public class PianoTestFrame extends JFrame {
 
@@ -37,30 +25,7 @@ public class PianoTestFrame extends JFrame {
 
 		this.add(keyboard, BorderLayout.CENTER);
 
-		final MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("Gervill", true);
-		MidiDevice synthDevice;
-		try {
-			synthDevice = MidiSystem.getMidiDevice(synthInfo);
-			synthDevice.open();
-
-			Receiver recv;
-			recv = new ReceiverSink(true, synthDevice.getReceiver(), new DumpReceiver(System.out));
-			keyboard.setReceiver(recv);
-
-			final double[] rebasedTuning = PlayAlong.tuningFromPeaks(tuning);
-
-			MidiUtils.sendTunings(recv, 0, 2, "african", rebasedTuning);
-			MidiUtils.sendTuningChange(recv, VirtualKeyboard.CHANNEL, 2);
-		} catch (MidiUnavailableException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidMidiDataException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		keyboard.connectToTunedSynth(tuning);
 
 	}
 

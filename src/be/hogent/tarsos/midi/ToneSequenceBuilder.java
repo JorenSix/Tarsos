@@ -154,23 +154,35 @@ public final class ToneSequenceBuilder {
 			final int startSample = (int) (previousTime * sampleRate);
 			final int stopSample = (int) (currentTime * sampleRate);
 
+			final int overlappingsamples = 3000;
+
 			// signal
 			for (int sample = startSample; sample < stopSample; sample++) {
 				final double time = sample / sampleRate;
-				final double fundamental = amplitude * Math.sin(twoPiF * time);
+				double fadingAmplitude = amplitude;
+				// fade in
+				if (startSample + overlappingsamples > sample) {
+					fadingAmplitude = fadingAmplitude * (sample - startSample) / overlappingsamples;
+				}
+				final double fundamental = fadingAmplitude * Math.sin(twoPiF * time);
 				// adding some harmonics makes the sound somewhat nicer
-				final double firstHarmonic = amplitude / 8 * Math.sin(twoPiF * 2 * time);
-				final double secondHarmonic = amplitude / 16 * Math.sin(twoPiF * 4 * time);
-				floatBuffer[sample] = +(float) (fundamental + firstHarmonic + secondHarmonic);
-			}
+				final double firstHarmonic = fadingAmplitude / 8 * Math.sin(twoPiF * 2 * time);
+				final double secondHarmonic = fadingAmplitude / 16 * Math.sin(twoPiF * 4 * time);
+				floatBuffer[sample] = floatBuffer[sample]
+						+ (float) (fundamental + firstHarmonic + secondHarmonic);
 
-			for (int sample = stopSample; sample < stopSample + 1000 && sample < numberOfSamples; sample++) {
+			}
+			// fade out
+			for (int sample = stopSample; sample < stopSample + overlappingsamples
+					&& sample < numberOfSamples; sample++) {
 				final double time = sample / sampleRate;
-				final double fundamental = amplitude * Math.sin(twoPiF * time);
+				double fadingAmplitude = amplitude * (overlappingsamples - (sample - stopSample))
+						/ overlappingsamples;
+				final double fundamental = fadingAmplitude * Math.sin(twoPiF * time);
 				// adding some harmonics makes the sound somewhat nicer
-				final double firstHarmonic = amplitude / 8 * Math.sin(twoPiF * 2 * time);
-				final double secondHarmonic = amplitude / 16 * Math.sin(twoPiF * 4 * time);
-				floatBuffer[sample] = +(float) (fundamental + firstHarmonic + secondHarmonic);
+				final double firstHarmonic = fadingAmplitude / 8 * Math.sin(twoPiF * 2 * time);
+				final double secondHarmonic = fadingAmplitude / 16 * Math.sin(twoPiF * 4 * time);
+				floatBuffer[sample] = (float) (fundamental + firstHarmonic + secondHarmonic);
 			}
 			previousTime = currentTime;
 		}

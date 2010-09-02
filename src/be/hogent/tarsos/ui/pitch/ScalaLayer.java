@@ -13,7 +13,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import be.hogent.tarsos.ui.virtualkeyboard.PianoTestFrame;
 import be.hogent.tarsos.ui.virtualkeyboard.VirtualKeyboard;
 
 public class ScalaLayer implements Layer {
@@ -77,10 +76,19 @@ public class ScalaLayer implements Layer {
 			ui = new JPanel(new BorderLayout());
 			JButton launchKeyboard = new JButton("Keyboard");
 			launchKeyboard.addActionListener(new ActionListener() {
+				VirtualKeyboard current;
+
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					VirtualKeyboard keyboard = VirtualKeyboard.createVirtualKeyboard(scale.length);
-					new PianoTestFrame(keyboard, scale).setVisible(true);
+					// if (current == null) {
+					current = VirtualKeyboard.createVirtualKeyboard(scale.length);
+					current.connectToTunedSynth(scale);
+					current.setSize(250, 30);
+					// }
+					ui.invalidate();
+					ui.repaint();
+					ui.add(current, BorderLayout.SOUTH);
+
 				}
 			});
 			ui.add(launchKeyboard, BorderLayout.SOUTH);
