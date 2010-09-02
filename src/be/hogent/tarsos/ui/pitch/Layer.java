@@ -2,6 +2,7 @@
  */
 package be.hogent.tarsos.ui.pitch;
 
+import java.awt.Component;
 import java.awt.Graphics2D;
 
 /**
@@ -9,5 +10,7 @@ import java.awt.Graphics2D;
  */
 public interface Layer {
 
-    void draw(final Graphics2D graphics);
+	void draw(final Graphics2D graphics);
+
+	Component ui();
 }

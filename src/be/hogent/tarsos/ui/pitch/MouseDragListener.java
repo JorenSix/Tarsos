@@ -1,5 +1,3 @@
-/**
- */
 package be.hogent.tarsos.ui.pitch;
 
 import java.awt.Point;
@@ -9,16 +7,46 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.JComponent;
 
+/**
+ * A listener used to register drag events and calculate relative offset values.
+ * *
+ * 
+ * @author Joren Six
+ */
 class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 	/**
      */
 	private final JComponent parent;
+	/**
+	 * Point to calculate distance to.
+	 */
 	private final Point referenceDragPoint;
+	/**
+	 * The mouse button to use. Middle button = BUTTON2, left = 1 and right = 3.
+	 */
 	private final int mouseButton;
+	/**
+	 * The previous button pressed (not clicked).
+	 */
 	private int prevButton;
+	/**
+	 * The number of pixels moved.
+	 */
 	private int delta;
+	/**
+	 * The relative distance in x direction: number of pixels/width.
+	 */
 	private double xOffset;
 
+	/**
+	 * Create a new mouse drag listener.
+	 * 
+	 * @param component
+	 *            The component is used to calculate the relative offset.
+	 * @param button
+	 *            The mouse button used (Middle button = BUTTON2, left = 1 and
+	 *            right = 3).
+	 */
 	public MouseDragListener(final JComponent component, final int button) {
 		parent = component;
 		referenceDragPoint = new Point(0, 0);
@@ -61,7 +89,18 @@ class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 			xOffset = 1.0 + xOffset;
 		}
 		delta = 0;
+		// System.out.println(mouseButton + " xoffset  " + xOffset);
 		return xOffset;
+	}
+
+	/**
+	 * Jumps to a new xOffset.
+	 * 
+	 * @param newXOffset
+	 *            The offset to jump to.
+	 */
+	public void setXOffset(final double newXOffset) {
+		this.xOffset = newXOffset;
 	}
 
 }

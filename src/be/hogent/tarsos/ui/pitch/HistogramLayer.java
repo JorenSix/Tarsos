@@ -3,6 +3,7 @@
 package be.hogent.tarsos.ui.pitch;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 import be.hogent.tarsos.util.histogram.Histogram;
 
@@ -24,9 +26,8 @@ public final class HistogramLayer implements Layer {
 	private final JComponent parent;
 	private final MouseDragListener mouseDrag;
 	private final Histogram histo;
-	private final int markerTTL = 1;
+	private final int maxMarkers = 50;
 	private final List<Double> markerPositions;
-	private final List<Integer> markerTTLs;
 
 	public HistogramLayer(final JComponent component, final Histogram histogram) {
 		parent = component;
@@ -35,26 +36,17 @@ public final class HistogramLayer implements Layer {
 		component.addMouseListener(mouseDrag);
 		component.addMouseMotionListener(mouseDrag);
 		markerPositions = new ArrayList<Double>();
-		markerTTLs = new ArrayList<Integer>();
 	}
 
 	public void setMarkers(List<Double> newMarkers) {
-		// remove old markers
-		for (int i = 0; i < markerPositions.size(); i++) {
-			if (markerTTLs.get(i) >= markerTTL) {
-				markerPositions.remove(i);
-				markerTTLs.remove(i);
-				i--;
-			}
-		}
-		// adjust ttl
-		for (int i = 0; i < markerPositions.size(); i++) {
-			markerTTLs.set(i, markerTTLs.get(i) + 1);
-		}
 		// add new markers with ttl 0
 		for (Double newMarker : newMarkers) {
 			markerPositions.add(newMarker);
-			markerTTLs.add(0);
+		}
+
+		// remove old markers
+		while (markerPositions.size() > maxMarkers) {
+			markerPositions.remove(0);
 		}
 	}
 
@@ -91,17 +83,27 @@ public final class HistogramLayer implements Layer {
 
 		// draw markers
 
-		for (int i = 0; i < markerPositions.size(); i++) {
+		for (int i = markerPositions.size() / 2; i < markerPositions.size(); i++) {
 			double position = markerPositions.get(i);
-			int ttl = markerTTLs.get(i);
 			x = (int) (position / delta * width + xOffsetPixels) % width;
 			y = height - Y_BORDER - (int) (histo.getCount(position) / (double) maxCount * height * 0.9);
-			float blueIntensity = 1.0f - ttl / (float) markerTTL;
-			System.out.println(blueIntensity);
-			Color color = new Color(0, 0, blueIntensity);
-			graphics.setColor(color);
+			graphics.setColor(Color.BLUE);
 			graphics.drawOval(x, y, 2, 2);
 		}
 
+	}
+
+	public double getXOffset() {
+		return mouseDrag.calculateXOffset();
+	}
+
+	JComponent ui;
+
+	@Override
+	public Component ui() {
+		if (ui == null) {
+			ui = new JPanel();
+		}
+		return ui;
 	}
 }

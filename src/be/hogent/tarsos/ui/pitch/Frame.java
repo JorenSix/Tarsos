@@ -3,9 +3,11 @@
 package be.hogent.tarsos.ui.pitch;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -20,15 +22,25 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
  */
 public class Frame extends JFrame {
 	/**
+	 * Default height.
+	 */
+	private static final int INITIAL_HEIGHT = 480;
+	/**
+	 * Default width.
+	 */
+	private static final int INITIAL_WIDTH = 640;
+	/**
      */
 	private static final long serialVersionUID = -8095965296377515567L;
+
+	final ToneScaleFrame panel;
 
 	public Frame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
-		setSize(640, 480);
+		setSize(INITIAL_WIDTH, INITIAL_HEIGHT);
 		final Histogram histo = new ToneScaleHistogram();
-		final ToneScaleFrame panel = new ToneScaleFrame(histo);
+		panel = new ToneScaleFrame(histo);
 
 		final JSlider silder = new JSlider(0, 100);
 		silder.setValue(0);
@@ -46,17 +58,28 @@ public class Frame extends JFrame {
 				for (final Peak peak : peaks) {
 					peaksInCents[i++] = peak.getPosition();
 				}
-				// panel.setReferenceScale(peaksInCents);
-				// }
+				panel.setReferenceScale(peaksInCents);
 			}
 		});
 
 		add(panel, BorderLayout.CENTER);
 		add(silder, BorderLayout.SOUTH);
+		// add(new ConfigurationPanel(), BorderLayout.CENTER);
+	}
+
+	private void addLayers() {
+		List<Layer> layers = panel.getLayers();
+		JPanel layersJPanel = new JPanel(new GridLayout(layers.size(), 1));
+		for (int i = 0; i < layers.size(); i++) {
+			layersJPanel.add(layers.get(i).ui());
+		}
+		add(layersJPanel, BorderLayout.WEST);
 	}
 
 	public static void main(final String... strings) {
 		final Frame frame = new Frame();
+		frame.addLayers();
 		frame.setVisible(true);
+
 	}
 }

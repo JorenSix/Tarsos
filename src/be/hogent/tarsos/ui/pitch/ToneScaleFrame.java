@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 
 import be.hogent.tarsos.pitch.PitchConverter;
 import be.hogent.tarsos.pitch.pure.DetectedPitchHandler;
+import be.hogent.tarsos.pitch.pure.McLeodPitchMethod;
 import be.hogent.tarsos.pitch.pure.PurePitchDetector;
 import be.hogent.tarsos.pitch.pure.Yin;
 import be.hogent.tarsos.sampled.AudioDispatcher;
@@ -30,6 +31,7 @@ import be.hogent.tarsos.sampled.BlockingAudioPlayer;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileDrop;
 import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.histogram.Histogram;
 
 /**
@@ -45,17 +47,20 @@ public final class ToneScaleFrame extends JPanel {
 	private Graphics2D graphics;
 	private final Histogram histo;
 	private final List<Layer> layers;
-	double referenceScale[] = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100 };
+
 	private final HistogramLayer histoLayer;
+	private final ScalaLayer scalaLayer;
 
 	public ToneScaleFrame(final Histogram histo) {
 		this.setSize(640, 480);
 		initializeGraphics();
 		this.histo = histo;
 		histoLayer = new HistogramLayer(this, histo);
+		final double referenceScale[] = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100 };
+		scalaLayer = new ScalaLayer(this, referenceScale, 1200);
 		layers = new ArrayList<Layer>();
 		layers.add(histoLayer);
-		layers.add(new ScalaLayer(this, referenceScale, 1200));
+		layers.add(scalaLayer);
 
 		addComponentListener(new ComponentAdapter() {
 			@Override
@@ -69,8 +74,8 @@ public final class ToneScaleFrame extends JPanel {
 			public void filesDropped(final java.io.File[] files) {
 				for (final File droppedFile : files) {
 					if (droppedFile.getName().endsWith(".scl")) {
-						// setReferenceScale(new
-						// ScalaFile(droppedFile.getAbsolutePath()).getPitches());
+						double[] scale = new ScalaFile(droppedFile.getAbsolutePath()).getPitches();
+						scalaLayer.setScale(scale);
 					} else if (FileUtils.isAudioFile(droppedFile)) {
 						final AudioFile audioFile = new AudioFile(droppedFile.getAbsolutePath());
 						AudioInputStream ais;
@@ -80,7 +85,7 @@ public final class ToneScaleFrame extends JPanel {
 							final float sampleRate = ais.getFormat().getSampleRate();
 							final int bufferSize = Yin.DEFAULT_BUFFER_SIZE;
 							final int overlapSize = Yin.DEFAULT_OVERLAP;
-							final PurePitchDetector pureDetector = new Yin(sampleRate, bufferSize, 0.15);
+							final PurePitchDetector pureDetector = new McLeodPitchMethod(sampleRate);
 							final int bufferStepSize = bufferSize - overlapSize;
 							histo.clear();
 
@@ -95,12 +100,12 @@ public final class ToneScaleFrame extends JPanel {
 										markers.add(PitchConverter.hertzToRelativeCent(pitch));
 									}
 									if ((int) (time * 100) % 5 == 0) {
-										System.out.println("draw" + time + "\t" + pitch + "Hz");
+										// System.out.println(time + "\t" +
+										// pitch + "Hz");
 										histoLayer.setMarkers(markers);
 										repaint();
 									}
 								}
-
 							};
 
 							final AudioDispatcher dispatcher = new AudioDispatcher(ais, bufferSize,
@@ -174,6 +179,15 @@ public final class ToneScaleFrame extends JPanel {
 
 	public Histogram getHistogram() {
 		return this.histo;
+	}
+
+	public void setReferenceScale(double[] peaksInCents) {
+		this.scalaLayer.setScale(peaksInCents);
+		this.scalaLayer.setXOffset(histoLayer.getXOffset());
+	}
+
+	public List<Layer> getLayers() {
+		return layers;
 	}
 
 }
