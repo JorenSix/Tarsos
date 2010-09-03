@@ -6,14 +6,29 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
+import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.Histogram;
+import be.hogent.tarsos.util.histogram.peaks.Peak;
+import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * @author Joren Six
@@ -28,14 +43,16 @@ public final class HistogramLayer implements Layer {
 	private final Histogram histo;
 	private final int maxMarkers = 50;
 	private final List<Double> markerPositions;
+	private AudioFile file;
 
-	public HistogramLayer(final JComponent component, final Histogram histogram) {
+	public HistogramLayer(final JComponent component, final Histogram histogram, AudioFile file) {
 		parent = component;
 		mouseDrag = new MouseDragListener(component, MouseEvent.BUTTON1);
 		histo = histogram;
 		component.addMouseListener(mouseDrag);
 		component.addMouseMotionListener(mouseDrag);
 		markerPositions = new ArrayList<Double>();
+		this.file = file;
 	}
 
 	public void setMarkers(List<Double> newMarkers) {
@@ -102,8 +119,102 @@ public final class HistogramLayer implements Layer {
 	@Override
 	public Component ui() {
 		if (ui == null) {
-			ui = new JPanel();
+			JSlider peakSlider = new JSlider(5, 100);
+			peakSlider.setValue(5);
+			peakSlider.addChangeListener(new ChangeListener() {
+				@Override
+				public void stateChanged(final ChangeEvent e) {
+					final JSlider source = (JSlider) e.getSource();
+					// if (!source.getValueIsAdjusting()) {
+					final double value = source.getValue();
+					// panel.getHistogram().gaussianSmooth(value);
+					// panel.draw(0, 0);
+					final List<Peak> peaks = PeakDetector.detect(histo, (int) value, 0.5);
+					final double[] peaksInCents = new double[peaks.size()];
+					int i = 0;
+					for (final Peak peak : peaks) {
+						peaksInCents[i++] = peak.getPosition();
+					}
+					((ToneScalePanel) parent).setReferenceScale(peaksInCents);
+				}
+			});
+
+			JButton smoothButton = new JButton("Gaussian");
+			smoothButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					histo.gaussianSmooth(0.8);
+					parent.repaint();
+				}
+			});
+
+			JButton otherSmoothButton = new JButton("Avgs");
+			smoothButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					histo.smooth(true, 2);
+					parent.repaint();
+				}
+			});
+
+			JButton resetButton = new JButton("Reset");
+			resetButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					histo.clear();
+					parent.repaint();
+				}
+			});
+
+			final SpinnerModel minModel = new SpinnerNumberModel(0, // initial
+																	// value
+					0, // min
+					1200, // max
+					1); // step
+			final SpinnerModel maxModel = new SpinnerNumberModel(1200, // initial
+																		// value
+					0, // min
+					1200, // max
+					1); // step
+
+			final JSpinner minJSpinner = new JSpinner(minModel);
+			final JSpinner maxJSpinner = new JSpinner(maxModel);
+			JButton showRangeButton = new JButton("show");
+
+			showRangeButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					new IntervalCurve((Integer) minModel.getValue(), (Integer) maxJSpinner.getValue(), file);
+				}
+			});
+
+			FormLayout subLayout = new FormLayout("40dlu, 3dlu, 40dlu, 3dlu, min:grow");
+			DefaultFormBuilder subBuilder = new DefaultFormBuilder(subLayout);
+
+			subBuilder.setRowGroupingEnabled(true);
+			subBuilder.append(minJSpinner);
+			subBuilder.append(maxJSpinner);
+			subBuilder.append(showRangeButton);
+
+			FormLayout layout = new FormLayout("right:pref, 3dlu, min:grow");
+			DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+			builder.setDefaultDialogBorder();
+			builder.setRowGroupingEnabled(true);
+			builder.append("Peakpicking:", peakSlider, true);
+			builder.append("Smooth:", smoothButton, true);
+			builder.append("Reset:", resetButton, true);
+			builder.append("Smooth:", otherSmoothButton, true);
+			builder.append("Selection:", subBuilder.getPanel(), true);
+
+			ui = builder.getPanel();
+			ui.setBorder(new TitledBorder("Histogram commands"));
+
 		}
 		return ui;
+	}
+
+	public void setAudioFile(AudioFile audioFile) {
+		this.file = audioFile;
+
 	}
 }

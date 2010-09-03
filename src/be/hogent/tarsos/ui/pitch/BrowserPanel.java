@@ -76,6 +76,7 @@ public class BrowserPanel extends JPanel {
 
 				scalePanel.add(panel);
 				scalePanel.invalidate();
+				scalePanel.repaint();
 			}
 		};
 		new Thread(task).start();

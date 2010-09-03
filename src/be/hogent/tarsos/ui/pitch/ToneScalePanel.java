@@ -14,12 +14,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
+import javax.sound.sampled.TargetDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JPanel;
 
+import be.hogent.tarsos.apps.Tarsos;
 import be.hogent.tarsos.pitch.PitchConverter;
 import be.hogent.tarsos.pitch.pure.DetectedPitchHandler;
 import be.hogent.tarsos.pitch.pure.PurePitchDetector;
@@ -54,7 +59,7 @@ public final class ToneScalePanel extends JPanel {
 		this.setSize(640, 480);
 		initializeGraphics();
 		this.histo = histo;
-		histoLayer = new HistogramLayer(this, histo);
+		histoLayer = new HistogramLayer(this, histo, null);
 		final double referenceScale[] = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100 };
 		scalaLayer = new ScalaLayer(this, referenceScale, 1200);
 		layers = new ArrayList<Layer>();
@@ -80,7 +85,22 @@ public final class ToneScalePanel extends JPanel {
 						AudioInputStream ais;
 
 						try {
-							ais = AudioSystem.getAudioInputStream(new File(audioFile.transcodedPath()));
+							boolean live = false;
+							if (live) {
+								final Mixer mixer = Tarsos.chooseMixerDevice();
+								final AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
+								final DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,
+										format);
+								final TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
+								final int numberOfSamples = Yin.DEFAULT_BUFFER_SIZE;
+								line.open(format, numberOfSamples);
+								line.start();
+								ais = new AudioInputStream(line);
+							} else {
+								histoLayer.setAudioFile(audioFile);
+								ais = AudioSystem.getAudioInputStream(new File(audioFile.transcodedPath()));
+							}
+
 							final float sampleRate = ais.getFormat().getSampleRate();
 							final int bufferSize = Yin.DEFAULT_BUFFER_SIZE;
 							final int overlapSize = Yin.DEFAULT_OVERLAP;
@@ -96,7 +116,10 @@ public final class ToneScalePanel extends JPanel {
 								public void handleDetectedPitch(final float time, final float pitch) {
 									if (pitch != -1) {
 										histo.add(PitchConverter.hertzToRelativeCent(pitch));
-										markers.add(PitchConverter.hertzToRelativeCent(pitch));
+										if (getShouldPlay()) {
+											markers.add(PitchConverter.hertzToRelativeCent(pitch));
+										}
+
 									}
 									if ((int) (time * 100) % 5 == 0) {
 										// System.out.println(time + "\t" +
@@ -138,8 +161,11 @@ public final class ToneScalePanel extends JPanel {
 								}
 							});
 
-							dispatcher.addAudioProcessor(new BlockingAudioPlayer(ais.getFormat(), bufferSize,
-									overlapSize));
+							if (getShouldPlay()) {
+								BlockingAudioPlayer player = new BlockingAudioPlayer(ais.getFormat(),
+										bufferSize, overlapSize);
+								dispatcher.addAudioProcessor(player);
+							}
 							new Thread(dispatcher).start();
 						} catch (final UnsupportedAudioFileException e) {
 							// TODO Auto-generated catch block
@@ -183,6 +209,16 @@ public final class ToneScalePanel extends JPanel {
 	public void setReferenceScale(double[] peaksInCents) {
 		this.scalaLayer.setScale(peaksInCents);
 		this.scalaLayer.setXOffset(histoLayer.getXOffset());
+	}
+
+	private boolean play = false;
+
+	void setShouldPlay(boolean shouldPlay) {
+		play = shouldPlay;
+	}
+
+	boolean getShouldPlay() {
+		return play;
 	}
 
 	public List<Layer> getLayers() {

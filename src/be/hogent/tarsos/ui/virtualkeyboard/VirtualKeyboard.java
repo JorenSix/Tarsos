@@ -95,8 +95,8 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		// number of keys smaller than VirtualKeyboard.NUMBER_OF_MIDI_KEYS
 		this(
 				numberOfKeysPerOctave,
-				numberOfKeysPerOctave * 7 > VirtualKeyboard.NUMBER_OF_MIDI_KEYS ? VirtualKeyboard.NUMBER_OF_MIDI_KEYS
-						: numberOfKeysPerOctave * 7);
+				numberOfKeysPerOctave * 3 > VirtualKeyboard.NUMBER_OF_MIDI_KEYS ? VirtualKeyboard.NUMBER_OF_MIDI_KEYS
+						: numberOfKeysPerOctave * 3);
 	}
 
 	/**

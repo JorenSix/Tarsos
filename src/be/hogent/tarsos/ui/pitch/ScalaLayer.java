@@ -1,6 +1,5 @@
 package be.hogent.tarsos.ui.pitch;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
@@ -11,9 +10,14 @@ import java.awt.event.MouseEvent;
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 import be.hogent.tarsos.ui.virtualkeyboard.VirtualKeyboard;
+import be.hogent.tarsos.util.ScalaFile;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 public class ScalaLayer implements Layer {
 
@@ -60,6 +64,9 @@ public class ScalaLayer implements Layer {
 
 	public void setScale(final double[] referenceScale) {
 		this.scale = referenceScale;
+		if (keyboard != null) {
+			keyboard.connectToTunedSynth(referenceScale);
+		}
 		parent.repaint();
 	}
 
@@ -69,29 +76,43 @@ public class ScalaLayer implements Layer {
 	}
 
 	JComponent ui;
+	VirtualKeyboard keyboard;
 
 	@Override
 	public Component ui() {
 		if (ui == null) {
-			ui = new JPanel(new BorderLayout());
-			JButton launchKeyboard = new JButton("Keyboard");
-			launchKeyboard.addActionListener(new ActionListener() {
-				VirtualKeyboard current;
 
+			JButton exportButton = new JButton("Export");
+			exportButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// if (current == null) {
-					current = VirtualKeyboard.createVirtualKeyboard(scale.length);
-					current.connectToTunedSynth(scale);
-					current.setSize(250, 30);
-					// }
-					ui.invalidate();
-					ui.repaint();
-					ui.add(current, BorderLayout.SOUTH);
-
+					ScalaFile file = new ScalaFile("Tarsos exported scala file", scale);
+					file.write("export.scl");
 				}
 			});
-			ui.add(launchKeyboard, BorderLayout.SOUTH);
+
+			VirtualKeyboard[] keyboards = new VirtualKeyboard[20];
+			for (int i = 0; i < 20; i++) {
+				keyboards[i] = VirtualKeyboard.createVirtualKeyboard(0);
+			}
+
+			keyboard = VirtualKeyboard.createVirtualKeyboard(scale.length);
+			keyboard.connectToTunedSynth(scale);
+
+			FormLayout layout = new FormLayout("right:pref, 3dlu, min:grow");
+			DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+			builder.setDefaultDialogBorder();
+			builder.setRowGroupingEnabled(true);
+			builder.append("Export scala file:", exportButton, true);
+			CellConstraints cc = new CellConstraints();
+
+			builder.append("Keyboard:");
+			builder.appendRow("31dlu"); // Assumes line is 14, gap is 3
+			builder.add(keyboard, cc.xywh(builder.getColumn(), builder.getRow(), 1, 2));
+			builder.nextLine(2);
+
+			ui = builder.getPanel();
+			ui.setBorder(new TitledBorder("Peak commands"));
 		}
 		return ui;
 	}

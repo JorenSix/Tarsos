@@ -11,14 +11,15 @@ import be.hogent.tarsos.util.Execute;
 import be.hogent.tarsos.util.FileUtils;
 
 /**
- * The IPEM_SIX Pitch detector uses an auditory model for polyphonic pitch tracking.
- * More information can be found in following papers: Factors affecting music
- * retrieval in query-by-melody De Mulder, Tom; Martens, Jean; PAUWS, S;
- * VIGNOLI, F et al. IEEE TRANSACTIONS ON MULTIMEDIA (2006) Recent improvements
- * of an auditory model based front-end for the transcription of vocal queries
- * De Mulder, Tom; MARTENS, J; Lesaffre, Micheline; Leman, Marc et al. 2004 IEEE
- * INTERNATIONAL CONFERENCE ON ACOUSTICS, SPEECH, AND SIGNAL PROCESSING, VOL IV,
- * PROCEEDINGS (2004) An Auditory Model Based Transcriber of Vocal Queries
+ * The IPEM_SIX Pitch detector uses an auditory model for polyphonic pitch
+ * tracking. More information can be found in following papers: Factors
+ * affecting music retrieval in query-by-melody De Mulder, Tom; Martens, Jean;
+ * PAUWS, S; VIGNOLI, F et al. IEEE TRANSACTIONS ON MULTIMEDIA (2006) Recent
+ * improvements of an auditory model based front-end for the transcription of
+ * vocal queries De Mulder, Tom; MARTENS, J; Lesaffre, Micheline; Leman, Marc et
+ * al. 2004 IEEE INTERNATIONAL CONFERENCE ON ACOUSTICS, SPEECH, AND SIGNAL
+ * PROCESSING, VOL IV, PROCEEDINGS (2004) An Auditory Model Based Transcriber of
+ * Vocal Queries
  * 
  * De Mulder, Tom; Martens, Jean; Lesaffre, Micheline; Leman, Marc et al.
  * Proceedings of the Fourth International Conference on Music Information
@@ -29,122 +30,166 @@ import be.hogent.tarsos.util.FileUtils;
  * @author Joren Six
  */
 public final class IPEMPitchDetection implements PitchDetector {
-    /**
-     * Log messages.
-     */
-    private static final Logger LOG = Logger.getLogger(IPEMPitchDetection.class.getName());
+	/**
+	 * Log messages.
+	 */
+	private static final Logger LOG = Logger.getLogger(IPEMPitchDetection.class.getName());
 
+	private final PitchDetectionMode mode;
 
-    private final String name;
+	private final AudioFile file;
 
-    private final AudioFile file;
+	private final List<Sample> samples;
 
-    private final List<Sample> samples;
+	/**
+	 * @param file
+	 *            the file to detect pitch for
+	 */
+	public IPEMPitchDetection(final AudioFile audioFile, final PitchDetectionMode detectionMode) {
+		this.file = audioFile;
+		this.samples = new ArrayList<Sample>();
+		this.mode = detectionMode;
 
-    /**
-     * @param file
-     *            the file to detect pitch for
-     */
-    public IPEMPitchDetection(final AudioFile file, final PitchDetectionMode mode) {
-        this.file = file;
-        this.samples = new ArrayList<Sample>();
-        this.name = mode.getParametername();
+		// check files and copy them if needed
+		final String[] files = { "ipem_pitch_detection.sh", "libsndfile.dll",
+				mode.getParametername() + ".exe" };
+		for (final String ipemFile : files) {
+			final String target = FileUtils.combine(FileUtils.getRuntimePath(), ipemFile);
+			if (!FileUtils.exists(target)) {
+				FileUtils.copyFileFromJar("/be/hogent/tarsos/pitch/data/" + ipemFile, target);
+			}
+		}
+	}
 
-        // check files and copy them if needed
-        final String[] files = { "ipem_pitch_detection.sh", "libsndfile.dll", name + ".exe" };
-        for (final String ipemFile : files) {
-            final String target = FileUtils.combine(FileUtils.getRuntimePath(), ipemFile);
-            if (!FileUtils.exists(target)) {
-                FileUtils.copyFileFromJar("/be/hogent/tarsos/pitch/data/" + ipemFile, target);
-            }
-        }
-    }
+	@Override
+	public void executePitchDetection() {
 
-    @Override
-    public void executePitchDetection() {
+		final String transcodedBaseName = FileUtils.basename(file.transcodedPath());
+		FileUtils.writeFile(transcodedBaseName + "\n", "lijst.txt");
+		final String name = mode.getParametername();
 
-        final String transcodedBaseName = FileUtils.basename(file.transcodedPath());
+		final String annotationsDirectory = Configuration.get(ConfKey.raw_ipem_annotations_directory);
+		String outputDirectory = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory, name)
+				+ "/";
+		final String csvFileName = FileUtils.combine(outputDirectory, transcodedBaseName + ".txt");
+		String command = null;
 
-        FileUtils.writeFile(transcodedBaseName + "\n", "lijst.txt");
+		String audioDirectory = FileUtils.combine(AudioFile.TRANSCODED_AUDIO_DIR, "") + "/";
 
-        final String annotationsDirectory = Configuration.get(ConfKey.raw_ipem_annotations_directory);
-        String outputDirectory = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory, name)
-        + "/";
-        final String csvFileName = FileUtils.combine(outputDirectory, transcodedBaseName + ".txt");
-        String command = null;
+		if (System.getProperty("os.name").contains("indows")) {
+			audioDirectory = audioDirectory.replace("/", "\\").replace(":\\", "://");
+			outputDirectory = outputDirectory.replace("/", "\\").replace(":\\", "://");
+			if (mode == PitchDetectionMode.IPEM_ONE) {
+				command = name + ".exe  " + audioDirectory + transcodedBaseName + ".wav " + outputDirectory
+						+ transcodedBaseName + ".txt";
+			} else {
 
-        String audioDirectory = FileUtils.combine(AudioFile.TRANSCODED_AUDIO_DIR, "") + "/";
+				command = name + ".exe  lijst.txt " + audioDirectory + " " + outputDirectory;
+			}
 
+		} else { // on linux use wine's Z-directory
+			audioDirectory = "z://" + audioDirectory.replace("/", "\\\\");
+			outputDirectory = "z://" + outputDirectory.replace("/", "\\\\");
+			audioDirectory = audioDirectory.replace("//\\\\", "//");
+			outputDirectory = outputDirectory.replace("//\\\\", "//");
+			command = FileUtils.getRuntimePath() + "/ipem_pitch_detection.sh \"" + audioDirectory + "\" \""
+					+ outputDirectory + "\"";
+		}
 
-        if (System.getProperty("os.name").contains("indows")) {
-            audioDirectory = audioDirectory.replace("/", "\\").replace(":\\", "://");
-            outputDirectory = outputDirectory.replace("/", "\\").replace(":\\", "://");
-            command = name + ".exe  lijst.txt " + audioDirectory + " " + outputDirectory;
-        } else { // on linux use wine's Z-directory
-            audioDirectory = "z://" + audioDirectory.replace("/", "\\\\");
-            outputDirectory = "z://" + outputDirectory.replace("/", "\\\\");
-            audioDirectory = audioDirectory.replace("//\\\\", "//");
-            outputDirectory = outputDirectory.replace("//\\\\", "//");
-            command = FileUtils.getRuntimePath() + "/ipem_pitch_detection.sh \"" + audioDirectory + "\" \""
-            + outputDirectory + "\"";
-        }
+		if (!FileUtils.exists(csvFileName)) {
+			Execute.command(command, null);
+		}
 
-        if (!FileUtils.exists(csvFileName)) {
-            Execute.command(command, null);
-        }
+		if (mode == PitchDetectionMode.IPEM_ONE) {
+			parseIpemOne(csvFileName);
+		} else {
+			parseIpemSix(csvFileName);
+		}
+	}
 
-        final List<Double> probabilities = new ArrayList<Double>();
-        final List<Double> pitches = new ArrayList<Double>();
-        long start = 0;
-        final double minimumAcceptableProbability = 0.05;
+	/**
+	 * Parse a CSV file containing this information: ' 0.070 84.064 ' the first
+	 * column is a time stamp (in seconds), the second the pitch in Hz.
+	 * 
+	 * @param csvFileName
+	 */
+	private void parseIpemOne(String csvFileName) {
+		// split on a one or more whitespace characters
+		final List<String[]> csvData = FileUtils.readCSVFile(csvFileName, "\\s+", -1);
+		long start = 0;
+		for (final String[] row : csvData) {
+			final int pitchIndex;
+			if (row.length == 2) {
+				pitchIndex = 1;
+			} else {
+				pitchIndex = 2;
+			}
+			try {
 
-        final List<String[]> csvData = FileUtils.readCSVFile(csvFileName, " ", 12);
+				double pitch = Double.parseDouble(row[pitchIndex]);
+				final Sample sample = new Sample(start, pitch);
+				sample.source = mode;
+				samples.add(sample);
+			} catch (final NumberFormatException e) {
+				LOG.info("Ignored incorrectly formatted pitch: " + row[pitchIndex]);
+			}
+			start += 10;
+		}
+	}
 
-        for (final String[] row : csvData) {
-            for (int index = 0; index < 6; index++) {
-                Double probability = 0.0;
-                try {
-                    probability = Double.parseDouble(row[index * 2 + 1]);
-                } catch (final NumberFormatException e) {
-                    LOG.info("Ignored incorrectly formatted number: " + row[index * 2 + 1]);
-                }
+	private void parseIpemSix(String csvFileName) {
+		final List<Double> probabilities = new ArrayList<Double>();
+		final List<Double> pitches = new ArrayList<Double>();
+		long start = 0;
+		final double minimumAcceptableProbability = 0.05;
 
-                Double pitch = row[index * 2].equals("-1.#IND00") || row[index * 2].equals("-1.#QNAN0") ? 0.0
-                        : Double.parseDouble(row[index * 2]);
-                // only accept values smaller than 25000Hz
-                // bigger values are probably annotated incorrectly
-                // With the ipem pitchdetector this happens sometimes, on wine
-                // a big value is
-                if (pitch > 25000) {
-                    pitch = 0.0;
-                }
+		final List<String[]> csvData = FileUtils.readCSVFile(csvFileName, " ", 12);
 
-                // Do not store 0 Hz values
-                if (pitch != 0.0) {
-                    probabilities.add(probability);
-                    pitches.add(pitch);
-                }
-            }
-            final Sample sample = new Sample(start, pitches, probabilities, minimumAcceptableProbability);
-            sample.source = PitchDetectionMode.IPEM_SIX;
-            samples.add(sample);
-            start += 10;
+		for (final String[] row : csvData) {
+			for (int index = 0; index < 6; index++) {
+				Double probability = 0.0;
+				try {
+					probability = Double.parseDouble(row[index * 2 + 1]);
+				} catch (final NumberFormatException e) {
+					LOG.info("Ignored incorrectly formatted number: " + row[index * 2 + 1]);
+				}
 
-            assert pitches.size() == 6;
-            assert probabilities.size() == 6;
+				Double pitch = row[index * 2].equals("-1.#IND00") || row[index * 2].equals("-1.#QNAN0") ? 0.0
+						: Double.parseDouble(row[index * 2]);
+				// only accept values smaller than 25000Hz
+				// bigger values are probably annotated incorrectly
+				// With the ipem pitchdetector this happens sometimes, on wine
+				// a big value is
+				if (pitch > 25000) {
+					pitch = 0.0;
+				}
 
-            probabilities.clear();
-            pitches.clear();
-        }
-    }
+				// Do not store 0 Hz values
+				if (pitch != 0.0) {
+					probabilities.add(probability);
+					pitches.add(pitch);
+				}
+			}
+			final Sample sample = new Sample(start, pitches, probabilities, minimumAcceptableProbability);
+			sample.source = mode;
+			samples.add(sample);
+			start += 10;
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
+			assert pitches.size() == 6;
+			assert probabilities.size() == 6;
 
-    @Override
-    public List<Sample> getSamples() {
-        return this.samples;
-    }
+			probabilities.clear();
+			pitches.clear();
+		}
+	}
+
+	@Override
+	public String getName() {
+		return this.mode.getParametername();
+	}
+
+	@Override
+	public List<Sample> getSamples() {
+		return this.samples;
+	}
 }

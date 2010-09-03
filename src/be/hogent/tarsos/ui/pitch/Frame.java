@@ -5,28 +5,29 @@ package be.hogent.tarsos.ui.pitch;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
-import be.hogent.tarsos.util.histogram.peaks.Peak;
-import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * @author Joren Six
@@ -87,48 +88,44 @@ public class Frame extends JFrame {
 	private void setProgramIcon() {
 		try {
 			final BufferedImage image;
-			final String iconPath = "/be/hogent/tarsos/ui/resources/sound.png";
+			final String iconPath = "/be/hogent/tarsos/ui/resources/micro.png";
 			image = ImageIO.read(this.getClass().getResource(iconPath));
 			setIconImage(image);
 		} catch (IOException e) {
 			// fail silently, lacking icon
 		}
-
 	}
 
 	private JComponent makeTarsosPanel() {
 		final JPanel tarsosPanel = new JPanel(new BorderLayout());
 
 		final ToneScalePanel panel = new ToneScalePanel(new ToneScaleHistogram());
-		final JSlider slider = new JSlider(0, 100);
-		slider.setValue(0);
-		slider.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(final ChangeEvent e) {
-				final JSlider source = (JSlider) e.getSource();
-				// if (!source.getValueIsAdjusting()) {
-				final double value = source.getValue();
-				// panel.getHistogram().gaussianSmooth(value);
-				// panel.draw(0, 0);
-				final List<Peak> peaks = PeakDetector.detect(panel.getHistogram(), (int) value, 0.5);
-				final double[] peaksInCents = new double[peaks.size()];
-				int i = 0;
-				for (final Peak peak : peaks) {
-					peaksInCents[i++] = peak.getPosition();
-				}
-				panel.setReferenceScale(peaksInCents);
-			}
-		});
-
-		tarsosPanel.add(slider, BorderLayout.NORTH);
 		tarsosPanel.add(panel, BorderLayout.CENTER);
 
 		List<Layer> layers = panel.getLayers();
-		JPanel layersJPanel = new JPanel(new GridLayout(layers.size(), 1));
+		JPanel layersJPanel = new JPanel(new GridLayout(0, layers.size()));
 		for (int i = 0; i < layers.size(); i++) {
 			layersJPanel.add(layers.get(i).ui());
 		}
 		tarsosPanel.add(layersJPanel, BorderLayout.SOUTH);
+
+		final JCheckBox checkbox = new JCheckBox();
+		checkbox.setSelected(false);
+		checkbox.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				boolean play = checkbox.getModel().isSelected();
+				panel.setShouldPlay(play);
+
+			}
+		});
+		FormLayout layout = new FormLayout("right:pref, 3dlu, min:grow");
+		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+		builder.setDefaultDialogBorder();
+		builder.setRowGroupingEnabled(true);
+		builder.append("Should play:", checkbox, true);
+		tarsosPanel.add(builder.getPanel(), BorderLayout.NORTH);
 		return tarsosPanel;
 	}
 
