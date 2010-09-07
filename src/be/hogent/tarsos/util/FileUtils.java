@@ -86,7 +86,7 @@ public final class FileUtils {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Sample.headerString());
 		for (Sample s : samples) {
-			sb.append(s.toString());
+			sb.append(s.toString()).append("\n");
 		}
 		writeFile(sb.toString(), fileName);
 	}

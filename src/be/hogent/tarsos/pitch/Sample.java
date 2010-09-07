@@ -55,6 +55,9 @@ public final class Sample implements Comparable<Sample> {
 	public Sample(final long starTime, final List<Double> pitchList, final List<Double> probabilityList,
 			final double minimumAcceptableProbability) {
 		this(starTime);
+		if (pitchList.size() != probabilityList.size()) {
+			throw new IllegalArgumentException("Pitch and probability list should have the same length!");
+		}
 		for (int i = 0; i < probabilityList.size(); i++) {
 			final Double probability = probabilityList.get(i);
 			if (probability >= minimumAcceptableProbability) {
@@ -261,11 +264,13 @@ public final class Sample implements Comparable<Sample> {
 	public static Sample parse(String string) {
 		String[] data = string.split("\t");
 		final List<Double> hertzValues = new ArrayList<Double>();
+		final List<Double> probabilities = new ArrayList<Double>();
 		long start = (long) (Double.parseDouble(data[0]) * 1000);
 		for (int i = 1; i < data.length; i++) {
 			hertzValues.add(Double.parseDouble(data[i]));
+			probabilities.add(1.0);
 		}
-		return new Sample(start, hertzValues, new ArrayList<Double>());
+		return new Sample(start, hertzValues, probabilities);
 	}
 
 	@Override

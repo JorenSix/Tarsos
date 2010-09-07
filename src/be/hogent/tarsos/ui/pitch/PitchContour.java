@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 
 import ptolemy.plot.Plot;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchUnit;
 import be.hogent.tarsos.pitch.pure.DetectedPitchHandler;
 import be.hogent.tarsos.util.AudioFile;
@@ -48,10 +49,12 @@ public class PitchContour extends Plot {
 		frame.pack();
 		frame.setVisible(true);
 
+		analyseFile();
+
 		this.audioFile = file;
 	}
 
-	private void setYTicks(double[] scale) {
+	private void setYTicks(final double[] scale) {
 		if (scale != null) {
 			// 9 octaves
 			for (int octave = 1; octave < 9; octave++) {
@@ -76,6 +79,12 @@ public class PitchContour extends Plot {
 				}
 			}
 		};
-
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				audioFile.detectPitch(PitchDetectionMode.TARSOS_YIN, detectedPitchHandler, 2);
+			}
+		};
+		new Thread(r, "Pitch Contour Data Collection Thread").start();
 	}
 }
