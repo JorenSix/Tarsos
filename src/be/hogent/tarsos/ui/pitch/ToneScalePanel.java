@@ -55,11 +55,11 @@ public final class ToneScalePanel extends JPanel {
 	private final HistogramLayer histoLayer;
 	private final ScalaLayer scalaLayer;
 
-	public ToneScalePanel(final Histogram histo) {
+	public ToneScalePanel(final Histogram histogram) {
 		this.setSize(640, 480);
 		initializeGraphics();
-		this.histo = histo;
-		histoLayer = new HistogramLayer(this, histo, null);
+		this.histo = histogram;
+		histoLayer = new HistogramLayer(this, histogram, null);
 		final double referenceScale[] = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100 };
 		scalaLayer = new ScalaLayer(this, referenceScale, 1200);
 		layers = new ArrayList<Layer>();
@@ -106,7 +106,7 @@ public final class ToneScalePanel extends JPanel {
 							final int overlapSize = Yin.DEFAULT_OVERLAP;
 							final PurePitchDetector pureDetector = new Yin(sampleRate, bufferSize);
 							final int bufferStepSize = bufferSize - overlapSize;
-							histo.clear();
+							histogram.clear();
 
 							final DetectedPitchHandler detectedPitchHandler = new DetectedPitchHandler() {
 
@@ -115,7 +115,7 @@ public final class ToneScalePanel extends JPanel {
 								@Override
 								public void handleDetectedPitch(final float time, final float pitch) {
 									if (pitch != -1) {
-										histo.add(PitchConverter.hertzToRelativeCent(pitch));
+										histogram.add(PitchConverter.hertzToRelativeCent(pitch));
 										if (getShouldPlay()) {
 											markers.add(PitchConverter.hertzToRelativeCent(pitch));
 										}

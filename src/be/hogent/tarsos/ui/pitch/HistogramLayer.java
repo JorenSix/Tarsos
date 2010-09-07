@@ -22,6 +22,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import be.hogent.tarsos.pitch.PitchUnit;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
@@ -36,7 +37,7 @@ import com.jgoodies.forms.layout.FormLayout;
 public final class HistogramLayer implements Layer {
 
 	// private final int X_BORDER = 5;
-	private final int Y_BORDER = 5;
+	private static final int Y_BORDER = 5;
 
 	private final JComponent parent;
 	private final MouseDragListener mouseDrag;
@@ -44,15 +45,17 @@ public final class HistogramLayer implements Layer {
 	private final int maxMarkers = 50;
 	private final List<Double> markerPositions;
 	private AudioFile file;
+	private double[] scale;
 
-	public HistogramLayer(final JComponent component, final Histogram histogram, AudioFile file) {
+	public HistogramLayer(final JComponent component, final Histogram histogram, AudioFile audioFile) {
 		parent = component;
 		mouseDrag = new MouseDragListener(component, MouseEvent.BUTTON1);
 		histo = histogram;
 		component.addMouseListener(mouseDrag);
 		component.addMouseMotionListener(mouseDrag);
 		markerPositions = new ArrayList<Double>();
-		this.file = file;
+		this.file = audioFile;
+		scale = null;
 	}
 
 	public void setMarkers(List<Double> newMarkers) {
@@ -136,6 +139,7 @@ public final class HistogramLayer implements Layer {
 						peaksInCents[i++] = peak.getPosition();
 					}
 					((ToneScalePanel) parent).setReferenceScale(peaksInCents);
+					scale = peaksInCents;
 				}
 			});
 
@@ -148,11 +152,11 @@ public final class HistogramLayer implements Layer {
 				}
 			});
 
-			JButton otherSmoothButton = new JButton("Avgs");
-			smoothButton.addActionListener(new ActionListener() {
+			JButton baselineButton = new JButton("Baseline");
+			baselineButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					histo.smooth(true, 2);
+					histo.baselineHistogram();
 					parent.repaint();
 				}
 			});
@@ -184,7 +188,7 @@ public final class HistogramLayer implements Layer {
 			showRangeButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					new IntervalCurve((Integer) minModel.getValue(), (Integer) maxJSpinner.getValue(), file);
+					new PitchContour(file, scale, PitchUnit.HERTZ);
 				}
 			});
 
@@ -203,12 +207,11 @@ public final class HistogramLayer implements Layer {
 			builder.append("Peakpicking:", peakSlider, true);
 			builder.append("Smooth:", smoothButton, true);
 			builder.append("Reset:", resetButton, true);
-			builder.append("Smooth:", otherSmoothButton, true);
+			builder.append("Baseline:", baselineButton, true);
 			builder.append("Selection:", subBuilder.getPanel(), true);
 
 			ui = builder.getPanel();
 			ui.setBorder(new TitledBorder("Histogram commands"));
-
 		}
 		return ui;
 	}

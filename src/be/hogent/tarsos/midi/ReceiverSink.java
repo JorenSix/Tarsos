@@ -8,37 +8,38 @@ import javax.sound.midi.Receiver;
  * messages to each registered <code>Receiver</code>. It can be used to send
  * messages to a synthesizer while monitoring the events by writing them to the
  * command line, a LOG file,... or to build a MIDI file from any input
+ * 
  * @author Joren Six
  */
 public final class ReceiverSink implements Receiver {
 
-    private final Receiver[] receivers;
-    private final boolean ignoreTiming;
+	private final Receiver[] receivers;
+	private final boolean ignoreTiming;
 
-    /**
-     * @param receivers
-     *            the list of <code>Receiver</code>s to send messages to
-     */
-    public ReceiverSink(final boolean ignoreTiming, final Receiver... receivers) {
-        this.receivers = receivers;
-        this.ignoreTiming = ignoreTiming;
-    }
+	/**
+	 * @param receiverList
+	 *            The list of <code>Receiver</code>s to send messages to
+	 */
+	public ReceiverSink(final boolean ignoreTimingData, final Receiver... receiverList) {
+		this.receivers = receiverList;
+		this.ignoreTiming = ignoreTimingData;
+	}
 
-    @Override
-    public void close() {
-        for (final Receiver receiver : receivers) {
-            receiver.close();
-        }
-    }
+	@Override
+	public void close() {
+		for (final Receiver receiver : receivers) {
+			receiver.close();
+		}
+	}
 
-    @Override
-    public void send(final MidiMessage message, final long timeStamp) {
-        long actualTimeStamp = timeStamp;
-        if (ignoreTiming) {
-            actualTimeStamp = -1;
-        }
-        for (final Receiver receiver : receivers) {
-            receiver.send(message, actualTimeStamp);
-        }
-    }
+	@Override
+	public void send(final MidiMessage message, final long timeStamp) {
+		long actualTimeStamp = timeStamp;
+		if (ignoreTiming) {
+			actualTimeStamp = -1;
+		}
+		for (final Receiver receiver : receivers) {
+			receiver.send(message, actualTimeStamp);
+		}
+	}
 }

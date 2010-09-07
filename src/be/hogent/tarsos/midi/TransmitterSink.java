@@ -16,8 +16,8 @@ public final class TransmitterSink implements Transmitter {
 
     private final Transmitter[] transmitters;
 
-    public TransmitterSink(final Transmitter... transmitters) {
-        this.transmitters = transmitters;
+    public TransmitterSink(final Transmitter... transmitterList) {
+        this.transmitters = transmitterList;
     }
 
     @Override

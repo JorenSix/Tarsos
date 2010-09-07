@@ -51,12 +51,18 @@ public class ConfigurationPanel extends JPanel {
 		for (ConfKey key : orderedKeys) {
 			JTextField configurationTextField = new JTextField();
 			String value = Configuration.get(key);
+			String tooltip = Configuration.getDescription(key);
+			String label = Configuration.getHumanName(key);
+			if (label == null) {
+				label = key.name();
+			}
+			configurationTextField.setToolTipText(tooltip);
 			configurationTextField.setText(value);
-			builder.append(key.name() + ":", configurationTextField, true);
+			builder.append(label + ":", configurationTextField, true);
 			configurationTextFields.put(configurationTextField, key);
 			configurationTextField.addCaretListener(new CaretListener() {
 				@Override
-				public void caretUpdate(CaretEvent e) {
+				public void caretUpdate(final CaretEvent e) {
 					JTextField textField = (JTextField) e.getSource();
 					ConfKey key = configurationTextFields.get(textField);
 					String value = textField.getText();
@@ -67,5 +73,4 @@ public class ConfigurationPanel extends JPanel {
 		JComponent center = builder.getPanel();
 		add(center, BorderLayout.CENTER);
 	}
-
 }

@@ -11,59 +11,58 @@ import be.hogent.tarsos.util.StopWatch;
 
 public final class PlotThread extends Thread {
 
-    // private String title;
-    private final List<Sample> samples;
-    private final StopWatch watch;
+	// private String title;
+	private final List<Sample> samples;
+	private final StopWatch watch;
 
-    public PlotThread(final String title, final List<Sample> samples, final StopWatch watch) {
-        // this.title = title;
-        this.samples = samples;
-        this.watch = watch;
-    }
+	public PlotThread(final String title, final List<Sample> samples, final StopWatch watch) {
+		// this.title = title;
+		this.samples = samples;
+		this.watch = watch;
+	}
 
-    @Override
-    public void run() {
-        // TODO Auto-generated method stub
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
 
-        final Plot livePlot = new Plot();
-        livePlot.setSize(1024, 786);
-        // livePlot.setTitle(title);
-        livePlot.setPointsPersistence(3000);
-        livePlot.setMarksStyle("dots");
+		final Plot livePlot = new Plot();
+		livePlot.setSize(1024, 786);
+		// livePlot.setTitle(title);
+		livePlot.setMarksStyle("dots");
 
-        livePlot.setYRange(2000, 6000);
-        // livePlot.setYLog(true);
+		livePlot.setYRange(2000, 6000);
+		// livePlot.setYLog(true);
 
-        final Iterator<Sample> sampleIterator = samples.iterator();
-        Sample currentSample = sampleIterator.next();
+		final Iterator<Sample> sampleIterator = samples.iterator();
+		Sample currentSample = sampleIterator.next();
 
-        new PlotApplication(livePlot);
+		new PlotApplication(livePlot);
 
-        for (long currentTick = 0; currentTick <= samples.get(samples.size() - 1).getStart(); currentTick += 100) {
+		for (long currentTick = 0; currentTick <= samples.get(samples.size() - 1).getStart(); currentTick += 100) {
 
-            while (sampleIterator.hasNext() && currentSample.getStart() <= currentTick) {
-                for (final Double pitch : currentSample
-                        .getPitchesWithoutHarmonicsIn(PitchUnit.ABSOLUTE_CENTS, 0.07)) {
-                    final double yValue = pitch;
-                    livePlot.addPoint(1, currentTick, yValue, false);
-                }
-                currentSample = sampleIterator.next();
-            }
+			while (sampleIterator.hasNext() && currentSample.getStart() <= currentTick) {
+				for (final Double pitch : currentSample.getPitchesWithoutHarmonicsIn(
+						PitchUnit.ABSOLUTE_CENTS, 0.07)) {
+					final double yValue = pitch;
+					livePlot.addPoint(1, currentTick, yValue, false);
+				}
+				currentSample = sampleIterator.next();
+			}
 
-            int numberOfTicksToSleep = (int) (currentTick - watch.ticksPassed());
-            if (numberOfTicksToSleep > 0) {
-                livePlot.setXRange(currentTick - 9900, currentTick + 1000);
+			int numberOfTicksToSleep = (int) (currentTick - watch.ticksPassed());
+			if (numberOfTicksToSleep > 0) {
+				livePlot.setXRange(currentTick - 9900, currentTick + 1000);
 
-                livePlot.repaint();
-                numberOfTicksToSleep = (int) (currentTick - watch.ticksPassed());
-                if (numberOfTicksToSleep > 0) {
-                    try {
-                        Thread.sleep(numberOfTicksToSleep);
-                    } catch (final InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
+				livePlot.repaint();
+				numberOfTicksToSleep = (int) (currentTick - watch.ticksPassed());
+				if (numberOfTicksToSleep > 0) {
+					try {
+						Thread.sleep(numberOfTicksToSleep);
+					} catch (final InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
 }

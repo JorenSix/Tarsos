@@ -19,14 +19,14 @@ import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-public class ScalaLayer implements Layer {
+public final class ScalaLayer implements Layer {
 
 	private final JComponent parent;
 	private final MouseDragListener mouseDrag;
 	private double[] scale;
 	private final double delta;
 
-	public ScalaLayer(final JComponent component, final double[] toneScale, double pitchDelta) {
+	public ScalaLayer(final JComponent component, final double[] toneScale, final double pitchDelta) {
 		parent = component;
 		delta = pitchDelta;
 		scale = toneScale;
@@ -43,7 +43,7 @@ public class ScalaLayer implements Layer {
 	}
 
 	@Override
-	public void draw(Graphics2D graphics) {
+	public void draw(final Graphics2D graphics) {
 		final double xOffset = mouseDrag.calculateXOffset();
 		final int width = parent.getWidth();
 		final int height = parent.getHeight();

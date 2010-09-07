@@ -42,11 +42,9 @@ class ClickForPitchListener extends MouseAdapter {
 		if (pitchInRelativeCents < 0) {
 			pitchInRelativeCents += 1200;
 		}
-		System.out.println(pitchInRelativeCents);
 
 		final int velocity = (int) (e.getY() / (double) height * 127);
 
 		synth.play(pitchInRelativeCents, velocity);
-
 	}
 }

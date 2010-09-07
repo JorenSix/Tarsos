@@ -37,563 +37,598 @@ import be.hogent.tarsos.pitch.Pitch;
 import be.hogent.tarsos.pitch.PitchUnit;
 import be.hogent.tarsos.pitch.Sample;
 
-
 /**
  * Exports a DatabaseResult to a CSV-file.
+ * 
  * @author Joren Six
  */
 public final class FileUtils {
-    private static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
+	private static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
 
-    /**
-     * Parses files that can be exported from <a
-     * href="http://miracle.otago.ac.nz/postgrads/tartini/">The Tartini
-     * program</a>. The files look like this (with header):
-     * <pre>
-     *        Time(secs) Pitch(semi-tones)       Volume(rms)
-     *                  0                 0              -150
-     *           0.301859           72.3137          -108.931
-     *           0.325079           72.0692          -79.6062
-     *           0.348299           71.9804           -64.634
-     *           0.371519           71.9619          -59.5387
-     *           0.394739           71.9699          -59.0133
-     *           0.417959           71.9717           -59.567
-     *           0.441179           71.9854          -59.7326
-     *           0.464399            72.011          -58.6959
-     * </pre>
-     * @param fileName
-     *            The Tartini pitch file.
-     * @return
-     */
-    public static List<Sample> parseTartiniPitchFile(final String fileName) {
-        final List<Sample> samples = new ArrayList<Sample>();
-        final String contents = FileUtils.readFile(fileName);
-        final String[] lines = contents.split("\n");
-        for (int i = 1; i < lines.length; i++) {
-            final String[] data = lines[i].split(" +");
-            final double time = Double.parseDouble(data[1]);
-            final double midiCents = Double.parseDouble(data[2]);
-            final Pitch pitch = Pitch.getInstance(PitchUnit.MIDI_CENT, midiCents);
-            final Sample s = new Sample((long) (time * 1000), pitch.getPitch(PitchUnit.HERTZ));
-            samples.add(s);
-        }
-        return samples;
-    }
+	/**
+	 * Parses files that can be exported from <a
+	 * href="http://miracle.otago.ac.nz/postgrads/tartini/">The Tartini
+	 * program</a>. The files look like this (with header):
+	 * 
+	 * <pre>
+	 *        Time(secs) Pitch(semi-tones)       Volume(rms)
+	 *                  0                 0              -150
+	 *           0.301859           72.3137          -108.931
+	 *           0.325079           72.0692          -79.6062
+	 *           0.348299           71.9804           -64.634
+	 *           0.371519           71.9619          -59.5387
+	 *           0.394739           71.9699          -59.0133
+	 *           0.417959           71.9717           -59.567
+	 *           0.441179           71.9854          -59.7326
+	 *           0.464399            72.011          -58.6959
+	 * </pre>
+	 * 
+	 * @param fileName
+	 *            The Tartini pitch file.
+	 * @return
+	 */
+	public static List<Sample> parseTartiniPitchFile(final String fileName) {
+		final List<Sample> samples = new ArrayList<Sample>();
+		final String contents = FileUtils.readFile(fileName);
+		final String[] lines = contents.split("\n");
+		for (int i = 1; i < lines.length; i++) {
+			final String[] data = lines[i].split(" +");
+			final double time = Double.parseDouble(data[1]);
+			final double midiCents = Double.parseDouble(data[2]);
+			final Pitch pitch = Pitch.getInstance(PitchUnit.MIDI_CENT, midiCents);
+			final Sample s = new Sample((long) (time * 1000), pitch.getPitch(PitchUnit.HERTZ));
+			samples.add(s);
+		}
+		return samples;
+	}
 
+	public static void writePitchAnnotations(final String fileName, List<Sample> samples) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(Sample.headerString());
+		for (Sample s : samples) {
+			sb.append(s.toString());
+		}
+		writeFile(sb.toString(), fileName);
+	}
 
-    public static String temporaryDirectory() {
-        final String tempDir = System.getProperty("java.io.tmpdir");
-        if (tempDir.contains(" ")) {
-            LOG.warning("Temporary directory (" + tempDir + ") contains whitespace");
-        }
-        return tempDir;
-    }
+	public static List<Sample> readPitchAnnotations(final String fileName) {
+		final List<Sample> samples = new ArrayList<Sample>();
+		final String contents = FileUtils.readFile(fileName);
+		final String[] lines = contents.split("\n");
+		for (int i = 1; i < lines.length; i++) {
+			samples.add(Sample.parse(lines[i]));
+		}
+		return samples;
+	}
 
-    // disable the default constructor
-    private FileUtils() {
-    }
+	public static String temporaryDirectory() {
+		final String tempDir = System.getProperty("java.io.tmpdir");
+		if (tempDir.contains(" ")) {
+			LOG.warning("Temporary directory (" + tempDir + ") contains whitespace");
+		}
+		return tempDir;
+	}
 
-    /**
-     * Joins path elements using the systems path separator. e.g. "/tmp" and
-     * "test.wav" combined together should yield /tmp/test.wav on UNIX.
-     * @param path
-     *            the path parts part
-     * @return each element from path joined by the systems path separator.
-     */
-    public static String combine(final String... path) {
-        File file = new File(path[0]);
-        for (int i = 1; i < path.length; i++) {
-            file = new File(file, path[i]);
-        }
-        return file.getPath();
-    }
+	// disable the default constructor
+	private FileUtils() {
+	}
 
-    /**
-     * @return The path where the program is executed.
-     */
-    public static String getRuntimePath() {
-        String runtimePath = "";
-        try {
-            runtimePath = new File(".").getCanonicalPath();
-        } catch (final IOException e) {
-            LOG.log(Level.SEVERE, "Could not find runtime path, strange.", e);
-        }
-        return runtimePath;
-    }
+	/**
+	 * Joins path elements using the systems path separator. e.g. "/tmp" and
+	 * "test.wav" combined together should yield /tmp/test.wav on UNIX.
+	 * 
+	 * @param path
+	 *            the path parts part
+	 * @return each element from path joined by the systems path separator.
+	 */
+	public static String combine(final String... path) {
+		File file = new File(path[0]);
+		for (int i = 1; i < path.length; i++) {
+			file = new File(file, path[i]);
+		}
+		return file.getPath();
+	}
 
-    /**
-     * Writes a file to disk. Uses the string contents as content. Failures are
-     * logged.
-     * @param contents
-     *            The contents of the file.
-     * @param name
-     *            The name of the file to create.
-     */
-    /**
-     * @param contents
-     * @param name
-     */
-    public static void writeFile(final String contents, final String name) {
-        writeFile(contents, name, false);
-    }
+	/**
+	 * @return The path where the program is executed.
+	 */
+	public static String getRuntimePath() {
+		String runtimePath = "";
+		try {
+			runtimePath = new File(".").getCanonicalPath();
+		} catch (final IOException e) {
+			LOG.log(Level.SEVERE, "Could not find runtime path, strange.", e);
+		}
+		return runtimePath;
+	}
 
-    private static void writeFile(final String contents, final String name, final boolean append) {
-        BufferedWriter outputStream = null;
-        PrintWriter output = null;
-        FileWriter fileWriter = null;
-        try {
-            fileWriter = new FileWriter(name, append);
-            outputStream = new BufferedWriter(fileWriter);
-            output = new PrintWriter(outputStream);
-            output.print(contents);
-            outputStream.flush();
-            output.close();
-        } catch (final IOException e) {
-            LOG.log(Level.SEVERE, "Could not write file " + name, e);
-        } finally {
-            try {
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-                if (output != null) {
-                    output.close();
-                }
-            } catch (final IOException e) {
-                LOG.log(Level.SEVERE, "Failed to close file: " + name, e);
-            }
-        }
-    }
+	/**
+	 * Writes a file to disk. Uses the string contents as content. Failures are
+	 * logged.
+	 * 
+	 * @param contents
+	 *            The contents of the file.
+	 * @param name
+	 *            The name of the file to create.
+	 */
+	/**
+	 * @param contents
+	 * @param name
+	 */
+	public static void writeFile(final String contents, final String name) {
+		writeFile(contents, name, false);
+	}
 
-    /**
-     * Appends a string to a file on disk. Fails silently.
-     * @param contents
-     *            The contents of the file.
-     * @param name
-     *            The name of the file to create.
-     */
-    public static void appendFile(final String contents, final String name) {
-        writeFile(contents, name, true);
-    }
+	private static void writeFile(final String contents, final String name, final boolean append) {
+		BufferedWriter outputStream = null;
+		PrintWriter output = null;
+		FileWriter fileWriter = null;
+		try {
+			fileWriter = new FileWriter(name, append);
+			outputStream = new BufferedWriter(fileWriter);
+			output = new PrintWriter(outputStream);
+			output.print(contents);
+			outputStream.flush();
+			output.close();
+		} catch (final IOException e) {
+			LOG.log(Level.SEVERE, "Could not write file " + name, e);
+		} finally {
+			try {
+				if (outputStream != null) {
+					outputStream.close();
+				}
+				if (output != null) {
+					output.close();
+				}
+			} catch (final IOException e) {
+				LOG.log(Level.SEVERE, "Failed to close file: " + name, e);
+			}
+		}
+	}
 
-    /**
-     * Reads the contents of a file.
-     * @param name
-     *            the name of the file to read
-     * @return the contents of the file if successful, an empty string
-     *         otherwise.
-     */
-    public static String readFile(final String name) {
-        FileReader fileReader = null;
-        final StringBuilder contents = new StringBuilder();
-        try {
-            final File file = new File(name);
-            if (!file.exists()) {
-                throw new IllegalArgumentException("File " + name + " does not exist");
-            }
-            fileReader = new FileReader(file);
-            final BufferedReader reader = new BufferedReader(fileReader);
-            String inputLine = reader.readLine();
-            while (inputLine != null) {
-                contents.append(inputLine).append("\n");
-                inputLine = reader.readLine();
-            }
-            reader.close();
-        } catch (final IOException i1) {
-            LOG.severe("Can't open file:" + name);
-        }
-        return contents.toString();
-    }
+	/**
+	 * Appends a string to a file on disk. Fails silently.
+	 * 
+	 * @param contents
+	 *            The contents of the file.
+	 * @param name
+	 *            The name of the file to create.
+	 */
+	public static void appendFile(final String contents, final String name) {
+		writeFile(contents, name, true);
+	}
 
-    /**
-     * Reads the contents of a file in a jar.
-     * @param path
-     *            the path to read e.g. /package/name/here/help.html
-     * @return the contents of the file when successful, an empty string
-     *         otherwise.
-     */
-    public static String readFileFromJar(final String path) {
-        final StringBuilder contents = new StringBuilder();
-        final URL url = FileUtils.class.getResource(path);
-        URLConnection connection;
-        try {
-            connection = url.openConnection();
-            final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
-            final BufferedReader reader = new BufferedReader(inputStreamReader);
-            String inputLine;
-            inputLine = reader.readLine();
-            while (inputLine != null) {
-                contents.append(new String(inputLine.getBytes(), "UTF-8")).append("\n");
-                inputLine = reader.readLine();
-            }
-            reader.close();
-        } catch (final IOException e) {
-            LOG.severe("Error while reading file " + path + " from jar: " + e.getMessage());
-        } catch (final NullPointerException e) {
-            LOG.severe("Error while reading file " + path + " from jar: " + e.getMessage());
-        }
-        return contents.toString();
-    }
+	/**
+	 * Reads the contents of a file.
+	 * 
+	 * @param name
+	 *            the name of the file to read
+	 * @return the contents of the file if successful, an empty string
+	 *         otherwise.
+	 */
+	public static String readFile(final String name) {
+		FileReader fileReader = null;
+		final StringBuilder contents = new StringBuilder();
+		try {
+			final File file = new File(name);
+			if (!file.exists()) {
+				throw new IllegalArgumentException("File " + name + " does not exist");
+			}
+			fileReader = new FileReader(file);
+			final BufferedReader reader = new BufferedReader(fileReader);
+			String inputLine = reader.readLine();
+			while (inputLine != null) {
+				contents.append(inputLine).append("\n");
+				inputLine = reader.readLine();
+			}
+			reader.close();
+		} catch (final IOException i1) {
+			LOG.severe("Can't open file:" + name);
+		}
+		return contents.toString();
+	}
 
-    /**
-     * Copy a file from a jar.
-     * @param source
-     *            The path to read e.g. /package/name/here/help.html
-     */
-    public static void copyFileFromJar(final String source, final String target) {
-        try {
-            final InputStream inputStream = new FileUtils().getClass().getResourceAsStream(source);
-            OutputStream out;
-            out = new FileOutputStream(target);
-            final byte[] buffer = new byte[4096];
-            int len = inputStream.read(buffer);
-            while (len != -1) {
-                out.write(buffer, 0, len);
-                len = inputStream.read(buffer);
-            }
-            out.close();
-            inputStream.close();
-        } catch (final FileNotFoundException e) {
-            LOG.log(Level.SEVERE, "File not found: " + e.getMessage(), e);
-        } catch (final IOException e) {
-            LOG.log(Level.SEVERE, "Exception while copying file from jar" + e.getMessage(), e);
-        }
-    }
+	/**
+	 * Reads the contents of a file in a jar.
+	 * 
+	 * @param path
+	 *            the path to read e.g. /package/name/here/help.html
+	 * @return the contents of the file when successful, an empty string
+	 *         otherwise.
+	 */
+	public static String readFileFromJar(final String path) {
+		final StringBuilder contents = new StringBuilder();
+		final URL url = FileUtils.class.getResource(path);
+		URLConnection connection;
+		try {
+			connection = url.openConnection();
+			final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
+			final BufferedReader reader = new BufferedReader(inputStreamReader);
+			String inputLine;
+			inputLine = reader.readLine();
+			while (inputLine != null) {
+				contents.append(new String(inputLine.getBytes(), "UTF-8")).append("\n");
+				inputLine = reader.readLine();
+			}
+			reader.close();
+		} catch (final IOException e) {
+			LOG.severe("Error while reading file " + path + " from jar: " + e.getMessage());
+		} catch (final NullPointerException e) {
+			LOG.severe("Error while reading file " + path + " from jar: " + e.getMessage());
+		}
+		return contents.toString();
+	}
 
-    /**
-     * Reads a CSV-file from disk. The separator can be chosen.
-     * @param fileName
-     *            the filename, an exception if thrown if the file does not
-     *            exist
-     * @param separator
-     *            the separator, e.g. ";" or ","
-     * @param expectedColumns
-     *            The expected number of columns, user -1 if the number is
-     *            unknown. An exception is thrown if there is a row with an
-     *            unexpected row length.
-     * @return a List of string arrays. The data of the CSV-file can be found in
-     *         the arrays. Each row corresponds with an array.
-     */
-    public static List<String[]> readCSVFile(final String fileName, final String separator, final int expectedColumns) {
-        final List<String[]> data = new ArrayList<String[]>();
-        FileReader fileReader = null;
+	/**
+	 * Copy a file from a jar.
+	 * 
+	 * @param source
+	 *            The path to read e.g. /package/name/here/help.html
+	 */
+	public static void copyFileFromJar(final String source, final String target) {
+		try {
+			final InputStream inputStream = new FileUtils().getClass().getResourceAsStream(source);
+			OutputStream out;
+			out = new FileOutputStream(target);
+			final byte[] buffer = new byte[4096];
+			int len = inputStream.read(buffer);
+			while (len != -1) {
+				out.write(buffer, 0, len);
+				len = inputStream.read(buffer);
+			}
+			out.close();
+			inputStream.close();
+		} catch (final FileNotFoundException e) {
+			LOG.log(Level.SEVERE, "File not found: " + e.getMessage(), e);
+		} catch (final IOException e) {
+			LOG.log(Level.SEVERE, "Exception while copying file from jar" + e.getMessage(), e);
+		}
+	}
 
-        try {
-            final File file = new File(fileName);
-            if (!file.exists()) {
-                throw new IllegalArgumentException("File '" + fileName + "' does not exist");
-            }
-            fileReader = new FileReader(file);
-            final BufferedReader in = new BufferedReader(fileReader);
-            String inputLine;
-            int lineNumber = 0;
-            inputLine = in.readLine();
-            while (inputLine != null) {
-                lineNumber++;
-                final String[] row = inputLine.split(separator);
-                if (expectedColumns == -1 || expectedColumns == row.length) {
-                    data.add(row);
-                } else {
-                    throw new AssertionError("Unexpected row length (line " + lineNumber + " ). "
-                            + "Expected:"
-                            + expectedColumns + " real " + row.length
-                            + ". CVS-file incorrectly formatted?");
-                }
-                inputLine = in.readLine();
-            }
-            in.close();
-        } catch (final IOException i1) {
-            LOG.severe("Can't open file:" + fileName);
-        }
-        return data;
-    }
+	/**
+	 * Reads a CSV-file from disk. The separator can be chosen.
+	 * 
+	 * @param fileName
+	 *            the filename, an exception if thrown if the file does not
+	 *            exist
+	 * @param separator
+	 *            the separator, e.g. ";" or ","
+	 * @param expectedColumns
+	 *            The expected number of columns, user -1 if the number is
+	 *            unknown. An exception is thrown if there is a row with an
+	 *            unexpected row length.
+	 * @return a List of string arrays. The data of the CSV-file can be found in
+	 *         the arrays. Each row corresponds with an array.
+	 */
+	public static List<String[]> readCSVFile(final String fileName, final String separator,
+			final int expectedColumns) {
+		final List<String[]> data = new ArrayList<String[]>();
+		FileReader fileReader = null;
 
-    public interface RowFilter {
-        boolean acceptRow(String[] row);
-    }
+		try {
+			final File file = new File(fileName);
+			if (!file.exists()) {
+				throw new IllegalArgumentException("File '" + fileName + "' does not exist");
+			}
+			fileReader = new FileReader(file);
+			final BufferedReader in = new BufferedReader(fileReader);
+			String inputLine;
+			int lineNumber = 0;
+			inputLine = in.readLine();
+			while (inputLine != null) {
+				lineNumber++;
+				final String[] row = inputLine.split(separator);
+				if (expectedColumns == -1 || expectedColumns == row.length) {
+					data.add(row);
+				} else {
+					throw new AssertionError("Unexpected row length (line " + lineNumber + " ). "
+							+ "Expected:" + expectedColumns + " real " + row.length
+							+ ". CVS-file incorrectly formatted?");
+				}
+				inputLine = in.readLine();
+			}
+			in.close();
+		} catch (final IOException i1) {
+			LOG.severe("Can't open file:" + fileName);
+		}
+		return data;
+	}
 
-    public static final RowFilter ACCEPT_ALL_ROWFILTER = new RowFilter() {
-        @Override
-        public boolean acceptRow(final String[] row) {
-            return true;
-        }
-    };
+	public interface RowFilter {
+		boolean acceptRow(String[] row);
+	}
 
-    public static List<String> readColumnFromCSVData(final List<String[]> data, final int columnIndex, final RowFilter filter) {
-        final RowFilter actualFilter = filter == null ? ACCEPT_ALL_ROWFILTER : filter;
-        final List<String> columnData = new ArrayList<String>();
-        for (final String[] row : data) {
-            if (actualFilter.acceptRow(row)) {
-                columnData.add(row[columnIndex]);
-            }
-        }
-        return columnData;
-    }
+	public static final RowFilter ACCEPT_ALL_ROWFILTER = new RowFilter() {
+		@Override
+		public boolean acceptRow(final String[] row) {
+			return true;
+		}
+	};
 
-    public static void export(final String filename, final String[] header, final List<Object[]> data) {
+	public static List<String> readColumnFromCSVData(final List<String[]> data, final int columnIndex,
+			final RowFilter filter) {
+		final RowFilter actualFilter = filter == null ? ACCEPT_ALL_ROWFILTER : filter;
+		final List<String> columnData = new ArrayList<String>();
+		for (final String[] row : data) {
+			if (actualFilter.acceptRow(row)) {
+				columnData.add(row[columnIndex]);
+			}
+		}
+		return columnData;
+	}
 
-        final String dateFormat = "yyyy-MM-dd hh:mm:ss";
-        final String numberFormat = "#0.000";
-        final SimpleDateFormat exportDateFormatter = new SimpleDateFormat(dateFormat);
-        final DecimalFormat exportDecimalFormat = new DecimalFormat(numberFormat);
-        final String separator = "\t";
+	public static void export(final String filename, final String[] header, final List<Object[]> data) {
 
-        FileWriter fileWriter = null;
-        PrintWriter output = null;
-        try {
-            fileWriter = new FileWriter(filename + ".csv");
-            final BufferedWriter outputStream = new BufferedWriter(fileWriter);
-            output = new PrintWriter(outputStream);
+		final String dateFormat = "yyyy-MM-dd hh:mm:ss";
+		final String numberFormat = "#0.000";
+		final SimpleDateFormat exportDateFormatter = new SimpleDateFormat(dateFormat);
+		final DecimalFormat exportDecimalFormat = new DecimalFormat(numberFormat);
+		final String separator = "\t";
 
-            if (header != null) {
-                // HEADERS
-                for (int column = 0; column < header.length; column++) {
-                    final Object valueObject = header[column];
-                    String value = valueObject == null ? "" : valueObject.toString();
-                    value = value.replace(separator, "");
-                    output.print(value + separator);
-                }
-                output.println("");
-            }
+		FileWriter fileWriter = null;
+		PrintWriter output = null;
+		try {
+			fileWriter = new FileWriter(filename + ".csv");
+			final BufferedWriter outputStream = new BufferedWriter(fileWriter);
+			output = new PrintWriter(outputStream);
 
-            // DATA
-            for (final Object[] row : data) {
-                for (int column = 0; column < row.length; column++) {
-                    final Object valueObject = row[column];
-                    String value = valueObject == null ? "" : valueObject.toString();
-                    if (valueObject != null) {
-                        if (valueObject instanceof Double) {
-                            value = exportDecimalFormat.format(valueObject);
-                        } else if (valueObject instanceof Date) {
-                            value = exportDateFormatter.format(valueObject);
-                        }
-                    }
-                    value = value.replace(separator, "");
-                    output.print(value + separator);
-                }
-                output.println("");
-            }
-            outputStream.flush();
-        } catch (final IOException i1) {
-            LOG.severe("Can't open file:" + filename);
-        } finally {
-            output.close();
-        }
-    }
+			if (header != null) {
+				// HEADERS
+				for (final String valueObject : header) {
+					String value = valueObject == null ? "" : valueObject.toString();
+					value = value.replace(separator, "");
+					output.print(value + separator);
+				}
+				output.println("");
+			}
 
-    /**
-     * <p>
-     * Return a list of files in directory that satisfy pattern. Pattern should
-     * be a valid regular expression not a 'unix glob pattern' so in stead of
-     * <code>*.wav</code> you could use <code>.*\.wav</code>
-     * </p>
-     * <p>
-     * E.g. in a directory <code>home</code> with the files
-     * <code>test.txt</code>, <code>blaat.wav</code> and <code>foobar.wav</code>
-     * the pattern <code>.*\.wav</code> matches <code>blaat.wav</code> and
-     * <code>foobar.wav</code>
-     * </p>
-     * @param directory
-     *            a readable directory.
-     * @param pattern
-     *            a valid regular expression.
-     * @return a list of filenames matching the pattern for directory.
-     * @exception Error
-     *                an error is thrown if the directory is not ... a
-     *                directory.
-     * @exception java.util.regex.PatternSyntaxException
-     *                Unchecked exception thrown to indicate a syntax error in a
-     *                regular-expression pattern.
-     */
-    public static List<String> glob(final String directory, final String pattern) {
-        final File dir = new File(directory);
-        final Pattern p = Pattern.compile(pattern);
-        final List<String> matchingFiles = new ArrayList<String>();
-        if (!dir.isDirectory()) {
-            throw new IllegalArgumentException(directory + " is not a directory");
-        }
+			// DATA
+			for (final Object[] row : data) {
+				for (final Object valueObject : row) {
+					String value = valueObject == null ? "" : valueObject.toString();
+					if (valueObject != null) {
+						if (valueObject instanceof Double) {
+							value = exportDecimalFormat.format(valueObject);
+						} else if (valueObject instanceof Date) {
+							value = exportDateFormatter.format(valueObject);
+						}
+					}
+					value = value.replace(separator, "");
+					output.print(value + separator);
+				}
+				output.println("");
+			}
+			outputStream.flush();
+		} catch (final IOException i1) {
+			LOG.severe("Can't open file:" + filename);
+		} finally {
+			output.close();
+		}
+	}
 
-        for (final String file : dir.list()) {
-            if (!new File(file).isDirectory() && p.matcher(file).matches() && file != null) {
-                matchingFiles.add(FileUtils.combine(directory, file));
-            }
-        }
-        // sort alphabetically
-        Collections.sort(matchingFiles);
-        return matchingFiles;
-    }
+	/**
+	 * <p>
+	 * Return a list of files in directory that satisfy pattern. Pattern should
+	 * be a valid regular expression not a 'unix glob pattern' so in stead of
+	 * <code>*.wav</code> you could use <code>.*\.wav</code>
+	 * </p>
+	 * <p>
+	 * E.g. in a directory <code>home</code> with the files
+	 * <code>test.txt</code>, <code>blaat.wav</code> and <code>foobar.wav</code>
+	 * the pattern <code>.*\.wav</code> matches <code>blaat.wav</code> and
+	 * <code>foobar.wav</code>
+	 * </p>
+	 * 
+	 * @param directory
+	 *            a readable directory.
+	 * @param pattern
+	 *            a valid regular expression.
+	 * @return a list of filenames matching the pattern for directory.
+	 * @exception Error
+	 *                an error is thrown if the directory is not ... a
+	 *                directory.
+	 * @exception java.util.regex.PatternSyntaxException
+	 *                Unchecked exception thrown to indicate a syntax error in a
+	 *                regular-expression pattern.
+	 */
+	public static List<String> glob(final String directory, final String pattern) {
+		final File dir = new File(directory);
+		final Pattern p = Pattern.compile(pattern);
+		final List<String> matchingFiles = new ArrayList<String>();
+		if (!dir.isDirectory()) {
+			throw new IllegalArgumentException(directory + " is not a directory");
+		}
 
-    /**
-     * Return the extension of a file.
-     * @param fileName
-     *            the file to get the extension for
-     * @return the extension. E.g. TXT or JPEG.
-     */
-    public static String extension(final String fileName) {
-        final int dot = fileName.lastIndexOf('.');
-        return dot == -1 ? "" : fileName.substring(dot + 1);
-    }
+		for (final String file : dir.list()) {
+			if (!new File(file).isDirectory() && p.matcher(file).matches() && file != null) {
+				matchingFiles.add(FileUtils.combine(directory, file));
+			}
+		}
+		// sort alphabetically
+		Collections.sort(matchingFiles);
+		return matchingFiles;
+	}
 
-    /**
-     * Returns the filename without path and without extension.
-     * @param fileName
-     * @return the file name without extension and path
-     */
-    public static String basename(final String fileName) {
-        int dot = fileName.lastIndexOf('.');
-        int sep = fileName.lastIndexOf(File.separatorChar);
-        if (sep == -1) {
-            sep = fileName.lastIndexOf('\\');
-        }
-        if (dot == -1) {
-            dot = fileName.length();
-        }
-        return fileName.substring(sep + 1, dot);
-    }
+	/**
+	 * Return the extension of a file.
+	 * 
+	 * @param fileName
+	 *            the file to get the extension for
+	 * @return the extension. E.g. TXT or JPEG.
+	 */
+	public static String extension(final String fileName) {
+		final int dot = fileName.lastIndexOf('.');
+		return dot == -1 ? "" : fileName.substring(dot + 1);
+	}
 
-    /**
-     * Returns the path for a file.<br>
-     * <code>path("/home/user/test.jpg") == "/home/user"</code><br>
-     * Uses the correct pathSeparator depending on the operating system. On
-     * windows c:/test/ is not c:\test\
-     * @param fileName
-     *            the name of the file using correct path separators.
-     * @return the path of the file.
-     */
-    public static String path(final String fileName) {
-        final int sep = fileName.lastIndexOf(File.separatorChar);
-        return fileName.substring(0, sep);
-    }
+	/**
+	 * Returns the filename without path and without extension.
+	 * 
+	 * @param fileName
+	 * @return the file name without extension and path
+	 */
+	public static String basename(final String fileName) {
+		int dot = fileName.lastIndexOf('.');
+		int sep = fileName.lastIndexOf(File.separatorChar);
+		if (sep == -1) {
+			sep = fileName.lastIndexOf('\\');
+		}
+		if (dot == -1) {
+			dot = fileName.length();
+		}
+		return fileName.substring(sep + 1, dot);
+	}
 
-    /**
-     * Checks if a file exists.
-     * @param fileName
-     *            the name of the file to check.
-     * @return true if and only if the file or directory denoted by this
-     *         abstract pathname exists; false otherwise
-     */
-    public static boolean exists(final String fileName) {
-        return new File(fileName).exists();
-    }
+	/**
+	 * Returns the path for a file.<br>
+	 * <code>path("/home/user/test.jpg") == "/home/user"</code><br>
+	 * Uses the correct pathSeparator depending on the operating system. On
+	 * windows c:/test/ is not c:\test\
+	 * 
+	 * @param fileName
+	 *            the name of the file using correct path separators.
+	 * @return the path of the file.
+	 */
+	public static String path(final String fileName) {
+		final int sep = fileName.lastIndexOf(File.separatorChar);
+		return fileName.substring(0, sep);
+	}
 
-    /**
-     * Creates a directory and parent directories if needed.
-     * @param path
-     *            the path of the directory to create
-     * @return true if the directory was created (possibly with parent
-     *         directories) , false otherwise
-     */
-    public static boolean mkdirs(final String path) {
-        return new File(path).mkdirs();
-    }
+	/**
+	 * Checks if a file exists.
+	 * 
+	 * @param fileName
+	 *            the name of the file to check.
+	 * @return true if and only if the file or directory denoted by this
+	 *         abstract pathname exists; false otherwise
+	 */
+	public static boolean exists(final String fileName) {
+		return new File(fileName).exists();
+	}
 
-    /**
-     * replaces UTF-8 characters and spaces with _ . Returns the complete path.
-     * <p>
-     * E.g. <code>/tmp/01.��skar ton.mp3</code> is converted to:
-     * <code>/tmp/01.__skar_ton.mp3</code>
-     * </p>
-     * @param fileName
-     *            the filename to sanitize
-     * @return the complete sanitized path.
-     */
-    public static String sanitizedFileName(final String fileName) {
-        final String baseName = basename(fileName);
-        String newBaseName = baseName.replaceAll(" ", "_");
-        newBaseName = newBaseName.replaceAll("\\(", "-");
-        newBaseName = newBaseName.replaceAll("\\)", "-");
-        newBaseName = newBaseName.replaceAll("&", "and");
-        newBaseName = filterNonAscii(newBaseName);
-        return fileName.replace(baseName, newBaseName);
-    }
+	/**
+	 * Creates a directory and parent directories if needed.
+	 * 
+	 * @param path
+	 *            the path of the directory to create
+	 * @return true if the directory was created (possibly with parent
+	 *         directories) , false otherwise
+	 */
+	public static boolean mkdirs(final String path) {
+		return new File(path).mkdirs();
+	}
 
-    private static String filterNonAscii(final String inString) {
-        // Create the encoder and decoder for the character encoding
-        final Charset charset = Charset.forName("US-ASCII");
-        final CharsetDecoder decoder = charset.newDecoder();
-        final CharsetEncoder encoder = charset.newEncoder();
-        // This line is the key to removing "unmappable" characters.
-        encoder.replaceWith("_".getBytes());
-        encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
-        String result = inString;
-        try {
-            // Convert a string to bytes in a ByteBuffer
-            final ByteBuffer bbuf = encoder.encode(CharBuffer.wrap(inString));
-            // Convert bytes in a ByteBuffer to a character ByteBuffer and then
-            // to a string.
-            final CharBuffer cbuf = decoder.decode(bbuf);
-            result = cbuf.toString();
-        } catch (final CharacterCodingException cce) {
-            LOG.severe("Exception during character encoding/decoding: " + cce.getMessage());
-        }
+	/**
+	 * replaces UTF-8 characters and spaces with _ . Returns the complete path.
+	 * <p>
+	 * E.g. <code>/tmp/01.��skar ton.mp3</code> is converted to:
+	 * <code>/tmp/01.__skar_ton.mp3</code>
+	 * </p>
+	 * 
+	 * @param fileName
+	 *            the filename to sanitize
+	 * @return the complete sanitized path.
+	 */
+	public static String sanitizedFileName(final String fileName) {
+		final String baseName = basename(fileName);
+		String newBaseName = baseName.replaceAll(" ", "_");
+		newBaseName = newBaseName.replaceAll("\\(", "-");
+		newBaseName = newBaseName.replaceAll("\\)", "-");
+		newBaseName = newBaseName.replaceAll("&", "and");
+		newBaseName = filterNonAscii(newBaseName);
+		return fileName.replace(baseName, newBaseName);
+	}
 
-        return result;
-    }
+	private static String filterNonAscii(final String inString) {
+		// Create the encoder and decoder for the character encoding
+		final Charset charset = Charset.forName("US-ASCII");
+		final CharsetDecoder decoder = charset.newDecoder();
+		final CharsetEncoder encoder = charset.newEncoder();
+		// This line is the key to removing "unmappable" characters.
+		encoder.replaceWith("_".getBytes());
+		encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
+		String result = inString;
+		try {
+			// Convert a string to bytes in a ByteBuffer
+			final ByteBuffer bbuf = encoder.encode(CharBuffer.wrap(inString));
+			// Convert bytes in a ByteBuffer to a character ByteBuffer and then
+			// to a string.
+			final CharBuffer cbuf = decoder.decode(bbuf);
+			result = cbuf.toString();
+		} catch (final CharacterCodingException cce) {
+			LOG.severe("Exception during character encoding/decoding: " + cce.getMessage());
+		}
 
-    /**
-     * Copy from source to target.
-     * @param source
-     *            the source file.
-     * @param target
-     *            the target file.
-     */
-    public static void cp(final String source, final String target) {
-        FileChannel inChannel = null;
-        FileChannel outChannel = null;
-        try {
-            inChannel = new FileInputStream(new File(source)).getChannel();
-            outChannel = new FileOutputStream(new File(target)).getChannel();
-            inChannel.transferTo(0, inChannel.size(), outChannel);
-        } catch (final FileNotFoundException e) {
-            LOG.severe("File " + source + " not found! " + e.getMessage());
-        } catch (final IOException e) {
-            LOG.severe("Error while copying " + source + " to " + target + " : " + e.getMessage());
-        } finally {
-            try {
-                if (inChannel != null) {
-                    inChannel.close();
-                }
-                if (outChannel != null) {
-                    outChannel.close();
-                }
-            } catch (final IOException e) {
-                // ignore
-                LOG.log(Level.INFO, "Ignored exception while copying files", e);
-            }
-        }
-    }
+		return result;
+	}
 
-    /**
-     * Removes a file from disk.
-     * @param fileName
-     *            the file to remove
-     * @return true if and only if the file or directory is successfully
-     *         deleted; false otherwise
-     */
-    public static boolean rm(final String fileName) {
-        return new File(fileName).delete();
-    }
+	/**
+	 * Copy from source to target.
+	 * 
+	 * @param source
+	 *            the source file.
+	 * @param target
+	 *            the target file.
+	 */
+	public static void cp(final String source, final String target) {
+		FileChannel inChannel = null;
+		FileChannel outChannel = null;
+		try {
+			inChannel = new FileInputStream(new File(source)).getChannel();
+			outChannel = new FileOutputStream(new File(target)).getChannel();
+			inChannel.transferTo(0, inChannel.size(), outChannel);
+		} catch (final FileNotFoundException e) {
+			LOG.severe("File " + source + " not found! " + e.getMessage());
+		} catch (final IOException e) {
+			LOG.severe("Error while copying " + source + " to " + target + " : " + e.getMessage());
+		} finally {
+			try {
+				if (inChannel != null) {
+					inChannel.close();
+				}
+				if (outChannel != null) {
+					outChannel.close();
+				}
+			} catch (final IOException e) {
+				// ignore
+				LOG.log(Level.INFO, "Ignored exception while copying files", e);
+			}
+		}
+	}
 
-    /**
-     * Tests whether the file denoted by this abstract pathname is a directory.
-     * @param inputFile
-     *            A pathname string.
-     * @return true if and only if the file denoted by this abstract pathname
-     *         exists and is a directory; false otherwise.
-     */
-    public static boolean isDirectory(final String inputFile) {
-        return new File(inputFile).isDirectory();
-    }
+	/**
+	 * Removes a file from disk.
+	 * 
+	 * @param fileName
+	 *            the file to remove
+	 * @return true if and only if the file or directory is successfully
+	 *         deleted; false otherwise
+	 */
+	public static boolean rm(final String fileName) {
+		return new File(fileName).delete();
+	}
 
-    /**
-     * Checks if the name of the file (extension) is a known audio extension.
-     * @param file
-     *            The file to check.
-     * @return True if the name of the file matches
-     *         ConfKey.audio_file_name_pattern, false otherwise.
-     */
-    public static boolean isAudioFile(final File file) {
-        return file.getAbsolutePath().matches(Configuration.get(ConfKey.audio_file_name_pattern));
-    }
+	/**
+	 * Tests whether the file denoted by this abstract pathname is a directory.
+	 * 
+	 * @param inputFile
+	 *            A pathname string.
+	 * @return true if and only if the file denoted by this abstract pathname
+	 *         exists and is a directory; false otherwise.
+	 */
+	public static boolean isDirectory(final String inputFile) {
+		return new File(inputFile).isDirectory();
+	}
+
+	/**
+	 * Checks if the name of the file (extension) is a known audio extension.
+	 * 
+	 * @param file
+	 *            The file to check.
+	 * @return True if the name of the file matches
+	 *         ConfKey.audio_file_name_pattern, false otherwise.
+	 */
+	public static boolean isAudioFile(final File file) {
+		return file.getAbsolutePath().matches(Configuration.get(ConfKey.audio_file_name_pattern));
+	}
 }
-
-

@@ -113,7 +113,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 	 * 
 	 * @param csvFileName
 	 */
-	private void parseIpemOne(String csvFileName) {
+	private void parseIpemOne(final String csvFileName) {
 		// split on a one or more whitespace characters
 		final List<String[]> csvData = FileUtils.readCSVFile(csvFileName, "\\s+", -1);
 		long start = 0;
@@ -128,7 +128,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 
 				double pitch = Double.parseDouble(row[pitchIndex]);
 				final Sample sample = new Sample(start, pitch);
-				sample.source = mode;
+				sample.setSource(mode);
 				samples.add(sample);
 			} catch (final NumberFormatException e) {
 				LOG.info("Ignored incorrectly formatted pitch: " + row[pitchIndex]);
@@ -137,7 +137,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		}
 	}
 
-	private void parseIpemSix(String csvFileName) {
+	private void parseIpemSix(final String csvFileName) {
 		final List<Double> probabilities = new ArrayList<Double>();
 		final List<Double> pitches = new ArrayList<Double>();
 		long start = 0;
@@ -171,7 +171,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 				}
 			}
 			final Sample sample = new Sample(start, pitches, probabilities, minimumAcceptableProbability);
-			sample.source = mode;
+			sample.setSource(mode);
 			samples.add(sample);
 			start += 10;
 

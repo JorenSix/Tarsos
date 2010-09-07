@@ -4,6 +4,7 @@ package be.hogent.tarsos.ui.pitch;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,10 +21,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.TextAreaHandler;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
@@ -73,6 +76,11 @@ public class Frame extends JFrame {
 		configurationPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		tabbedPane.addTab("Config", icon, configurationPanel, "Configuration");
 
+		icon = createImageIcon("list_extensions.gif");
+		JComponent logPanel = makeLogPanel();
+		configurationPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		tabbedPane.addTab("Log", icon, logPanel, "Log");
+
 		icon = createImageIcon("icon_info.gif");
 		JComponent helpPanel = makeHelpanel();
 		helpPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -92,8 +100,17 @@ public class Frame extends JFrame {
 			image = ImageIO.read(this.getClass().getResource(iconPath));
 			setIconImage(image);
 		} catch (IOException e) {
-			// fail silently, lacking icon
+			// fail silently, a lacking icon is not that bad
 		}
+	}
+
+	private JComponent makeLogPanel() {
+		JTextArea output = new JTextArea();
+		output.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		output.setAutoscrolls(true);
+		output.setEditable(false);
+		TextAreaHandler.setupLoggerHandler(output);
+		return new JScrollPane(output);
 	}
 
 	private JComponent makeTarsosPanel() {
