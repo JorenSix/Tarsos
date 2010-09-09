@@ -71,16 +71,19 @@ public final class ToneScaleMatcher {
 		final String globDirectory = FileUtils.combine(FileUtils.getRuntimePath(), "audio");
 		final List<String> inputFiles = FileUtils.glob(globDirectory, pattern);
 		// two priority queues with info about same histograms
-		final TreeMap<Double, ToneScaleHistogram> toneScaleCorrelations = new TreeMap<Double, ToneScaleHistogram>();
+		final TreeMap<Double, ToneScaleHistogram> toneScaleCorrelations;
+		toneScaleCorrelations = new TreeMap<Double, ToneScaleHistogram>();
 		final TreeMap<Double, String> fileNameCorrelations = new TreeMap<Double, String>();
 
 		for (final String file : inputFiles) {
 			final AudioFile audioFile = new AudioFile(file);
-			final PitchDetector pitchDetector = detector.equals("AUBIO") ? new AubioPitchDetection(audioFile,
-					PitchDetectionMode.AUBIO_YIN) : new IPEMPitchDetection(audioFile,
-					PitchDetectionMode.IPEM_SIX);
+			final PitchDetector pitchDetector;
+			if (detector.equals("AUBIO")) {
+				pitchDetector = new AubioPitchDetection(audioFile, PitchDetectionMode.AUBIO_YIN);
+			} else {
+				pitchDetector = new IPEMPitchDetection(audioFile, PitchDetectionMode.IPEM_SIX);
+			}
 			pitchDetector.executePitchDetection();
-
 			final List<Sample> samples = pitchDetector.getSamples();
 			final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
 			final ToneScaleHistogram toneScaleHistogram = ambitusHistogram.toneScaleHistogram();
@@ -110,14 +113,14 @@ public final class ToneScaleMatcher {
 		}
 
 		// plot best correlation
-		if (toneScaleCorrelations.size() > 0) {
-			// final double bestCorrelation =
-			// toneScaleCorrelations.descendingKeySet().first();
-			// final ToneScaleHistogram hayStackHistogram =
-			// toneScaleCorrelations.get(bestCorrelation);
-			// needleToneScale.plotCorrelation(hayStackHistogram,
-			// CorrelationMeasure.INTERSECTION);
-		}
+		// if (toneScaleCorrelations.size() > 0) {
+		// final double bestCorrelation =
+		// toneScaleCorrelations.descendingKeySet().first();
+		// final ToneScaleHistogram hayStackHistogram =
+		// toneScaleCorrelations.get(bestCorrelation);
+		// needleToneScale.plotCorrelation(hayStackHistogram,
+		// CorrelationMeasure.INTERSECTION);
+		// }
 	}
 
 	private static void printHelp() {

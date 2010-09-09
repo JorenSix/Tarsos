@@ -1,7 +1,15 @@
 package be.hogent.tarsos.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
@@ -16,6 +24,11 @@ import be.hogent.tarsos.pitch.pure.DetectedPitchHandler;
  * @author Joren Six
  */
 public final class AudioFile {
+
+	/**
+	 * Log messages.
+	 */
+	private static final Logger LOG = Logger.getLogger(AudioFile.class.getName());
 
 	/**
 	 * Where to save the transcoded files.
@@ -83,6 +96,30 @@ public final class AudioFile {
 			}
 		}
 		return files;
+	}
+
+	/**
+	 * Determines the length or the file in microseconds.
+	 * 
+	 * @return The length of the file in microseconds. If the length could not
+	 *         be determined -1 is returned.
+	 */
+	public long getLengthInMicroSeconds() {
+		long lengtInMicroSeconds = -1;
+		try {
+			AudioFileFormat fileFormat;
+			fileFormat = AudioSystem.getAudioFileFormat(new File(transcodedPath()));
+			int frames = fileFormat.getFrameLength();
+			float frameRate = fileFormat.getFormat().getFrameRate();
+			lengtInMicroSeconds = (long) (frames / frameRate * 1000);
+			LOG.finest(String.format("Determined the lenght of " + "%s: %s microseconds.", basename(),
+					lengtInMicroSeconds));
+		} catch (UnsupportedAudioFileException e) {
+			LOG.log(Level.WARNING, "Could not determine audio file length.", e);
+		} catch (IOException e) {
+			LOG.log(Level.SEVERE, "Could not determine audio file length.", e);
+		}
+		return lengtInMicroSeconds;
 	}
 
 	public void detectPitch(final PitchDetectionMode detectionMode, final DetectedPitchHandler handler,

@@ -107,9 +107,9 @@ public final class VirtualKeyboard12 extends VirtualKeyboard {
 				g2.setColor(Color.BLACK);
 				g2.draw(rect);
 
-				if (hasFocus() && i >= lowestAssignedKey && i - lowestAssignedKey < mappedKeys.length()) {
+				if (hasFocus() && i >= getLowestAssignedKey() && i - getLowestAssignedKey() < getMappedKeys().length()) {
 					g2.setColor(Color.GRAY);
-					final char k = mappedKeys.charAt(i - lowestAssignedKey);
+					final char k = getMappedKeys().charAt(i - getLowestAssignedKey());
 					g2.drawString("" + k, cx + 2, h - 4);
 				}
 				cx += nw;
@@ -133,9 +133,9 @@ public final class VirtualKeyboard12 extends VirtualKeyboard {
 				g2.setColor(Color.BLACK);
 				g2.draw(rect);
 
-				if (hasFocus() && i >= lowestAssignedKey && i - lowestAssignedKey < mappedKeys.length()) {
+				if (hasFocus() && i >= getLowestAssignedKey() && i - getLowestAssignedKey() < getMappedKeys().length()) {
 					g2.setColor(Color.LIGHT_GRAY);
-					final char k = mappedKeys.charAt(i - lowestAssignedKey);
+					final char k = getMappedKeys().charAt(i - getLowestAssignedKey());
 					g2.drawString("" + k, cx - black_note_width / 2 + 1, h * 4.0f / 7.0f - 3);
 				}
 			}

@@ -82,7 +82,7 @@ public final class FileUtils {
 		return samples;
 	}
 
-	public static void writePitchAnnotations(final String fileName, List<Sample> samples) {
+	public static void writePitchAnnotations(final String fileName, final List<Sample> samples) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Sample.headerString());
 		for (Sample s : samples) {

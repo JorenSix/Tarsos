@@ -1,12 +1,19 @@
 package be.hogent.tarsos.util;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DropTargetListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.border.Border;
 
 /**
  * This class makes it easy to drag and drop files from the operating system to
@@ -53,15 +60,15 @@ import java.io.Reader;
  * @author rharder@users.sf.net
  * @version 1.0.1
  */
-public class FileDrop {
-	private transient javax.swing.border.Border normalBorder;
-	private transient java.awt.dnd.DropTargetListener dropListener;
+public final class FileDrop {
+	private transient Border normalBorder;
+	private transient DropTargetListener dropListener;
 
 	/** Discover if the running JVM is modern enough to have drag and drop. */
 	private static Boolean supportsDnD;
 
 	// Default border color
-	private static java.awt.Color defaultBorderColor = new java.awt.Color(0f, 0f, 1f, 0.25f);
+	private static Color defaultBorderColor = new Color(0f, 0f, 1f, 0.25f);
 
 	/**
 	 * Constructs a {@link FileDrop} with a default light-blue border and, if
@@ -126,7 +133,7 @@ public class FileDrop {
 	public FileDrop(final java.io.PrintStream out, final java.awt.Component c, final Listener listener) {
 		this(out, // Logging stream
 				c, // Drop target
-				javax.swing.BorderFactory.createMatteBorder(2, 2, 2, 2, defaultBorderColor), false, // Recursive
+				BorderFactory.createMatteBorder(2, 2, 2, 2, defaultBorderColor), false, // Recursive
 				listener);
 	} // end constructor
 
@@ -247,15 +254,14 @@ public class FileDrop {
 	 *            Listens for <tt>filesDropped</tt>.
 	 * @since 1.0
 	 */
-	public FileDrop(final java.io.PrintStream out, final java.awt.Component c,
-			final javax.swing.border.Border dragBorder, final boolean recursive, final Listener listener) {
+	public FileDrop(final PrintStream out, final Component c, final Border dragBorder,
+			final boolean recursive, final Listener listener) {
 
 		if (supportsDnD()) { // Make a drop listener
-			dropListener = new java.awt.dnd.DropTargetListener() {
+			dropListener = new DropTargetListener() {
 				@Override
 				public void dragEnter(final java.awt.dnd.DropTargetDragEvent evt) {
 					log(out, "FileDrop: dragEnter event.");
-
 					// Is this an acceptable drag event?
 					if (isDragOk(out, evt)) {
 						// If it's a Swing component, set its border
@@ -268,52 +274,37 @@ public class FileDrop {
 						} // end if: JComponent
 
 						// Acknowledge that it's okay to enter
-						// evt.acceptDrag(
-						// java.awt.dnd.DnDConstants.ACTION_COPY_OR_MOVE );
 						evt.acceptDrag(java.awt.dnd.DnDConstants.ACTION_COPY);
 						log(out, "FileDrop: event accepted.");
-					} // end if: drag ok
-					else { // Reject the drag event
+						// end if: drag ok
+					} else { // Reject the drag event
 						evt.rejectDrag();
 						log(out, "FileDrop: event rejected.");
 					} // end else: drag not ok
 				} // end dragEnter
 
+				// This is called continually as long as the mouse is over the
+				// drag target.
 				@Override
-				public void dragOver(final java.awt.dnd.DropTargetDragEvent evt) { // This
-																					// is
-																					// called
-																					// continually
-																					// as
-																					// long
-																					// as
-																					// the
-																					// mouse
-																					// is
-																					// over
-																					// the
-																					// drag
-																					// target.
+				public void dragOver(final java.awt.dnd.DropTargetDragEvent evt) {
 				} // end dragOver
 
 				@Override
 				public void drop(final java.awt.dnd.DropTargetDropEvent evt) {
 					log(out, "FileDrop: drop event.");
 					try { // Get whatever was dropped
-						final java.awt.datatransfer.Transferable tr = evt.getTransferable();
+						final Transferable tr = evt.getTransferable();
 
 						// Is it a file list?
-						if (tr.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.javaFileListFlavor)) {
+						if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
 							// Say we'll take it.
-							// evt.acceptDrop (
-							// java.awt.dnd.DnDConstants.ACTION_COPY_OR_MOVE );
 							evt.acceptDrop(java.awt.dnd.DnDConstants.ACTION_COPY);
 							log(out, "FileDrop: file list accepted.");
 
 							// Get a useful list
 							@SuppressWarnings("unchecked")
-							final java.util.List<File> fileList = (java.util.List<File>) tr
-									.getTransferData(java.awt.datatransfer.DataFlavor.javaFileListFlavor);
+							final List<File> fileList = (List<File>) tr
+									.getTransferData(DataFlavor.javaFileListFlavor);
 
 							// Convert list to array
 							final java.io.File[] filesTemp = new java.io.File[fileList.size()];
@@ -324,24 +315,16 @@ public class FileDrop {
 							if (listener != null) {
 								listener.filesDropped(files);
 							}
-
 							// Mark that drop is completed.
 							evt.getDropTargetContext().dropComplete(true);
 							log(out, "FileDrop: drop complete.");
-						} // end if: file list
-						else // this section will check for a reader flavor.
-						{
-							// Thanks, Nathan!
-							// BEGIN 2007-09-12 Nathan Blomquist -- Linux
-							// (KDE/Gnome) support added.
+							// end if: file list
+						} else { // this section will check for a reader flavor.
 							final DataFlavor[] flavors = tr.getTransferDataFlavors();
 							boolean handled = false;
 							for (DataFlavor flavor : flavors) {
 								if (flavor.isRepresentationClassReader()) {
 									// Say we'll take it.
-									// evt.acceptDrop (
-									// java.awt.dnd.DnDConstants.ACTION_COPY_OR_MOVE
-									// );
 									evt.acceptDrop(java.awt.dnd.DnDConstants.ACTION_COPY);
 									log(out, "FileDrop: reader accepted.");
 
@@ -364,21 +347,19 @@ public class FileDrop {
 								log(out, "FileDrop: not a file list or reader - abort.");
 								evt.rejectDrop();
 							}
-							// END 2007-09-12 Nathan Blomquist -- Linux
-							// (KDE/Gnome) support added.
 						} // end else: not a file list
-					} // end try
-					catch (final java.io.IOException io) {
+							// end try
+					} catch (final java.io.IOException io) {
 						log(out, "FileDrop: IOException - abort:");
 						io.printStackTrace(out);
 						evt.rejectDrop();
-					} // end catch IOException
-					catch (final java.awt.datatransfer.UnsupportedFlavorException ufe) {
+						// end catch IOException
+					} catch (final java.awt.datatransfer.UnsupportedFlavorException ufe) {
 						log(out, "FileDrop: UnsupportedFlavorException - abort:");
 						ufe.printStackTrace(out);
 						evt.rejectDrop();
-					} // end catch: UnsupportedFlavorException
-					finally {
+						// end catch: UnsupportedFlavorException
+					} finally {
 						// If it's a Swing component, reset its border
 						if (c instanceof javax.swing.JComponent) {
 							final javax.swing.JComponent jc = (javax.swing.JComponent) c;
@@ -408,8 +389,8 @@ public class FileDrop {
 												// );
 						evt.acceptDrag(java.awt.dnd.DnDConstants.ACTION_COPY);
 						log(out, "FileDrop: event accepted.");
-					} // end if: drag ok
-					else {
+						// end if: drag ok
+					} else {
 						evt.rejectDrag();
 						log(out, "FileDrop: event rejected.");
 					} // end else: drag not ok
@@ -418,8 +399,8 @@ public class FileDrop {
 
 			// Make the component (and possibly children) drop targets
 			makeDropTarget(out, c, recursive);
-		} // end if: supports dnd
-		else {
+			// end if: supports dnd
+		} else {
 			log(out, "FileDrop: Drag and drop is not supported with this JVM");
 		} // end else: does not support DnD
 	} // end constructor
@@ -429,8 +410,8 @@ public class FileDrop {
 			boolean support = false;
 			try {
 				support = true;
-			} // end try
-			catch (final Exception e) {
+				// end try
+			} catch (final Exception e) {
 				support = false;
 			} // end catch
 			supportsDnD = new Boolean(support);
@@ -439,7 +420,7 @@ public class FileDrop {
 	} // end supportsDnD
 
 	// BEGIN 2007-09-12 Nathan Blomquist -- Linux (KDE/Gnome) support added.
-	private static String ZERO_CHAR_STRING = "" + (char) 0;
+	private static String zeroCharString = "" + (char) 0;
 
 	private static File[] createFileArray(final BufferedReader bReader, final PrintStream out) {
 		try {
@@ -448,7 +429,7 @@ public class FileDrop {
 			while ((line = bReader.readLine()) != null) {
 				try {
 					// kde seems to append a 0 char to the end of the reader
-					if (ZERO_CHAR_STRING.equals(line)) {
+					if (zeroCharString.equals(line)) {
 						continue;
 					}
 
@@ -468,7 +449,7 @@ public class FileDrop {
 
 	// END 2007-09-12 Nathan Blomquist -- Linux (KDE/Gnome) support added.
 
-	private void makeDropTarget(final java.io.PrintStream out, final java.awt.Component c,
+	public void makeDropTarget(final java.io.PrintStream out, final java.awt.Component c,
 			final boolean recursive) {
 		// Make drop target
 		final java.awt.dnd.DropTarget dt = new java.awt.dnd.DropTarget();
@@ -555,6 +536,7 @@ public class FileDrop {
 	/** Outputs <tt>message</tt> to <tt>out</tt> if it's not null. */
 	private static void log(final java.io.PrintStream out, final String message) { // Log
 																					// message
+																					// //
 																					// if
 																					// requested
 		if (out != null) {
@@ -719,11 +701,11 @@ public class FileDrop {
 	 *      ...
 	 *      final MyCoolClass myObj = new MyCoolClass();
 	 * 
-	 *      TransferableObject.Fetcher fetcher = new TransferableObject.Fetcher()
+	 *      TransferableObject.Fetcher fetcher = new be.hogent.tarsos.util.FileDrop.TransferableObject.Fetcher()
 	 *      {   public Object getObject(){ return myObj; }
 	 *      }; // end fetcher
 	 * 
-	 *      Transferable xfer = new TransferableObject( fetcher );
+	 *      Transferable xfer = new be.hogent.tarsos.util.FileDrop.TransferableObject( fetcher );
 	 *      ...
 	 * </code>
 	 * </pre>

@@ -7,15 +7,15 @@ package be.hogent.tarsos.util.histogram;
  */
 public final class BhattacharyaDistance implements HistogramCorrelation {
 
-    public double correlation(final Histogram thisHistogam, final int displacement, final Histogram otherHistogram) {
+    public double correlation(final Histogram first, final int displacement, final Histogram second) {
         // number of bins (classes)
-        final int numberOfClasses = thisHistogam.getNumberOfClasses();
+        final int numberOfClasses = first.getNumberOfClasses();
         // start value
-        final double start = thisHistogam.getStart();
+        final double start = first.getStart();
         // stop value
-        final double stop = thisHistogam.getStop();
+        final double stop = first.getStop();
         // classWidth
-        final double classWidth = thisHistogam.getClassWidth();
+        final double classWidth = first.getClassWidth();
 
         int actualDisplacement = displacement;
         // make displacement positive
@@ -28,7 +28,7 @@ public final class BhattacharyaDistance implements HistogramCorrelation {
         for (double current = start + classWidth / 2; current <= stop; current += classWidth) {
             final double displacedValue = (current + actualDisplacement * classWidth)
             % (numberOfClasses * classWidth);
-            distance += Math.pow(thisHistogam.getCount(current) * otherHistogram.getCount(displacedValue),
+            distance += Math.pow(first.getCount(current) * second.getCount(displacedValue),
                     0.5);
         }
 

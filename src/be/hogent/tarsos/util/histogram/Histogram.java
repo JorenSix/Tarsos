@@ -86,18 +86,18 @@ public class Histogram implements Cloneable {
 	 * values inside using a modulo calculation.
 	 * </p>
 	 * 
-	 * @param start
+	 * @param startVal
 	 *            the starting value of the histogram. The starting value is not
 	 *            the same as the first class middle. The starting value is
 	 *            equal to <code>the first class middle - classWidth / 2</code>
-	 * @param stop
+	 * @param stopVal
 	 *            the stopping value of the histogram. The stopping value is not
 	 *            the same as the last class middle. The stopping value is equal
 	 *            to <code>the last class middle + classWidth / 2</code>
-	 * @param numberOfClasses
+	 * @param totalClasses
 	 *            the number of classes between the starting and stopping
 	 *            values. Also defines the classWidth.
-	 * @param wraps
+	 * @param wrapping
 	 *            indicates if the histogram wraps around the edges. More
 	 *            formal: If the histogram wraps values outside the range
 	 *            <code>]start - classWidht / 2, stop + classWidth / 2 [</code>
@@ -108,25 +108,31 @@ public class Histogram implements Cloneable {
 	 *                           the valid range is added an
 	 *                           IllegalArgumentException is thrown.
 	 */
-	public Histogram(final double start, final double stop, final int numberOfClasses, final boolean wraps,
-			final boolean ignoreValuesOutsideRange) {
-		if (stop <= start) {
-			throw new IllegalArgumentException("The stopping value (" + stop
-					+ ") should be bigger than the starting value (" + start + ") .");
+	public Histogram(final double startVal, final double stopVal, final int totalClasses,
+			final boolean wrapping, final boolean ignoreOutsideRange) {
+		if (stopVal <= startVal) {
+			throw new IllegalArgumentException("The stopping value (" + stopVal
+					+ ") should be bigger than the starting value (" + startVal + ") .");
 		}
 
-		this.classWidth = preventRoundingErrors((stop - start) / numberOfClasses);
-		this.start = start;
-		this.stop = stop;
+		this.classWidth = preventRoundingErrors((stopVal - startVal) / totalClasses);
+		this.start = startVal;
+		this.stop = stopVal;
 		this.freqTable = new TreeMap<Double, Long>();
-		this.wraps = wraps;
-		this.ignoreValuesOutsideRange = ignoreValuesOutsideRange;
+		this.wraps = wrapping;
+		this.ignoreValuesOutsideRange = ignoreOutsideRange;
 
-		final double lastKey = stop - getClassWidth() / 2;
+		final double lastKey = stopVal - getClassWidth() / 2;
 
-		for (double current = start + getClassWidth() / 2; wraps ? current < lastKey : current <= lastKey; current = preventRoundingErrors(current
-				+ getClassWidth())) {
+		final double stopValue;
+		if (wrapping) {
+			stopValue = lastKey;
+		} else {
+			stopValue = lastKey + getClassWidth() / 2;
+		}
+		for (double current = startVal + getClassWidth() / 2; current < stopValue;) {
 			freqTable.put(current, 0L);
+			current = preventRoundingErrors(current + getClassWidth());
 		}
 
 		this.numberOfClasses = freqTable.keySet().size();
@@ -153,20 +159,20 @@ public class Histogram implements Cloneable {
 	 * values inside using a modulo calculation.
 	 * </p>
 	 * 
-	 * @param start
+	 * @param startVal
 	 *            the starting value of the histogram. The starting value is not
 	 *            the same as the first class middle. The starting value is
 	 *            equal to <code>the first class middle - classWidth / 2</code>
-	 * @param stop
+	 * @param stopVal
 	 *            the stopping value of the histogram. The stopping value is not
 	 *            the same as the last class middle. The stopping value is equal
 	 *            to <code>the last class middle + classWidth / 2</code>
-	 * @param numberOfClasses
+	 * @param totalClasses
 	 *            the number of classes between the starting and stopping
 	 *            values. Also defines the classWidth.
 	 */
-	public Histogram(final double start, final double stop, final int numberOfClasses) {
-		this(start, stop, numberOfClasses, false, false);
+	public Histogram(final double startVal, final double stopVal, final int totalClasses) {
+		this(startVal, stopVal, totalClasses, false, false);
 	}
 
 	/**
@@ -177,26 +183,27 @@ public class Histogram implements Cloneable {
 	 * values inside using a modulo calculation.
 	 * </p>
 	 * 
-	 * @param start
+	 * @param startVal
 	 *            the starting value of the histogram. The starting value is not
 	 *            the same as the first class middle. The starting value is
 	 *            equal to <code>the first class middle - classWidth / 2</code>
-	 * @param stop
+	 * @param stopVal
 	 *            the stopping value of the histogram. The stopping value is not
 	 *            the same as the last class middle. The stopping value is equal
 	 *            to <code>the last class middle + classWidth / 2</code>
-	 * @param numberOfClasses
+	 * @param totalClasses
 	 *            the number of classes between the starting and stopping
 	 *            values. Also defines the classWidth.
-	 * @param wraps
+	 * @param wrapping
 	 *            indicates if the histogram wraps around the edges. More
 	 *            formal: If the histogram wraps values outside the range
 	 *            <code>]start - classWidht / 2, stop + classWidth / 2 [</code>
 	 *            are mapped to values inside the range using a modulo
 	 *            calculation.
 	 */
-	public Histogram(final double start, final double stop, final int numberOfClasses, final boolean wraps) {
-		this(start, stop, numberOfClasses, wraps, true);
+	public Histogram(final double startVal, final double stopVal, final int totalClasses,
+			final boolean wrapping) {
+		this(startVal, stopVal, totalClasses, wrapping, true);
 	}
 
 	/**
@@ -250,7 +257,7 @@ public class Histogram implements Cloneable {
 	 * @throws IllegalArgumentException
 	 *             when the value is not in the range of the histogram.
 	 */
-	public Histogram add(final double value) {
+	public final Histogram add(final double value) {
 
 		if (!wraps && !ignoreValuesOutsideRange && !validValue(value)) {
 			throw new IllegalArgumentException("Value not in the correct interval: " + value
@@ -271,7 +278,17 @@ public class Histogram implements Cloneable {
 			LOG.warning("Using values below zero in is not tested, "
 					+ "it can yield unexpected results. Values below zero are ignored!");
 		}
+		valueAddedHook(value);
 		return this;
+	}
+
+	/**
+	 * A hook to intercept added values.
+	 * 
+	 * @param value
+	 *            The value added
+	 */
+	protected void valueAddedHook(final double value) {
 	}
 
 	private static final double PRECISION_FACTOR = 10000.0;

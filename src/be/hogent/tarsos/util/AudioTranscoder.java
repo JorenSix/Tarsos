@@ -92,10 +92,12 @@ public final class AudioTranscoder {
 
 		// sanity checks
 		if (!sourceFile.exists()) {
-			throw new IllegalArgumentException(source + " does not exist. It should be a readable audiofile.");
+			throw new IllegalArgumentException(source + " does not exist. It should"
+					+ " be a readable audiofile.");
 		}
 		if (sourceFile.isDirectory()) {
-			throw new IllegalArgumentException(source + " is a directory. It should be a readable audiofile.");
+			throw new IllegalArgumentException(source + " is a directory. It should "
+					+ "be a readable audiofile.");
 		}
 		if (!sourceFile.canRead()) {
 			throw new IllegalArgumentException(source

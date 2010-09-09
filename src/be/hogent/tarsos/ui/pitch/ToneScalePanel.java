@@ -60,7 +60,7 @@ public final class ToneScalePanel extends JPanel {
 		initializeGraphics();
 		this.histo = histogram;
 		histoLayer = new HistogramLayer(this, histogram, null);
-		final double referenceScale[] = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100 };
+		final double[] referenceScale = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100 };
 		scalaLayer = new ScalaLayer(this, referenceScale, 1200);
 		layers = new ArrayList<Layer>();
 		layers.add(histoLayer);

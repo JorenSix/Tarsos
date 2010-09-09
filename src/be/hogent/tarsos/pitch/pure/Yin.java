@@ -165,15 +165,34 @@ public final class Yin implements PurePitchDetector {
 	 * @return a better, more precise tau value.
 	 */
 	private float parabolicInterpolation(final int tauEstimate) {
-		float betterTau;
-		float s0, s1, s2;
-		final int x0 = tauEstimate < 1 ? tauEstimate : tauEstimate - 1;
-		final int x2 = tauEstimate + 1 < yinBuffer.length ? tauEstimate + 1 : tauEstimate;
-		if (x0 == tauEstimate) {
-			betterTau = yinBuffer[tauEstimate] <= yinBuffer[x2] ? tauEstimate : x2;
-		} else if (x2 == tauEstimate) {
-			betterTau = yinBuffer[tauEstimate] <= yinBuffer[x0] ? tauEstimate : x0;
+		final float betterTau;
+		final int x0;
+		final int x2;
+
+		if (tauEstimate < 1) {
+			x0 = tauEstimate;
 		} else {
+			x0 = tauEstimate - 1;
+		}
+		if (tauEstimate + 1 < yinBuffer.length) {
+			x2 = tauEstimate + 1;
+		} else {
+			x2 = tauEstimate;
+		}
+		if (x0 == tauEstimate) {
+			if (yinBuffer[tauEstimate] <= yinBuffer[x2]) {
+				betterTau = tauEstimate;
+			} else {
+				betterTau = x2;
+			}
+		} else if (x2 == tauEstimate) {
+			if (yinBuffer[tauEstimate] <= yinBuffer[x0]) {
+				betterTau = tauEstimate;
+			} else {
+				betterTau = x0;
+			}
+		} else {
+			float s0, s1, s2;
 			s0 = yinBuffer[x0];
 			s1 = yinBuffer[tauEstimate];
 			s2 = yinBuffer[x2];

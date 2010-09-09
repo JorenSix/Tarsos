@@ -56,7 +56,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 	private final boolean[] previousKeys;
 	private final int[] velocities;
 
-	int bufferCount = 0;
+	private int bufferCount = 0;
 
 	private boolean toFile;
 

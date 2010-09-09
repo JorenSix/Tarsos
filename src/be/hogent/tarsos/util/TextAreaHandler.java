@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.util.logging.Filter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
@@ -15,18 +16,18 @@ import javax.swing.SwingUtilities;
  * 
  * @author Joren Six
  */
-public class TextAreaHandler extends Handler {
+public final class TextAreaHandler extends Handler {
 
-	static private JTextArea jTextArea = null;
+	private static JTextArea jTextArea = null;
 
 	/**
 	 * Set the JTextArea to log to.
 	 * 
-	 * @param jTextArea
+	 * @param textArea
 	 *            The JTextArea to log to.
 	 */
-	static private void setTextArea(JTextArea jTextArea) {
-		TextAreaHandler.jTextArea = jTextArea;
+	private static void setTextArea(final JTextArea textArea) {
+		TextAreaHandler.jTextArea = textArea;
 	}
 
 	/**
@@ -34,7 +35,7 @@ public class TextAreaHandler extends Handler {
 	 * @param logJTextArea
 	 *            setup logging for a JTextarea
 	 */
-	public static void setupLoggerHandler(JTextArea logJTextArea) {
+	public static void setupLoggerHandler(final JTextArea logJTextArea) {
 		// This code attaches the handler to the text area
 		setTextArea(logJTextArea);
 
@@ -46,32 +47,22 @@ public class TextAreaHandler extends Handler {
 		// these settings.
 		//
 		StringBuffer buf = new StringBuffer();
-		buf.append("handlers = be.hogent.tarsos.util.TextAreaHandler, java.util.logging.ConsoleHandler"); // A
-																											// default
-																											// handler
-																											// and
-																											// our
-																											// custom
-																											// handler
+		// A default handler and our custom handler
+		buf.append("handlers = be.hogent.tarsos.util.TextAreaHandler, java.util.logging.ConsoleHandler");
 		buf.append("\n");
 		buf.append(".level = INFO"); // Set the default logging level see:
 										// C:\software\sun\jdk141_05\docs\api\index.html
 		buf.append("\n");
-		buf.append("be.hogent.tarsos.util.TextAreaHandler.level = INFO"); // Custom
-																			// Handler
-																			// logging
-																			// level
+		// Custom Handler logging level
+		buf.append("be.hogent.tarsos.util.TextAreaHandler.level = INFO");
 		buf.append("\n");
-		buf.append("java.util.logging.ConsoleHandler.level = INFO"); // Custom
-																		// Handler
-																		// logging
-																		// level
+		// Custom Handler logging level
+		buf.append("java.util.logging.ConsoleHandler.level = INFO");
 		buf.append("\n");
 		buf.append("java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter"); //
 
 		try {
-			java.util.logging.LogManager.getLogManager().readConfiguration(
-					new ByteArrayInputStream(buf.toString().getBytes()));
+			LogManager.getLogManager().readConfiguration(new ByteArrayInputStream(buf.toString().getBytes()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -87,7 +78,7 @@ public class TextAreaHandler extends Handler {
 	public TextAreaHandler() {
 		Filter filter = new Filter() {
 			@Override
-			public boolean isLoggable(LogRecord record) {
+			public boolean isLoggable(final LogRecord record) {
 				return record.getLevel().intValue() >= level.intValue();
 			}
 		};
@@ -100,7 +91,7 @@ public class TextAreaHandler extends Handler {
 	 * @see java.util.logging.Handler#publish(java.util.logging.LogRecord)
 	 */
 	@Override
-	public void publish(LogRecord logRecord) {
+	public void publish(final LogRecord logRecord) {
 		// Must filter our own logRecords, (lame) Abstract Handler does not do
 		// it for us.
 		if (!getFilter().isLoggable(logRecord)) {
@@ -124,7 +115,7 @@ public class TextAreaHandler extends Handler {
 	 * @see java.util.logging.Handler#close()
 	 */
 	@Override
-	public void close() throws SecurityException {
+	public void close() {
 	}
 
 	/*
@@ -141,8 +132,8 @@ public class TextAreaHandler extends Handler {
 	 * in the abstract class.
 	 */
 	@Override
-	public void setLevel(Level level) {
-		this.level = level;
-		super.setLevel(level);
+	public void setLevel(final Level newLevel) {
+		this.level = newLevel;
+		super.setLevel(newLevel);
 	}
 }

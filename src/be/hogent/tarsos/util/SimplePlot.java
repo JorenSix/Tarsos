@@ -25,12 +25,12 @@ public final class SimplePlot {
 	private boolean first;
 	private final String title;
 
-	public SimplePlot(final String title) {
+	public SimplePlot(final String plotTitle) {
 		plot = new Plot();
 		first = true;
-		this.title = title;
+		this.title = plotTitle;
 		plot.setSize(1024, 786);
-		plot.setTitle(title);
+		plot.setTitle(plotTitle);
 	}
 
 	public void setSize(final int width, final int height) {

@@ -32,6 +32,8 @@ public class PitchContour extends Plot {
 		}
 		setYLabel("Pitch (" + unit.getHumanName() + ")");
 
+		setXRange(0, file.getLengthInMicroSeconds() / 1000.0);
+
 		setButtons(true);
 		setTitle(file.basename());
 		setXLabel("Time (seconds)");

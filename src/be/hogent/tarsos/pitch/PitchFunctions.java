@@ -383,7 +383,8 @@ public final class PitchFunctions {
 		for (final Double value : values) {
 			histogram.add(value);
 		}
-		assert histogram.getSumFreq() == values.size() : "Number of items in bins does not correspond with total number of items";
+		assert histogram.getSumFreq() == values.size() : "Number of items in bins does no"
+				+ "t correspond with total number of items";
 
 		return histogram;
 	}

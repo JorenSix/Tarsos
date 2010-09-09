@@ -1,33 +1,29 @@
 package be.hogent.tarsos.util.histogram.peaks;
 
 class DerivativeAndPosition implements Comparable<DerivativeAndPosition> {
-    Double derivative;
+	private final Double derivative;
 
-    // , position;
+	DerivativeAndPosition(final double derive) {
+		this.derivative = derive;
+	}
 
-    DerivativeAndPosition(final double derivative, final double position) {
-        this.derivative = derivative;
-        // this.position = position;
-    }
+	@Override
+	public int compareTo(final DerivativeAndPosition arg0) {
+		return derivative.compareTo(arg0.derivative);
+	}
 
-    @Override
-    public int compareTo(final DerivativeAndPosition arg0) {
-        return derivative.compareTo(arg0.derivative);
-    }
+	@Override
+	public boolean equals(final Object other) {
+		boolean isEqual = false;
+		if (other != null && other instanceof DerivativeAndPosition) {
+			final DerivativeAndPosition otherD = (DerivativeAndPosition) other;
+			isEqual = derivative.equals(otherD.derivative);
+		}
+		return isEqual;
+	}
 
-    @Override
-    public boolean equals(final Object other) {
-        boolean isEqual = false;
-        if (other != null && other instanceof DerivativeAndPosition) {
-            final DerivativeAndPosition otherD = (DerivativeAndPosition) other;
-            isEqual = derivative.equals(otherD.derivative);
-        }
-        return isEqual;
-    }
-
-    @Override
-    public int hashCode() {
-        return derivative.hashCode();
-    }
+	@Override
+	public int hashCode() {
+		return derivative.hashCode();
+	}
 }
-

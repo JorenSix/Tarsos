@@ -25,7 +25,9 @@ public class MidiToWav extends JFrame {
 	public MidiToWav() {
 		super("MIDI and Scala to WAV");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setLayout(new FormLayout("4dlu,left:60dlu:grow, 4dlu ,right:60dlu:grow,4dlu", "pref,2dlu,150dlu,2dlu"));
+		final FormLayout layout;
+		layout = new FormLayout("4dlu,left:60dlu:grow, 4dlu ,right:60dlu:grow,4dlu", "pref,2dlu,150dlu,2dlu");
+		setLayout(layout);
 
 		// final DropTarget scalaFilesTarget;
 		// final DropTarget midiFilesTarget;

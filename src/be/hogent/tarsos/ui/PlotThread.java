@@ -15,10 +15,10 @@ public final class PlotThread extends Thread {
 	private final List<Sample> samples;
 	private final StopWatch watch;
 
-	public PlotThread(final String title, final List<Sample> samples, final StopWatch watch) {
+	public PlotThread(final String title, final List<Sample> sampleList, final StopWatch stopWatch) {
 		// this.title = title;
-		this.samples = samples;
-		this.watch = watch;
+		this.samples = sampleList;
+		this.watch = stopWatch;
 	}
 
 	@Override
@@ -38,7 +38,8 @@ public final class PlotThread extends Thread {
 
 		new PlotApplication(livePlot);
 
-		for (long currentTick = 0; currentTick <= samples.get(samples.size() - 1).getStart(); currentTick += 100) {
+		long currentTick = 0;
+		for (; currentTick <= samples.get(samples.size() - 1).getStart(); currentTick += 100) {
 
 			while (sampleIterator.hasNext() && currentSample.getStart() <= currentTick) {
 				for (final Double pitch : currentSample.getPitchesWithoutHarmonicsIn(

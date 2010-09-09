@@ -101,27 +101,27 @@ public final class FFT {
         private final float[] w;
         private final int fftFrameSize;
         private final int sign;
-        private final int[] bitm_array;
+        private final int[] bitmarray;
         private final int fftFrameSize2;
 
         /**
          * Data = Interlaced float array to be transformed. The order is: real
          * (sin), complex (cos)
          * 
-         * @param fftFrameSize
+         * @param fftSize
          *            Framesize must be power of 2
-         * @param sign
+         * @param fftSign
          *            Sign = -1 is FFT, 1 is IFFT (inverse FFT)
          */
-        public FloatFFT(final int fftFrameSize, final int sign) {
-            w = computeTwiddleFactors(fftFrameSize, sign);
+        public FloatFFT(final int fftSize, final int fftSign) {
+            w = computeTwiddleFactors(fftSize, fftSign);
 
-            this.fftFrameSize = fftFrameSize;
-            this.sign = sign;
-            fftFrameSize2 = fftFrameSize << 1;
+            this.fftFrameSize = fftSize;
+            this.sign = fftSign;
+            fftFrameSize2 = fftSize << 1;
 
             // Pre-process Bit-Reversal
-            bitm_array = new int[fftFrameSize2];
+            bitmarray = new int[fftFrameSize2];
             for (int i = 2; i < fftFrameSize2; i += 2) {
                 int j;
                 int bitm;
@@ -131,7 +131,7 @@ public final class FFT {
                     }
                     j <<= 1;
                 }
-                bitm_array[i] = j;
+                bitmarray[i] = j;
             }
 
         }
@@ -775,7 +775,7 @@ public final class FFT {
 
             final int inverse = fftFrameSize2 - 2;
             for (int i = 0; i < fftFrameSize; i += 4) {
-                final int j = bitm_array[i];
+                final int j = bitmarray[i];
 
                 // Performing Bit-Reversal, even v.s. even, O(2N)
                 if (i < j) {
