@@ -36,36 +36,6 @@ public final class TextAreaHandler extends Handler {
 	public static void setupLoggerHandler(final JTextArea logJTextArea) {
 		// This code attaches the handler to the text area
 		setTextArea(logJTextArea);
-
-		// // Normally configuration would be done via a properties file
-		// // that would be read in with
-		// // LogManager.getLogManager().readConfiguration()
-		// // But I create an inputstream here to keep it local.
-		// // See JAVA_HOME/jre/lib/logging.properties for more description of
-		// // these settings.
-		// //
-		// StringBuffer buf = new StringBuffer();
-		// // A default handler and our custom handler
-		// buf.append("handlers = , java.util.logging.ConsoleHandler");
-		// buf.append("\n");
-		// buf.append(".level = INFO"); // Set the default logging level see:
-		// // C:\software\sun\jdk141_05\docs\api\index.html
-		// buf.append("\n");
-		// // Custom Handler logging level
-		// buf.append("be.hogent.tarsos.util.TextAreaHandler.level = INFO");
-		// buf.append("\n");
-		// // Custom Handler logging level
-		// buf.append("java.util.logging.ConsoleHandler.level = INFO");
-		// buf.append("\n");
-		// buf.append("java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter");
-		// //
-		//
-		// try {
-		// LogManager.getLogManager().readConfiguration(new
-		// ByteArrayInputStream(buf.toString().getBytes()));
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
 	}
 
 	private Level level = Level.INFO; // The logging level for this handler,
