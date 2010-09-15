@@ -35,61 +35,84 @@ package be.hogent.tarsos.midi;
  |<---            this code is formatted to fit into 80 columns             --->|
  */
 
+import java.util.Vector;
+import java.util.logging.Logger;
+
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiDevice.Info;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 
-import be.hogent.tarsos.apps.Tarsos;
-
 /** Utility methods for MIDI examples. */
 public final class MidiCommon {
+
+	/**
+	 * Log messages.
+	 */
+	private static final Logger LOG = Logger.getLogger(MidiCommon.class.getName());
+
+	public static final class MoreMidiInfo {
+		private final MidiDevice.Info deviceInfo;
+		private final boolean allowsInput;
+		private final boolean allowsOutput;
+
+		public MoreMidiInfo(final MidiDevice.Info info, final boolean input, final boolean output) {
+			deviceInfo = info;
+			allowsInput = input;
+			allowsOutput = output;
+		}
+
+		@Override
+		public String toString() {
+			String descr = "MIDI";
+			if (allowsInput) {
+				descr = descr + " IN";
+			}
+			if (allowsInput && allowsOutput) {
+				descr = descr + " &";
+			}
+			if (allowsOutput) {
+				descr = descr + " OUT";
+			}
+			return String.format("%s - %s", descr, deviceInfo.getName());
+		}
+
+		@Override
+		public boolean equals(final Object other) {
+			return deviceInfo.equals(((MoreMidiInfo) other).deviceInfo);
+		}
+
+		@Override
+		public int hashCode() {
+			return deviceInfo.hashCode();
+		}
+
+		public MidiDevice.Info getInfo() {
+			return deviceInfo;
+		}
+	}
 
 	private MidiCommon() {
 	}
 
-	public static void listDevices(final boolean bForInput, final boolean bForOutput) {
-		listDevices(bForInput, bForOutput, false);
-	}
-
-	public static void listDevices(final boolean input, final boolean output, final boolean verbose) {
-		if (input && !output) {
-			out("Available MIDI IN Devices:");
-		} else if (!input && output) {
-			out("Available MIDI OUT Devices:");
-		} else {
-			out("Available MIDI Devices:");
-		}
+	public static Vector<MoreMidiInfo> listDevices(final boolean input, final boolean output) {
+		final Vector<MoreMidiInfo> deviceInfos = new Vector<MoreMidiInfo>();
 
 		final MidiDevice.Info[] aInfos = MidiSystem.getMidiDeviceInfo();
-		for (int i = 0; i < aInfos.length; i++) {
+		for (Info aInfo : aInfos) {
 			try {
-				final MidiDevice device = MidiSystem.getMidiDevice(aInfos[i]);
-				final boolean bAllowsInput = device.getMaxTransmitters() != 0;
-				final boolean bAllowsOutput = device.getMaxReceivers() != 0;
-				if (bAllowsInput && input || bAllowsOutput && output) {
-					if (verbose) {
-						String info = i + "  ";
-						if (bAllowsInput) {
-							info = info + "IN ";
-						}
-						if (bAllowsOutput) {
-							info = info + "OUT ";
-						}
-						info = info + aInfos[i].getName() + ", " + aInfos[i].getVendor() + ", "
-								+ aInfos[i].getVersion() + ", " + aInfos[i].getDescription();
-						out(info);
-					} else {
-						out(i + "  " + aInfos[i].getName());
-					}
+				final MidiDevice device = MidiSystem.getMidiDevice(aInfo);
+				final boolean deviceAllowsInput = device.getMaxTransmitters() != 0;
+				final boolean deviceAllowsOutput = device.getMaxReceivers() != 0;
+				final MoreMidiInfo moreInfo = new MoreMidiInfo(aInfo, deviceAllowsInput, deviceAllowsOutput);
+				if (deviceAllowsInput && input || deviceAllowsOutput && output) {
+					deviceInfos.add(moreInfo);
 				}
 			} catch (final MidiUnavailableException e) {
-				e.printStackTrace();
+				LOG.warning(String.format("Ignored unavailable MIDI device %s in list.", aInfo));
 			}
 		}
-		if (aInfos.length == 0) {
-			out("[No devices available]");
-		}
+		return deviceInfos;
 	}
 
 	/**
@@ -143,10 +166,6 @@ public final class MidiCommon {
 			return null;
 		}
 		return aInfos[index];
-	}
-
-	private static void out(final String strMessage) {
-		Tarsos.println(strMessage);
 	}
 }
 

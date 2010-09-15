@@ -17,7 +17,7 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.Transmitter;
 import javax.swing.JFrame;
 
-import be.hogent.tarsos.midi.DumpReceiver;
+import be.hogent.tarsos.midi.LogReceiver;
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
@@ -129,7 +129,7 @@ public final class PlayAlong {
 			synthDevice.open();
 
 			Receiver recv;
-			recv = new ReceiverSink(true, synthDevice.getReceiver(), new DumpReceiver(System.out));
+			recv = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
 			keyboard.setReceiver(recv);
 
 			MidiDevice virtualMidiInputDevice;
