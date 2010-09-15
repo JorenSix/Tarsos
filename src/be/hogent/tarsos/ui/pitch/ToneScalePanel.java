@@ -10,29 +10,17 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.Mixer;
-import javax.sound.sampled.TargetDataLine;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JPanel;
 
-import be.hogent.tarsos.apps.Tarsos;
 import be.hogent.tarsos.pitch.PitchConverter;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.pure.DetectedPitchHandler;
-import be.hogent.tarsos.pitch.pure.PurePitchDetector;
-import be.hogent.tarsos.pitch.pure.Yin;
-import be.hogent.tarsos.sampled.AudioDispatcher;
-import be.hogent.tarsos.sampled.AudioProcessor;
-import be.hogent.tarsos.sampled.BlockingAudioPlayer;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileDrop;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.ScalaFile;
@@ -59,7 +47,7 @@ public final class ToneScalePanel extends JPanel {
 		this.setSize(640, 480);
 		initializeGraphics();
 		this.histo = histogram;
-		histoLayer = new HistogramLayer(this, histogram, null);
+		histoLayer = new HistogramLayer(this, histogram);
 		final double[] referenceScale = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100 };
 		scalaLayer = new ScalaLayer(this, referenceScale, 1200);
 		layers = new ArrayList<Layer>();
@@ -82,102 +70,36 @@ public final class ToneScalePanel extends JPanel {
 						scalaLayer.setScale(scale);
 					} else if (FileUtils.isAudioFile(droppedFile)) {
 						final AudioFile audioFile = new AudioFile(droppedFile.getAbsolutePath());
-						AudioInputStream ais;
+						histoLayer.setAudioFile(audioFile);
+						histogram.clear();
+						final DetectedPitchHandler detectedPitchHandler = new DetectedPitchHandler() {
+							private final List<Double> markers = new ArrayList<Double>();
 
-						try {
-							boolean live = false;
-							if (live) {
-								final Mixer mixer = Tarsos.chooseMixerDevice();
-								final AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
-								final DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,
-										format);
-								final TargetDataLine line = (TargetDataLine) mixer.getLine(dataLineInfo);
-								final int numberOfSamples = Yin.DEFAULT_BUFFER_SIZE;
-								line.open(format, numberOfSamples);
-								line.start();
-								ais = new AudioInputStream(line);
-							} else {
-								histoLayer.setAudioFile(audioFile);
-								ais = AudioSystem.getAudioInputStream(new File(audioFile.transcodedPath()));
-							}
-
-							final float sampleRate = ais.getFormat().getSampleRate();
-							final int bufferSize = Yin.DEFAULT_BUFFER_SIZE;
-							final int overlapSize = Yin.DEFAULT_OVERLAP;
-							final PurePitchDetector pureDetector = new Yin(sampleRate, bufferSize);
-							final int bufferStepSize = bufferSize - overlapSize;
-							histogram.clear();
-
-							final DetectedPitchHandler detectedPitchHandler = new DetectedPitchHandler() {
-
-								private final List<Double> markers = new ArrayList<Double>();
-
-								@Override
-								public void handleDetectedPitch(final float time, final float pitch) {
-									if (pitch != -1) {
-										histogram.add(PitchConverter.hertzToRelativeCent(pitch));
-										if (getShouldPlay()) {
-											markers.add(PitchConverter.hertzToRelativeCent(pitch));
-										}
-
-									}
-									if ((int) (time * 100) % 5 == 0) {
-										// System.out.println(time + "\t" +
-										// pitch + "Hz");
-										histoLayer.setMarkers(markers);
-										repaint();
+							@Override
+							public void handleDetectedPitch(final float time, final float pitch) {
+								if (pitch != -1) {
+									histogram.add(PitchConverter.hertzToRelativeCent(pitch));
+									if (getShouldPlay()) {
+										markers.add(PitchConverter.hertzToRelativeCent(pitch));
 									}
 								}
-							};
-
-							final AudioDispatcher dispatcher = new AudioDispatcher(ais, bufferSize,
-									overlapSize);
-							dispatcher.addAudioProcessor(new AudioProcessor() {
-								private long samplesProcessed = 0;
-								private float time = 0;
-
-								@Override
-								public void processFull(final float[] audioFloatBuffer,
-										final byte[] audioByteBuffer) {
-									samplesProcessed += audioFloatBuffer.length;
-									processBuffer(audioFloatBuffer);
+								if ((int) (time * 100) % 5 == 0) {
+									histoLayer.setMarkers(markers);
+									repaint();
 								}
-
-								@Override
-								public void processOverlapping(final float[] audioFloatBuffer,
-										final byte[] audioByteBuffer) {
-									samplesProcessed += bufferStepSize;
-									processBuffer(audioFloatBuffer);
-								}
-
-								private void processBuffer(final float[] audioFloatBuffer) {
-									final float pitch = pureDetector.getPitch(audioFloatBuffer);
-									time = samplesProcessed / sampleRate;
-									detectedPitchHandler.handleDetectedPitch(time, pitch);
-								}
-
-								@Override
-								public void processingFinished() {
-								}
-							});
-
-							if (getShouldPlay()) {
-								BlockingAudioPlayer player = new BlockingAudioPlayer(ais.getFormat(),
-										bufferSize, overlapSize);
-								dispatcher.addAudioProcessor(player);
 							}
-							new Thread(dispatcher).start();
-						} catch (final UnsupportedAudioFileException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (final IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (final LineUnavailableException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						};
+						Runnable r = new Runnable() {
+							@Override
+							public void run() {
+								PitchDetectionMode mode = Configuration
+										.getPitchDetectionMode(ConfKey.pitch_tracker_current);
+								audioFile.detectPitch(mode, detectedPitchHandler, 10);
+							}
+						};
+						new Thread(r, "Pitch Contour Data Collection Thread").start();
 					}
+
 				}
 
 			} // end filesDropped

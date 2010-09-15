@@ -6,7 +6,6 @@ import java.awt.GridLayout;
 import java.io.File;
 import java.util.List;
 
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -15,6 +14,8 @@ import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileDrop;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
@@ -28,19 +29,11 @@ public class BrowserPanel extends JPanel {
 	private static final long serialVersionUID = -2721032191436893433L;
 
 	private final JPanel scalePanel;
-	private final JComboBox comboBox;
 
 	public BrowserPanel() {
 		super(new BorderLayout());
 
-		comboBox = new JComboBox(PitchDetectionMode.values());
-
-		JPanel controlPanel = new JPanel();
-		controlPanel.add(comboBox);
-
 		scalePanel = new JPanel(new GridLayout(0, 1));
-
-		this.add(controlPanel, BorderLayout.NORTH);
 		this.add(scalePanel, BorderLayout.CENTER);
 
 		new FileDrop(this, new FileDrop.Listener() {
@@ -61,7 +54,7 @@ public class BrowserPanel extends JPanel {
 			@Override
 			public void run() {
 				final AudioFile audioFile = new AudioFile(fileName);
-				PitchDetectionMode mode = (PitchDetectionMode) comboBox.getSelectedItem();
+				PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
 				final PitchDetector pitchDetector = mode.getPitchDetector(audioFile);
 				pitchDetector.executePitchDetection();
 				final List<Sample> samples = pitchDetector.getSamples();

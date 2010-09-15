@@ -47,14 +47,13 @@ public final class HistogramLayer implements Layer {
 	private AudioFile file;
 	private double[] scale;
 
-	public HistogramLayer(final JComponent component, final Histogram histogram, final AudioFile audioFile) {
+	public HistogramLayer(final JComponent component, final Histogram histogram) {
 		parent = component;
 		mouseDrag = new MouseDragListener(component, MouseEvent.BUTTON1);
 		histo = histogram;
 		component.addMouseListener(mouseDrag);
 		component.addMouseMotionListener(mouseDrag);
 		markerPositions = new ArrayList<Double>();
-		this.file = audioFile;
 		scale = null;
 	}
 

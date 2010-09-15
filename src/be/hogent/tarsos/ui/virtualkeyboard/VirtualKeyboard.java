@@ -20,7 +20,7 @@ import javax.sound.midi.Transmitter;
 import javax.swing.JComponent;
 
 import be.hogent.tarsos.apps.PlayAlong;
-import be.hogent.tarsos.midi.DumpReceiver;
+import be.hogent.tarsos.midi.LogReceiver;
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
@@ -344,7 +344,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 			synthDevice.open();
 
 			Receiver recv;
-			recv = new ReceiverSink(true, synthDevice.getReceiver(), new DumpReceiver(System.out));
+			recv = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
 			setReceiver(recv);
 
 			final double[] rebasedTuning = PlayAlong.tuningFromPeaks(tuning);

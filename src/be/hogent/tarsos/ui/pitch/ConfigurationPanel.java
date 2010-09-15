@@ -1,18 +1,31 @@
 package be.hogent.tarsos.ui.pitch;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiSystem;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 
+import be.hogent.tarsos.midi.MidiCommon;
+import be.hogent.tarsos.midi.MidiCommon.MoreMidiInfo;
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 
@@ -29,15 +42,133 @@ public class ConfigurationPanel extends JPanel {
 	private static final long serialVersionUID = 773663466708366659L;
 	private final HashMap<JTextField, ConfKey> configurationTextFields;
 
+	/**
+	 * Log messages.
+	 */
+	private static final Logger LOG = Logger.getLogger(ConfigurationPanel.class.getName());
+
 	public ConfigurationPanel() {
 		super(new BorderLayout());
-
 		FormLayout layout = new FormLayout("right:pref, 3dlu, min:grow");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 		configurationTextFields = new HashMap<JTextField, ConfKey>();
 		builder.setDefaultDialogBorder();
 		builder.setRowGroupingEnabled(true);
-		builder.appendSeparator("Configuratieparameters");
+		addConfigurationComponents(builder);
+		addConfigurationTextFields(builder);
+		JComponent center = builder.getPanel();
+		add(center, BorderLayout.CENTER);
+	}
+
+	private static class MidiDevicePolling implements Runnable {
+		private final JComboBox optionsComboBox;
+		private final boolean midiInput;
+		private final boolean midiOutput;
+
+		public MidiDevicePolling(final JComboBox comboBox, final boolean input, final boolean output) {
+			optionsComboBox = comboBox;
+			midiInput = input;
+			midiOutput = output;
+		}
+
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					Thread.sleep(1000);
+					poll();
+				} catch (InterruptedException e) {
+					LOG.log(Level.SEVERE, String.format("Thread %s execution interrupted!", Thread
+							.currentThread().getName()), e);
+				}
+			}
+		}
+
+		private void poll() {
+			DefaultComboBoxModel model = (DefaultComboBoxModel) optionsComboBox.getModel();
+			Vector<MoreMidiInfo> infos = MidiCommon.listDevices(midiInput, midiOutput);
+			// Add new MIDI device if it is not already present in the
+			// current list.
+			for (MoreMidiInfo info : infos) {
+				if (model.getIndexOf(info) == -1) {
+					model.addElement(info);
+				}
+			}
+			// Remove a device if the MIDI device is not there any more.
+			for (int i = 0; i < model.getSize(); i++) {
+				MoreMidiInfo info = (MoreMidiInfo) model.getElementAt(i);
+				if (!infos.contains(info)) {
+					model.removeElementAt(i);
+					i--;
+				}
+			}
+		}
+	}
+
+	private void addConfigurationComponents(final DefaultFormBuilder builder) {
+		builder.appendSeparator("Runtime configuration parameters");
+
+		final JComboBox midiInComboBox = new JComboBox(MidiCommon.listDevices(true, false));
+		Runnable pollingMidiIn = new MidiDevicePolling(midiInComboBox, true, false);
+		Thread pollingMidiInThread = new Thread(pollingMidiIn, "MIDI IN Device polling");
+		pollingMidiInThread.start();
+		midiInComboBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				MoreMidiInfo info = (MoreMidiInfo) midiInComboBox.getSelectedItem();
+				int index = -1;
+				MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+				for (int i = 0; i < infos.length; i++) {
+					if (infos[i] == info.getInfo()) {
+						index = i;
+					}
+				}
+				Configuration.set(ConfKey.midi_input_device, index);
+			}
+		});
+
+		final JComboBox midiOutComboBox = new JComboBox(MidiCommon.listDevices(false, true));
+		Runnable pollingMidiOut = new MidiDevicePolling(midiOutComboBox, false, true);
+		Thread pollingMidiOutThread = new Thread(pollingMidiOut, "MIDI OUT Device polling");
+		pollingMidiOutThread.start();
+		midiOutComboBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+
+			}
+		});
+
+		final JComboBox pitchDetectorsComboBox = new JComboBox(PitchDetectionMode.values());
+		pitchDetectorsComboBox.setSelectedItem(Configuration
+				.getPitchDetectionMode(ConfKey.pitch_tracker_default));
+		pitchDetectorsComboBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PitchDetectionMode mode = (PitchDetectionMode) pitchDetectorsComboBox.getSelectedItem();
+				ConfKey current = ConfKey.pitch_tracker_current;
+				Configuration.set(current, mode.name());
+				for (Entry<JTextField, ConfKey> entry : configurationTextFields.entrySet()) {
+					if (entry.getValue() == current) {
+						entry.getKey().setText(mode.name());
+					}
+				}
+			}
+		});
+
+		builder.append("Pitch Detector", pitchDetectorsComboBox, true);
+		builder.append("MIDI IN", midiInComboBox, true);
+		builder.append("MIDI OUT", midiOutComboBox, true);
+	}
+
+	/**
+	 * Adds a text field for each configured value to the form.
+	 * 
+	 * @param builder
+	 *            The form builder.
+	 */
+	private void addConfigurationTextFields(final DefaultFormBuilder builder) {
+
+		builder.appendSeparator("Configuration parameters");
 		List<ConfKey> orderedKeys = new ArrayList<ConfKey>();
 		for (ConfKey key : ConfKey.values()) {
 			orderedKeys.add(key);
@@ -70,7 +201,5 @@ public class ConfigurationPanel extends JPanel {
 				}
 			});
 		}
-		JComponent center = builder.getPanel();
-		add(center, BorderLayout.CENTER);
 	}
 }
