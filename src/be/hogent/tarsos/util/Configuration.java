@@ -2,10 +2,14 @@ package be.hogent.tarsos.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+
+import be.hogent.tarsos.pitch.PitchDetectionMode;
 
 /**
  * Utility class to access (read and write) configuration settings. There are
@@ -20,8 +24,20 @@ public final class Configuration {
 	 * Log messages.
 	 */
 	private static final Logger LOG = Logger.getLogger(Configuration.class.getName());
+	/**
+	 * The suffix used for the human name of a configuration setting.
+	 */
 	private static final String HUMAN_NAME_SUFFIX = "_human";
+	/**
+	 * The suffix used for a discription of a configuration setting.
+	 */
 	private static final String DESCIPTION_SUFFIX = "_descr";
+
+	/**
+	 * A list of listeners that are notified when a configuration setting
+	 * changes.
+	 */
+	private static final List<ConfigChangeListener> LISTENERS = new ArrayList<ConfigChangeListener>();
 
 	/**
 	 * The default configuration, defined in a properties file.
@@ -134,6 +150,18 @@ public final class Configuration {
 	}
 
 	/**
+	 * Return a configured PitchDetectionMode
+	 * 
+	 * @param key
+	 *            the key of the configured value
+	 * @return a PitchDetectionMode if the configured string represents a
+	 *         correct value.
+	 */
+	public static PitchDetectionMode getPitchDetectionMode(final ConfKey key) {
+		return PitchDetectionMode.valueOf(get(key));
+	}
+
+	/**
 	 * Fetches configured values. If no values are configured a default
 	 * configuration is written (based on configuration.properties).
 	 * 
@@ -193,10 +221,38 @@ public final class Configuration {
 			final String actualValue = sanitizeConfiguredValue(key.name(), value);
 			userPreferences.put(key.name(), actualValue);
 			userPreferences.flush();
-			LOG.info(key.name() + " = " + actualValue);
+			LOG.finer(key.name() + " = " + actualValue);
 		} catch (final BackingStoreException e) {
 			LOG.severe("Could not save preference for " + key.name());
 		}
+		for (ConfigChangeListener listener : LISTENERS) {
+			listener.configurationChanged(key);
+		}
+	}
+
+	/**
+	 * An interface used to send notifications of a changed configurations
+	 * setting.
+	 * 
+	 */
+	public static interface ConfigChangeListener {
+		/**
+		 * Fires when a configuration setting changes. The value of the
+		 * configuration setting can be found using the Configuration.get
+		 * method.
+		 * 
+		 * @param key
+		 *            The changed configuration setting.
+		 */
+		void configurationChanged(final ConfKey key);
+	}
+
+	/**
+	 * 
+	 * @param listener
+	 */
+	public static void addListener(final ConfigChangeListener listener) {
+		LISTENERS.add(listener);
 	}
 
 	/**
