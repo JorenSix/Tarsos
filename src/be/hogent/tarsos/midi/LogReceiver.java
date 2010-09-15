@@ -31,7 +31,7 @@ package be.hogent.tarsos.midi;
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.PrintStream;
+import java.util.logging.Logger;
 
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiMessage;
@@ -42,7 +42,12 @@ import javax.sound.midi.SysexMessage;
 /**
  * Displays the file format information of a MIDI file.
  */
-public final class DumpReceiver implements Receiver {
+public final class LogReceiver implements Receiver {
+
+	/**
+	 * Log messages.
+	 */
+	private static final Logger LOG = Logger.getLogger(LogReceiver.class.getName());
 
 	private static long seByteCount = 0;
 	private static long smByteCount = 0;
@@ -67,15 +72,13 @@ public final class DumpReceiver implements Receiver {
 	private static final String[] FRAME_TYPE_TEXT = { "24 frames/second", "25 frames/second",
 			"30 frames/second (drop)", "30 frames/second (non-drop)", };
 
-	private final PrintStream m_printStream;
 	private final boolean m_bPrintTimeStampAsTicks;
 
-	public DumpReceiver(final PrintStream printStream) {
-		this(printStream, false);
+	public LogReceiver() {
+		this(false);
 	}
 
-	public DumpReceiver(final PrintStream printStream, final boolean bPrintTimeStampAsTicks) {
-		m_printStream = printStream;
+	public LogReceiver(final boolean bPrintTimeStampAsTicks) {
 		m_bPrintTimeStampAsTicks = bPrintTimeStampAsTicks;
 	}
 
@@ -105,7 +108,7 @@ public final class DumpReceiver implements Receiver {
 				strTimeStamp = "timestamp " + lTimeStamp + " us: ";
 			}
 		}
-		m_printStream.println(strTimeStamp + strMessage);
+		LOG.finest(strTimeStamp + strMessage);
 	}
 
 	public String decodeMessage(final ShortMessage message) {
