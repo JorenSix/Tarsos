@@ -336,9 +336,9 @@ public class Histogram implements Cloneable {
 
 		assert validValue(roundedValue);
 
-		final double numberOfClasses = Math.floor((roundedValue + start) / classWidth);
+		final double classes = Math.floor((roundedValue + start) / classWidth);
 		final double offset = classWidth / 2 - start;
-		final double key = preventRoundingErrors(numberOfClasses * classWidth + offset);
+		final double key = preventRoundingErrors(classes * classWidth + offset);
 		assert key >= freqTable.firstKey();
 		assert key <= freqTable.lastKey();
 		return key;
