@@ -8,7 +8,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.hogent.tarsos.pitch.PitchDetectionMode;
@@ -16,6 +18,8 @@ import be.hogent.tarsos.pitch.PitchDetector;
 import be.hogent.tarsos.pitch.PitchUnit;
 import be.hogent.tarsos.pitch.Sample;
 import be.hogent.tarsos.pitch.pure.DetectedPitchHandler;
+import be.hogent.tarsos.sampled.AudioDispatcher;
+import be.hogent.tarsos.sampled.BlockingAudioPlayer;
 
 /**
  * Represents an audio file. Facilitates transcoding, handling of path names and
@@ -99,7 +103,8 @@ public final class AudioFile {
 	}
 
 	/**
-	 * Determines the length or the file in microseconds.
+	 * Determines the length of the transcoded file (only audio data) in
+	 * microseconds.
 	 * 
 	 * @return The length of the file in microseconds. If the length could not
 	 *         be determined -1 is returned.
@@ -112,14 +117,65 @@ public final class AudioFile {
 			int frames = fileFormat.getFrameLength();
 			float frameRate = fileFormat.getFormat().getFrameRate();
 			lengtInMicroSeconds = (long) (frames / frameRate * 1000);
-			LOG.finest(String.format("Determined the lenght of " + "%s: %s microseconds.", basename(),
-					lengtInMicroSeconds));
+			LOG.finest(String.format("Determined the lenght of %s: %s µs", basename(), lengtInMicroSeconds));
 		} catch (UnsupportedAudioFileException e) {
 			LOG.log(Level.WARNING, "Could not determine audio file length.", e);
 		} catch (IOException e) {
 			LOG.log(Level.SEVERE, "Could not determine audio file length.", e);
 		}
 		return lengtInMicroSeconds;
+	}
+
+	/**
+	 * Determines the size of the transcoded audio data in bytes.
+	 * 
+	 * @return The size of the audio data in bytes. If the length could not be
+	 *         determined -1 is returned.
+	 */
+	public long getSizeInBytes() {
+		long size = -1;
+		try {
+			AudioFileFormat fileFormat;
+			fileFormat = AudioSystem.getAudioFileFormat(new File(transcodedPath()));
+			int frames = fileFormat.getFrameLength();
+			int frameSize = fileFormat.getFormat().getFrameSize();
+			size = frames * frameSize;
+			LOG.finest(String.format("Determined size of audio data for %s: %s bytes.", basename(), size));
+		} catch (UnsupportedAudioFileException e) {
+			LOG.log(Level.WARNING, "Could not determine audio file length.", e);
+		} catch (IOException e) {
+			LOG.log(Level.SEVERE, "Could not determine audio file length.", e);
+		}
+		return size;
+	}
+
+	public void playSelection(final double from, final double to) {
+		try {
+			final AudioInputStream stream = AudioSystem.getAudioInputStream(new File(transcodedPath()));
+			double bytesPerSecond = getSizeInBytes() / (double) getLengthInMicroSeconds() * 1000.0;
+			final double actualFrom;
+			if (from < 0) {
+				actualFrom = 0;
+			} else {
+				actualFrom = from;
+			}
+
+			long skip = (long) (bytesPerSecond * actualFrom);
+			stream.skip(skip);
+			AudioDispatcher dispatcher = new AudioDispatcher(stream, 512, 0);
+			long numberOfBytesToProcess = (long) (bytesPerSecond * (to - actualFrom));
+			dispatcher.setNumberOfBytesToProcess(numberOfBytesToProcess);
+			dispatcher.addAudioProcessor(new BlockingAudioPlayer(stream.getFormat(), 512, 0));
+			Thread playingThread = new Thread(dispatcher, String.format(
+					"Audiofile %s segment playing thread", basename()));
+			playingThread.start();
+		} catch (UnsupportedAudioFileException e) {
+			LOG.log(Level.SEVERE, "Unsupported audio for a transcoded file. Check your configuration.", e);
+		} catch (IOException e) {
+			LOG.log(Level.SEVERE, "Could not read a transcoded audio file. Check your configuration.", e);
+		} catch (LineUnavailableException e) {
+			LOG.log(Level.WARNING, "Could not play an audio segment. Audio line not available.", e);
+		}
 	}
 
 	public void detectPitch(final PitchDetectionMode detectionMode, final DetectedPitchHandler handler,
@@ -135,7 +191,6 @@ public final class AudioFile {
 				handler.handleDetectedPitch(sample.getStart() / 1000.0f, (float) pitchInHertz);
 				try {
 					long sleepTime = (long) ((sample.getStart() - previousSample) / speedFactor);
-					System.out.println(sleepTime);
 					Thread.sleep(sleepTime);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
