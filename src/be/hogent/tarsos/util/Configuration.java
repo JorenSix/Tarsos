@@ -1,5 +1,6 @@
 package be.hogent.tarsos.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import be.hogent.tarsos.pitch.PitchDetectionMode;
+import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 
 /**
  * Utility class to access (read and write) configuration settings. There are
@@ -319,8 +320,26 @@ public final class Configuration {
 	 */
 	public static void createRequiredDirectories() {
 		for (final ConfKey confKey : ConfKey.values()) {
-			if (confKey.isRequiredDirectory() && FileUtils.mkdirs(get(confKey))) {
-				LOG.info("Created directory: " + get(confKey));
+			if (confKey.isRequiredDirectory()) {
+				String directory = get(confKey);
+				boolean isWindows = System.getProperty("os.name").startsWith("Windows");
+
+				String baseDirectory;
+				if (isWindows) {
+					baseDirectory = System.getenv("LOCALAPPDATA");
+					if (baseDirectory == null || baseDirectory.isEmpty()) {
+						baseDirectory = System.getProperty("user.home");
+					}
+				} else {
+					baseDirectory = System.getProperty("user.home");
+				}
+
+				if (!new File(directory).isAbsolute()) {
+					directory = FileUtils.combine(baseDirectory, directory);
+				}
+				if (FileUtils.mkdirs(directory)) {
+					LOG.info("Created directory: " + get(directory));
+				}
 			}
 		}
 	}

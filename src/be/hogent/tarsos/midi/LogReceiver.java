@@ -108,7 +108,7 @@ public final class LogReceiver implements Receiver {
 				strTimeStamp = "timestamp " + lTimeStamp + " us: ";
 			}
 		}
-		LOG.finest(strTimeStamp + strMessage);
+		LOG.fine("MIDI-DATA: " + strTimeStamp + strMessage);
 	}
 
 	public String decodeMessage(final ShortMessage message) {

@@ -19,7 +19,7 @@ import javax.sound.midi.Synthesizer;
 import javax.sound.midi.Track;
 import javax.sound.midi.Transmitter;
 
-import be.hogent.tarsos.pitch.PitchConverter;
+import be.hogent.tarsos.sampled.pitch.PitchConverter;
 
 /**
  * Utility class to generate a sequence of MIDI events.

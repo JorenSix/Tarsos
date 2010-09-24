@@ -1,23 +1,17 @@
 package be.hogent.tarsos.ui.pitch;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-
 import ptolemy.plot.Plot;
-import be.hogent.tarsos.pitch.PitchConverter;
-import be.hogent.tarsos.pitch.PitchDetectionMode;
-import be.hogent.tarsos.pitch.PitchUnit;
-import be.hogent.tarsos.pitch.pure.DetectedPitchHandler;
+import be.hogent.tarsos.sampled.pitch.PitchConverter;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.sampled.pitch.Sample;
+import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
 import be.hogent.tarsos.util.AudioFile;
-import be.hogent.tarsos.util.ConfKey;
-import be.hogent.tarsos.util.Configuration;
 
-public class PitchContour extends Plot {
+public class PitchContour extends Plot implements AudioFileChangedListener, ScaleChangedListener,
+		SampleHandler {
 
 	/**
 	 * Log messages.
@@ -29,60 +23,14 @@ public class PitchContour extends Plot {
 	 */
 	private static final long serialVersionUID = 1744724271250082834L;
 
-	private final AudioFile audioFile;
 	private final PitchUnit pitchUnit;
+	private double[] scale;
 
-	public PitchContour(final AudioFile file, final double[] scale, final PitchUnit unit) {
-		setSize(640, 480);
-
-		pitchUnit = unit;
-
-		if (unit == PitchUnit.HERTZ) {
-			setYLog(true);
-			setYRange(convertToLog(20), convertToLog(2000));
-		} else if (unit == PitchUnit.RELATIVE_CENTS) {
-			setYRange(0, 1200);
-		}
-		setYLabel("Pitch (" + unit.getHumanName() + ")");
-
-		setXRange(0, file.getLengthInMicroSeconds() / 1000.0);
-		String title = String.format("%s - pitch in %s", file.basename(), pitchUnit.getHumanName());
-
-		setButtons(true);
-		setTitle(title);
-		setXLabel("Time (seconds)");
-
-		setMarksStyle("dots");
-		setReuseDatasets(true);
-
-		setYTicks(scale);
-
-		setConnected(false);
-
-		JFrame frame = new JFrame(title);
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.add(this, BorderLayout.CENTER);
-		JButton button = new JButton("Play");
-		button.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(final ActionEvent event) {
-				double from = getXRange()[0];
-				double to = getXRange()[1];
-				file.playSelection(from, to);
-			}
-		});
-
-		frame.add(button, BorderLayout.SOUTH);
-		frame.pack();
-		frame.setVisible(true);
-
-		analyseFile();
-
-		this.audioFile = file;
+	public PitchContour() {
+		pitchUnit = PitchUnit.ABSOLUTE_CENTS;
 	}
 
-	private void setYTicks(final double[] scale) {
+	private void setYTicks() {
 		if (scale != null) {
 			// 9 octaves
 			int octaves = 9;
@@ -99,40 +47,90 @@ public class PitchContour extends Plot {
 					} else {
 						tickPosition = axisValue;
 					}
-					LOG.finest(String.format("Added %s cents marker at position %s %s", tickValue,
+					LOG.fine(String.format("Added %s cents marker at position %s %s", tickValue,
 							tickPosition, pitchUnit.getHumanName()));
-					addYTick(String.format("%.0f (%s)", axisValue, pitchClass), tickPosition);
+					addYTick(String.format("%.0f (%.0f)", axisValue, pitchClass), tickPosition);
 				}
 			}
-			final double min = (Double) getYTicks()[0].firstElement();
-			final double max = (Double) getYTicks()[0].lastElement();
+			final double min;
+			final double max;
+			if (pitchUnit == PitchUnit.RELATIVE_CENTS) {
+				min = 0.0;
+				max = 1200.0;
+			} else {
+				max = (Double) getYTicks()[0].lastElement();
+				min = (Double) getYTicks()[0].firstElement();
+			}
+
 			setYRange(min, max);
 		}
 	}
 
-	private double convertToLog(double axisValue) {
+	private void clearYTicks() {
+		if (getYTicks() != null) {
+			getYTicks()[0].clear();
+			getYTicks()[1].clear();
+		}
+	}
+
+	private double convertToLog(final double axisValue) {
 		return Math.log(axisValue) / Math.log(10);
 	}
 
-	private void analyseFile() {
-		final DetectedPitchHandler detectedPitchHandler = new DetectedPitchHandler() {
-			@Override
-			public void handleDetectedPitch(final float time, final float pitch) {
-				if (pitch != -1) {
-					double convertedPitch = pitchUnit.convertFromHertz(pitch);
-					LOG.finest(String.format("Added %.2f %s to pitch contour", convertedPitch,
-							pitchUnit.getHumanName()));
-					addPoint(0, time, convertedPitch, false);
-				}
+	@Override
+	public void audioFileChanged(AudioFile newAudioFile) {
+		clear(0);
+
+		if (pitchUnit == PitchUnit.HERTZ) {
+			setYLog(true);
+			setYRange(convertToLog(20), convertToLog(2000));
+		} else if (pitchUnit == PitchUnit.RELATIVE_CENTS) {
+			setYRange(0, 1200);
+		}
+		setYLabel("Pitch (" + pitchUnit.getHumanName() + ")");
+
+		setXRange(0, newAudioFile.getLengthInMilliSeconds() / 1000.0);
+		String title = String.format("%s - pitch in %s", newAudioFile.basename(), pitchUnit.getHumanName());
+
+		setButtons(true);
+		setTitle(title);
+		setXLabel("Time (seconds)");
+
+		setMarksStyle("points");
+		setReuseDatasets(true);
+
+		setYTicks();
+
+		setConnected(false);
+		repaint();
+	}
+
+	@Override
+	public void scaleChanged(double[] newScale, boolean isChanging) {
+		scale = newScale;
+		clearYTicks();
+		setYTicks();
+		repaint();
+	}
+
+	@Override
+	public void addSample(Sample sample) {
+		List<Double> pitches = sample.getPitchesIn(pitchUnit);
+		double time = sample.getStart() / 1000.0;
+		for (Double pitch : pitches) {
+			if (pitch != -1) {
+				double convertedPitch = pitchUnit.convertFromHertz(pitch);
+				LOG.finest(String.format("Added %.2f %s to pitch contour", convertedPitch,
+						pitchUnit.getHumanName()));
+				addPoint(0, time, convertedPitch, false);
 			}
-		};
-		Runnable r = new Runnable() {
-			@Override
-			public void run() {
-				PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
-				audioFile.detectPitch(mode, detectedPitchHandler, 2);
-			}
-		};
-		new Thread(r, "Pitch Contour Data Collection Thread").start();
+		}
+
+	}
+
+	@Override
+	public void removeSample(Sample sample) {
+		// TODO Auto-generated method stub
+
 	}
 }

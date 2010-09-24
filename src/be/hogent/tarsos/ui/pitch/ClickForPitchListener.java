@@ -26,23 +26,8 @@ class ClickForPitchListener extends MouseAdapter {
 
 	@Override
 	public void mouseClicked(final MouseEvent e) {
-
-		double xOffset = mouseDrag.calculateXOffset();
-		final int width = parent.getWidth();
 		final int height = parent.getHeight();
-
-		double xOffsetCents = xOffset * 1200.0;
-
-		if (xOffset < 0) {
-			xOffset = 1.0 + xOffset;
-		}
-		double pitchInRelativeCents = e.getX() * 1200.0 / width;
-
-		pitchInRelativeCents = (pitchInRelativeCents - xOffsetCents) % 1200.0;
-		if (pitchInRelativeCents < 0) {
-			pitchInRelativeCents += 1200;
-		}
-
+		final double pitchInRelativeCents = mouseDrag.getRelativeCents(e);
 		final int velocity = (int) (e.getY() / (double) height * 127);
 
 		synth.play(pitchInRelativeCents, velocity);

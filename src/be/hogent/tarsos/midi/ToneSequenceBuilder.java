@@ -14,9 +14,9 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import be.hogent.tarsos.pitch.PitchFunctions;
 import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.BlockingAudioPlayer;
+import be.hogent.tarsos.sampled.pitch.PitchFunctions;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SignalPowerExtractor;
 

@@ -26,7 +26,7 @@ public final class SignalPowerExtractor {
 	 * waveform or power is calculated. E.g. a song of 300sec long at 10 Hz =>
 	 * 3000 measurements takes place.
 	 */
-	private static final int POWER_SAMPLE_RATE = 10;
+	private static final int POWER_SAMPLE_RATE = 50;
 
 	/**
 	 * Log messages.
@@ -152,19 +152,19 @@ public final class SignalPowerExtractor {
 	/**
 	 * Creates a wave from plot.
 	 * 
+	 * 
 	 * @param waveFormPlot
 	 *            The file to save to.
 	 */
-	public void saveWaveFormPlot(final String waveFormPlot) {
+	public void waveFormPlot(WaveFormDataAggregator aggregator) {
 		FileInputStream file = null;
 		try {
 			final File inputFile = new File(audioFile.transcodedPath());
 			file = new FileInputStream(inputFile);
-			final double timeFactor = 2.0 / (frameSize * frameRate);
-			final SimplePlot plot = new SimplePlot("Waveform " + audioFile.basename());
+			final double timeFactor = 1.0 / (frameSize * frameRate);
 
-			plot.setSize(3000, 500);
-			// skip header (44 bytes, fixed length)
+			// TODO This method expects the file to be a WAV
+			// Skip WAV header (44 bytes, fixed length).
 			for (int i = 0; i < 44; i++) {
 				file.read();
 			}
@@ -182,14 +182,15 @@ public final class SignalPowerExtractor {
 			intByte = file.read(byteBuffer);
 			index = bufferSize;
 
+			// TODO This method expects the file to be a WAV with 16 as bit
+			// depth
 			while (intByte != -1) {
 				final double seconds = index * timeFactor;
 				final double power = (byteBuffer[0] << 8 | byteBuffer[1] & 0xFF) / 32767.0;
-				plot.addData(seconds, power);
+				aggregator.addDataPoint(seconds, power);
 				index += bufferSize;
 				intByte = file.read(byteBuffer);
 			}
-			plot.save(waveFormPlot);
 		} catch (final IOException e) {
 			LOG.log(Level.SEVERE, "Failed to write audio file.", e);
 		} finally {
@@ -201,6 +202,10 @@ public final class SignalPowerExtractor {
 				LOG.log(Level.SEVERE, "Failed to initialize audio file stream.", e);
 			}
 		}
+	}
+
+	public interface WaveFormDataAggregator {
+		void addDataPoint(double seconds, double power);
 	}
 
 	/**

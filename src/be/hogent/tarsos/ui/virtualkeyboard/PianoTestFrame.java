@@ -12,7 +12,7 @@ public class PianoTestFrame extends JFrame {
 	private static final long serialVersionUID = 6063312726815482475L;
 
 	public PianoTestFrame(final VirtualKeyboard keyboard, final double[] tuning) {
-		// setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 		final Dimension dimension = new Dimension(650, 100);
 		setPreferredSize(dimension);

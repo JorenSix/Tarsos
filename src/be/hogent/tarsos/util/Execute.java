@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import be.hogent.tarsos.apps.Tarsos;
-
 public final class Execute {
 	private static final Logger LOG = Logger.getLogger(Execute.class.getName());
 
@@ -37,7 +35,7 @@ public final class Execute {
 			stdout = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			String line = stdout.readLine();
 			while (line != null) {
-				Tarsos.println(line);
+				LOG.finer(line);
 				line = stdout.readLine();
 			}
 			exitValue = proc.waitFor();

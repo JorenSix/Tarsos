@@ -17,7 +17,7 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Synthesizer;
 
-import be.hogent.tarsos.pitch.PitchConverter;
+import be.hogent.tarsos.sampled.pitch.PitchConverter;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.Configuration.ConfigChangeListener;
@@ -108,13 +108,19 @@ public final class PitchSynth implements ConfigChangeListener {
 
 	private void setReceiver() throws MidiUnavailableException {
 		final int midiDeviceIndex = Configuration.getInt(ConfKey.midi_output_device);
+		if (synthDevice != null) {
+			synthDevice.close();
+		}
 		final MidiDevice.Info synthInfo = MidiSystem.getMidiDeviceInfo()[midiDeviceIndex];
-		LOG.fine(String.format("%s is used as MIDI out device.", synthInfo.getName()));
+		LOG.info(String.format("Configuring %s as MIDI OUT.", synthInfo.getName()));
 		synthDevice = MidiSystem.getMidiDevice(synthInfo);
 		synthDevice.open();
-		receiver = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
+		receiver = synthDevice.getReceiver(); // new ReceiverSink(true,
+												// synthDevice.getReceiver(),
+												// new LogReceiver());
 		// configure the instrument as well
 		setConfiguredInstrument();
+		LOG.info(String.format("Configured %s as MIDI OUT.", synthInfo.getName()));
 	}
 
 	private void setConfiguredInstrument() {
@@ -122,7 +128,7 @@ public final class PitchSynth implements ConfigChangeListener {
 			Synthesizer synth = (Synthesizer) synthDevice;
 			Instrument[] available = synth.getAvailableInstruments();
 			Instrument configuredInstrument = available[Configuration.getInt(ConfKey.midi_instrument_index)];
-			synth.loadInstrument(configuredInstrument);
+			// synth.loadInstrument(configuredInstrument);
 			MidiChannel channel = synth.getChannels()[MIDI_CHANNEL];
 			Patch patch = configuredInstrument.getPatch();
 			channel.programChange(patch.getBank(), patch.getProgram());

@@ -35,13 +35,23 @@ package be.hogent.tarsos.midi;
  |<---            this code is formatted to fit into 80 columns             --->|
  */
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Vector;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiDevice.Info;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Mixer;
+
+import be.hogent.tarsos.Tarsos;
+import be.hogent.tarsos.cli.PlayAlong;
+import be.hogent.tarsos.sampled.pitch.PitchConverter;
 
 /** Utility methods for MIDI examples. */
 public final class MidiCommon {
@@ -166,6 +176,126 @@ public final class MidiCommon {
 			return null;
 		}
 		return aInfos[index];
+	}
+
+	/**
+	 * Choose a MIDI device using a CLI. If an invalid device number is given
+	 * the user is requested to choose another one.
+	 * 
+	 * @param inputDevice
+	 *            is the MIDI device needed for input of events? E.G. a keyboard
+	 * @param outputDevice
+	 *            is the MIDI device needed to send events to? E.g. a (software)
+	 *            synthesizer.
+	 * @return the chosen MIDI device
+	 */
+	public static MidiDevice chooseMidiDevice(final boolean inputDevice, final boolean outputDevice) {
+		MidiDevice device = null;
+		try {
+			// choose MIDI input device
+			listDevices(inputDevice, outputDevice);
+			String deviceType = "";
+			if (inputDevice) {
+				deviceType += " IN ";
+			}
+			if (outputDevice) {
+				deviceType += " OUT ";
+			}
+			Tarsos.println("Choose the MIDI" + deviceType + "device: ");
+			final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+			final int deviceIndex = Integer.parseInt(bufferedReader.readLine());
+			Tarsos.println("");
+			final Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[deviceIndex];
+
+			device = MidiSystem.getMidiDevice(midiDeviceInfo);
+			if (device.getMaxTransmitters() == 0 == inputDevice
+					&& device.getMaxReceivers() == 0 == outputDevice) {
+				Tarsos.println("Invalid choise, please try again");
+				device = chooseMidiDevice(inputDevice, outputDevice);
+			}
+		} catch (final NumberFormatException e) {
+			Tarsos.println("Invalid number, please try again");
+			device = chooseMidiDevice(inputDevice, outputDevice);
+		} catch (final IOException e) {
+			Logger.getLogger(Tarsos.class.getName()).log(Level.SEVERE,
+					"Exception while reading from STD IN.", e);
+		} catch (final MidiUnavailableException e) {
+			Tarsos.println("The device is not available ( " + e.getMessage() + " ), "
+					+ "please choose another device.");
+			device = chooseMidiDevice(inputDevice, outputDevice);
+		} catch (final ArrayIndexOutOfBoundsException e) {
+			Tarsos.println("Number out of bounds, please try again");
+			device = chooseMidiDevice(inputDevice, outputDevice);
+		}
+		return device;
+	}
+
+	/**
+	 * Choose a Mixer device using CLI.
+	 */
+	public static Mixer chooseMixerDevice() {
+		Mixer mixer = null;
+		try {
+			final Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+			for (int i = 0; i < mixers.length; i++) {
+				final javax.sound.sampled.Mixer.Info mixerinfo = mixers[i];
+				if (AudioSystem.getMixer(mixerinfo).getTargetLineInfo().length != 0) {
+					Tarsos.println(i + " " + mixerinfo.toString());
+				}
+			}
+			Tarsos.println("Choose the Mixer device: ");
+			final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+			final int deviceIndex = Integer.parseInt(reader.readLine());
+			mixer = AudioSystem.getMixer(mixers[deviceIndex]);
+		} catch (final NumberFormatException e) {
+			Tarsos.println("Invalid number, please try again");
+			mixer = chooseMixerDevice();
+		} catch (final ArrayIndexOutOfBoundsException e) {
+			Tarsos.println("Number out of bounds, please try again");
+			mixer = chooseMixerDevice();
+		} catch (final IOException e) {
+			Logger.getLogger(Tarsos.class.getName()).log(Level.SEVERE,
+					"Exception while reading from STD IN.", e);
+		}
+		return mixer;
+	}
+
+	/**
+	 * @param peaks
+	 * @return
+	 */
+	public static double[] tuningFromPeaks(final double[] peaks) {
+		final double[] tuning = new double[128];
+	
+		// align tuning to MIDI note 69, A4 or 440Hz.
+		final double referencePitch = 440.0;
+		final Double referenceNote = PitchConverter.hertzToAbsoluteCent(referencePitch);
+		final int referenceNoteMidiNumber = PitchConverter.hertzToMidiKey(referencePitch);
+	
+		int midiNoteClosestToReference = -1;
+		double closestDistance = Double.MAX_VALUE;
+		for (int i = 0; i < tuning.length; i++) {
+			final int octave = i / peaks.length;
+			final double centOffset = peaks[i % peaks.length];
+			tuning[i] = octave * 1200 + centOffset;
+			final double distanceToReferenceNote = Math.abs(tuning[i] - referenceNote); // cents
+			if (distanceToReferenceNote < closestDistance) {
+				closestDistance = distanceToReferenceNote;
+				midiNoteClosestToReference = i;
+			}
+		}
+	
+		PlayAlong.LOG.info("Closest to " + referenceNote + " cents) is the tuned midi key "
+				+ midiNoteClosestToReference + " at " + tuning[midiNoteClosestToReference] + " cents");
+	
+		final double[] rebasedTuning = new double[128];
+		final int diff = referenceNoteMidiNumber - midiNoteClosestToReference;
+		for (int i = 0; i < tuning.length; i++) {
+			if (i + diff >= 0 && i + diff < 128) {
+				rebasedTuning[i] = tuning[(i + diff) % 128];
+			}
+		}
+		return rebasedTuning;
 	}
 }
 

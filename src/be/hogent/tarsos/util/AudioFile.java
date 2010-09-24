@@ -3,7 +3,10 @@ package be.hogent.tarsos.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,13 +16,11 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import be.hogent.tarsos.pitch.PitchDetectionMode;
-import be.hogent.tarsos.pitch.PitchDetector;
-import be.hogent.tarsos.pitch.PitchUnit;
-import be.hogent.tarsos.pitch.Sample;
-import be.hogent.tarsos.pitch.pure.DetectedPitchHandler;
-import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.BlockingAudioPlayer;
+import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
+import be.hogent.tarsos.sampled.pitch.PitchDetector;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.sampled.pitch.Sample;
 
 /**
  * Represents an audio file. Facilitates transcoding, handling of path names and
@@ -38,7 +39,6 @@ public final class AudioFile {
 	 * Where to save the transcoded files.
 	 */
 	public static final String TRANSCODED_AUDIO_DIR = Configuration.get(ConfKey.transcoded_audio_directory);
-	private static final String ORIGINAL_AUDIO_DIR = Configuration.get(ConfKey.audio_directory);
 
 	private final String path;
 
@@ -84,18 +84,20 @@ public final class AudioFile {
 	}
 
 	/**
-	 * Returns a list of AudioFiles included in one or more datasets. Datasets
-	 * are sub folders of the audio directory.
+	 * Returns a list of AudioFiles included in one or more folders. Searches
+	 * recursively.
 	 * 
-	 * @param datasets
-	 *            the datasets to find AudioFiles for
+	 * @param folders
+	 *            The fo
+	 * 
 	 * @return a list of AudioFiles
 	 */
-	public static List<AudioFile> audioFiles(final String... datasets) {
+	public static List<AudioFile> audioFiles(final String... folders) {
 		final List<AudioFile> files = new ArrayList<AudioFile>();
-		for (final String dataset : datasets) {
-			for (final String originalFile : FileUtils.glob(FileUtils.combine(ORIGINAL_AUDIO_DIR, dataset),
-					".*\\..*")) {
+		String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
+		for (final String folder : folders) {
+			List<String> audioFiles = FileUtils.glob(folder, pattern, true);
+			for (final String originalFile : audioFiles) {
 				files.add(new AudioFile(originalFile));
 			}
 		}
@@ -109,7 +111,7 @@ public final class AudioFile {
 	 * @return The length of the file in microseconds. If the length could not
 	 *         be determined -1 is returned.
 	 */
-	public long getLengthInMicroSeconds() {
+	public long getLengthInMilliSeconds() {
 		long lengtInMicroSeconds = -1;
 		try {
 			AudioFileFormat fileFormat;
@@ -117,6 +119,22 @@ public final class AudioFile {
 			int frames = fileFormat.getFrameLength();
 			float frameRate = fileFormat.getFormat().getFrameRate();
 			lengtInMicroSeconds = (long) (frames / frameRate * 1000);
+			LOG.finest(String.format("Determined the lenght of %s: %s µs", basename(), lengtInMicroSeconds));
+		} catch (UnsupportedAudioFileException e) {
+			LOG.log(Level.WARNING, "Could not determine audio file length.", e);
+		} catch (IOException e) {
+			LOG.log(Level.SEVERE, "Could not determine audio file length.", e);
+		}
+		return lengtInMicroSeconds;
+	}
+
+	public double getMicrosecondsPositionOfFrame(final long frame) {
+		long lengtInMicroSeconds = -1;
+		try {
+			AudioFileFormat fileFormat;
+			fileFormat = AudioSystem.getAudioFileFormat(new File(transcodedPath()));
+			float frameRate = fileFormat.getFormat().getFrameRate();
+			lengtInMicroSeconds = (long) (frame / frameRate * 1000);
 			LOG.finest(String.format("Determined the lenght of %s: %s µs", basename(), lengtInMicroSeconds));
 		} catch (UnsupportedAudioFileException e) {
 			LOG.log(Level.WARNING, "Could not determine audio file length.", e);
@@ -150,25 +168,50 @@ public final class AudioFile {
 	}
 
 	public void playSelection(final double from, final double to) {
+		final double actualFrom;
+		if (from < 0) {
+			actualFrom = 0;
+		} else {
+			actualFrom = from;
+		}
+		double[] selections = { actualFrom, to };
+		playSelections(selections);
+	}
+
+	/**
+	 * Play selections of the audio file.
+	 * 
+	 * @param selections
+	 *            An interleaved array with in the form
+	 *            [from,to,from,to,from,to...]. The from and to values are given
+	 *            in seconds.
+	 */
+	public void playSelections(final double[] selections) {
+
 		try {
 			final AudioInputStream stream = AudioSystem.getAudioInputStream(new File(transcodedPath()));
-			double bytesPerSecond = getSizeInBytes() / (double) getLengthInMicroSeconds() * 1000.0;
-			final double actualFrom;
-			if (from < 0) {
-				actualFrom = 0;
-			} else {
-				actualFrom = from;
+			int frameSize = stream.getFormat().getFrameSize();
+			int bytesPerSecond = (int) (frameSize * stream.getFormat().getFrameRate());
+			BlockingAudioPlayer player = new BlockingAudioPlayer(stream.getFormat(), 512, 0);
+
+			int previousStop = 0;
+			for (int i = 0; i < selections.length; i += 2) {
+				double from = selections[i];
+				double to = selections[i + 1];
+				int start = (int) (bytesPerSecond * from);
+				int stop = (int) (bytesPerSecond * to);
+				stream.skip(start - previousStop);
+				previousStop = stop;
+				int numberOfBytes = stop - start;
+				// only read complete frames
+				while (numberOfBytes % frameSize != 0) {
+					numberOfBytes++;
+				}
+				byte[] audioInfo = new byte[numberOfBytes];
+				stream.read(audioInfo, 0, numberOfBytes);
+				player.processFull(null, audioInfo);
 			}
 
-			long skip = (long) (bytesPerSecond * actualFrom);
-			stream.skip(skip);
-			AudioDispatcher dispatcher = new AudioDispatcher(stream, 512, 0);
-			long numberOfBytesToProcess = (long) (bytesPerSecond * (to - actualFrom));
-			dispatcher.setNumberOfBytesToProcess(numberOfBytesToProcess);
-			dispatcher.addAudioProcessor(new BlockingAudioPlayer(stream.getFormat(), 512, 0));
-			Thread playingThread = new Thread(dispatcher, String.format(
-					"Audiofile %s segment playing thread", basename()));
-			playingThread.start();
 		} catch (UnsupportedAudioFileException e) {
 			LOG.log(Level.SEVERE, "Unsupported audio for a transcoded file. Check your configuration.", e);
 		} catch (IOException e) {
@@ -178,25 +221,68 @@ public final class AudioFile {
 		}
 	}
 
-	public void detectPitch(final PitchDetectionMode detectionMode, final DetectedPitchHandler handler,
-			final double speedFactor) {
+	/**
+	 * Detects pitch and plays plays the samples that are in the interval from,
+	 * to in the given pitch unit. E.g. when you want to hear all the b's in a
+	 * western piece you could select TARSOS_YIN as detection mode, form and to
+	 * would be [190-210] and the unit would be relative cents.
+	 * 
+	 * @param detectionMode
+	 *            The detection mode.
+	 * @param from
+	 *            Interval start.
+	 * @param to
+	 *            Interval stop.
+	 * @param unit
+	 *            The pitch unit.
+	 */
+	public void playCents(final PitchDetectionMode detectionMode, final double from, final double to,
+			final PitchUnit unit) {
 		final PitchDetector pitchDetector = detectionMode.getPitchDetector(this);
 		pitchDetector.executePitchDetection();
 		final List<Sample> samples = pitchDetector.getSamples();
-		long previousSample = 0L;
+		List<Long> startPositions = new ArrayList<Long>();
 		for (Sample sample : samples) {
-			List<Double> pitchList = sample.getPitchesIn(PitchUnit.HERTZ);
-			if (pitchList.size() > 0) {
-				double pitchInHertz = pitchList.get(0);
-				handler.handleDetectedPitch(sample.getStart() / 1000.0f, (float) pitchInHertz);
-				try {
-					long sleepTime = (long) ((sample.getStart() - previousSample) / speedFactor);
-					Thread.sleep(sleepTime);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				previousSample = sample.getStart();
+			List<Double> pitchList = sample.getPitchesIn(unit);
+			if (pitchList.size() > 0 && pitchList.get(0) > from && pitchList.get(0) < to) {
+				startPositions.add(sample.getStart());
 			}
 		}
+
+		HashMap<Long, Long> selections = new HashMap<Long, Long>();
+		if (startPositions.size() > 1) {
+			int last = startPositions.size() - 1;
+			long startSegment = startPositions.get(0);
+			selections.put(startSegment, startPositions.get(last));
+			for (int i = 0; i < startPositions.size() - 1; i++) {
+				long start = startPositions.get(i);
+				long nextStart = startPositions.get(i + 1);
+				if (nextStart - start > 100) {
+					selections.put(startSegment, start);
+					startSegment = nextStart;
+					selections.put(startSegment, startPositions.get(last));
+				}
+			}
+		}
+
+		double[] selectionsDouble = new double[selections.size() * 2];
+		int index = 0;
+		for (Map.Entry<Long, Long> entry : selections.entrySet()) {
+			selectionsDouble[index++] = entry.getKey() / 1000.0;
+			selectionsDouble[index++] = entry.getValue() / 1000.0;
+		}
+		Arrays.sort(selectionsDouble);
+		playSelections(selectionsDouble);
 	}
+
+	private double speedFactor = 1.0;
+
+	public void setSpeedFactor(final double speedFactor) {
+		this.speedFactor = speedFactor;
+	}
+
+	private double getSpeedFactor() {
+		return speedFactor;
+	}
+
 }

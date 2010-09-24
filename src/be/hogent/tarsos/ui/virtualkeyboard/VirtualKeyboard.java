@@ -8,22 +8,30 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.sound.midi.Instrument;
 import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Patch;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Synthesizer;
 import javax.sound.midi.Transmitter;
 import javax.swing.JComponent;
 
-import be.hogent.tarsos.apps.PlayAlong;
+import ptolemy.kernel.util.InvalidStateException;
 import be.hogent.tarsos.midi.LogReceiver;
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 
 /**
  * An abstract class to represent a keyboard.
@@ -39,6 +47,7 @@ import be.hogent.tarsos.midi.ReceiverSink;
  * @author Joren Six
  */
 public abstract class VirtualKeyboard extends JComponent implements Transmitter, Receiver {
+	private static final Logger LOG = Logger.getLogger(VirtualKeyboard.class.getName());
 	/**
      */
 	private static final long serialVersionUID = -8109877572069108012L;
@@ -59,7 +68,6 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 	private static String mappedKeys = "qsdfghjklmazertyuiop&й\"'(§и!за";
 
 	private final int numberOfKeysPerOctave;
-	private Receiver recveiver = null;
 
 	/**
 	 * The (one and only) MIDI key currently pressed using the mouse.
@@ -198,6 +206,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 				}
 			}
 		});
+
 	}
 
 	protected final boolean isKeyDown(final int midiKey) {
@@ -243,7 +252,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 				velocity = 0;
 			}
 
-			sm.setMessage(command, VirtualKeyboard.CHANNEL, midiKey, velocity);
+			sm.setMessage(command, MIDI_CHANNEL, midiKey, velocity);
 
 			send(sm, -1);
 		} catch (final InvalidMidiDataException e1) {
@@ -271,23 +280,20 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 	}
 
 	@Override
-	public final void setReceiver(final Receiver receiver) {
-		this.recveiver = receiver;
+	public final void close() {
+		receiver.close();
 	}
 
 	@Override
-	public abstract void close();
-
-	@Override
 	public final Receiver getReceiver() {
-		return this.recveiver;
+		return this.receiver;
 	}
 
 	@Override
 	public final void send(final MidiMessage message, final long timeStamp) {
 		// acts as a "MIDI cable" sends the received messages trough
-		if (recveiver != null) {
-			recveiver.send(message, timeStamp);
+		if (receiver != null) {
+			receiver.send(message, timeStamp);
 		}
 
 		// implements Receiver send: makes sure the right keys are marked
@@ -330,6 +336,46 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		return keyboard;
 	}
 
+	private MidiDevice synthDevice;
+	private Receiver receiver;
+	/**
+	 * The channel used to send messages on.
+	 */
+	private static final int MIDI_CHANNEL = 0;
+
+	private void setReceiver() throws MidiUnavailableException {
+		final int midiDeviceIndex = Configuration.getInt(ConfKey.midi_output_device);
+		if (synthDevice != null) {
+			synthDevice.close();
+		}
+		final MidiDevice.Info synthInfo = MidiSystem.getMidiDeviceInfo()[midiDeviceIndex];
+		LOG.info(String.format("Configuring %s as MIDI OUT.", synthInfo.getName()));
+		synthDevice = MidiSystem.getMidiDevice(synthInfo);
+		synthDevice.open();
+		receiver = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
+		// configure the instrument as well
+		setConfiguredInstrument();
+		LOG.info(String.format("Configured %s as MIDI OUT.", synthInfo.getName()));
+	}
+
+	@Override
+	public void setReceiver(final Receiver newReceiver) {
+		receiver = newReceiver;
+	}
+
+	private void setConfiguredInstrument() {
+		if (synthDevice instanceof Synthesizer) {
+			Synthesizer synth = (Synthesizer) synthDevice;
+			Instrument[] available = synth.getAvailableInstruments();
+			Instrument configuredInstrument = available[Configuration.getInt(ConfKey.midi_instrument_index)];
+			// synth.loadInstrument(configuredInstrument);
+			MidiChannel channel = synth.getChannels()[MIDI_CHANNEL];
+			Patch patch = configuredInstrument.getPatch();
+			channel.programChange(patch.getBank(), patch.getProgram());
+			LOG.info(String.format("Configured synth with %s.", configuredInstrument.getName()));
+		}
+	}
+
 	/**
 	 * Connects the virtual keyboard to the default Gervill synthesizer.
 	 * 
@@ -337,29 +383,24 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 	 *            The tuning for one octave defined in cents.
 	 */
 	public void connectToTunedSynth(double[] tuning) {
-		final MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("Gervill", true);
-		MidiDevice synthDevice;
+
 		try {
-			synthDevice = MidiSystem.getMidiDevice(synthInfo);
-			synthDevice.open();
-
-			Receiver recv;
-			recv = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
-			setReceiver(recv);
-
-			final double[] rebasedTuning = PlayAlong.tuningFromPeaks(tuning);
-
-			MidiUtils.sendTunings(recv, 0, 2, "tuning", rebasedTuning);
-			MidiUtils.sendTuningChange(recv, VirtualKeyboard.CHANNEL, 2);
+			if (receiver == null) {
+				setReceiver();
+				setConfiguredInstrument();
+			}
+			if (tuning.length != 0) {
+				final double[] rebasedTuning = MidiCommon.tuningFromPeaks(tuning);
+				MidiUtils.sendTunings(receiver, 0, 2, "tuning", rebasedTuning);
+				MidiUtils.sendTuningChange(receiver, MIDI_CHANNEL, 2);
+			}
 		} catch (MidiUnavailableException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.log(Level.WARNING, "Tuning failed: MIDI device not available", e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.log(Level.WARNING, "Tuning failed: MIDI device threw an I/O error.", e);
 		} catch (InvalidMidiDataException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.log(Level.WARNING, "Tuning failed: MIDI tuning message incorrectly constructed.", e);
+			throw new InvalidStateException("MIDI tuning message incorrectly constructed");
 		}
 	}
 
@@ -385,6 +426,10 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 
 	protected int getNumberOfKeys() {
 		return numberOfKeys;
+	}
+
+	protected float getNumberOfOctaves() {
+		return numberOfKeys / (float) numberOfKeysPerOctave;
 	}
 
 }

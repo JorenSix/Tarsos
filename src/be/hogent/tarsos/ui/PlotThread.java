@@ -5,8 +5,8 @@ import java.util.List;
 
 import ptolemy.plot.Plot;
 import ptolemy.plot.PlotApplication;
-import be.hogent.tarsos.pitch.PitchUnit;
-import be.hogent.tarsos.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.sampled.pitch.Sample;
 import be.hogent.tarsos.util.StopWatch;
 
 public final class PlotThread extends Thread {

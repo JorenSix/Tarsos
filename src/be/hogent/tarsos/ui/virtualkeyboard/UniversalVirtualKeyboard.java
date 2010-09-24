@@ -22,71 +22,66 @@ import java.awt.geom.Rectangle2D;
  */
 public final class UniversalVirtualKeyboard extends VirtualKeyboard {
 
-    private static final long serialVersionUID = -3017076399911747736L;
+	private static final long serialVersionUID = -3017076399911747736L;
 
-    public UniversalVirtualKeyboard(final int numberOfKeysPerOctave) {
-        super(numberOfKeysPerOctave);
-    }
+	public UniversalVirtualKeyboard(final int numberOfKeysPerOctave) {
+		super(numberOfKeysPerOctave);
+	}
 
-    @Override
-    protected int getMidiNote(final int x, final int y) {
-        final int w = getWidth();
-        final float nw = w / (float) getNumberOfKeys();
-        final int wn = (int) (x / nw);
-        final int oct = wn / getNumberOfKeysPerOctave();
-        int n = oct * getNumberOfKeysPerOctave() + wn % getNumberOfKeysPerOctave();
-        if (n < 0) {
-            n = 0;
-        }
-        if (n > getNumberOfKeys() - 1) {
-            n = getNumberOfKeys() - 1;
-        }
-        return n;
-    }
+	@Override
+	protected int getMidiNote(final int x, final int y) {
 
-    @Override
-    public void paint(final Graphics g) {
-        super.paint(g);
-        final Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		final int w = getWidth();
+		final float nw = w / (float) getNumberOfKeys();
+		final int wn = (int) (x / nw);
+		final int oct = wn / getNumberOfKeysPerOctave();
+		int n = oct * getNumberOfKeysPerOctave() + wn % getNumberOfKeysPerOctave();
+		if (n < 0) {
+			n = 0;
+		}
+		if (n > getNumberOfKeys() - 1) {
+			n = getNumberOfKeys() - 1;
+		}
+		return n;
+	}
 
-        final int w = getWidth();
-        final int h = getHeight();
+	@Override
+	public void paint(final Graphics g) {
+		super.paint(g);
+		final Graphics2D g2 = (Graphics2D) g;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-        final float nw = w / (float) getNumberOfKeys();
-        float cx = 0;
-        final Rectangle2D rect = new Rectangle2D.Double();
-        for (int i = 0; i < getNumberOfKeys(); i++) {
+		final int w = getWidth();
+		final int h = getHeight();
 
-            rect.setRect(cx, 0, nw, h);
-            if (isKeyDown(i)) {
-                g2.setColor(new Color(0.8f, 0.8f, 0.95f));
-            } else {
-                g2.setColor(Color.WHITE);
-            }
-            g2.fill(rect);
-            g2.setColor(Color.BLACK);
-            g2.draw(rect);
+		final float nw = w / (float) getNumberOfKeys();
+		float cx = 0;
+		final Rectangle2D rect = new Rectangle2D.Double();
+		for (int i = 0; i < getNumberOfKeys(); i++) {
 
-            if (i % this.getNumberOfKeysPerOctave() == 0) {
-                g2.drawString("_", cx + 2, 12);
-            }
+			rect.setRect(cx, 0, nw, h);
+			if (isKeyDown(i)) {
+				g2.setColor(new Color(0.8f, 0.8f, 0.95f));
+			} else {
+				g2.setColor(Color.WHITE);
+			}
+			g2.fill(rect);
+			g2.setColor(Color.BLACK);
+			g2.draw(rect);
 
-            if (i >= getLowestAssignedKey()) {
-                if (i - getLowestAssignedKey() < VirtualKeyboard.getMappedKeys().length()) {
-                    g2.setColor(Color.GRAY);
-                    final char keyChar = VirtualKeyboard.getMappedKeys().charAt(i - getLowestAssignedKey());
-                    g2.drawString("" + keyChar, cx + 2, h - 4);
-                }
-            }
-            cx += nw;
-        }
-    }
+			if (i % this.getNumberOfKeysPerOctave() == 0) {
+				g2.drawString("_", cx + 2, 12);
+			}
 
-    @Override
-    public void close() {
-        // TODO Auto-generated method stub
-
-    }
+			if (i >= getLowestAssignedKey()) {
+				if (i - getLowestAssignedKey() < VirtualKeyboard.getMappedKeys().length()) {
+					g2.setColor(Color.GRAY);
+					final char keyChar = VirtualKeyboard.getMappedKeys().charAt(i - getLowestAssignedKey());
+					g2.drawString("" + keyChar, cx + 2, h - 4);
+				}
+			}
+			cx += nw;
+		}
+	}
 }

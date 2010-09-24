@@ -22,8 +22,9 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import be.hogent.tarsos.apps.Tarsos;
-import be.hogent.tarsos.pitch.PitchConverter;
+import be.hogent.tarsos.Tarsos;
+import be.hogent.tarsos.midi.MidiCommon;
+import be.hogent.tarsos.sampled.pitch.PitchConverter;
 import be.hogent.tarsos.util.FFT;
 
 import com.sun.media.sound.AudioFloatInputStream;
@@ -203,7 +204,7 @@ public final class Spectrogram extends JComponent {
     public static void main(final String[] args) throws UnsupportedAudioFileException, IOException,
     LineUnavailableException {
         final JPanel panel = new JPanel(new BorderLayout());
-        final Spectrogram spectogram = new Spectrogram(Tarsos.chooseMixerDevice());
+        final Spectrogram spectogram = new Spectrogram(MidiCommon.chooseMixerDevice());
         spectogram.setPreferredSize(new Dimension(W, H / 2));
         panel.add(spectogram, BorderLayout.CENTER);
         final JFrame frame = new JFrame("Spectrogram");

@@ -33,9 +33,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import be.hogent.tarsos.pitch.Pitch;
-import be.hogent.tarsos.pitch.PitchUnit;
-import be.hogent.tarsos.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.Pitch;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.sampled.pitch.Sample;
 
 /**
  * Exports a DatabaseResult to a CSV-file.
@@ -431,22 +431,32 @@ public final class FileUtils {
 	 *                Unchecked exception thrown to indicate a syntax error in a
 	 *                regular-expression pattern.
 	 */
-	public static List<String> glob(final String directory, final String pattern) {
-		final File dir = new File(directory);
-		final Pattern p = Pattern.compile(pattern);
+	public static List<String> glob(final String directory, final String pattern, final boolean recursive) {
 		final List<String> matchingFiles = new ArrayList<String>();
-		if (!dir.isDirectory()) {
-			throw new IllegalArgumentException(directory + " is not a directory");
-		}
-
-		for (final String file : dir.list()) {
-			if (!new File(file).isDirectory() && p.matcher(file).matches() && file != null) {
-				matchingFiles.add(FileUtils.combine(directory, file));
-			}
-		}
+		final Pattern p = Pattern.compile(pattern);
+		final File dir = new File(new File(directory).getAbsolutePath());
+		glob(dir, p, recursive, matchingFiles);
 		// sort alphabetically
 		Collections.sort(matchingFiles);
 		return matchingFiles;
+	}
+
+	private static void glob(final File directory, final Pattern pattern, final boolean recursive,
+			List<String> matchingFiles) {
+
+		if (!directory.isDirectory()) {
+			throw new IllegalArgumentException(directory + " is not a directory");
+		}
+		for (final String file : directory.list()) {
+			File filePath = new File(FileUtils.combine(directory.getAbsolutePath(), file));
+			if (recursive && filePath.isDirectory()) {
+				glob(filePath, pattern, recursive, matchingFiles);
+			} else {
+				if (pattern.matcher(file).matches() && file != null) {
+					matchingFiles.add(filePath.getAbsolutePath());
+				}
+			}
+		}
 	}
 
 	/**

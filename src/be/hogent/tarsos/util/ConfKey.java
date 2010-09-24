@@ -42,10 +42,6 @@ public enum ConfKey {
 	 */
 	histogram_bin_width,
 	/**
-	 * The (relative) directory with audio files.
-	 */
-	audio_directory(true),
-	/**
 	 * The (relative) directory to save (text) data files.
 	 */
 	data_directory(true),

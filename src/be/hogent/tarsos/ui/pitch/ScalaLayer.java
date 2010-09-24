@@ -5,46 +5,157 @@ import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
 
 import be.hogent.tarsos.ui.virtualkeyboard.VirtualKeyboard;
 import be.hogent.tarsos.util.ScalaFile;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-public final class ScalaLayer implements Layer {
+public final class ScalaLayer implements Layer, ScaleChangedListener {
+
+	/**
+	 * Log messages.
+	 */
+	private static final Logger LOG = Logger.getLogger(ScalaLayer.class.getName());
 
 	private final JComponent parent;
 	private final MouseDragListener mouseDrag;
 	private double[] scale;
 	private final double delta;
+	private final ScaleEditor editor;
+	private final ScaleChangedListener scaleChangedPublisher;
 
-	public ScalaLayer(final JComponent component, final double[] toneScale, final double pitchDelta) {
+	public ScalaLayer(final JComponent component, final double[] toneScale, final double pitchDelta,
+			final ScaleChangedListener scalePublisher) {
 		parent = component;
 		delta = pitchDelta;
 		scale = toneScale;
 		mouseDrag = new MouseDragListener(component, MouseEvent.BUTTON3);
 		component.addMouseListener(mouseDrag);
 		component.addMouseMotionListener(mouseDrag);
+		editor = new ScaleEditor(mouseDrag, this, parent);
+		component.addMouseListener(editor);
+		component.addMouseMotionListener(editor);
+		scaleChangedPublisher = scalePublisher;
 
 		try {
 			new ClickForPitchListener(component, mouseDrag);
 		} catch (MidiUnavailableException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			LOG.log(Level.WARNING, "MIDI device not available, disabled the click for pitch function.", e1);
+		}
+	}
+
+	private static class ScaleEditor extends MouseAdapter implements MouseMotionListener {
+		private final MouseDragListener mouseDrag;
+		private final ScalaLayer layer;
+		private final JComponent parent;
+		private double movingElement = -1.0;
+
+		ScaleEditor(final MouseDragListener mouseDrag, final ScalaLayer layer, final JComponent parent) {
+			this.mouseDrag = mouseDrag;
+			this.layer = layer;
+			this.parent = parent;
+		}
+
+		@Override
+		public void mouseDragged(MouseEvent arg0) {
+
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			if (e.isAltDown() || e.isAltGraphDown()) {
+				if (movingElement != -1.0) {
+					int index = -1;
+					for (int i = 0; i < layer.scale.length; i++) {
+						if (layer.scale[i] == movingElement) {
+							index = i;
+						}
+					}
+					layer.scale[index] = mouseDrag.getRelativeCents(e);
+					movingElement = layer.scale[index];
+				} else {
+					double[] newScale = new double[layer.scale.length + 1];
+					for (int i = 0; i < layer.scale.length; i++) {
+						newScale[i] = layer.scale[i];
+					}
+					newScale[newScale.length - 1] = mouseDrag.getRelativeCents(e);
+					movingElement = newScale[newScale.length - 1];
+					Arrays.sort(newScale);
+					layer.scale = newScale;
+				}
+				parent.repaint();
+				layer.scaleChangedPublisher.scaleChanged(layer.scale, true);
+			} else if (e.isControlDown()) {
+				if (movingElement == -1.0) {
+					int index = closestIndex(mouseDrag.getRelativeCents(e));
+					movingElement = layer.scale[index];
+				}
+				for (int i = 0; i < layer.scale.length; i++) {
+					if (layer.scale[i] == movingElement) {
+						layer.scale[i] = mouseDrag.getRelativeCents(e);
+						movingElement = layer.scale[i];
+					}
+				}
+				parent.repaint();
+				layer.scaleChangedPublisher.scaleChanged(layer.scale, true);
+			}
+
+		}
+
+		private int closestIndex(double key) {
+			double distance = Double.MAX_VALUE;
+			int index = -1;
+			for (int i = 0; i < layer.scale.length; i++) {
+				double currentDistance = Math.abs(key - layer.scale[i]);
+				double wrappedDistance = Math.abs(key - (layer.scale[i] + 1200));
+				if (Math.min(currentDistance, wrappedDistance) < distance) {
+					distance = Math.min(currentDistance, wrappedDistance);
+					index = i;
+				}
+			}
+			return index;
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			if (movingElement != -1.0) {
+
+				layer.scaleChangedPublisher.scaleChanged(layer.scale, false);
+			}
+			movingElement = -1.0;
+
+		}
+
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+
+		}
+
+		public double getMovingElement() {
+			return movingElement;
 		}
 	}
 
 	@Override
 	public void draw(final Graphics2D graphics) {
 		final double xOffset = mouseDrag.calculateXOffset();
+		final int yOffset = 20;
+		final int yLabelsOffset = 5;
+
 		final int width = parent.getWidth();
 		final int height = parent.getHeight();
 		final int xOffsetPixels = (int) Math.round(xOffset * width);
@@ -53,20 +164,27 @@ public final class ScalaLayer implements Layer {
 
 		for (final double reference : scale) {
 			final int x = (int) (reference / delta * width + xOffsetPixels) % width;
-			graphics.drawLine(x, 40, x, height);
 			final String text = Integer.valueOf((int) reference).toString();
 			final int labelLength = text.length();
 			final double labelWidth = graphics.getFontMetrics().getStringBounds(text, graphics).getWidth();
 			final int start = (int) labelWidth / 2 - labelLength / 2;
-			graphics.drawString(text, x - start, 20);
+			if (editor.getMovingElement() == reference) {
+				graphics.setColor(Color.BLUE);
+				graphics.drawLine(x, 0, x, height - yOffset);
+				graphics.drawString(text, x - start, height - yLabelsOffset);
+				graphics.setColor(Color.GRAY);
+			} else {
+				graphics.drawLine(x, 0, x, height - yOffset);
+				graphics.drawString(text, x - start, height - yLabelsOffset);
+			}
+
 		}
+
 	}
 
-	public void setScale(final double[] referenceScale) {
-		this.scale = referenceScale;
-		if (keyboard != null) {
-			keyboard.connectToTunedSynth(referenceScale);
-		}
+	@Override
+	public void scaleChanged(double[] newScale, boolean isChanging) {
+		this.scale = newScale;
 		parent.repaint();
 	}
 
@@ -91,29 +209,32 @@ public final class ScalaLayer implements Layer {
 				}
 			});
 
-			VirtualKeyboard[] keyboards = new VirtualKeyboard[20];
-			for (int i = 0; i < 20; i++) {
-				keyboards[i] = VirtualKeyboard.createVirtualKeyboard(0);
-			}
-
-			keyboard = VirtualKeyboard.createVirtualKeyboard(scale.length);
-			keyboard.connectToTunedSynth(scale);
-
-			FormLayout layout = new FormLayout("right:pref, 3dlu, min:grow");
+			FormLayout layout = new FormLayout("right:default, 3dlu,default:grow");
 			DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 			builder.setDefaultDialogBorder();
 			builder.setRowGroupingEnabled(true);
 			builder.append("Export scala file:", exportButton, true);
-			CellConstraints cc = new CellConstraints();
+			// CellConstraints cc = new CellConstraints();
 
-			builder.append("Keyboard:");
-			builder.appendRow("31dlu"); // Assumes line is 14, gap is 3
-			builder.add(keyboard, cc.xywh(builder.getColumn(), builder.getRow(), 1, 2));
-			builder.nextLine(2);
+			// builder.append("Keyboard:");
+			// builder.appendRow("31dlu"); // Assumes line is 14, gap is 3
+			// builder.add(keyboard, cc.xywh(builder.getColumn(),
+			// builder.getRow(), 1, 2));
+			// builder.nextLine(2);
+
+			// table = new JTable(new ScalaFile("hmm", scale).intervalTable());
+
+			// builder.appendRow("31dlu"); // Assumes line is 14, gap is 3
+			// builder.add(table, cc.xywh(builder.getColumn(), builder.getRow(),
+			// 1, 1));
+			// builder.nextLine(table.getRowCount());
 
 			ui = builder.getPanel();
 			ui.setBorder(new TitledBorder("Peak commands"));
 		}
 		return ui;
 	}
+
+	JTable table;
+
 }

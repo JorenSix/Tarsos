@@ -3,6 +3,8 @@ package be.hogent.tarsos.ui.pitch;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,14 +22,13 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiCommon.MoreMidiInfo;
-import be.hogent.tarsos.pitch.PitchDetectionMode;
+import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.util.Configuration.ConfigChangeListener;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -58,6 +59,18 @@ public class ConfigurationPanel extends JPanel {
 		addConfigurationTextFields(builder);
 		JComponent center = builder.getPanel();
 		add(center, BorderLayout.CENTER);
+
+		Configuration.addListener(new ConfigChangeListener() {
+			@Override
+			public void configurationChanged(final ConfKey key) {
+				for (Entry<JTextField, ConfKey> entry : configurationTextFields.entrySet()) {
+					if (entry.getValue() == key) {
+						String value = Configuration.get(key);
+						entry.getKey().setText(value);
+					}
+				}
+			}
+		});
 	}
 
 	private static class MidiDevicePolling implements Runnable {
@@ -134,7 +147,15 @@ public class ConfigurationPanel extends JPanel {
 		midiOutComboBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-
+				MoreMidiInfo info = (MoreMidiInfo) midiOutComboBox.getSelectedItem();
+				int index = -1;
+				MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+				for (int i = 0; i < infos.length; i++) {
+					if (infos[i] == info.getInfo()) {
+						index = i;
+					}
+				}
+				Configuration.set(ConfKey.midi_output_device, index);
 			}
 		});
 
@@ -147,11 +168,6 @@ public class ConfigurationPanel extends JPanel {
 				PitchDetectionMode mode = (PitchDetectionMode) pitchDetectorsComboBox.getSelectedItem();
 				ConfKey current = ConfKey.pitch_tracker_current;
 				Configuration.set(current, mode.name());
-				for (Entry<JTextField, ConfKey> entry : configurationTextFields.entrySet()) {
-					if (entry.getValue() == current) {
-						entry.getKey().setText(mode.name());
-					}
-				}
 			}
 		});
 
@@ -191,13 +207,19 @@ public class ConfigurationPanel extends JPanel {
 			configurationTextField.setText(value);
 			builder.append(label + ":", configurationTextField, true);
 			configurationTextFields.put(configurationTextField, key);
-			configurationTextField.addCaretListener(new CaretListener() {
+			configurationTextField.addFocusListener(new FocusListener() {
 				@Override
-				public void caretUpdate(final CaretEvent e) {
+				public void focusLost(FocusEvent e) {
 					JTextField textField = (JTextField) e.getSource();
 					ConfKey key = configurationTextFields.get(textField);
 					String value = textField.getText();
-					Configuration.set(key, value);
+					if (!value.equals(Configuration.get(key)) && !value.isEmpty()) {
+						Configuration.set(key, value);
+					}
+				}
+
+				@Override
+				public void focusGained(FocusEvent e) {
 				}
 			});
 		}

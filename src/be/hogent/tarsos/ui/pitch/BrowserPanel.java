@@ -10,9 +10,9 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import be.hogent.tarsos.pitch.PitchDetectionMode;
-import be.hogent.tarsos.pitch.PitchDetector;
-import be.hogent.tarsos.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
+import be.hogent.tarsos.sampled.pitch.PitchDetector;
+import be.hogent.tarsos.sampled.pitch.Sample;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -60,7 +60,7 @@ public class BrowserPanel extends JPanel {
 				final List<Sample> samples = pitchDetector.getSamples();
 				final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
 				final ToneScaleHistogram toneScaleHisto = ambitusHistogram.toneScaleHistogram();
-				JComponent component = new ToneScalePanel(toneScaleHisto);
+				JComponent component = new ToneScalePanel(toneScaleHisto, null);
 				JPanel panel = new JPanel(new BorderLayout());
 				panel.setSize(128, 128);
 				panel.setBorder(new EmptyBorder(5, 5, 5, 5));

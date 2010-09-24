@@ -65,12 +65,15 @@ class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 
 	@Override
 	public void mousePressed(final MouseEvent e) {
+
 		referenceDragPoint.setLocation(e.getPoint());
 		prevButton = e.getButton();
+
 	};
 
 	@Override
 	public void mouseDragged(final MouseEvent e) {
+
 		final boolean mouseMoved = !e.getPoint().equals(referenceDragPoint);
 		final boolean correctButton = prevButton == mouseButton;
 		if (mouseMoved && correctButton) {
@@ -78,6 +81,7 @@ class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 			referenceDragPoint.setLocation(e.getPoint());
 			parent.repaint();
 		}
+
 	}
 
 	/**
@@ -89,7 +93,6 @@ class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 			xOffset = 1.0 + xOffset;
 		}
 		delta = 0;
-		// System.out.println(mouseButton + " xoffset  " + xOffset);
 		return xOffset;
 	}
 
@@ -101,6 +104,26 @@ class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 	 */
 	public void setXOffset(final double newXOffset) {
 		this.xOffset = newXOffset;
+	}
+
+	public double getRelativeCents(final MouseEvent e) {
+		double currentXOffset = calculateXOffset();
+		final int width = parent.getWidth();
+
+		double xOffsetCents = currentXOffset * 1200.0;
+
+		if (currentXOffset < 0) {
+			currentXOffset = 1.0 + currentXOffset;
+		}
+		double pitchInRelativeCents = e.getX() * 1200.0 / width;
+
+		pitchInRelativeCents = (pitchInRelativeCents - xOffsetCents) % 1200.0;
+		if (pitchInRelativeCents < 0) {
+			pitchInRelativeCents += 1200;
+		}
+
+		return pitchInRelativeCents;
+
 	}
 
 }

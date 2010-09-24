@@ -74,7 +74,9 @@ public final class TextAreaHandler extends Handler {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				jTextArea.append(message);
+				if (jTextArea != null) {
+					jTextArea.append(message);
+				}
 			}
 		});
 	}
@@ -103,7 +105,7 @@ public final class TextAreaHandler extends Handler {
 	 */
 	@Override
 	public void setLevel(final Level newLevel) {
-		this.level = newLevel;
 		super.setLevel(newLevel);
+		level = newLevel;
 	}
 }
