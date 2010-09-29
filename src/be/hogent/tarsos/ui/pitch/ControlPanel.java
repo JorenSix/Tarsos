@@ -40,25 +40,50 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		playButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				if (processorThread != null) {
-					processorThread.start();
+				if (processorThread != null && processorThread.isAlive()) {
+					// processorThread.start();
+				} else {
+					// processorThread = new AudioFileSampleProcessor()
 				}
 			}
 		});
 		JButton pauseButton = new JButton("pause");
+		pauseButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent arg0) {
+				if (processorThread != null && processorThread.isAlive()) {
+					if (processorThread.isPaused()) {
+						processorThread.resumeAnalysis();
+						((JButton) arg0.getSource()).setText("pause");
+					} else {
+						processorThread.pauzeAnalysis();
+						((JButton) arg0.getSource()).setText("resume");
+					}
+				}
+			}
+		});
+
 		JButton stopButton = new JButton("stop");
+		stopButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent arg0) {
+				if (processorThread != null) {
+					processorThread.stopAnalysis();
+				}
+			}
+		});
+
 		JSlider speedSlider = new JSlider(0, 200);
 		speedSlider.setValue(10);
 		speedSlider.addChangeListener(new ChangeListener() {
 			@Override
-			public void stateChanged(ChangeEvent e) {
+			public void stateChanged(final ChangeEvent e) {
 				final JSlider source = (JSlider) e.getSource();
 				final double value = source.getValue();
 				if (processorThread != null) {
 					processorThread.setSpeedFactor(value / 100);
 				}
 			}
-
 		});
 		builder.addButton(playButton);
 		builder.addButton(pauseButton);
@@ -75,6 +100,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 
 		private final List<SampleHandler> handlers;
 		private boolean running;
+		private boolean isPaused;
 
 		AudioFileSampleProcessor(final AudioFile audioFile, final List<SampleHandler> someHandlers) {
 			super("Sample data publisher.");
@@ -82,6 +108,19 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			speedFactor = 10.0;
 			this.handlers = someHandlers;
 			running = false;
+			isPaused = false;
+		}
+
+		public void pauzeAnalysis() {
+			isPaused = true;
+		}
+
+		public void resumeAnalysis() {
+			isPaused = false;
+		}
+
+		public boolean isPaused() {
+			return isPaused;
 		}
 
 		@Override
@@ -96,24 +135,32 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 				if (!running) {
 					break;
 				}
-				List<Double> pitchList = sample.getPitchesIn(PitchUnit.HERTZ);
-				if (pitchList.size() > 0) {
+				if (isPaused) {
 					try {
-						for (SampleHandler handler : handlers) {
-							handler.addSample(sample);
-						}
-						if (getSpeedFactor() == 0.0) {
-							while (getSpeedFactor() == 0.0) {
-								Thread.sleep(100);
-							}
-						} else {
-							long sleepTime = (long) ((sample.getStart() - previousSample) / getSpeedFactor());
-							Thread.sleep(sleepTime);
-						}
+						Thread.sleep(100);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						// sleep interrupted
 					}
-					previousSample = sample.getStart();
+				} else {
+					List<Double> pitchList = sample.getPitchesIn(PitchUnit.HERTZ);
+					if (pitchList.size() > 0) {
+						try {
+							for (SampleHandler handler : handlers) {
+								handler.addSample(sample);
+							}
+							if (getSpeedFactor() == 0.0) {
+								while (getSpeedFactor() == 0.0) {
+									Thread.sleep(100);
+								}
+							} else {
+								long sleepTime = (long) ((sample.getStart() - previousSample) / getSpeedFactor());
+								Thread.sleep(sleepTime);
+							}
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						previousSample = sample.getStart();
+					}
 				}
 			}
 		}
@@ -141,6 +188,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			processorThread.stopAnalysis();
 		}
 		processorThread = new AudioFileSampleProcessor(newAudioFile, handlers);
+		processorThread.start();
 	}
 
 	public interface SampleHandler {

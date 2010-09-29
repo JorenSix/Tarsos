@@ -56,7 +56,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		for (final String ipemFile : files) {
 			final String target = FileUtils.combine(FileUtils.getRuntimePath(), ipemFile);
 			if (!FileUtils.exists(target)) {
-				FileUtils.copyFileFromJar("/be/hogent/tarsos/pitch/data/" + ipemFile, target);
+				FileUtils.copyFileFromJar("/be/hogent/tarsos/sampled/pitch/resources/" + ipemFile, target);
 			}
 		}
 	}
@@ -143,6 +143,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		final List<Double> probabilities = new ArrayList<Double>();
 		final List<Double> pitches = new ArrayList<Double>();
 		long start = 0;
+		// TODO: make this configurable
 		final double minimumAcceptableProbability = 0.05;
 
 		final List<String[]> csvData = FileUtils.readCSVFile(csvFileName, " ", 12);

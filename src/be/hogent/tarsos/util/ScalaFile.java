@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.table.AbstractTableModel;
-
 import be.hogent.tarsos.sampled.pitch.PitchConverter;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
@@ -246,10 +244,17 @@ public final class ScalaFile {
 	 */
 	public String[] getPitchNames() {
 		String[] names = null;
-		if (this.pitchNames != null) {
+		if (hasNames()) {
 			names = pitchNames.clone();
 		}
 		return names;
+	}
+
+	/**
+	 * @return True if the pitch classes are named, false otherwise.
+	 */
+	public boolean hasNames() {
+		return pitchNames != null;
 	}
 
 	/**
@@ -259,37 +264,5 @@ public final class ScalaFile {
 		final double[] notes = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, };
 		final String[] names = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 		return new ScalaFile("The western tone scale", notes, names);
-	}
-
-	public AbstractTableModel intervalTable() {
-		return new AbstractTableModel() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Object getValueAt(final int arg0, final int arg1) {
-				final Double value;
-				if (arg0 == 0 && arg1 == 0) {
-					value = null;
-				} else if (arg0 == 0) {
-					value = pitches[arg1 - 1];
-				} else if (arg1 == 0) {
-					value = pitches[arg0 - 1];
-				} else {
-					value = pitches[arg1 - 1] - pitches[arg0 - 1];
-				}
-				return value;
-			}
-
-			@Override
-			public int getRowCount() {
-				return getColumnCount();
-			}
-
-			@Override
-			public int getColumnCount() {
-				return pitches.length + 1;
-			}
-		};
 	}
 }

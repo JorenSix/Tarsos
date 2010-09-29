@@ -39,6 +39,7 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 
 	public ToneScalePanel(final Histogram histogram, final ScaleChangedListener scaleChangedPublisher) {
 		setSize(640, 480);
+		setInheritsPopupMenu(true);
 		histo = histogram;
 		histoLayer = new HistogramLayer(this, histogram, scaleChangedPublisher);
 		scalaLayer = new ScalaLayer(this, ScalaFile.westernTuning().getPitches(), histogram.getStop()

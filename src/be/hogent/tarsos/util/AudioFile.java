@@ -274,15 +274,4 @@ public final class AudioFile {
 		Arrays.sort(selectionsDouble);
 		playSelections(selectionsDouble);
 	}
-
-	private double speedFactor = 1.0;
-
-	public void setSpeedFactor(final double speedFactor) {
-		this.speedFactor = speedFactor;
-	}
-
-	private double getSpeedFactor() {
-		return speedFactor;
-	}
-
 }

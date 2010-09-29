@@ -22,19 +22,18 @@ public final class VirtualKeyboard12 extends VirtualKeyboard {
 
 	public VirtualKeyboard12() {
 		super(12, 12 * 4);
-
 	}
 
 	@Override
 	public int getMidiNote(final int x, final int y) {
 		final int w = getWidth();
 		final int h = getHeight();
-		final float nw = w / (float) getNumberOfKeys();
-		int octaves = getNumberOfKeys() / getNumberOfKeysPerOctave();
+		final float nw = w / 75f;
+
 		final int wn = (int) (x / nw);
-		final int oct = wn / octaves;
-		int n = oct * getNumberOfKeysPerOctave();
-		final int nb = wn % octaves;
+		final int oct = wn / 7;
+		int n = oct * 12;
+		final int nb = wn % 7;
 		if (nb == 1) {
 			n += 2;
 		}
@@ -53,8 +52,8 @@ public final class VirtualKeyboard12 extends VirtualKeyboard {
 		if (nb == 6) {
 			n += 11;
 		}
-		if (y < h * 4.0 / (float) octaves) {
-			final int xb = x - (int) (oct * octaves * nw);
+		if (y < h * 4.0 / 7.0) {
+			final int xb = x - (int) (oct * 7 * nw);
 			float cx = 0;
 			final float black_note_width = nw * 0.7f;
 			for (int b = 0; b < 12; b++) {
@@ -91,10 +90,10 @@ public final class VirtualKeyboard12 extends VirtualKeyboard {
 		final int w = getWidth();
 		final int h = getHeight();
 
-		final float nw = w / (float) getNumberOfKeys() *2;
+		final float nw = w / 75f;
 		float cx = 0;
 		final Rectangle2D rect = new Rectangle2D.Double();
-		for (int i = 0; i < getNumberOfKeys(); i++) {
+		for (int i = 0; i < 128; i++) {
 			final int b = i % 12;
 			final boolean a = b == 1 || b == 3 | b == 6 | b == 8 | b == 10;
 			if (!a) {
@@ -119,7 +118,7 @@ public final class VirtualKeyboard12 extends VirtualKeyboard {
 		}
 		cx = 0;
 		final float black_note_width = nw * 0.7f;
-		for (int i = 0; i < getNumberOfKeys(); i++) {
+		for (int i = 0; i < 128; i++) {
 			final int b = i % 12;
 			final boolean a = b == 1 || b == 3 | b == 6 | b == 8 | b == 10;
 			if (!a) {

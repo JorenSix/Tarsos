@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JTable;
 import javax.swing.border.TitledBorder;
 
 import be.hogent.tarsos.ui.virtualkeyboard.VirtualKeyboard;
@@ -85,8 +84,13 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 							index = i;
 						}
 					}
-					layer.scale[index] = mouseDrag.getRelativeCents(e);
-					movingElement = layer.scale[index];
+					if (index == -1) {
+						movingElement = -1.0;
+					} else {
+						layer.scale[index] = mouseDrag.getRelativeCents(e);
+						movingElement = layer.scale[index];
+					}
+
 				} else {
 					double[] newScale = new double[layer.scale.length + 1];
 					for (int i = 0; i < layer.scale.length; i++) {
@@ -133,7 +137,6 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			if (movingElement != -1.0) {
-
 				layer.scaleChangedPublisher.scaleChanged(layer.scale, false);
 			}
 			movingElement = -1.0;
@@ -214,27 +217,10 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 			builder.setDefaultDialogBorder();
 			builder.setRowGroupingEnabled(true);
 			builder.append("Export scala file:", exportButton, true);
-			// CellConstraints cc = new CellConstraints();
-
-			// builder.append("Keyboard:");
-			// builder.appendRow("31dlu"); // Assumes line is 14, gap is 3
-			// builder.add(keyboard, cc.xywh(builder.getColumn(),
-			// builder.getRow(), 1, 2));
-			// builder.nextLine(2);
-
-			// table = new JTable(new ScalaFile("hmm", scale).intervalTable());
-
-			// builder.appendRow("31dlu"); // Assumes line is 14, gap is 3
-			// builder.add(table, cc.xywh(builder.getColumn(), builder.getRow(),
-			// 1, 1));
-			// builder.nextLine(table.getRowCount());
 
 			ui = builder.getPanel();
 			ui.setBorder(new TitledBorder("Peak commands"));
 		}
 		return ui;
 	}
-
-	JTable table;
-
 }

@@ -12,14 +12,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 
-import net.bluecow.spectro.tool.TitleBorder;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileDrop;
 import be.hogent.tarsos.util.FileUtils;
@@ -58,6 +58,9 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 		addAudioFileChangedListener(pitchContourPanel);
 		addScaleChangedListener(pitchContourPanel);
 
+		final IntervalTable intervalTable = new IntervalTable();
+		addScaleChangedListener(intervalTable);
+
 		final ControlPanel controlPanel = new ControlPanel();
 		addAudioFileChangedListener(controlPanel);
 		controlPanel.addHandler(toneScalePanel);
@@ -69,43 +72,57 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 
 		final JPanel dynamicPanel = new JPanel(new GridLayout(0, 1));
 		dynamicPanel.add(toneScalePanel);
+		dynamicPanel.setInheritsPopupMenu(true);
 
 		List<Layer> layers = toneScalePanel.getLayers();
 		JPanel layersJPanel = new JPanel(new GridLayout(0, 1));
 		for (int i = 0; i < layers.size(); i++) {
 			Component comp = layers.get(i).ui();
-
 			layersJPanel.add(comp);
 		}
+		layersJPanel.setInheritsPopupMenu(true);
 
 		final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, new JScrollPane(
 				layersJPanel), dynamicPanel);
 		splitPane.setOneTouchExpandable(true);
 
-		final JCheckBox ambitusCheckBox = new JCheckBox("Show ambitus");
+		final JCheckBoxMenuItem toneScaleCheckBox = new JCheckBoxMenuItem("Show tone scale");
+		toneScaleCheckBox.getModel().setSelected(true);
+		toneScaleCheckBox.addActionListener(new ShowPanelActionListener(dynamicPanel, toneScalePanel,
+				splitPane));
+
+		final JCheckBoxMenuItem ambitusCheckBox = new JCheckBoxMenuItem("Show ambitus");
 		ambitusCheckBox.addActionListener(new ShowPanelActionListener(dynamicPanel, ambitusPanel, splitPane));
 
-		final JCheckBox keyboardCheckBox = new JCheckBox("Show keyboard");
+		final JCheckBoxMenuItem keyboardCheckBox = new JCheckBoxMenuItem("Show keyboard");
 		keyboardCheckBox
 				.addActionListener(new ShowPanelActionListener(dynamicPanel, keyboardPanel, splitPane));
 
-		final JCheckBox pitchContourCheckBox = new JCheckBox("Show annotations");
+		final JCheckBoxMenuItem intervalTableCheckBox = new JCheckBoxMenuItem("Show interval Table");
+		intervalTableCheckBox.addActionListener(new ShowPanelActionListener(dynamicPanel, intervalTable,
+				splitPane));
+
+		final JCheckBoxMenuItem pitchContourCheckBox = new JCheckBoxMenuItem("Show annotations");
 		pitchContourCheckBox.addActionListener(new ShowPanelActionListener(dynamicPanel, pitchContourPanel,
 				splitPane));
 
-		final JCheckBox controlsCheckBox = new JCheckBox("Controls");
+		final JCheckBoxMenuItem controlsCheckBox = new JCheckBoxMenuItem("Controls");
 		controlsCheckBox
 				.addActionListener(new ShowPanelActionListener(dynamicPanel, controlPanel, splitPane));
 
-		JPanel viewSettingsPanel = new JPanel(new GridLayout(0, 1));
-		viewSettingsPanel.setBorder(new TitleBorder("View settings"));
-		viewSettingsPanel.add(ambitusCheckBox);
-		viewSettingsPanel.add(keyboardCheckBox);
-		viewSettingsPanel.add(pitchContourCheckBox);
-		viewSettingsPanel.add(controlsCheckBox);
-		layersJPanel.add(viewSettingsPanel);
+		final JPopupMenu popup = new JPopupMenu();
+		popup.add(toneScaleCheckBox);
+		popup.add(ambitusCheckBox);
+		popup.add(keyboardCheckBox);
+		popup.add(pitchContourCheckBox);
+		popup.add(controlsCheckBox);
+		popup.add(intervalTableCheckBox);
+		setComponentPopupMenu(popup);
+
+		splitPane.setInheritsPopupMenu(true);
 
 		add(splitPane, BorderLayout.CENTER);
+
 	}
 
 	private class ShowPanelActionListener implements ActionListener {
@@ -122,7 +139,7 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 
 		@Override
 		public void actionPerformed(final ActionEvent e) {
-			final JCheckBox checkBox = (JCheckBox) e.getSource();
+			final JCheckBoxMenuItem checkBox = (JCheckBoxMenuItem) e.getSource();
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {

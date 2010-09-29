@@ -77,16 +77,6 @@ public final class AudioDispatcher implements Runnable {
 	private final int byteOverlap, byteStepSize;
 
 	/**
-	 * The number of bytes to process. The dispatcher stops at the end of a
-	 * stream or after processing bytesToProcess number of bytes.
-	 */
-	private long bytesToProcess;
-	/**
-	 * Remembers the number of bytes processed by the dispatcher.
-	 */
-	private long bytesProcessed;
-
-	/**
 	 * Create a new.
 	 * 
 	 * @param stream
@@ -105,8 +95,6 @@ public final class AudioDispatcher implements Runnable {
 
 		audioProcessors = new ArrayList<AudioProcessor>();
 		audioInputStream = stream;
-
-		bytesToProcess = Long.MAX_VALUE;
 
 		final AudioFormat format = audioInputStream.getFormat();
 
@@ -132,10 +120,6 @@ public final class AudioDispatcher implements Runnable {
 		LOG.fine("Added an audioprocessor to the list of processors: " + audioProcessor.toString());
 	}
 
-	public void setNumberOfBytesToProcess(final long numberOfBytesToProcess) {
-		bytesToProcess = numberOfBytesToProcess;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -148,8 +132,8 @@ public final class AudioDispatcher implements Runnable {
 
 			// Read, convert and process the first full buffer.
 			bytesRead = audioInputStream.read(audioByteBuffer);
-			bytesProcessed += bytesRead;
-			if (bytesRead != -1 && bytesProcessed < bytesToProcess) {
+
+			if (bytesRead != -1) {
 				converter.toFloatArray(audioByteBuffer, audioFloatBuffer);
 				for (final AudioProcessor processor : audioProcessors) {
 					processor.processFull(audioFloatBuffer, audioByteBuffer);
@@ -157,18 +141,17 @@ public final class AudioDispatcher implements Runnable {
 				// Read, convert and process consecutive overlapping buffers.
 				// Slide the buffer.
 				bytesRead = slideBuffer();
-				bytesProcessed += bytesRead;
+
 			}
 
 			// as long as the stream has not ended or the number of bytes
 			// processed is smaller than the number of bytes to process: process
 			// bytes.
-			while (bytesRead != -1 && bytesProcessed < bytesToProcess) {
+			while (bytesRead != -1) {
 				for (final AudioProcessor processor : audioProcessors) {
 					processor.processOverlapping(audioFloatBuffer, audioByteBuffer);
 				}
 				bytesRead = slideBuffer();
-				bytesProcessed += bytesRead;
 			}
 
 			// Notify all processors that no more data is available.

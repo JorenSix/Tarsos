@@ -29,7 +29,6 @@ class ClickForPitchListener extends MouseAdapter {
 		final int height = parent.getHeight();
 		final double pitchInRelativeCents = mouseDrag.getRelativeCents(e);
 		final int velocity = (int) (e.getY() / (double) height * 127);
-
 		synth.play(pitchInRelativeCents, velocity);
 	}
 }

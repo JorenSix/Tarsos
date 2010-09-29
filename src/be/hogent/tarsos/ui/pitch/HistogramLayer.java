@@ -16,16 +16,10 @@ import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JSlider;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerModel;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
-import be.hogent.tarsos.sampled.pitch.PitchUnit;
-import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
@@ -43,7 +37,6 @@ public final class HistogramLayer implements Layer {
 	private final Histogram histo;
 	private final int maxMarkers = 50;
 	private final List<Double> markerPositions;
-	private AudioFile file;
 	private final ScaleChangedListener scaleChangedPublisher;
 
 	/**
@@ -146,24 +139,6 @@ public final class HistogramLayer implements Layer {
 	@Override
 	public Component ui() {
 		if (ui == null) {
-
-			JSlider speedSlider = new JSlider(0, 20);
-			speedSlider.setValue(10);
-			// speedSlider.setPaintTicks(true);
-			// speedSlider.setMajorTickSpacing(5);
-			// speedSlider.setPaintLabels(true);
-			speedSlider.addChangeListener(new ChangeListener() {
-				@Override
-				public void stateChanged(final ChangeEvent e) {
-					final JSlider source = (JSlider) e.getSource();
-					final double value = source.getValue();
-					if (file != null) {
-						file.setSpeedFactor(value);
-					}
-					source.setToolTipText(String.valueOf(value));
-				}
-			});
-
 			JSlider peakSlider = new JSlider(5, 105);
 			peakSlider.setValue(5);
 			peakSlider.setMajorTickSpacing(20);
@@ -213,43 +188,6 @@ public final class HistogramLayer implements Layer {
 				}
 			});
 
-			final SpinnerModel minModel = new SpinnerNumberModel(0, // initial
-																	// value
-					0, // min
-					1200, // max
-					1); // step
-			final SpinnerModel maxModel = new SpinnerNumberModel(1200, // initial
-																		// value
-					0, // min
-					1200, // max
-					1); // step
-
-			final JSpinner minJSpinner = new JSpinner(minModel);
-			final JSpinner maxJSpinner = new JSpinner(maxModel);
-			JButton showRangeButton = new JButton("show");
-
-			showRangeButton.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					Thread t = new Thread(new Runnable() {
-						@Override
-						public void run() {
-							file.playCents(PitchDetectionMode.TARSOS_YIN, (Integer) minJSpinner.getValue(),
-									(Integer) maxJSpinner.getValue(), PitchUnit.RELATIVE_CENTS);
-
-						}
-					}, "Segment playing thread");
-					t.start();
-				}
-			});
-
-			FormLayout subLayout = new FormLayout("right:min,2dlu,min,min:grow");
-			DefaultFormBuilder subBuilder = new DefaultFormBuilder(subLayout);
-			subBuilder.setRowGroupingEnabled(true);
-			subBuilder.append(minJSpinner);
-			subBuilder.append(maxJSpinner);
-			subBuilder.append(showRangeButton);
-
 			FormLayout layout = new FormLayout("right:min,2dlu,min:grow");
 			DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 			builder.setDefaultDialogBorder();
@@ -257,10 +195,10 @@ public final class HistogramLayer implements Layer {
 			builder.append("Peakpicking:", peakSlider, true);
 			builder.append("Smooth:", smoothButton, true);
 			builder.append("Reset:", resetButton, true);
-			builder.append("Selection:", subBuilder.getPanel(), true);
 
 			ui = builder.getPanel();
 			ui.setBorder(new TitledBorder("Histogram commands"));
+			ui.setInheritsPopupMenu(true);
 		}
 		return ui;
 	}
