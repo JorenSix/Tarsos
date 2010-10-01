@@ -154,7 +154,18 @@ public enum ConfKey {
 	 * file. <br>
 	 * The default is <code>.*\.(mp3|...|mpc|MPC)</code>.
 	 */
-	audio_file_name_pattern, midi_instrument_index;
+	audio_file_name_pattern,
+
+	/**
+	 * When using the IPEM polyphonic pitch tracker a threshold can be used to
+	 * accept only some pitches. Default value is 0.05.
+	 */
+	ipem_pitch_threshold,
+
+	/**
+	 * An index for a General MIDI instrument
+	 */
+	midi_instrument_index;
 
 	/**
 	 * True if the configured key is a required directory. False otherwise.

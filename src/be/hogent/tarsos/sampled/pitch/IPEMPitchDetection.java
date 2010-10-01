@@ -143,8 +143,8 @@ public final class IPEMPitchDetection implements PitchDetector {
 		final List<Double> probabilities = new ArrayList<Double>();
 		final List<Double> pitches = new ArrayList<Double>();
 		long start = 0;
-		// TODO: make this configurable
-		final double minimumAcceptableProbability = 0.05;
+
+		final double minimumAcceptableProbability = Configuration.getDouble(ConfKey.ipem_pitch_threshold);
 
 		final List<String[]> csvData = FileUtils.readCSVFile(csvFileName, " ", 12);
 
