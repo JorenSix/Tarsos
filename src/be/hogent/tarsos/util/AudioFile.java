@@ -151,20 +151,28 @@ public final class AudioFile {
 	 *         determined -1 is returned.
 	 */
 	public long getSizeInBytes() {
-		long size = -1;
+		AudioFileFormat fileFormat = fileFormat();
+		int frames = fileFormat.getFrameLength();
+		int frameSize = fileFormat.getFormat().getFrameSize();
+		long size = frames * frameSize;
+		LOG.finest(String.format("Determined size of audio data for %s: %s bytes.", basename(), size));
+		return size;
+	}
+
+	/**
+	 * @return The file format info of the transcoded audio data.
+	 */
+	public AudioFileFormat fileFormat() {
+		AudioFileFormat fileFormat = null;
 		try {
-			AudioFileFormat fileFormat;
 			fileFormat = AudioSystem.getAudioFileFormat(new File(transcodedPath()));
-			int frames = fileFormat.getFrameLength();
-			int frameSize = fileFormat.getFormat().getFrameSize();
-			size = frames * frameSize;
-			LOG.finest(String.format("Determined size of audio data for %s: %s bytes.", basename(), size));
+			LOG.finest(String.format("Fileformat determined for %s", basename()));
 		} catch (UnsupportedAudioFileException e) {
 			LOG.log(Level.WARNING, "Could not determine audio file length.", e);
 		} catch (IOException e) {
 			LOG.log(Level.SEVERE, "Could not determine audio file length.", e);
 		}
-		return size;
+		return fileFormat;
 	}
 
 	public void playSelection(final double from, final double to) {

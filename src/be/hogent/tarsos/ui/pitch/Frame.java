@@ -66,11 +66,6 @@ public class Frame extends JFrame {
 		tabbedPane.addTab("Analysis", icon, tarsosPanel, "Analysis");
 
 		icon = null;
-		JComponent browserPanel = makeBrowserPanel();
-		browserPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		tabbedPane.addTab("Browser", icon, browserPanel, "Browser");
-
-		icon = null;
 		JComponent configurationPanel = makeConfigurationPanel();
 		configurationPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		tabbedPane.addTab("Config", icon, configurationPanel, "Configuration");
@@ -85,17 +80,20 @@ public class Frame extends JFrame {
 		helpPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		tabbedPane.addTab("Help", icon, helpPanel, "Help?");
 
+		add(new HeaderPanel(), BorderLayout.NORTH);
+
 		add(tabbedPane, BorderLayout.CENTER);
 	}
 
-	private JComponent makeBrowserPanel() {
-		return new JScrollPane(new BrowserPanel());
-	}
+	/*
+	 * private JComponent makeBrowserPanel() { return new JScrollPane(new
+	 * BrowserPanel()); }
+	 */
 
 	private void setProgramIcon() {
 		try {
 			final BufferedImage image;
-			final String iconPath = "/be/hogent/tarsos/ui/resources/micro.png";
+			final String iconPath = "/be/hogent/tarsos/ui/resources/tarsos_logo_small.png";
 			image = ImageIO.read(this.getClass().getResource(iconPath));
 			setIconImage(image);
 		} catch (IOException e) {

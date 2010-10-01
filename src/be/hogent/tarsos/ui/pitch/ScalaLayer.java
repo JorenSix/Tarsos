@@ -3,8 +3,6 @@ package be.hogent.tarsos.ui.pitch;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -13,15 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.sound.midi.MidiUnavailableException;
-import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.border.TitledBorder;
-
-import be.hogent.tarsos.ui.virtualkeyboard.VirtualKeyboard;
-import be.hogent.tarsos.util.ScalaFile;
-
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
 
 public final class ScalaLayer implements Layer, ScaleChangedListener {
 
@@ -196,31 +186,8 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		parent.repaint();
 	}
 
-	JComponent ui;
-	VirtualKeyboard keyboard;
-
 	@Override
 	public Component ui() {
-		if (ui == null) {
-
-			JButton exportButton = new JButton("Export");
-			exportButton.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					ScalaFile file = new ScalaFile("Tarsos exported scala file", scale);
-					file.write("export.scl");
-				}
-			});
-
-			FormLayout layout = new FormLayout("right:default, 3dlu,default:grow");
-			DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-			builder.setDefaultDialogBorder();
-			builder.setRowGroupingEnabled(true);
-			builder.append("Export scala file:", exportButton, true);
-
-			ui = builder.getPanel();
-			ui.setBorder(new TitledBorder("Peak commands"));
-		}
-		return ui;
+		throw new NullPointerException("No ui for scala layer");
 	}
 }

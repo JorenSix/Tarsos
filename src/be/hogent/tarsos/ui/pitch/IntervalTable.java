@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.util.Arrays;
 
 import javax.sound.midi.MidiUnavailableException;
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -33,12 +34,14 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 		getSelectionModel().addListSelectionListener(selectionListener);
 		getColumnModel().getSelectionModel().addListSelectionListener(selectionListener);
 		setDefaultRenderer(Object.class, new BackgroundColorCellRenderer());
+		setMaximumSize(new Dimension(650, 160));
 	}
 
 	@Override
 	public void scaleChanged(final double[] newScale, final boolean isChanging) {
 		ScalaFile newFile = new ScalaFile("hmmm", newScale);
 		setModel(new ToneScaleTableModel(newFile));
+		// setRowHeight(getWidth() / getColumnCount());
 	}
 
 	private static class SelectionListener implements ListSelectionListener {
@@ -118,6 +121,8 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 			} else {
 				comp = super.getTableCellRendererComponent(table, color, false, hasFocus, row, column);
 			}
+			JLabel label = (JLabel) comp;
+			label.setFont(label.getFont().deriveFont(9));
 			Dimension d = new Dimension(comp.getWidth(), comp.getWidth());
 			comp.setMinimumSize(d);
 			return comp;

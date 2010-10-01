@@ -40,7 +40,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 	private double[] scale;
 
 	public PitchContour() {
-		pitchUnit = PitchUnit.RELATIVE_CENTS;
+		pitchUnit = PitchUnit.ABSOLUTE_CENTS;
 
 	}
 
@@ -98,6 +98,8 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		return Math.log(axisValue) / Math.log(10);
 	}
 
+	JButton button;
+
 	@Override
 	public void audioFileChanged(final AudioFile newAudioFile) {
 		clear(0);
@@ -114,7 +116,10 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		String title = String.format("%s - pitch in %s", newAudioFile.basename(), pitchUnit.getHumanName());
 
 		setButtons(true);
-		JButton button = new JButton(Frame.createImageIcon("/ptolemy/plot/img/fill.gif"));
+		if (button != null) {
+			remove(button);
+		}
+		button = new JButton(Frame.createImageIcon("/ptolemy/plot/img/fill.gif"));
 		button.setPreferredSize(new Dimension(20, 20));
 		button.setToolTipText("Export CSV and EPS file");
 		button.addActionListener(new ActionListener() {

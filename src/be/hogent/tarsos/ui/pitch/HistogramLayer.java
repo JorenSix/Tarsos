@@ -20,6 +20,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
@@ -30,7 +32,7 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * @author Joren Six
  */
-public final class HistogramLayer implements Layer {
+public final class HistogramLayer implements Layer, ScaleChangedListener, AudioFileChangedListener {
 
 	private final JComponent parent;
 	private final MouseDragListener mouseDrag;
@@ -188,6 +190,18 @@ public final class HistogramLayer implements Layer {
 				}
 			});
 
+			JButton exportButton = new JButton("Export");
+			exportButton.setToolTipText("Export scala file.");
+			exportButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (scale != null) {
+						ScalaFile file = new ScalaFile("Tarsos exported scala file", scale);
+						file.write(audioFile.basename() + ".scl");
+					}
+				}
+			});
+
 			FormLayout layout = new FormLayout("right:min,2dlu,min:grow");
 			DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 			builder.setDefaultDialogBorder();
@@ -195,12 +209,28 @@ public final class HistogramLayer implements Layer {
 			builder.append("Peakpicking:", peakSlider, true);
 			builder.append("Smooth:", smoothButton, true);
 			builder.append("Reset:", resetButton, true);
+			builder.append("Scala export:", exportButton, true);
 
 			ui = builder.getPanel();
-			ui.setBorder(new TitledBorder("Histogram commands"));
 			ui.setInheritsPopupMenu(true);
+			ui.setBorder(new TitledBorder("Histogram commands"));
+
 		}
 		return ui;
 	}
 
+	double[] scale;
+	AudioFile audioFile;
+
+	@Override
+	public void scaleChanged(final double[] newScale, final boolean isChanging) {
+		if (!isChanging) {
+			scale = newScale;
+		}
+	}
+
+	@Override
+	public void audioFileChanged(final AudioFile newAudioFile) {
+		audioFile = newAudioFile;
+	}
 }

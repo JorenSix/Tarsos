@@ -1,6 +1,7 @@
 package be.hogent.tarsos.ui.pitch;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,6 +29,9 @@ public final class KeyboardPanel extends JPanel implements ScaleChangedListener 
 		keyboard = VirtualKeyboard.createVirtualKeyboard(scale.length);
 		keyboard.connectToTunedSynth(scale);
 		add(keyboard, BorderLayout.CENTER);
+		setMaximumSize(new Dimension(800, 70));
+		setMinimumSize(new Dimension(200, 50));
+		setPreferredSize(new Dimension(200, 50));
 	}
 
 	@Override
