@@ -71,7 +71,6 @@ class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 
 	};
 
-	@Override
 	public void mouseDragged(final MouseEvent e) {
 
 		final boolean mouseMoved = !e.getPoint().equals(referenceDragPoint);
@@ -124,6 +123,10 @@ class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 
 		return pitchInRelativeCents;
 
+	}
+
+	public void mouseMoved(final MouseEvent arg0) {
+		// do nothing
 	}
 
 }

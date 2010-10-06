@@ -28,7 +28,7 @@ public final class UniversalVirtualKeyboard extends VirtualKeyboard {
 		super(numberOfKeysPerOctave);
 	}
 
-	@Override
+	
 	protected int getMidiNote(final int x, final int y) {
 
 		final int w = getWidth();
@@ -45,7 +45,7 @@ public final class UniversalVirtualKeyboard extends VirtualKeyboard {
 		return n;
 	}
 
-	@Override
+	
 	public void paint(final Graphics g) {
 		super.paint(g);
 		final Graphics2D g2 = (Graphics2D) g;

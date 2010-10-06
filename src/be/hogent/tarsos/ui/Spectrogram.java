@@ -99,7 +99,7 @@ public final class Spectrogram extends JComponent {
 
         timer = new Timer();
         timer.schedule(new TimerTask() {
-            @Override
+            
             public void run() {
                 try {
                     step();
@@ -111,7 +111,7 @@ public final class Spectrogram extends JComponent {
 
     }
 
-    @Override
+    
     public void paintComponent(final Graphics g) {
         g.drawImage(buffer, 0, 0, null);
     }

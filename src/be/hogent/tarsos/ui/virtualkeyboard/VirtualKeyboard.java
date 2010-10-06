@@ -131,7 +131,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		keyDown = new boolean[VirtualKeyboard.NUMBER_OF_MIDI_KEYS];
 
 		addMouseListener(new MouseAdapter() {
-			@Override
+			
 			public void mousePressed(final MouseEvent e) {
 				grabFocus();
 				final Point p = e.getPoint();
@@ -139,7 +139,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 				sendNoteMessage(currentlyPressedMidiNote, true);
 			}
 
-			@Override
+			
 			public void mouseReleased(final MouseEvent e) {
 				sendNoteMessage(currentlyPressedMidiNote, false);
 				currentlyPressedMidiNote = -1;
@@ -147,12 +147,12 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		});
 
 		addFocusListener(new FocusListener() {
-			@Override
+			
 			public void focusGained(final FocusEvent e) {
 				repaint();
 			}
 
-			@Override
+			
 			public void focusLost(final FocusEvent e) {
 				allKeysOff(); // is this behavior wanted?
 				repaint();
@@ -160,7 +160,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		});
 
 		addKeyListener(new KeyListener() {
-			@Override
+			
 			public void keyPressed(final KeyEvent e) {
 				final int pressedKeyChar = e.getKeyChar();
 				for (int i = 0; i < VirtualKeyboard.getMappedKeys().length(); i++) {
@@ -174,7 +174,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 				}
 			}
 
-			@Override
+			
 			public void keyReleased(final KeyEvent e) {
 				final char pressedKeyChar = e.getKeyChar();
 				for (int i = 0; i < VirtualKeyboard.getMappedKeys().length(); i++) {
@@ -188,7 +188,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 				}
 			}
 
-			@Override
+			
 			public void keyTyped(final KeyEvent e) {
 				if (e.getKeyChar() == '-') {
 					setLowestAssignedKey(getLowestAssignedKey() - getNumberOfKeysPerOctave());
@@ -279,17 +279,14 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		}
 	}
 
-	@Override
 	public final void close() {
 		receiver.close();
 	}
 
-	@Override
 	public final Receiver getReceiver() {
 		return this.receiver;
 	}
 
-	@Override
 	public final void send(final MidiMessage message, final long timeStamp) {
 		// acts as a "MIDI cable" sends the received messages trough
 		if (receiver != null) {
@@ -358,7 +355,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		LOG.info(String.format("Configured %s as MIDI OUT.", synthInfo.getName()));
 	}
 
-	@Override
+	
 	public void setReceiver(final Receiver newReceiver) {
 		receiver = newReceiver;
 	}

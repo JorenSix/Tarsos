@@ -627,7 +627,7 @@ public class Histogram implements Cloneable {
 	 * 
 	 * @return a string representation.
 	 */
-	@Override
+	
 	public String toString() {
 		return toString(false);
 	}
@@ -860,7 +860,7 @@ public class Histogram implements Cloneable {
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	@Override
+	
 	public Histogram clone() throws CloneNotSupportedException {
 		final Histogram clone = (Histogram) super.clone();
 		for (final double key : this.freqTable.keySet()) {

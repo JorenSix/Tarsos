@@ -21,7 +21,7 @@ public final class PitchTable extends AbstractTarsosApp {
      * (non-Javadoc)
      * @see be.hogent.tarsos.cli.AbstractTarsosApp#run(java.lang.String[])
      */
-    @Override
+    
     public void run(final String... args) {
         final OptionParser parser = new OptionParser();
         final OptionSet options = parse(args, parser, this);
@@ -55,7 +55,7 @@ public final class PitchTable extends AbstractTarsosApp {
      * (non-Javadoc)
      * @see be.hogent.tarsos.cli.AbstractTarsosApp#description()
      */
-    @Override
+    
     public String description() {
         return "Prints a table with pitches in different units.";
     }
@@ -64,7 +64,7 @@ public final class PitchTable extends AbstractTarsosApp {
      * (non-Javadoc)
      * @see be.hogent.tarsos.cli.AbstractTarsosApp#name()
      */
-    @Override
+    
     public String name() {
         return "pitch_table";
     }

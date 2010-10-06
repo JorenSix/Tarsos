@@ -9,7 +9,6 @@ import be.hogent.tarsos.util.histogram.Histogram;
  */
 public final class LocalHeightScore implements PeakScore {
 
-	@Override
 	public double score(final Histogram originalHistogram, final int index, final int windowSize) {
 		int before = 0;
 		int after = 0;

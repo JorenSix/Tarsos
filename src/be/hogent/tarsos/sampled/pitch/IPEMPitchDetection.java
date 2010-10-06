@@ -61,20 +61,22 @@ public final class IPEMPitchDetection implements PitchDetector {
 		}
 	}
 
-	@Override
 	public void executePitchDetection() {
 
 		final String transcodedBaseName = FileUtils.basename(file.transcodedPath());
 		FileUtils.writeFile(transcodedBaseName + "\n", "lijst.txt");
 		final String name = mode.getParametername();
 
-		final String annotationsDirectory = Configuration.get(ConfKey.raw_ipem_annotations_directory);
+		// TODO: FIX directories
+		final String annotationsDirectory = "";// Configuration.get(ConfKey.raw_ipem_annotations_directory);
 		String outputDirectory = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory, name)
 				+ "/";
 		final String csvFileName = FileUtils.combine(outputDirectory, transcodedBaseName + ".txt");
 		String command = null;
 
-		String audioDirectory = FileUtils.combine(AudioFile.TRANSCODED_AUDIO_DIR, "") + "/";
+		// TODO: FIX directories
+		String audioDirectory = "";// FileUtils.combine(AudioFile.TRANSCODED_AUDIO_DIR,
+									// "") + "/";
 
 		if (System.getProperty("os.name").contains("indows")) {
 			audioDirectory = audioDirectory.replace("/", "\\").replace(":\\", "://");
@@ -83,7 +85,6 @@ public final class IPEMPitchDetection implements PitchDetector {
 				command = name + ".exe  " + audioDirectory + transcodedBaseName + ".wav " + outputDirectory
 						+ transcodedBaseName + ".txt";
 			} else {
-
 				command = name + ".exe  lijst.txt " + audioDirectory + " " + outputDirectory;
 			}
 
@@ -186,12 +187,10 @@ public final class IPEMPitchDetection implements PitchDetector {
 		}
 	}
 
-	@Override
 	public String getName() {
 		return this.mode.getParametername();
 	}
 
-	@Override
 	public List<Sample> getSamples() {
 		return this.samples;
 	}

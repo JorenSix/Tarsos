@@ -51,7 +51,7 @@ public final class AmbitusHistogram extends Histogram {
 
 	}
 
-	@Override
+	
 	public void valueAddedHook(final double value) {
 		// keep a histogram for each octave
 		final int octaveIndex = (int) (value / 1200);
@@ -89,7 +89,6 @@ public final class AmbitusHistogram extends Histogram {
 		}
 
 		Collections.sort(octaves, new Comparator<Integer>() {
-			@Override
 			public int compare(final Integer o1, final Integer o2) {
 				final Long energyFirst;
 				energyFirst = AmbitusHistogram.this.toneScaleHistogramPerOctave.get(o1).getSumFreq();
@@ -187,7 +186,7 @@ public final class AmbitusHistogram extends Histogram {
 		}
 	}
 
-	@Override
+	
 	public void plot(final String fileName, final String title) {
 		final SimplePlot plot = new SimplePlot(title);
 		double startingValue = getStart();

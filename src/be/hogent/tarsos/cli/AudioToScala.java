@@ -21,17 +21,17 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
  */
 public final class AudioToScala extends AbstractTarsosApp {
 
-    @Override
+    
     public String description() {
         return "Detects a tone scale from an audio file and exports it as a scala file.";
     }
 
-    @Override
+    
     public String name() {
         return "audio_to_scala";
     }
 
-    @Override
+    
     public void run(final String... args) {
         final OptionParser parser = new OptionParser();
         final OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate.").withRequiredArg()

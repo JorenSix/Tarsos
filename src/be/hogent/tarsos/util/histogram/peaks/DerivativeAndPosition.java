@@ -7,12 +7,11 @@ class DerivativeAndPosition implements Comparable<DerivativeAndPosition> {
 		this.derivative = derive;
 	}
 
-	@Override
 	public int compareTo(final DerivativeAndPosition arg0) {
 		return derivative.compareTo(arg0.derivative);
 	}
 
-	@Override
+	
 	public boolean equals(final Object other) {
 		boolean isEqual = false;
 		if (other != null && other instanceof DerivativeAndPosition) {
@@ -22,7 +21,7 @@ class DerivativeAndPosition implements Comparable<DerivativeAndPosition> {
 		return isEqual;
 	}
 
-	@Override
+	
 	public int hashCode() {
 		return derivative.hashCode();
 	}

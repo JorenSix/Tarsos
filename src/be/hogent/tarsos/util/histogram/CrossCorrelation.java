@@ -8,7 +8,6 @@ package be.hogent.tarsos.util.histogram;
  * @author Joren Six
  */
 public final class CrossCorrelation implements HistogramCorrelation {
-	@Override
 	public double correlation(final Histogram thisHistogam, final int displacement,
 			final Histogram otherHistogram) {
 		// number of bins (classes)
@@ -37,7 +36,6 @@ public final class CrossCorrelation implements HistogramCorrelation {
 		return distance / numberOfClasses;
 	}
 
-	@Override
 	public void plotCorrelation(final Histogram thisHistogram, final int displacement,
 			final Histogram otherHistogram, final String fileName, final String title) {
 		new Intersection().plotCorrelation(thisHistogram, displacement, otherHistogram, fileName, title);

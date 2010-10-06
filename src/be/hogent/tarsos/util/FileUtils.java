@@ -15,14 +15,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CodingErrorAction;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,7 +36,7 @@ import be.hogent.tarsos.sampled.pitch.Sample;
  * @author Joren Six
  */
 public final class FileUtils {
-	private static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
+	static final Logger LOG = Logger.getLogger(FileUtils.class.getName());
 
 	/**
 	 * Parses files that can be exported from <a
@@ -339,7 +332,6 @@ public final class FileUtils {
 	}
 
 	public static final RowFilter ACCEPT_ALL_ROWFILTER = new RowFilter() {
-		@Override
 		public boolean acceptRow(final String[] row) {
 			return true;
 		}
@@ -526,50 +518,6 @@ public final class FileUtils {
 	 */
 	public static boolean mkdirs(final String path) {
 		return new File(path).mkdirs();
-	}
-
-	/**
-	 * replaces UTF-8 characters and spaces with _ . Returns the complete path.
-	 * <p>
-	 * E.g. <code>/tmp/01.��skar ton.mp3</code> is converted to:
-	 * <code>/tmp/01.__skar_ton.mp3</code>
-	 * </p>
-	 * 
-	 * @param fileName
-	 *            the filename to sanitize
-	 * @return the complete sanitized path.
-	 */
-	public static String sanitizedFileName(final String fileName) {
-		final String baseName = basename(fileName);
-		String newBaseName = baseName.replaceAll(" ", "_");
-		newBaseName = newBaseName.replaceAll("\\(", "-");
-		newBaseName = newBaseName.replaceAll("\\)", "-");
-		newBaseName = newBaseName.replaceAll("&", "and");
-		newBaseName = filterNonAscii(newBaseName);
-		return fileName.replace(baseName, newBaseName);
-	}
-
-	private static String filterNonAscii(final String inString) {
-		// Create the encoder and decoder for the character encoding
-		final Charset charset = Charset.forName("US-ASCII");
-		final CharsetDecoder decoder = charset.newDecoder();
-		final CharsetEncoder encoder = charset.newEncoder();
-		// This line is the key to removing "unmappable" characters.
-		encoder.replaceWith("_".getBytes());
-		encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
-		String result = inString;
-		try {
-			// Convert a string to bytes in a ByteBuffer
-			final ByteBuffer bbuf = encoder.encode(CharBuffer.wrap(inString));
-			// Convert bytes in a ByteBuffer to a character ByteBuffer and then
-			// to a string.
-			final CharBuffer cbuf = decoder.decode(bbuf);
-			result = cbuf.toString();
-		} catch (final CharacterCodingException cce) {
-			LOG.severe("Exception during character encoding/decoding: " + cce.getMessage());
-		}
-
-		return result;
 	}
 
 	/**

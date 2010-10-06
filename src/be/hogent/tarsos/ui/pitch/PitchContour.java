@@ -100,7 +100,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 
 	JButton button;
 
-	@Override
+	
 	public void audioFileChanged(final AudioFile newAudioFile) {
 		clear(0);
 
@@ -125,7 +125,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		button.addActionListener(new ActionListener() {
 			final StringBuffer stringBuffer = new StringBuffer();
 
-			@Override
+			
 			public void actionPerformed(ActionEvent arg0) {
 				// EPS
 				OutputStream out;
@@ -162,7 +162,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		repaint();
 	}
 
-	@Override
+	
 	public void scaleChanged(double[] newScale, boolean isChanging) {
 		scale = newScale;
 		clearYTicks();
@@ -170,7 +170,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		repaint();
 	}
 
-	@Override
+	
 	public void addSample(Sample sample) {
 		List<Double> pitches = sample.getPitchesIn(PitchUnit.HERTZ);
 		double time = sample.getStart() / 1000.0;
@@ -185,7 +185,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 
 	}
 
-	@Override
+	
 	public void removeSample(Sample sample) {
 		// TODO Auto-generated method stub
 	}

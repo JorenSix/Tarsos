@@ -99,7 +99,7 @@ public final class Rank extends AbstractTarsosApp {
 				tree.put(correlation, hay.getName());
 			}
 
-			for (final Double correlation : tree.descendingKeySet()) {
+			for (final Double correlation : tree.keySet()) {
 				Tarsos.println(correlation + " " + tree.get(correlation));
 			}
 		}

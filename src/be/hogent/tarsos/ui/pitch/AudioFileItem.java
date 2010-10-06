@@ -85,7 +85,7 @@ public class AudioFileItem extends JComponent {
 		hints.put(RenderingHints.KEY_TEXT_ANTIALIASING, value);
 	}
 
-	@Override
+	
 	public Dimension getPreferredSize() {
 		return new Dimension(getItemWidth(), getItemHeight());
 	}
@@ -128,7 +128,7 @@ public class AudioFileItem extends JComponent {
 		return buffer;
 	}
 
-	@Override
+	
 	protected void paintComponent(Graphics g) {
 		if (isVisible()) {
 			Graphics2D g2 = (Graphics2D) g;

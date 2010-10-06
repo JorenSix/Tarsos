@@ -162,7 +162,6 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 	 * 
 	 * @see be.hogent.tarsos.pitch.pure.PurePitchDetector#getPitch(float[])
 	 */
-	@Override
 	public float getPitch(final float[] audioBuffer) {
 		float pitch;
 

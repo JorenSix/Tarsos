@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +117,6 @@ public final class Tarsos {
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			@Override
 			public void run() {
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -145,7 +143,10 @@ public final class Tarsos {
 		final String subcommand = arguments[0];
 		String[] subcommandArgs;
 		if (arguments.length > 1) {
-			subcommandArgs = Arrays.copyOfRange(arguments, 1, arguments.length);
+			subcommandArgs = new String[arguments.length - 1];
+			for (int i = 1; i < arguments.length; i++) {
+				subcommandArgs[i - 1] = arguments[i];
+			}
 		} else {
 			subcommandArgs = new String[0];
 		}

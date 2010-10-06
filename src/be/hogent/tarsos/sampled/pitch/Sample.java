@@ -218,7 +218,7 @@ public final class Sample implements Comparable<Sample> {
 		return ambitusHistogram;
 	}
 
-	@Override
+	
 	public int compareTo(final Sample o) {
 		// start time first
 		final int startCompare = Long.valueOf(start).compareTo(Long.valueOf(o.start));
@@ -232,7 +232,7 @@ public final class Sample implements Comparable<Sample> {
 		return compareValue;
 	}
 
-	@Override
+	
 	public boolean equals(final Object o) {
 		boolean isEqual = false;
 		if (o != null && o instanceof Sample) {
@@ -242,7 +242,7 @@ public final class Sample implements Comparable<Sample> {
 		return isEqual;
 	}
 
-	@Override
+	
 	public String toString() {
 		final String separator = "\t";
 		final StringBuilder sb = new StringBuilder();
@@ -273,7 +273,7 @@ public final class Sample implements Comparable<Sample> {
 		return new Sample(start, hertzValues, probabilities);
 	}
 
-	@Override
+	
 	public int hashCode() {
 		return Long.valueOf(start).hashCode() + getSource().hashCode();
 	}

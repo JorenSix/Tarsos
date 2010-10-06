@@ -28,7 +28,7 @@ public final class MidiToWav extends AbstractTarsosApp {
      * (non-Javadoc)
      * @see be.hogent.tarsos.cli.AbstractTarsosApp#description()
      */
-    @Override
+    
     public String description() {
         return "Creates a WAV file using a scala file and a MIDI file as input. "
         + "This is usefull to create WAV-files in a certain tone scale.";
@@ -38,7 +38,7 @@ public final class MidiToWav extends AbstractTarsosApp {
      * (non-Javadoc)
      * @see be.hogent.tarsos.cli.AbstractTarsosApp#name()
      */
-    @Override
+    
     public String name() {
         return "midi_to_wav";
     }
@@ -47,7 +47,7 @@ public final class MidiToWav extends AbstractTarsosApp {
      * (non-Javadoc)
      * @see be.hogent.tarsos.cli.AbstractTarsosApp#run(java.lang.String[])
      */
-    @Override
+    
     public void run(final String... args) {
         File midiFile;
         File outFile;

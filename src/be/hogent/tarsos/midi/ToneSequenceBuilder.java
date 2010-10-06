@@ -300,7 +300,7 @@ public final class ToneSequenceBuilder {
 		private static final int CENTSINOCTAVE = 1200;
 		private SignalPowerExtractor extr;
 
-		@Override
+		
 		public void handleRow(final ToneSequenceBuilder builder, final String[] row) {
 			final double realTime = Double.parseDouble(row[0]) / SAMPLERATE;
 			final double frequency = REFFREQUENCY * Math.pow(2.0, Double.parseDouble(row[1]) / CENTSINOCTAVE);
@@ -311,17 +311,17 @@ public final class ToneSequenceBuilder {
 			}
 		}
 
-		@Override
+		
 		public int getNumberOfExpectedColumn() {
 			return 2;
 		}
 
-		@Override
+		
 		public String getSeparator() {
 			return "[\\s]+";
 		}
 
-		@Override
+		
 		public void setExtractor(final SignalPowerExtractor extractor) {
 			extr = extractor;
 		}
@@ -330,7 +330,7 @@ public final class ToneSequenceBuilder {
 	private static class AubioCSVHandler implements CSVFileHandler {
 		private SignalPowerExtractor extr;
 
-		@Override
+		
 		public void handleRow(final ToneSequenceBuilder builder, final String[] row) {
 			final double realTime = Double.parseDouble(row[0]);
 			final double frequency = Double.parseDouble(row[1]);
@@ -341,17 +341,17 @@ public final class ToneSequenceBuilder {
 			}
 		}
 
-		@Override
+		
 		public int getNumberOfExpectedColumn() {
 			return 2;
 		}
 
-		@Override
+		
 		public String getSeparator() {
 			return "\t";
 		}
 
-		@Override
+		
 		public void setExtractor(final SignalPowerExtractor extractor) {
 			extr = extractor;
 		}
@@ -365,7 +365,7 @@ public final class ToneSequenceBuilder {
 		private int sampleNumber = 0;
 		private SignalPowerExtractor extr;
 
-		@Override
+		
 		public void handleRow(final ToneSequenceBuilder builder, final String[] row) {
 			sampleNumber++;
 			final double realTime = sampleNumber / 100.0; // 100 Hz sample
@@ -384,17 +384,17 @@ public final class ToneSequenceBuilder {
 			}
 		}
 
-		@Override
+		
 		public int getNumberOfExpectedColumn() {
 			return 0;
 		}
 
-		@Override
+		
 		public String getSeparator() {
 			return " ";
 		}
 
-		@Override
+		
 		public void setExtractor(final SignalPowerExtractor extractor) {
 			extr = extractor;
 		}

@@ -125,7 +125,6 @@ public final class AudioDispatcher implements Runnable {
 	 * 
 	 * @see java.lang.Runnable#run()
 	 */
-	@Override
 	public void run() {
 		try {
 			int bytesRead;

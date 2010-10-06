@@ -7,7 +7,6 @@ package be.hogent.tarsos.util.histogram;
  */
 public final class EuclideanDistance implements HistogramCorrelation {
 
-	@Override
 	public double correlation(final Histogram thisHistogam, final int displacement,
 			final Histogram otherHistogram) {
 		// number of bins (classes)
@@ -43,7 +42,6 @@ public final class EuclideanDistance implements HistogramCorrelation {
 	 * tarsos.util.histogram.HistogramCorrelation#plotCorrelation(tarsos.util
 	 * .histogram.Histogram, int, tarsos.util.histogram.Histogram)
 	 */
-	@Override
 	public void plotCorrelation(final Histogram thisHistogram, final int displacement,
 			final Histogram otherHistogram, final String fileName, final String title) {
 		// for the moment this plots the intersection (not the euclidean

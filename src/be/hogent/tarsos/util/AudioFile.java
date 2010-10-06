@@ -23,8 +23,8 @@ import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.sampled.pitch.Sample;
 
 /**
- * Represents an audio file. Facilitates transcoding, handling of path names and
- * data sets.
+ * Represents an audio file. Facilitates transcoding, handling of originalPath
+ * names and data sets.
  * 
  * @author Joren Six
  */
@@ -35,45 +35,42 @@ public final class AudioFile {
 	 */
 	private static final Logger LOG = Logger.getLogger(AudioFile.class.getName());
 
-	/**
-	 * Where to save the transcoded files.
-	 */
-	public static final String TRANSCODED_AUDIO_DIR = Configuration.get(ConfKey.transcoded_audio_directory);
-
-	private final String path;
+	private final String originalPath;
 
 	/**
 	 * Create and transcode an audio file.
 	 * 
 	 * @param filePath
-	 *            the path for the audio file
+	 *            the originalPath for the audio file
 	 */
 	public AudioFile(final String filePath) {
-		this.path = filePath;
+		this.originalPath = new File(filePath).getAbsolutePath();
 		if (AudioTranscoder.transcodingRequired(transcodedPath())) {
 			AudioTranscoder.transcode(filePath, transcodedPath());
 		}
 	}
 
 	/**
-	 * @return the path of the transcoded audio file.
+	 * @return the originalPath of the transcoded audio file.
 	 */
 	public String transcodedPath() {
-		final String baseName = FileUtils.basename(FileUtils.sanitizedFileName(path));
+		final String baseName = FileUtils.basename(StringUtils.sanitize(originalPath));
 		final String fileName = baseName + "." + Configuration.get(ConfKey.transcoded_audio_format);
-		return FileUtils.combine(TRANSCODED_AUDIO_DIR, fileName);
+		final String md5 = StringUtils.messageDigestFive(originalPath);
+		final String dataFolder = Configuration.get(ConfKey.data_directory);
+		return FileUtils.combine(dataFolder, fileName);
 	}
 
 	/**
-	 * @return the path of the original file
+	 * @return the originalPath of the original file
 	 */
 	public String path() {
-		return this.path;
+		return this.originalPath;
 	}
 
-	@Override
+	
 	public String toString() {
-		return FileUtils.basename(path);
+		return FileUtils.basename(originalPath);
 	}
 
 	/**

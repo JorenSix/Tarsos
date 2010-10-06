@@ -49,13 +49,12 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 		layers.add(scalaLayer);
 	}
 
-	@Override
 	public void audioFileChanged(final AudioFile audioFile) {
 		histo.clear();
 		histoLayer.audioFileChanged(audioFile);
 	}
 
-	@Override
+	
 	public void paint(final Graphics g) {
 		final Graphics2D graphics = (Graphics2D) g;
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -76,14 +75,12 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 		return layers;
 	}
 
-	@Override
 	public void scaleChanged(final double[] newScale, final boolean isChanging) {
 		this.scalaLayer.scaleChanged(newScale, isChanging);
 		this.scalaLayer.setXOffset(histoLayer.getXOffset());
 		histoLayer.scaleChanged(newScale, isChanging);
 	}
 
-	@Override
 	public void addSample(Sample sample) {
 		List<Double> pitches = sample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS);
 		for (double pitch : pitches) {
@@ -97,7 +94,6 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 
 	}
 
-	@Override
 	public void removeSample(Sample sample) {
 		// TODO Auto-generated method stub
 

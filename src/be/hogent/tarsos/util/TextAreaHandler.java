@@ -47,7 +47,6 @@ public final class TextAreaHandler extends Handler {
 	 */
 	public TextAreaHandler() {
 		Filter filter = new Filter() {
-			@Override
 			public boolean isLoggable(final LogRecord record) {
 				return record.getLevel().intValue() >= level.intValue();
 			}
@@ -60,6 +59,7 @@ public final class TextAreaHandler extends Handler {
 	 * 
 	 * @see java.util.logging.Handler#publish(java.util.logging.LogRecord)
 	 */
+
 	@Override
 	public void publish(final LogRecord logRecord) {
 		// Must filter our own logRecords, (lame) Abstract Handler does not do
@@ -72,7 +72,6 @@ public final class TextAreaHandler extends Handler {
 
 		// Append formatted message to textareas using the Swing Thread.
 		SwingUtilities.invokeLater(new Runnable() {
-			@Override
 			public void run() {
 				if (jTextArea != null) {
 					jTextArea.append(message);
@@ -86,6 +85,7 @@ public final class TextAreaHandler extends Handler {
 	 * 
 	 * @see java.util.logging.Handler#close()
 	 */
+
 	@Override
 	public void close() {
 	}
@@ -95,6 +95,7 @@ public final class TextAreaHandler extends Handler {
 	 * 
 	 * @see java.util.logging.Handler#flush()
 	 */
+
 	@Override
 	public void flush() {
 	}
@@ -103,6 +104,7 @@ public final class TextAreaHandler extends Handler {
 	 * Must capture level to use in our custom filter, because this is not done
 	 * in the abstract class.
 	 */
+
 	@Override
 	public void setLevel(final Level newLevel) {
 		super.setLevel(newLevel);

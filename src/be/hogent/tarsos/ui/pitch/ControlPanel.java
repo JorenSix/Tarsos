@@ -57,7 +57,6 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		playButton = new JButton("Play");
 		playButton.setEnabled(false);
 		playButton.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(final ActionEvent e) {
 				if (processorThread.isPaused()) {
 					processorThread.resumeAnalysis();
@@ -74,7 +73,6 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		stopButton = new JButton("Stop");
 		stopButton.setEnabled(false);
 		stopButton.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(final ActionEvent arg0) {
 				if (processorThread != null) {
 					processorThread.stopAnalysis();
@@ -88,7 +86,6 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		SpinnerModel model = new SpinnerNumberModel(1.0, 0.0, 20.0, 0.5);
 		speedSpinner = new JSpinner(model);
 		speedSpinner.addChangeListener(new ChangeListener() {
-			@Override
 			public void stateChanged(final ChangeEvent e) {
 				final JSpinner source = (JSpinner) e.getSource();
 				final double value = (Double) source.getValue();
@@ -155,7 +152,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			return isPaused;
 		}
 
-		@Override
+		
 		public void run() {
 			running = true;
 			PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
@@ -243,7 +240,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			running = false;
 		}
 
-		@Override
+		
 		public void run() {
 			running = true;
 			AudioFileFormat format = file.fileFormat();
@@ -289,7 +286,6 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		handlers.add(handler);
 	}
 
-	@Override
 	public void audioFileChanged(AudioFile newAudioFile) {
 		audioFile = newAudioFile;
 		if (processorThread != null && processorThread.isAlive()) {

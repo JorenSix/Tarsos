@@ -29,19 +29,19 @@ public final class AnnotationSynth extends AbstractTarsosApp {
      */
     private static final Logger LOG = Logger.getLogger(AnnotationSynth.class.getName());
 
-    @Override
+    
     public String description() {
         return "Generates audio from a set of annotations. AnnotationSynth is used to "
         + "sonificate pitch annotation files. For the moment it uderstands the pitch "
         + "files used by BOZKURT, AUBIO and IPEM_SIX. It reads the data from a file or from STDIN.";
     }
 
-    @Override
+    
     public String name() {
         return "annotation_synth";
     }
 
-    @Override
+    
     public void run(final String... args) {
         final OptionParser parser = new OptionParser();
 

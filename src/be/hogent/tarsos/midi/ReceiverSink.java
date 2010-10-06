@@ -25,14 +25,14 @@ public final class ReceiverSink implements Receiver {
 		this.ignoreTiming = ignoreTimingData;
 	}
 
-	@Override
+	
 	public void close() {
 		for (final Receiver receiver : receivers) {
 			receiver.close();
 		}
 	}
 
-	@Override
+	
 	public void send(final MidiMessage message, final long timeStamp) {
 		long actualTimeStamp = timeStamp;
 		if (ignoreTiming) {

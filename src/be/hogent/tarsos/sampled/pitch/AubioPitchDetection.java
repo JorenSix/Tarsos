@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import be.hogent.tarsos.util.AudioFile;
-import be.hogent.tarsos.util.ConfKey;
-import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.Execute;
 import be.hogent.tarsos.util.FileUtils;
 
@@ -38,11 +36,12 @@ public final class AubioPitchDetection implements PitchDetector {
 		this.name = "aubio_" + pitchDetectionMode.getParametername();
 	}
 
-	@Override
 	public void executePitchDetection() {
-		final String annotationsDirectory = Configuration.get(ConfKey.raw_aubio_annotations_directory);
-		final String csvFileName = FileUtils.combine(annotationsDirectory, this.name + "_" + file.basename()
-				+ ".txt");
+		// final String annotationsDirectory =
+		// Configuration.get(ConfKey.raw_aubio_annotations_directory);
+
+		// TODO: FIX directories
+		final String csvFileName = this.name + "_" + file.basename() + ".txt";
 
 		if (!FileUtils.exists(csvFileName)) {
 			final String command = "aubiopitch  -u freq --mode "
@@ -84,12 +83,10 @@ public final class AubioPitchDetection implements PitchDetector {
 		}
 	}
 
-	@Override
 	public String getName() {
 		return this.name;
 	}
 
-	@Override
 	public List<Sample> getSamples() {
 		return this.samples;
 	}

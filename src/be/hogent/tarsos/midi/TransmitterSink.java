@@ -20,14 +20,14 @@ public final class TransmitterSink implements Transmitter {
         this.transmitters = transmitterList;
     }
 
-    @Override
+    
     public void close() {
         for (final Transmitter transmitter : transmitters) {
             transmitter.close();
         }
     }
 
-    @Override
+    
     public Receiver getReceiver() {
         Receiver receiver = null;
         if (transmitters.length != 0) {
@@ -42,7 +42,7 @@ public final class TransmitterSink implements Transmitter {
         return receiver;
     }
 
-    @Override
+    
     public void setReceiver(final Receiver receiver) {
         for (final Transmitter transmitter : transmitters) {
             transmitter.setReceiver(receiver);

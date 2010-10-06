@@ -9,8 +9,6 @@ import be.hogent.tarsos.util.SimplePlot;
  * @author Joren Six
  */
 public final class Intersection implements HistogramCorrelation {
-
-	@Override
 	public double correlation(final Histogram thisHistogram, final int displacement,
 			final Histogram otherHistogram) {
 
@@ -51,7 +49,6 @@ public final class Intersection implements HistogramCorrelation {
 		return correlation;
 	}
 
-	@Override
 	public void plotCorrelation(final Histogram thisHistogram, final int displacement,
 			final Histogram otherHistogram, final String fileName, final String title) {
 		// number of bins (classes)

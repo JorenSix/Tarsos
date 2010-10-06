@@ -47,7 +47,7 @@ public final class StopWatch {
         ticks = System.nanoTime();
     }
 
-    @Override
+    
     public String toString() {
         return ticksPassed() + "ms";
     }

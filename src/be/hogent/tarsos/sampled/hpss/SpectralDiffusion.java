@@ -98,7 +98,7 @@ public final class SpectralDiffusion implements AudioProcessor, FrameListener {
 	 * 
 	 * @see be.hogent.tarsos.sampled.AudioProcessor#processFull(float[], byte[])
 	 */
-	@Override
+	
 	public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
 		fft = new FFT(1024);
 		f = new float[numberOfBlocks][audioFloatBuffer.length * 2];
@@ -111,7 +111,7 @@ public final class SpectralDiffusion implements AudioProcessor, FrameListener {
 	 * @see be.hogent.tarsos.sampled.AudioProcessor#processOverlapping(float[],
 	 * byte[])
 	 */
-	@Override
+	
 	public void processOverlapping(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
 		if (blockIndex == numberOfBlocks) {
 			blockIndex = blockIndex % numberOfBlocks;
@@ -130,7 +130,7 @@ public final class SpectralDiffusion implements AudioProcessor, FrameListener {
 	 * 
 	 * @see be.hogent.tarsos.sampled.AudioProcessor#processingFinished()
 	 */
-	@Override
+	
 	public void processingFinished() {
 		// TODO Auto-generated method stub
 	}
@@ -145,7 +145,7 @@ public final class SpectralDiffusion implements AudioProcessor, FrameListener {
 
 	}
 
-	@Override
+	
 	public void newFrame(STFT stft, long frAddr) {
 
 		System.out.println(stft.getFrame(frAddr).length);

@@ -148,14 +148,12 @@ public final class BandPassFilter implements AudioProcessor {
 		return 0;
 	}
 
-	@Override
 	public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
 
 		delayLine = new double[response.length];
 		processReal(audioFloatBuffer, audioByteBuffer);
 	}
 
-	@Override
 	public void processOverlapping(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
 		processReal(audioFloatBuffer, audioByteBuffer);
 	}
@@ -189,7 +187,6 @@ public final class BandPassFilter implements AudioProcessor {
 		return result;
 	}
 
-	@Override
 	public void processingFinished() {
 	}
 

@@ -54,7 +54,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 		this.detectionMode = pitchDetectionMode;
 	}
 
-	@Override
+	
 	public void executePitchDetection() {
 		try {
 			String annotationsFileName = detectionMode.getParametername() + "_" + file.basename() + ".txt";
@@ -62,7 +62,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 				samples.addAll(FileUtils.readPitchAnnotations(annotationsFileName));
 			} else {
 				processFile(file.transcodedPath(), detectionMode, new DetectedPitchHandler() {
-					@Override
+					
 					public void handleDetectedPitch(final float time, final float pitch) {
 						final long start = (long) (time * TICKS_PER_SEC);
 						final Sample s;
@@ -84,7 +84,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 		}
 	}
 
-	@Override
+	
 	public String getName() {
 		final String name;
 		if (PitchDetectionMode.TARSOS_MPM == detectionMode) {
@@ -97,7 +97,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 		return name;
 	}
 
-	@Override
+	
 	public List<Sample> getSamples() {
 		return samples;
 	}
@@ -164,13 +164,13 @@ public final class TarsosPitchDetection implements PitchDetector {
 			private long samplesProcessed = 0;
 			private float time = 0;
 
-			@Override
+			
 			public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
 				samplesProcessed += audioFloatBuffer.length;
 				processBuffer(audioFloatBuffer);
 			}
 
-			@Override
+			
 			public void processOverlapping(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
 				samplesProcessed += bufferStepSize;
 				processBuffer(audioFloatBuffer);
@@ -182,7 +182,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 				detectedPitchHandler.handleDetectedPitch(time, pitch);
 			}
 
-			@Override
+			
 			public void processingFinished() {
 			}
 		});
@@ -196,7 +196,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 		final SimplePlot p = new SimplePlot("Pitch tracking");
 		processFile("../Tarsos/audio/pitch_check/flute.novib.mf.C5B5.wav", PitchDetectionMode.TARSOS_MPM,
 				new DetectedPitchHandler() {
-					@Override
+					
 					public void handleDetectedPitch(final float time, final float pitch) {
 						Tarsos.println(time + "\t" + pitch);
 						double plotPitch = pitch;
@@ -214,7 +214,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 	 * Prints the detected pitch to STD OUT.
 	 */
 	public static final DetectedPitchHandler PRINT_DETECTED_PITCH_HANDLER = new DetectedPitchHandler() {
-		@Override
+		
 		public void handleDetectedPitch(final float time, final float pitch) {
 			Tarsos.println(time + "\t" + pitch);
 		}

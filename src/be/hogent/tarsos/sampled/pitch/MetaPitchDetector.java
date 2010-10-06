@@ -45,7 +45,6 @@ public final class MetaPitchDetector implements PurePitchDetector {
 	 * 
 	 * @see be.hogent.tarsos.pitch.pure.PurePitchDetector#getPitch(float[])
 	 */
-	@Override
 	public float getPitch(final float[] audioBuffer) {
 		final float yinPitch = yin.getPitch(audioBuffer);
 		final float mpmPitch = mpm.getPitch(audioBuffer);

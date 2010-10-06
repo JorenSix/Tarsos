@@ -82,11 +82,11 @@ public final class LogReceiver implements Receiver {
 		m_bPrintTimeStampAsTicks = bPrintTimeStampAsTicks;
 	}
 
-	@Override
+	
 	public void close() {
 	}
 
-	@Override
+	
 	public void send(final MidiMessage message, final long lTimeStamp) {
 		String strMessage = null;
 		if (message instanceof ShortMessage) {

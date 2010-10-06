@@ -22,17 +22,17 @@ public final class PowerExtractor extends AbstractTarsosApp {
 	 */
 	private static final int SILENCELEVEL = -40;
 
-	@Override
+	
 	public String description() {
 		return "Extracts power features from one or more files.";
 	}
 
-	@Override
+	
 	public String name() {
 		return "power_extractor";
 	}
 
-	@Override
+	
 	public void run(final String... args) {
 		final OptionParser parser = new OptionParser();
 

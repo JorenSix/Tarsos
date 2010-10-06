@@ -28,17 +28,17 @@ import be.hogent.tarsos.util.ScalaFile;
  */
 public final class TuneMidiSynth extends AbstractTarsosApp {
 
-	@Override
+	
 	public String description() {
 		return "Sends MIDI Tuning messages to the requested port using a scala file as tone scale.";
 	}
 
-	@Override
+	
 	public String name() {
 		return "tune_midi_synth";
 	}
 
-	@Override
+	
 	public void run(final String... args) {
 
 		final File sclFile;

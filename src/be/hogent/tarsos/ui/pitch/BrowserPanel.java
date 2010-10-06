@@ -37,7 +37,6 @@ public class BrowserPanel extends JPanel {
 		this.add(scalePanel, BorderLayout.CENTER);
 
 		new FileDrop(this, new FileDrop.Listener() {
-			@Override
 			public void filesDropped(final java.io.File[] files) {
 				for (final File droppedFile : files) {
 					if (FileUtils.isAudioFile(droppedFile)) {
@@ -51,7 +50,6 @@ public class BrowserPanel extends JPanel {
 	private void addAudioFile(final String fileName) {
 		Runnable task = new Runnable() {
 
-			@Override
 			public void run() {
 				final AudioFile audioFile = new AudioFile(fileName);
 				PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);

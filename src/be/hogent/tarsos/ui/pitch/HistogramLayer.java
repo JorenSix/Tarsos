@@ -74,7 +74,6 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 	 * 
 	 * @see be.hogent.tarsos.ui.Layer#draw()
 	 */
-	@Override
 	public void draw(final Graphics2D graphics) {
 
 		double xOffset = mouseDrag.calculateXOffset();
@@ -138,14 +137,13 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 
 	JComponent ui;
 
-	@Override
 	public Component ui() {
 		if (ui == null) {
 			JSlider peakSlider = new JSlider(5, 105);
 			peakSlider.setValue(5);
 			peakSlider.setMajorTickSpacing(20);
 			peakSlider.addChangeListener(new ChangeListener() {
-				@Override
+
 				public void stateChanged(final ChangeEvent e) {
 					final JSlider source = (JSlider) e.getSource();
 					//
@@ -165,7 +163,6 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 
 			JButton smoothButton = new JButton("Gaussian");
 			smoothButton.addActionListener(new ActionListener() {
-				@Override
 				public void actionPerformed(ActionEvent e) {
 					histo.gaussianSmooth(0.8);
 					parent.repaint();
@@ -174,7 +171,6 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 
 			JButton ambitusButton = new JButton("Ambitus");
 			ambitusButton.addActionListener(new ActionListener() {
-				@Override
 				public void actionPerformed(ActionEvent e) {
 					histo.clear();
 					parent.repaint();
@@ -183,7 +179,6 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 
 			JButton resetButton = new JButton("Reset");
 			resetButton.addActionListener(new ActionListener() {
-				@Override
 				public void actionPerformed(ActionEvent e) {
 					histo.clear();
 					parent.repaint();
@@ -193,7 +188,6 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 			JButton exportButton = new JButton("Export");
 			exportButton.setToolTipText("Export scala file.");
 			exportButton.addActionListener(new ActionListener() {
-				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (scale != null) {
 						ScalaFile file = new ScalaFile("Tarsos exported scala file", scale);
@@ -222,14 +216,12 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 	double[] scale;
 	AudioFile audioFile;
 
-	@Override
 	public void scaleChanged(final double[] newScale, final boolean isChanging) {
 		if (!isChanging) {
 			scale = newScale;
 		}
 	}
 
-	@Override
 	public void audioFileChanged(final AudioFile newAudioFile) {
 		audioFile = newAudioFile;
 	}

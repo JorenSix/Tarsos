@@ -34,13 +34,11 @@ public final class KeyboardPanel extends JPanel implements ScaleChangedListener 
 		setPreferredSize(new Dimension(200, 50));
 	}
 
-	@Override
 	public void scaleChanged(final double[] newScale, final boolean isChanging) {
 		if (!isChanging) {
 			// tuning takes some time, run it in a separate thread to keep the
 			// UI responsive.
 			Runnable tuneRunnable = new Runnable() {
-				@Override
 				public void run() {
 					keyboard.connectToTunedSynth(newScale);
 					LOG.log(Level.FINE, "Tuned the keboard using a new scale %s", Arrays.toString(newScale));

@@ -45,7 +45,6 @@ public final class PitchDetectionMix implements PitchDetector {
 		samples = new ArrayList<Sample>();
 	}
 
-	@Override
 	public void executePitchDetection() {
 
 		for (final PitchDetector detector : detectors) {
@@ -76,12 +75,10 @@ public final class PitchDetectionMix implements PitchDetector {
 		}
 	}
 
-	@Override
 	public String getName() {
 		return this.name;
 	}
 
-	@Override
 	public List<Sample> getSamples() {
 		return this.samples;
 	}

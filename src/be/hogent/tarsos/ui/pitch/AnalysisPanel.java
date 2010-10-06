@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
-import javax.swing.GroupLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -24,6 +23,8 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+
+import org.jdesktop.layout.GroupLayout;
 
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileDrop;
@@ -126,26 +127,19 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 
 		layout.setHorizontalGroup(layout
 				.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-								.addComponent(ambitusCheckBox).addComponent(keyboardCheckBox)
-								.addComponent(controlsCheckBox))
-				.addGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-								.addComponent(intervalTableCheckBox).addComponent(pitchContourCheckBox)
-								.addComponent(toneScaleCheckBox)));
+				.add(layout.createParallelGroup(GroupLayout.LEADING).add(ambitusCheckBox)
+						.add(keyboardCheckBox).add(controlsCheckBox))
+				.add(layout.createParallelGroup(GroupLayout.LEADING).add(intervalTableCheckBox)
+						.add(pitchContourCheckBox).add(toneScaleCheckBox)));
 
 		layout.setVerticalGroup(layout
 				.createSequentialGroup()
-				.addGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-								.addComponent(ambitusCheckBox).addComponent(pitchContourCheckBox))
-				.addGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-								.addComponent(intervalTableCheckBox).addComponent(keyboardCheckBox))
-				.addGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-								.addComponent(controlsCheckBox).addComponent(toneScaleCheckBox)));
+				.add(layout.createParallelGroup(GroupLayout.BASELINE).add(ambitusCheckBox)
+						.add(pitchContourCheckBox))
+				.add(layout.createParallelGroup(GroupLayout.BASELINE).add(intervalTableCheckBox)
+						.add(keyboardCheckBox))
+				.add(layout.createParallelGroup(GroupLayout.BASELINE).add(controlsCheckBox)
+						.add(toneScaleCheckBox)));
 
 		JScrollPane browserScollPane = new JScrollPane(browser);
 		browserScollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -176,11 +170,9 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 			this.toValidate = componentToValidate;
 		}
 
-		@Override
 		public void actionPerformed(final ActionEvent e) {
 			final JCheckBox checkBox = (JCheckBox) e.getSource();
 			SwingUtilities.invokeLater(new Runnable() {
-				@Override
 				public void run() {
 					if (checkBox.getModel().isSelected()) {
 						panel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -196,7 +188,6 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 
 	private void addFileDropListener() {
 		new FileDrop(this, new FileDrop.Listener() {
-			@Override
 			public void filesDropped(final java.io.File[] files) {
 				if (files.length != 0) {
 					LOG.log(Level.WARNING, "Dropped %s files. For the moment only 1 file should be dropped",
@@ -255,7 +246,6 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 		scaleChangedListeners.add(listener);
 	}
 
-	@Override
 	public void scaleChanged(double[] newScale, boolean isChanging) {
 		scale = newScale;
 		notifyScaleChangedListeners(isChanging);

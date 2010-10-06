@@ -54,17 +54,17 @@ class DFilterCanvas extends Canvas {
 		pg = p;
 	}
 
-	@Override
+	
 	public Dimension getPreferredSize() {
 		return new Dimension(300, 400);
 	}
 
-	@Override
+	
 	public void update(Graphics g) {
 		pg.updateDFilter(g);
 	}
 
-	@Override
+	
 	public void paint(Graphics g) {
 		pg.updateDFilter(g);
 	}
@@ -74,25 +74,20 @@ class DFilterLayout implements LayoutManager {
 	public DFilterLayout() {
 	}
 
-	@Override
 	public void addLayoutComponent(String name, Component c) {
 	}
 
-	@Override
 	public void removeLayoutComponent(Component c) {
 	}
 
-	@Override
 	public Dimension preferredLayoutSize(Container target) {
 		return new Dimension(500, 500);
 	}
 
-	@Override
 	public Dimension minimumLayoutSize(Container target) {
 		return new Dimension(100, 100);
 	}
 
-	@Override
 	public void layoutContainer(Container target) {
 		Insets insets = target.insets();
 		int targetw = target.size().width - insets.left - insets.right;
@@ -139,7 +134,7 @@ public class DFilter extends Applet implements ComponentListener {
 
 	boolean started = false;
 
-	@Override
+	
 	public void init() {
 		addComponentListener(this);
 	}
@@ -162,7 +157,7 @@ public class DFilter extends Applet implements ComponentListener {
 
 	boolean security = false;
 
-	@Override
+	
 	public void paint(Graphics g) {
 		String s = "Applet is open in a separate window.";
 		if (security) {
@@ -177,24 +172,20 @@ public class DFilter extends Applet implements ComponentListener {
 		g.drawString(s, 10, 30);
 	}
 
-	@Override
 	public void componentHidden(ComponentEvent e) {
 	}
 
-	@Override
 	public void componentMoved(ComponentEvent e) {
 	}
 
-	@Override
 	public void componentShown(ComponentEvent e) {
 		showFrame();
 	}
 
-	@Override
 	public void componentResized(ComponentEvent e) {
 	}
 
-	@Override
+	
 	public void destroy() {
 		if (ogf != null) {
 			ogf.dispose();
@@ -717,7 +708,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		g.drawString(s, (winSize.width - fm.stringWidth(s)) / 2, y);
 	}
 
-	@Override
+	
 	public void paint(Graphics g) {
 		cv.repaint();
 	}
@@ -1547,26 +1538,21 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		return wform;
 	}
 
-	@Override
 	public void componentHidden(ComponentEvent e) {
 	}
 
-	@Override
 	public void componentMoved(ComponentEvent e) {
 	}
 
-	@Override
 	public void componentShown(ComponentEvent e) {
 		cv.repaint(pause);
 	}
 
-	@Override
 	public void componentResized(ComponentEvent e) {
 		handleResize();
 		cv.repaint(pause);
 	}
 
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == exitItem) {
 			applet.destroyFrame();
@@ -1574,7 +1560,6 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		}
 	}
 
-	@Override
 	public void adjustmentValueChanged(AdjustmentEvent e) {
 		setupFilter();
 		System.out.print(((Scrollbar) e.getSource()).getValue() + "\n");
@@ -1588,7 +1573,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		inputW = pi * inputBar.getValue() / 1000.;
 	}
 
-	@Override
+	
 	public boolean handleEvent(Event ev) {
 		if (ev.id == Event.WINDOW_DESTROY) {
 			if (playThread != null) {
@@ -1600,7 +1585,6 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		return super.handleEvent(ev);
 	}
 
-	@Override
 	public void mouseDragged(MouseEvent e) {
 		mouseX = e.getX();
 		mouseY = e.getY();
@@ -1608,7 +1592,6 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		cv.repaint(pause);
 	}
 
-	@Override
 	public void mouseMoved(MouseEvent e) {
 		dragX = mouseX = e.getX();
 		dragY = mouseY = e.getY();
@@ -1664,25 +1647,20 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
 	}
 
-	@Override
 	public void mouseClicked(MouseEvent e) {
 	}
 
-	@Override
 	public void mouseEntered(MouseEvent e) {
 	}
 
-	@Override
 	public void mouseExited(MouseEvent e) {
 	}
 
-	@Override
 	public void mousePressed(MouseEvent e) {
 		mouseMoved(e);
 		edit(e);
 	}
 
-	@Override
 	public void mouseReleased(MouseEvent e) {
 	}
 
@@ -1767,7 +1745,6 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		setupFilter();
 	}
 
-	@Override
 	public void itemStateChanged(ItemEvent e) {
 		filterChanged = true;
 		if (e.getSource() == displayCheck) {
@@ -2024,13 +2001,13 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	}
 
 	class NoiseWaveform extends Waveform {
-		@Override
+		
 		boolean start() {
 			getBuffer();
 			return true;
 		}
 
-		@Override
+		
 		int getData() {
 			int i;
 			for (i = 0; i != buffer.length; i++) {
@@ -2039,12 +2016,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return buffer.length;
 		}
 
-		@Override
+		
 		String getInputText() {
 			return null;
 		}
 
-		@Override
+		
 		boolean needsFrequency() {
 			return false;
 		}
@@ -2054,12 +2031,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		short smbuf[];
 		int ix;
 
-		@Override
+		
 		int getChannels() {
 			return 1;
 		}
 
-		@Override
+		
 		boolean start() {
 			getBuffer();
 			smbuf = new short[1];
@@ -2067,7 +2044,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return true;
 		}
 
-		@Override
+		
 		int getData() {
 			int period = (int) (2 * pi / inputW);
 			if (period != smbuf.length) {
@@ -2091,19 +2068,19 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	class SineWaveform extends Waveform {
 		int ix;
 
-		@Override
+		
 		int getChannels() {
 			return 1;
 		}
 
-		@Override
+		
 		boolean start() {
 			getBuffer();
 			ix = 0;
 			return true;
 		}
 
-		@Override
+		
 		int getData() {
 			int i;
 			for (i = 0; i != buffer.length; i++) {
@@ -2118,12 +2095,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		int ix;
 		short smbuf[];
 
-		@Override
+		
 		int getChannels() {
 			return 1;
 		}
 
-		@Override
+		
 		boolean start() {
 			getBuffer();
 			ix = 0;
@@ -2131,7 +2108,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return true;
 		}
 
-		@Override
+		
 		int getData() {
 			int i;
 			int period = (int) (2 * pi / inputW);
@@ -2159,12 +2136,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		int ix;
 		short smbuf[];
 
-		@Override
+		
 		int getChannels() {
 			return 1;
 		}
 
-		@Override
+		
 		boolean start() {
 			getBuffer();
 			ix = 0;
@@ -2172,7 +2149,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return true;
 		}
 
-		@Override
+		
 		int getData() {
 			int i;
 			int period = (int) (2 * pi / inputW);
@@ -2198,12 +2175,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		double omega;
 		short smbuf[];
 
-		@Override
+		
 		int getChannels() {
 			return 1;
 		}
 
-		@Override
+		
 		boolean start() {
 			getBuffer();
 			ix = 0;
@@ -2211,7 +2188,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return true;
 		}
 
-		@Override
+		
 		int getData() {
 			int i;
 			int period = (int) (2 * pi / inputW);
@@ -2241,12 +2218,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		int ix;
 		double omega, nextOmega, t, startOmega;
 
-		@Override
+		
 		int getChannels() {
 			return 1;
 		}
 
-		@Override
+		
 		boolean start() {
 			getBuffer();
 			ix = 0;
@@ -2255,7 +2232,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return true;
 		}
 
-		@Override
+		
 		int getData() {
 			int i;
 			double nmul = 1;
@@ -2285,12 +2262,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return buffer.length;
 		}
 
-		@Override
+		
 		String getInputText() {
 			return "Sweep Speed";
 		}
 
-		@Override
+		
 		boolean needsFrequency() {
 			return false;
 		}
@@ -2299,19 +2276,19 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	class ImpulseWaveform extends Waveform {
 		int ix;
 
-		@Override
+		
 		int getChannels() {
 			return 1;
 		}
 
-		@Override
+		
 		boolean start() {
 			getBuffer();
 			ix = 0;
 			return true;
 		}
 
-		@Override
+		
 		int getData() {
 			int i;
 			int ww = inputBar.getValue() / 51 + 1;
@@ -2327,12 +2304,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return buffer.length;
 		}
 
-		@Override
+		
 		String getInputText() {
 			return "Impulse Frequency";
 		}
 
-		@Override
+		
 		boolean needsFrequency() {
 			return false;
 		}
@@ -2384,7 +2361,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		int inbp, outbp;
 		int spectCt;
 
-		@Override
+		
 		public void run() {
 			try {
 				doRun();
@@ -2856,12 +2833,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			nList = new int[] { 0 };
 		}
 
-		@Override
+		
 		int getLength() {
 			return aList.length;
 		}
 
-		@Override
+		
 		boolean useConvolve() {
 			return bList == null && aList.length > 25;
 		}
@@ -2885,7 +2862,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 
 		Complex czn, top, bottom;
 
-		@Override
+		
 		void evalTransfer(Complex c) {
 			if (czn == null) {
 				czn = new Complex();
@@ -2920,7 +2897,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			c.set(top);
 		}
 
-		@Override
+		
 		void run(double inBuf[], double outBuf[], int bp, int mask, int count, double state[]) {
 			int j;
 			int fi2 = bp, i20;
@@ -2954,7 +2931,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return nList[nList.length - 1] == nList.length - 1;
 		}
 
-		@Override
+		
 		int getImpulseOffset() {
 			if (isSimpleAList()) {
 				return 0;
@@ -2962,7 +2939,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return getStepOffset();
 		}
 
-		@Override
+		
 		int getStepOffset() {
 			int i;
 			int offset = 0;
@@ -2974,7 +2951,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return offset;
 		}
 
-		@Override
+		
 		double[] getImpulseResponse(int offset) {
 			if (isSimpleAList()) {
 				return aList;
@@ -2982,7 +2959,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return super.getImpulseResponse(offset);
 		}
 
-		@Override
+		
 		int getImpulseLen(int offset, double buf[]) {
 			if (isSimpleAList()) {
 				return aList.length;
@@ -3008,7 +2985,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		double a1[], a2[], b0[], b1[], b2[];
 		int size;
 
-		@Override
+		
 		double[] createState() {
 			return new double[size * 3];
 		}
@@ -3059,7 +3036,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			System.out.println("setBStage failed");
 		}
 
-		@Override
+		
 		void run(double inBuf[], double outBuf[], int bp, int mask, int count, double state[]) {
 			int fi2, i20;
 			int i2, j;
@@ -3081,7 +3058,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 
 		Complex cm2, cm1, top, bottom;
 
-		@Override
+		
 		void evalTransfer(Complex c) {
 			if (cm1 == null) {
 				cm1 = new Complex();
@@ -3107,17 +3084,17 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			}
 		}
 
-		@Override
+		
 		int getImpulseOffset() {
 			return 0;
 		}
 
-		@Override
+		
 		int getStepOffset() {
 			return 0;
 		}
 
-		@Override
+		
 		int getLength() {
 			return 1;
 		}
@@ -3166,7 +3143,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	abstract class IIRFilterType extends FilterType {
 		double response[];
 
-		@Override
+		
 		void getResponse(double w, Complex c) {
 			if (response == null) {
 				c.set(0);
@@ -3275,7 +3252,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			// " XX");
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			int n = getPoleCount();
 			CascadeFilter f = new CascadeFilter((n + 1) / 2);
@@ -3331,7 +3308,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 
 		abstract void getSPole(int i, Complex c1, double wc);
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getSPole(i, c1, wc);
 			bilinearXform(c1);
@@ -3458,7 +3435,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	}
 
 	abstract class ButterFilterType extends PoleFilterType {
-		@Override
+		
 		void getSPole(int i, Complex c1, double wc) {
 			double theta = pi / 2 + (2 * i + 1) * pi / (2 * n);
 			c1.setMagPhase(Math.tan(wc * .5), theta);
@@ -3472,32 +3449,32 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			sign = 1;
 		}
 
-		@Override
+		
 		int select() {
 			return selectLowPass();
 		}
 
-		@Override
+		
 		void setup() {
 			setupLowPass();
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			c1.set(-sign);
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return n;
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return n;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Butterworth (IIR), " + getPoleCount() + "-pole";
 			getInfoLowPass(x);
@@ -3535,7 +3512,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			epsilon = Math.sqrt(1 / ripval - 1);
 		}
 
-		@Override
+		
 		void getSPole(int i, Complex c1, double wc) {
 			Complex c2 = new Complex();
 			double alpha = 1 / epsilon + Math.sqrt(1 + 1 / (epsilon * epsilon));
@@ -3572,19 +3549,19 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	abstract class InvChebyFilterType extends ChebyFilterType {
 		double scale;
 
-		@Override
+		
 		void selectCheby(int s) {
 			auxLabels[s].setText("Stopband Attenuation");
 			auxBars[s].setValue(600);
 		}
 
-		@Override
+		
 		void setupCheby(int a) {
 			epsilon = Math.exp(-auxBars[a].getValue() / 120.);
 			scale = cosh(acosh(1 / epsilon) / n);
 		}
 
-		@Override
+		
 		void getSPole(int i, Complex c1, double wc) {
 			wc = pi - wc;
 			super.getSPole(i, c1, wc);
@@ -3600,18 +3577,18 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			c1.div(c2);
 		}
 
-		@Override
+		
 		void getInfoCheby(String x[]) {
 			x[2] = "Stopband attenuation: "
 					+ showFormat.format(-10 * Math.log(1 + 1 / (epsilon * epsilon)) / log10) + " dB";
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return n;
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return n;
 		}
@@ -3622,41 +3599,41 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			sign = 1;
 		}
 
-		@Override
+		
 		int select() {
 			int s = selectLowPass();
 			selectCheby(s++);
 			return s;
 		}
 
-		@Override
+		
 		void setup() {
 			setupLowPass();
 			setupCheby(2);
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			super.getPole(i, c1);
 			c1.mult(sign);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			c1.set(-sign);
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return n;
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return n;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Chebyshev (IIR), " + getPoleCount() + "-pole";
 			getInfoLowPass(x);
@@ -3671,41 +3648,41 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	}
 
 	class InvChebyLowPass extends InvChebyFilterType {
-		@Override
+		
 		int select() {
 			int s = selectLowPass();
 			selectCheby(s++);
 			return s;
 		}
 
-		@Override
+		
 		void setup() {
 			setupLowPass();
 			setupCheby(2);
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Inverse Chebyshev (IIR), " + getPoleCount() + "-pole";
 			getInfoLowPass(x);
 			getInfoCheby(x);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getChebyZero(i, c1, wc);
 		}
 	}
 
 	class InvChebyHighPass extends InvChebyLowPass {
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getSPole(i, c1, pi - wc);
 			bilinearXform(c1);
 			c1.mult(-1);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getChebyZero(i, c1, pi - wc);
 			c1.mult(-1);
@@ -3713,37 +3690,37 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	}
 
 	class ButterBandPass extends ButterFilterType {
-		@Override
+		
 		int select() {
 			return selectBandPass();
 		}
 
-		@Override
+		
 		void setup() {
 			setupBandPass();
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getBandPassPole(i, c1);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getBandPassZero(i, c1);
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return n * 2;
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return n * 2;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Butterworth (IIR), " + getPoleCount() + "-pole";
 			getInfoBandPass(x, this instanceof ButterBandStop);
@@ -3751,52 +3728,52 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	}
 
 	class ButterBandStop extends ButterBandPass {
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getBandStopPole(i, c1);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getBandStopZero(i, c1);
 		}
 	}
 
 	class ChebyBandPass extends ChebyFilterType {
-		@Override
+		
 		int select() {
 			int s = selectBandPass();
 			selectCheby(s++);
 			return s;
 		}
 
-		@Override
+		
 		void setup() {
 			setupBandPass();
 			setupCheby(3);
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getBandPassPole(i, c1);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getBandPassZero(i, c1);
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return n * 2;
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return n * 2;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Chebyshev (IIR), " + getPoleCount() + "-pole";
 			getInfoBandPass(x, this instanceof ChebyBandStop);
@@ -3805,53 +3782,53 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	}
 
 	class ChebyBandStop extends ChebyBandPass {
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getBandStopPole(i, c1);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getBandStopZero(i, c1);
 		}
 	}
 
 	class InvChebyBandPass extends InvChebyFilterType {
-		@Override
+		
 		int select() {
 			int s = selectBandPass();
 			selectCheby(s++);
 			return s;
 		}
 
-		@Override
+		
 		void setup() {
 			setupBandPass();
 			setupCheby(3);
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getBandPassPole(i, c1);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getChebyZero(i / 2, c1, pi * .5);
 			bandPassXform(i, c1);
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return n * 2;
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return n * 2;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Inv Cheby (IIR), " + getPoleCount() + "-pole";
 			getInfoBandPass(x, this instanceof InvChebyBandStop);
@@ -3860,12 +3837,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	}
 
 	class InvChebyBandStop extends InvChebyBandPass {
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getBandStopPole(i, c1);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getChebyZero(i / 2, c1, pi * .5);
 			bandStopXform(i, c1);
@@ -4151,7 +4128,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return Math.log(Math.tan(x)) * p;
 		}
 
-		@Override
+		
 		void getSPole(int i, Complex c1, double wc) {
 			double tanwc = Math.tan(wc * .5);
 			c1.set(rootR[i + 1] * tanwc, rootI[i + 1] * tanwc);
@@ -4169,53 +4146,53 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		void getInfoElliptic(String x[]) {
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return n;
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return n;
 		}
 	}
 
 	class EllipticLowPass extends EllipticFilterType {
-		@Override
+		
 		int select() {
 			int s = selectLowPass();
 			selectElliptic(s);
 			return s + 2;
 		}
 
-		@Override
+		
 		void setup() {
 			setupLowPass();
 			setupElliptic(2);
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Elliptic (IIR), " + getPoleCount() + "-pole";
 			getInfoLowPass(x);
 			getInfoElliptic(x);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getEllipticZero(i, c1, wc);
 		}
 	}
 
 	class EllipticHighPass extends EllipticLowPass {
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getSPole(i, c1, pi - wc);
 			bilinearXform(c1);
 			c1.mult(-1);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getEllipticZero(i, c1, pi - wc);
 			c1.mult(-1);
@@ -4223,7 +4200,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	}
 
 	class EllipticBandPass extends EllipticFilterType {
-		@Override
+		
 		int select() {
 			int s = selectBandPass();
 			auxBars[2].setValue(5);
@@ -4231,34 +4208,34 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return s + 2;
 		}
 
-		@Override
+		
 		void setup() {
 			setupBandPass();
 			setupElliptic(3);
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getBandPassPole(i, c1);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getEllipticZero(i / 2, c1, pi * .5);
 			bandPassXform(i, c1);
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return n * 2;
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return n * 2;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Elliptic (IIR), " + getPoleCount() + "-pole";
 			getInfoBandPass(x, this instanceof EllipticBandStop);
@@ -4267,12 +4244,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	}
 
 	class EllipticBandStop extends EllipticBandPass {
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			getBandStopPole(i, c1);
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			getEllipticZero(i / 2, c1, pi * .5);
 			bandStopXform(i, c1);
@@ -4287,7 +4264,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			sign = s;
 		}
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("1st Pole");
 			auxBars[0].setValue(60);
@@ -4296,20 +4273,20 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 2;
 		}
 
-		@Override
+		
 		void setup() {
 			n = 2000 / auxBars[0].getValue();
 			mult = auxBars[1].getValue() / 1000.;
 			peak = 1 / (1 - mult);
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			int odd = sign == 1 ? 0 : 1;
 			c1.setMagPhase(Math.pow(mult, 1. / n), pi * (odd + 2 * i) / n);
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[] { 1 / peak, 0 };
@@ -4319,7 +4296,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Comb (IIR); Resonance every " + getOmegaText(2 * pi / n);
 			x[1] = "Delay: " + n + " samples, " + getUnitText(n / (double) sampleRate, "s");
@@ -4332,17 +4309,17 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			}
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return n;
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return n;
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			c1.set(0);
 		}
@@ -4393,7 +4370,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		int n;
 		double mult, peak;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("2nd Zero");
 			auxBars[0].setValue(60);
@@ -4402,24 +4379,24 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 2;
 		}
 
-		@Override
+		
 		void setup() {
 			n = 1990 / auxBars[0].getValue();
 			mult = auxBars[1].getValue() / 1000.;
 			peak = 1 + mult;
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			c1.setMagPhase(Math.pow(mult, 1. / n), pi * 2 * i / n);
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return n;
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[] { 1 / peak, -mult / peak };
@@ -4428,7 +4405,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Inverse Comb (FIR)";
 			x[1] = "Zeros every " + getOmegaText(2 * pi / n);
@@ -4440,7 +4417,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			super(1);
 		}
 
-		@Override
+		
 		void getResponse(double w, Complex c) {
 			if (n > 212) {
 				c.set(1);
@@ -4449,11 +4426,11 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			}
 		}
 
-		@Override
+		
 		void setCutoff(double f) {
 		}
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Delay");
 			auxBars[0].setValue(300);
@@ -4462,14 +4439,14 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 2;
 		}
 
-		@Override
+		
 		void setup() {
 			n = auxBars[0].getValue() * 16384 / 1000;
 			mult = auxBars[1].getValue() / 1250.;
 			peak = 1 / (1 - mult);
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Delay (IIR)";
 			x[1] = "Delay: " + n + " samples, " + getUnitText(n / (double) sampleRate, "s");
@@ -4484,7 +4461,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	class ResonatorFilter extends IIRFilterType {
 		double r, wc;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Resonant Frequency");
 			auxBars[0].setValue(500);
@@ -4493,24 +4470,24 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 2;
 		}
 
-		@Override
+		
 		void setup() {
 			wc = auxBars[0].getValue() * pi / 1000.;
 			double rolldb = -auxBars[1].getValue() * 3 / 1000.;
 			r = 1 - Math.pow(10, rolldb);
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			c1.setMagPhase(r, i == 1 ? -wc : wc);
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return 2;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Reson (IIR)";
 			x[1] = "Res. Frequency: " + getOmegaText(wc);
@@ -4518,12 +4495,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	}
 
 	class ResonatorZeroFilter extends ResonatorFilter {
-		@Override
+		
 		int getZeroCount() {
 			return 2;
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			c1.set(i == 0 ? 1 : -1);
 		}
@@ -4532,7 +4509,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	class NotchFilter extends IIRFilterType {
 		double wc, a, b, bw;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Notch Frequency");
 			auxBars[0].setValue(500);
@@ -4541,7 +4518,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 2;
 		}
 
-		@Override
+		
 		void setup() {
 			wc = auxBars[0].getValue() * pi / 1000.;
 			bw = auxBars[1].getValue() * pi / 2000.;
@@ -4549,7 +4526,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			b = Math.cos(wc);
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			c1.set(-4 * a + (b + a * b) * (b + a * b));
 			c1.sqrt();
@@ -4560,24 +4537,24 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			c1.mult(.5);
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return 2;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Notch (IIR)";
 			x[1] = "Notch Frequency: " + getOmegaText(wc);
 			x[2] = "Bandwidth: " + getOmegaText(bw);
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return 2;
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			c1.set(b * b - 1);
 			c1.sqrt();
@@ -4591,30 +4568,30 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	class AllPassFilter extends IIRFilterType {
 		double a;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Phase Delay");
 			auxBars[0].setValue(500);
 			return 1;
 		}
 
-		@Override
+		
 		void setup() {
 			double delta = auxBars[0].getValue() / 1000.;
 			a = (1 - delta) / (1 + delta);
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			c1.set(-a);
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return 1;
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[2];
@@ -4628,7 +4605,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Allpass Fractional Delay (IIR)";
 		}
@@ -4638,7 +4615,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		int n;
 		double mult;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Fundamental");
 			auxBars[0].setValue(20);
@@ -4647,13 +4624,13 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 2;
 		}
 
-		@Override
+		
 		void setup() {
 			n = 2000 / auxBars[0].getValue();
 			mult = .5 * Math.exp(-.5 + auxBars[1].getValue() / 2000.);
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[] { 1, 1, 0, 0 };
@@ -4663,7 +4640,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Plucked String (IIR); Resonance every " + getOmegaText(2 * pi / n);
 			x[1] = "Delay: " + n + " samples, " + getUnitText(n / (double) sampleRate, "s");
@@ -4674,7 +4651,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		int n;
 		double cw;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Offset");
 			auxBars[0].setMaximum(1000);
@@ -4688,13 +4665,13 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 3;
 		}
 
-		@Override
+		
 		void setup() {
 			n = auxBars[2].getValue();
 			cw = auxBars[0].getValue() * pi / 1000.;
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[n];
@@ -4709,12 +4686,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		boolean needsWindow() {
 			return true;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Gaussian (FIR)";
 			x[1] = "Order: " + n;
@@ -4724,7 +4701,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	class RandomFilter extends FIRFilterType {
 		int n;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Order");
 			auxBars[0].setMaximum(1600);
@@ -4732,17 +4709,17 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 1;
 		}
 
-		@Override
+		
 		void setCutoff(double f) {
 		}
 
-		@Override
+		
 		void setup() {
 			n = auxBars[0].getValue();
 			;
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[n];
@@ -4754,12 +4731,12 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		boolean needsWindow() {
 			return true;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Random (FIR)";
 			x[1] = "Order: " + n;
@@ -4771,7 +4748,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		double r, norm;
 		int n;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Fundamental Freq");
 			auxBars[0].setValue(500);
@@ -4785,11 +4762,11 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 4;
 		}
 
-		@Override
+		
 		void setCutoff(double f) {
 		}
 
-		@Override
+		
 		void setup() {
 			cw = auxBars[0].getValue() * pi / 1000.;
 			if (cw < .147) {
@@ -4800,7 +4777,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			;
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			int nn = 20;
@@ -4839,7 +4816,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Order: " + n;
 		}
@@ -4848,7 +4825,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	abstract class FIRFilterType extends FilterType {
 		double response[];
 
-		@Override
+		
 		void getResponse(double w, Complex c) {
 			if (response == null) {
 				c.set(0);
@@ -4961,7 +4938,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		double resp[];
 		boolean invert;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Cutoff Frequency");
 			auxLabels[1].setText("Order");
@@ -4971,13 +4948,13 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 2;
 		}
 
-		@Override
+		
 		void setup() {
 			wc = auxBars[0].getValue() * pi / 1000.;
 			n = auxBars[1].getValue();
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[n];
@@ -5006,13 +4983,13 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Cutoff freq: " + getOmegaText(wc);
 			x[1] = "Order: " + n;
 		}
 
-		@Override
+		
 		boolean needsWindow() {
 			return true;
 		}
@@ -5030,7 +5007,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		double resp[];
 		boolean invert;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Center Frequency");
 			auxLabels[1].setText(invert ? "Passband Width" : "Stopband Width");
@@ -5042,7 +5019,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 3;
 		}
 
-		@Override
+		
 		void setup() {
 			double wcmid = auxBars[0].getValue() * pi / 1000.;
 			double width = auxBars[1].getValue() * pi / 1000.;
@@ -5057,16 +5034,16 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			n = auxBars[2].getValue();
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return 0;
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[n + 1];
@@ -5117,14 +5094,14 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = invert ? "Passband: " : "Stopband: ";
 			x[0] += getOmegaText(wc1) + " - " + getOmegaText(wc2);
 			x[1] = "Order: " + n;
 		}
 
-		@Override
+		
 		boolean needsWindow() {
 			return true;
 		}
@@ -5140,14 +5117,14 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		double n;
 		int ni;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Cutoff Frequency");
 			auxBars[0].setValue(500);
 			return 1;
 		}
 
-		@Override
+		
 		void setup() {
 			n = 2000. / auxBars[0].getValue();
 			if (n > 1000) {
@@ -5156,7 +5133,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			ni = (int) n;
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[ni + 1];
@@ -5169,7 +5146,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Moving Average (FIR)";
 			x[1] = "Cutoff: " + getOmegaText(2 * pi / n);
@@ -5181,14 +5158,14 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 		int ni;
 		double n;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Cutoff Frequency");
 			auxBars[0].setValue(500);
 			return 1;
 		}
 
-		@Override
+		
 		void setup() {
 			n = 4000. / auxBars[0].getValue();
 			if (n > 1000) {
@@ -5197,7 +5174,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			ni = (int) n;
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[ni + 1];
@@ -5221,7 +5198,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Triangle (FIR)";
 			x[1] = "Cutoff: " + getOmegaText(4 * pi / n);
@@ -5238,7 +5215,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			}
 		}
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("Order");
 			auxBars[0].setValue(120);
@@ -5250,7 +5227,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 1;
 		}
 
-		@Override
+		
 		void setup() {
 		}
 
@@ -5269,7 +5246,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			}
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			int n = auxBars[0].getValue();
 			int nsz = uresp.length * 4;
@@ -5298,25 +5275,25 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return f;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			int n = auxBars[0].getValue();
 			x[0] = "Order: " + n;
 		}
 
-		@Override
+		
 		boolean needsWindow() {
 			return true;
 		}
 	}
 
 	class NoFilter extends FilterType {
-		@Override
+		
 		void getResponse(double w, Complex c) {
 			c.set(1);
 		}
 
-		@Override
+		
 		Filter genFilter() {
 			DirectFilter f = new DirectFilter();
 			f.aList = new double[1];
@@ -5330,7 +5307,7 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 	class CustomIIRFilter extends IIRFilterType {
 		int npoles, nzeros;
 
-		@Override
+		
 		int select() {
 			auxLabels[0].setText("# of Pole Pairs");
 			auxBars[0].setMaximum(10);
@@ -5338,32 +5315,32 @@ class DFilterFrame extends Frame implements ComponentListener, ActionListener, A
 			return 1;
 		}
 
-		@Override
+		
 		void setup() {
 			npoles = nzeros = auxBars[0].getValue() * 2;
 		}
 
-		@Override
+		
 		void getPole(int i, Complex c1) {
 			c1.set(customPoles[i]);
 		}
 
-		@Override
+		
 		int getPoleCount() {
 			return npoles;
 		}
 
-		@Override
+		
 		void getZero(int i, Complex c1) {
 			c1.set(customZeros[i]);
 		}
 
-		@Override
+		
 		int getZeroCount() {
 			return nzeros;
 		}
 
-		@Override
+		
 		void getInfo(String x[]) {
 			x[0] = "Custom IIR";
 			x[1] = npoles + " poles and zeros";

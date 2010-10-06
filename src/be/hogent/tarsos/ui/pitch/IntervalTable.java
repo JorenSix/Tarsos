@@ -37,7 +37,6 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 		setMaximumSize(new Dimension(650, 160));
 	}
 
-	@Override
 	public void scaleChanged(final double[] newScale, final boolean isChanging) {
 		ScalaFile newFile = new ScalaFile("hmmm", newScale);
 		setModel(new ToneScaleTableModel(newFile));
@@ -60,7 +59,6 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 			}
 		}
 
-		@Override
 		public void valueChanged(final ListSelectionEvent event) {
 			final int row = table.getSelectionModel().getLeadSelectionIndex();
 			final int col = table.getColumnModel().getSelectionModel().getLeadSelectionIndex();
@@ -79,7 +77,7 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 
 				}
 				SwingUtilities.invokeLater(new Runnable() {
-					@Override
+
 					public void run() {
 						table.repaint();
 
@@ -101,7 +99,7 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 			super();
 		}
 
-		@Override
+		
 		public Component getTableCellRendererComponent(JTable table, Object color, boolean isSelected,
 				boolean hasFocus, int row, int column) {
 			int selectedRow = table.getSelectionModel().getLeadSelectionIndex();
@@ -142,7 +140,6 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 			Arrays.sort(pitches);
 		}
 
-		@Override
 		public Object getValueAt(final int row, final int col) {
 			final Long value;
 			if (row == 0 && col % 2 == 0) {
@@ -187,12 +184,10 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 			return rightIndex;
 		}
 
-		@Override
 		public int getRowCount() {
 			return pitches.length;
 		}
 
-		@Override
 		public int getColumnCount() {
 			return pitches.length * 2;
 		}

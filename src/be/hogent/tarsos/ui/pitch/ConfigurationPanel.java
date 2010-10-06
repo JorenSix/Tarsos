@@ -61,7 +61,6 @@ public class ConfigurationPanel extends JPanel {
 		add(center, BorderLayout.CENTER);
 
 		Configuration.addListener(new ConfigChangeListener() {
-			@Override
 			public void configurationChanged(final ConfKey key) {
 				for (Entry<JTextField, ConfKey> entry : configurationTextFields.entrySet()) {
 					if (entry.getValue() == key) {
@@ -84,7 +83,6 @@ public class ConfigurationPanel extends JPanel {
 			midiOutput = output;
 		}
 
-		@Override
 		public void run() {
 			while (true) {
 				try {
@@ -125,27 +123,21 @@ public class ConfigurationPanel extends JPanel {
 		Runnable pollingMidiIn = new MidiDevicePolling(midiInComboBox, true, false);
 		Thread pollingMidiInThread = new Thread(pollingMidiIn, "MIDI IN Device polling");
 		pollingMidiInThread.start();
-		midiInComboBox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				MoreMidiInfo info = (MoreMidiInfo) midiInComboBox.getSelectedItem();
-				int index = -1;
-				MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
-				for (int i = 0; i < infos.length; i++) {
-					if (infos[i] == info.getInfo()) {
-						index = i;
-					}
-				}
-				Configuration.set(ConfKey.midi_input_device, index);
+		MoreMidiInfo info = (MoreMidiInfo) midiInComboBox.getSelectedItem();
+		int index = -1;
+		MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+		for (int i = 0; i < infos.length; i++) {
+			if (infos[i] == info.getInfo()) {
+				index = i;
 			}
-		});
+		}
+		Configuration.set(ConfKey.midi_input_device, index);
 
 		final JComboBox midiOutComboBox = new JComboBox(MidiCommon.listDevices(false, true));
 		Runnable pollingMidiOut = new MidiDevicePolling(midiOutComboBox, false, true);
 		Thread pollingMidiOutThread = new Thread(pollingMidiOut, "MIDI OUT Device polling");
 		pollingMidiOutThread.start();
 		midiOutComboBox.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				MoreMidiInfo info = (MoreMidiInfo) midiOutComboBox.getSelectedItem();
 				int index = -1;
@@ -163,7 +155,6 @@ public class ConfigurationPanel extends JPanel {
 		pitchDetectorsComboBox.setSelectedItem(Configuration
 				.getPitchDetectionMode(ConfKey.pitch_tracker_default));
 		pitchDetectorsComboBox.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				PitchDetectionMode mode = (PitchDetectionMode) pitchDetectorsComboBox.getSelectedItem();
 				ConfKey current = ConfKey.pitch_tracker_current;
@@ -190,7 +181,6 @@ public class ConfigurationPanel extends JPanel {
 			orderedKeys.add(key);
 		}
 		Collections.sort(orderedKeys, new Comparator<ConfKey>() {
-			@Override
 			public int compare(final ConfKey o1, final ConfKey o2) {
 				return o1.name().compareTo(o2.name());
 			}
@@ -208,17 +198,15 @@ public class ConfigurationPanel extends JPanel {
 			builder.append(label + ":", configurationTextField, true);
 			configurationTextFields.put(configurationTextField, key);
 			configurationTextField.addFocusListener(new FocusListener() {
-				@Override
 				public void focusLost(FocusEvent e) {
 					JTextField textField = (JTextField) e.getSource();
 					ConfKey key = configurationTextFields.get(textField);
 					String value = textField.getText();
-					if (!value.equals(Configuration.get(key)) && !value.isEmpty()) {
+					if (!value.equals(Configuration.get(key)) && !"".equals(value.trim())) {
 						Configuration.set(key, value);
 					}
 				}
 
-				@Override
 				public void focusGained(FocusEvent e) {
 				}
 			});

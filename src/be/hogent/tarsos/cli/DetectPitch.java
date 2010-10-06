@@ -18,18 +18,18 @@ import be.hogent.tarsos.util.AudioFile;
  */
 public final class DetectPitch extends AbstractTarsosApp {
 
-    @Override
+    
     public String description() {
         return "Detects pitch for an input file"
         + " using a pitch detector. Outputs two columns, one in ms and the oters in Hz.";
     }
 
-    @Override
+    
     public String name() {
         return "detect_pitch";
     }
 
-    @Override
+    
     public void run(final String... args) {
         final OptionParser parser = new OptionParser();
         final OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate").withRequiredArg()

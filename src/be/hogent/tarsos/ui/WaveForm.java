@@ -21,12 +21,12 @@ public final class WaveForm extends JComponent {
 	 */
 	private static final long serialVersionUID = 3730361987954996673L;
 
-	final AudioFile audioFile;
+	private final AudioFile audioFile;
 
-	BufferedImage image;
-	Graphics2D graphics;
+	private final BufferedImage image;
+	private final Graphics2D graphics;
 
-	public WaveForm(AudioFile file) {
+	public WaveForm(final AudioFile file) {
 		this.audioFile = file;
 		setSize(new Dimension(1000, 280));
 		image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_BGR);
@@ -37,7 +37,7 @@ public final class WaveForm extends JComponent {
 		draw(graphics);
 	}
 
-	@Override
+	
 	public void paint(final Graphics g) {
 		graphics.setBackground(Color.WHITE);
 		graphics.clearRect(0, 0, getWidth(), getHeight());
@@ -62,7 +62,6 @@ public final class WaveForm extends JComponent {
 		spex.waveFormPlot(new WaveFormDataAggregator() {
 			int prevx, prevy;
 
-			@Override
 			public void addDataPoint(double seconds, double power) {
 				System.out.println("[" + seconds + "," + power + "]");
 				int x = (int) (secondsToX * seconds);

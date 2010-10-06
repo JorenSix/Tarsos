@@ -24,7 +24,7 @@ public final class VirtualKeyboard19 extends VirtualKeyboard {
 		super(19, 19 * 5); // 19*5 = 95
 	}
 
-	@Override
+	
 	public int getMidiNote(final int x, final int y) {
 		final int w = getWidth();
 		final int h = getHeight();
@@ -91,7 +91,7 @@ public final class VirtualKeyboard19 extends VirtualKeyboard {
 		return n;
 	}
 
-	@Override
+	
 	public void paint(final Graphics g) {
 		super.paint(g);
 		final Graphics2D g2 = (Graphics2D) g;

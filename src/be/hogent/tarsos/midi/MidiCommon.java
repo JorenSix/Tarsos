@@ -72,7 +72,7 @@ public final class MidiCommon {
 			allowsOutput = output;
 		}
 
-		@Override
+		
 		public String toString() {
 			String descr = "MIDI";
 			if (allowsInput) {
@@ -87,12 +87,12 @@ public final class MidiCommon {
 			return String.format("%s - %s", descr, deviceInfo.getName());
 		}
 
-		@Override
+		
 		public boolean equals(final Object other) {
 			return deviceInfo.equals(((MoreMidiInfo) other).deviceInfo);
 		}
 
-		@Override
+		
 		public int hashCode() {
 			return deviceInfo.hashCode();
 		}

@@ -114,7 +114,6 @@ public class Frame extends JFrame {
 	private JComponent makeTarsosPanel() {
 		AnalysisPanel analysisPanel = new AnalysisPanel();
 		analysisPanel.addAudioFileChangedListener(new AudioFileChangedListener() {
-			@Override
 			public void audioFileChanged(AudioFile newAudioFile) {
 				String newTitle = String.format("Analysis - %s", newAudioFile.basename());
 				tabbedPane.setTitleAt(0, newTitle);

@@ -327,7 +327,7 @@ public final class Configuration {
 				String baseDirectory;
 				if (isWindows) {
 					baseDirectory = System.getenv("LOCALAPPDATA");
-					if (baseDirectory == null || baseDirectory.isEmpty()) {
+					if (baseDirectory == null || "".equals(baseDirectory.trim())) {
 						baseDirectory = System.getProperty("user.home");
 					}
 				} else {

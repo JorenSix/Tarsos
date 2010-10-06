@@ -24,7 +24,7 @@ class ClickForPitchListener extends MouseAdapter {
 		component.addMouseListener(this);
 	}
 
-	@Override
+	
 	public void mouseClicked(final MouseEvent e) {
 		final int height = parent.getHeight();
 		final double pitchInRelativeCents = mouseDrag.getRelativeCents(e);

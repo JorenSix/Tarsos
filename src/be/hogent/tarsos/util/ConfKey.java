@@ -47,21 +47,6 @@ public enum ConfKey {
 	data_directory(true),
 
 	/**
-	 * The (relative) directory to save generated audio.
-	 */
-	generated_audio_directory(true),
-
-	/**
-	 * The (relative) directory to save IPEM_SIX annotations.
-	 */
-	raw_ipem_annotations_directory(true),
-
-	/**
-	 * The (relative) directory to save AUBIO annotations.
-	 */
-	raw_aubio_annotations_directory(true),
-
-	/**
 	 * The reference frequency to base all absolute cent calculations on. <br>
 	 * The default value is the frequency of C0 with A4 tuned to 440Hz: <br>
 	 * <code>440/32 * Math.pow(2.0,0.25) = 16.35 Hz</code>.
@@ -95,12 +80,6 @@ public enum ConfKey {
 	 * The default is <code>true</code>.
 	 */
 	skip_transcoded_audio_format_check,
-
-	/**
-	 * The directory where the transcoded audio is saved. <br>
-	 * The default is <code>data/transcoded_audio</code>.
-	 */
-	transcoded_audio_directory(true),
 
 	/**
 	 * The sampling rate for the transcoded audio. <br>
@@ -141,7 +120,17 @@ public enum ConfKey {
 	/**
 	 * The pitch tracker currently in use.
 	 */
-	pitch_tracker_current, midi_input_device, midi_output_device,
+	pitch_tracker_current,
+
+	/**
+	 * A MIDI device used as INPUT.
+	 */
+	midi_input_device,
+
+	/**
+	 * A MIDI device used as OUTPUT. Should support the MIDI tuning standard.
+	 */
+	midi_output_device,
 	/**
 	 * Defines the number of threads used to annotate files. Ideally this is the
 	 * same as the number of cores on your CPU. Use one thread less if you want

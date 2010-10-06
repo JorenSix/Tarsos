@@ -38,7 +38,6 @@ public final class LocalVolumeScore implements PeakScore {
 		return volumes[index];
 	}
 
-	@Override
 	public double score(final Histogram originalHistogram, final int index, final int slidingWindowSize) {
 		assert this.windowSize == slidingWindowSize;
 		int before = 0;

@@ -89,7 +89,7 @@ public final class Annotate extends AbstractTarsosApp {
 		}
 	}
 
-	@Override
+	
 	public void run(final String... args) {
 
 		final OptionParser parser = new OptionParser();
@@ -119,7 +119,7 @@ public final class Annotate extends AbstractTarsosApp {
 		}
 	}
 
-	@Override
+	
 	public String description() {
 		return "Annotate can be used to annotate audio files. It transcodes "
 				+ "audio to an understandable format, detects pitch and stores information about the files. "
@@ -127,7 +127,7 @@ public final class Annotate extends AbstractTarsosApp {
 				+ "option or all the audiofiles in the audio directory.";
 	}
 
-	@Override
+	
 	public String name() {
 		return "annotate";
 	}

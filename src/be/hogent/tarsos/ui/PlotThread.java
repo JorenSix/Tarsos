@@ -21,7 +21,7 @@ public final class PlotThread extends Thread {
 		this.watch = stopWatch;
 	}
 
-	@Override
+	
 	public void run() {
 		// TODO Auto-generated method stub
 

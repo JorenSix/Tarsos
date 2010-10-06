@@ -59,12 +59,10 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 			this.parent = parent;
 		}
 
-		@Override
 		public void mouseDragged(MouseEvent arg0) {
 
 		}
 
-		@Override
 		public void mouseMoved(MouseEvent e) {
 			if (e.isAltDown() || e.isAltGraphDown()) {
 				if (movingElement != -1.0) {
@@ -124,7 +122,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 			return index;
 		}
 
-		@Override
+		
 		public void mouseReleased(MouseEvent e) {
 			if (movingElement != -1.0) {
 				layer.scaleChangedPublisher.scaleChanged(layer.scale, false);
@@ -133,7 +131,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 
 		}
 
-		@Override
+		
 		public void mousePressed(MouseEvent arg0) {
 
 		}
@@ -143,7 +141,6 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		}
 	}
 
-	@Override
 	public void draw(final Graphics2D graphics) {
 		final double xOffset = mouseDrag.calculateXOffset();
 		final int yOffset = 20;
@@ -175,7 +172,6 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 
 	}
 
-	@Override
 	public void scaleChanged(double[] newScale, boolean isChanging) {
 		this.scale = newScale;
 		parent.repaint();
@@ -186,7 +182,6 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		parent.repaint();
 	}
 
-	@Override
 	public Component ui() {
 		throw new NullPointerException("No ui for scala layer");
 	}

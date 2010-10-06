@@ -66,7 +66,6 @@ public final class DifferenceScore implements PeakScore {
 		}
 	}
 
-	@Override
 	public double score(final Histogram originalHistogram, final int index, final int slidingWindowSize) {
 		return scores[index];
 	}

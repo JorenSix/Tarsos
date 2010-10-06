@@ -172,7 +172,7 @@ public final class PitchSynth implements ConfigChangeListener {
 			receiver.send(noteOnMessage, -1);
 
 			final Runnable noteOffThread = new Runnable() {
-				@Override
+				
 				public void run() {
 					try {
 						Thread.sleep(NOTE_OFF_AFTER);
@@ -189,7 +189,7 @@ public final class PitchSynth implements ConfigChangeListener {
 		}
 	}
 
-	@Override
+	
 	public void configurationChanged(final ConfKey key) {
 		// change the instrument
 		if (key == ConfKey.midi_instrument_index) {

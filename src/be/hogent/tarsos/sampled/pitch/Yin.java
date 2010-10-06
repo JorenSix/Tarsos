@@ -57,7 +57,6 @@ public final class Yin implements PurePitchDetector {
 	 * 
 	 * @return a pitch value in Hz or -1 if no pitch is detected.
 	 */
-	@Override
 	public float getPitch(final float[] audioBuffer) {
 
 		int tauEstimate = -1;

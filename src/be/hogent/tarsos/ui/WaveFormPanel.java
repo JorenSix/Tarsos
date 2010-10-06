@@ -27,7 +27,7 @@ public final class WaveFormPanel extends JComponent {
 		this.audioFile = file;
 	}
 
-	@Override
+	
 	protected void paintComponent(final Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;

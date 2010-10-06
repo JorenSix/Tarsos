@@ -108,7 +108,7 @@ public final class ToneScaleMatcher {
 		// print all correlations in descending order
 		// best match first
 		Tarsos.println("correlation\tfile");
-		for (final Double key : toneScaleCorrelations.descendingKeySet()) {
+		for (final Double key : toneScaleCorrelations.keySet()) {
 			Tarsos.println(key + "\t" + fileNameCorrelations.get(key));
 		}
 
