@@ -1,5 +1,8 @@
 package be.hogent.tarsos.sampled.pitch;
 
+import java.util.Arrays;
+import java.util.List;
+
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 
@@ -153,5 +156,63 @@ public final class PitchConverter {
 	 */
 	public static double midiCentToHertz(final double midiCent) {
 		return 440 * Math.pow(2, (midiCent - 69) / 12d);
+	}
+
+	/**
+	 * Converts cent values to ratios. See
+	 * "Ratios Make Cents: Conversions from ratios to cents and back again" in
+	 * the book "Tuning Timbre Spectrum Scale" William A. Sethares.
+	 * 
+	 * @param cent
+	 *            A cent value
+	 * @return A ratio containing the same information.
+	 */
+	public static double centToRatio(final double cent) {
+		final double ratio;
+		ratio = Math.pow(10, Math.log10(2) * cent / 1200.0);
+		return ratio;
+	}
+
+	/**
+	 * Converts a ratio to cents.
+	 * "Ratios Make Cents: Conversions from ratios to cents and back again" in
+	 * the book "Tuning Timbre Spectrum Scale" William A. Sethares
+	 * 
+	 * @param ratio
+	 *            A cent value
+	 * @return A ratio containing the same information.
+	 */
+	public static double ratioToCent(final double ratio) {
+		final double cent;
+		cent = 1200 / Math.log10(2) * Math.log10(ratio);
+		return cent;
+	}
+
+	// see
+	// http://en.wikipedia.org/wiki/Interval_(music)#Size_of_intervals_used_in_different_tuning_systems
+	public static String closestRatio(double cent) {
+		List<Double> ratios = Arrays.asList(1.0 / 1.0, 16.0 / 15.0, 9.0 / 8.0, 6.0 / 5.0, 5.0 / 4.0,
+				4.0 / 3.0, 3.0 / 2.0, 8.0 / 5.0, 5.0 / 3.0, 9.0 / 5.0, 15.0 / 8.0, 2.0 / 1.0);
+
+		List<String> ratioNames = Arrays.asList("Unison 1/1", "Minor second 16/15", "Major second 9/8",
+				"Minor third 6/5", "Major third 5/4", "Perfect fourth 4/3", "Perfect fifth 3/2",
+				"Minor sixth 8/5", "Major sixth 5/3", "Minor seventh 9/5", "Major seventh 15/8",
+				"Perfect octave 2/1");
+
+		double ratioToLookFor = centToRatio(cent);
+		double closestDistance = Integer.MAX_VALUE;
+		int closestIndex = -1;
+		for (int i = 0; i < ratios.size(); i++) {
+			double ratio = ratios.get(i);
+			double distance = (ratio - ratioToLookFor) * (ratio - ratioToLookFor);
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestIndex = i;
+			}
+		}
+
+		long distanceInCents = Math.round(cent - ratioToCent(ratios.get(closestIndex)));
+		return String.format("%s %+d cents", ratioNames.get(closestIndex), distanceInCents);
+
 	}
 }
