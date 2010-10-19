@@ -1,0 +1,44 @@
+@prefix xsd:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix vamp:     <http://purl.org/ontology/vamp/> .
+@prefix :         <#> .
+
+:transform_plugin a vamp:Plugin ;
+    vamp:identifier "mzharmonicspectrum" .
+
+:transform_library a vamp:PluginLibrary ;
+    vamp:identifier "mazurka-plugins" ;
+    vamp:available_plugin :transform_plugin .
+
+:transform a vamp:Transform ;
+    vamp:plugin :transform_plugin ;
+    vamp:step_size "512"^^xsd:int ; 
+    vamp:block_size "1024"^^xsd:int ; 
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "compress" ] ;
+        vamp:value "1"^^xsd:float ;
+    ] ;
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "harmonics" ] ;
+        vamp:value "5"^^xsd:float ;
+    ] ;
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "maxpitch" ] ;
+        vamp:value "96"^^xsd:float ;
+    ] ;
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "method" ] ;
+        vamp:value "1"^^xsd:float ;
+    ] ;
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "minpitch" ] ;
+        vamp:value "24"^^xsd:float ;
+    ] ;
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "stepsamples" ] ;
+        vamp:value "512"^^xsd:float ;
+    ] ;
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "windowsamples" ] ;
+        vamp:value "1500"^^xsd:float ;
+    ] ;
+    vamp:output [ vamp:identifier "rawpitch" ] .
