@@ -7,6 +7,8 @@ correlation classes are also reusable.
 
 More information can be found on the "Tarsos website":http://tarsos.0110.be  
 
+To give Tarsos a try you can "start Tarsos using JAVA WebStart":http://tarsos.0110.be/attachment/tarsos.jnlp or download the "executable Tarsos JAR-file":http://tarsos.0110.be/attachment/tarsos.jar. A JAVA 5 runtime is required, JAVA 6 preferred.
+
 h2. Credits
 
 Tarsos is developed at University College Ghent, Faculty of Music 
