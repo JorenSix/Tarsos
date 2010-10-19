@@ -49,6 +49,8 @@ public final class MetaPitchDetector implements PurePitchDetector {
 		final float yinPitch = yin.getPitch(audioBuffer);
 		final float mpmPitch = mpm.getPitch(audioBuffer);
 		float pitch;
+		System.out.println(String.format("%f.0  %f.0", yinPitch, mpmPitch));
+
 		if (yinPitch == -1 || mpmPitch == -1) {
 			pitch = -1;
 		} else if (Math.abs(yinPitch - mpmPitch) <= mpmPitch * ERROR_MARGIN) {

@@ -78,6 +78,7 @@ public final class FileUtils {
 	public static void writePitchAnnotations(final String fileName, final List<Sample> samples) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Sample.headerString());
+		sb.append("\n");
 		for (Sample s : samples) {
 			sb.append(s.toString()).append("\n");
 		}
@@ -125,7 +126,7 @@ public final class FileUtils {
 	/**
 	 * @return The path where the program is executed.
 	 */
-	public static String getRuntimePath() {
+	public static String runtimeDirectory() {
 		String runtimePath = "";
 		try {
 			runtimePath = new File(".").getCanonicalPath();
@@ -534,6 +535,7 @@ public final class FileUtils {
 		try {
 			inChannel = new FileInputStream(new File(source)).getChannel();
 			outChannel = new FileOutputStream(new File(target)).getChannel();
+			// JavaVM does its best to do this as native I/O operations.
 			inChannel.transferTo(0, inChannel.size(), outChannel);
 		} catch (final FileNotFoundException e) {
 			LOG.severe("File " + source + " not found! " + e.getMessage());

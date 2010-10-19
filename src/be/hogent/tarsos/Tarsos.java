@@ -1,5 +1,6 @@
 package be.hogent.tarsos;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -25,7 +26,9 @@ import be.hogent.tarsos.cli.PowerExtractor;
 import be.hogent.tarsos.cli.Rank;
 import be.hogent.tarsos.cli.TuneMidiSynth;
 import be.hogent.tarsos.ui.pitch.Frame;
+import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.util.FileUtils;
 
 /**
  * This is the starting point of the Tarsos application suite. It's main task is
@@ -65,9 +68,40 @@ public final class Tarsos {
 	}
 
 	private void configureDirectories() {
-		// Check and/or create the required directories.
-		Configuration.createRequiredDirectories();
+		// replace java.io.tmpdir with actual temp dir.
+		for (final ConfKey confKey : ConfKey.values()) {
+			String directory = Configuration.get(confKey);
+			if (directory.contains("java.io.tmpdir")) {
+				directory = directory.replace("java.io.tmpdir", FileUtils.temporaryDirectory());
+				Configuration.set(confKey, directory);
+			}
+		}
 
+		// if the runtime directory is writable use it as base directory
+		// otherwise use the temporary directory
+		final String baseDirectory;
+		if (new File(FileUtils.runtimeDirectory()).canWrite()) {
+			baseDirectory = FileUtils.runtimeDirectory();
+		} else {
+			baseDirectory = FileUtils.temporaryDirectory();
+		}
+		// Check and create required directories. If relative use baseDirectory.
+		for (final ConfKey confKey : ConfKey.values()) {
+			if (confKey.isRequiredDirectory()) {
+				String directory = Configuration.get(confKey);
+				if (!new File(directory).isAbsolute()) {
+					directory = FileUtils.combine(baseDirectory, directory);
+				}
+				if (FileUtils.mkdirs(directory)) {
+					log.info("Created directory: " + Configuration.get(confKey));
+				}
+				// Check if the directory is writable
+				if (!new File(directory).canWrite()) {
+					log.severe("Required directory  " + directory + "is not writable!");
+				}
+				log.fine(String.format("%s files in %s", new File(directory).list().length, directory));
+			}
+		}
 	}
 
 	/**

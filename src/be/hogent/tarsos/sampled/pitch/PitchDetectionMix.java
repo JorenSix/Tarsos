@@ -19,8 +19,8 @@ public final class PitchDetectionMix implements PitchDetector {
 	 * Creates a new PitchdetectionMix.
 	 * 
 	 * @param subDetectors
-	 *            a list of initialized pitch detectors. For the moment only a
-	 *            list of two detectors is allowed
+	 *            a list of initialized pitch detectors. For now only a list of
+	 *            two detectors is allowed
 	 * @param errorMargin
 	 *            a percentage that defines when an annotation of two
 	 *            consecutive samples is accepted: e.g. a sample of 100HZ

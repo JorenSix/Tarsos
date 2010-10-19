@@ -29,7 +29,7 @@ public final class FFTBinHistogram {
                 "data", "power_test.wav"));
         AudioInputStream stream = null;
         try {
-            stream = AudioSystem.getAudioInputStream(new File(audioFile.path()));
+            stream = AudioSystem.getAudioInputStream(new File(audioFile.originalPath()));
             final AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(stream);
 
             final int readAmount = 16384 / 2;

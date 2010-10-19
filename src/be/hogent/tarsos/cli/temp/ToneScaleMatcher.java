@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.TreeMap;
 
 import be.hogent.tarsos.Tarsos;
-import be.hogent.tarsos.sampled.pitch.AubioPitchDetection;
 import be.hogent.tarsos.sampled.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.sampled.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.VampPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -68,7 +68,7 @@ public final class ToneScaleMatcher {
 				.createToneScale(peaks, null, null, null);
 
 		final String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
-		final String globDirectory = FileUtils.combine(FileUtils.getRuntimePath(), "audio");
+		final String globDirectory = FileUtils.combine(FileUtils.runtimeDirectory(), "audio");
 		final List<String> inputFiles = FileUtils.glob(globDirectory, pattern, false);
 		// two priority queues with info about same histograms
 		final TreeMap<Double, ToneScaleHistogram> toneScaleCorrelations;
@@ -79,7 +79,7 @@ public final class ToneScaleMatcher {
 			final AudioFile audioFile = new AudioFile(file);
 			final PitchDetector pitchDetector;
 			if (detector.equals("AUBIO")) {
-				pitchDetector = new AubioPitchDetection(audioFile, PitchDetectionMode.AUBIO_YIN);
+				pitchDetector = new VampPitchDetection(audioFile, PitchDetectionMode.VAMP_YIN);
 			} else {
 				pitchDetector = new IPEMPitchDetection(audioFile, PitchDetectionMode.IPEM_SIX);
 			}

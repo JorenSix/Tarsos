@@ -24,7 +24,7 @@ public final class FFTTest {
 	public static void main(final String... args) throws UnsupportedAudioFileException, IOException {
 		final AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test",
 				"data", "power_test.wav"));
-		final AudioInputStream stream = AudioSystem.getAudioInputStream(new File(audioFile.path()));
+		final AudioInputStream stream = AudioSystem.getAudioInputStream(new File(audioFile.originalPath()));
 		final AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(stream);
 
 		final int readAmount = 16384 / 2;

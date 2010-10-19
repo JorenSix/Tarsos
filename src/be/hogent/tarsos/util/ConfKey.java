@@ -42,7 +42,7 @@ public enum ConfKey {
 	 */
 	histogram_bin_width,
 	/**
-	 * The (relative) directory to save (text) data files.
+	 * The (relative) directory to save transcoded files and data files.
 	 */
 	data_directory(true),
 
@@ -113,11 +113,6 @@ public enum ConfKey {
 	transcoded_audio_number_of_channels,
 
 	/**
-	 * The default pitch tracker. Should map to PitchDetectionMode name.
-	 */
-	pitch_tracker_default,
-
-	/**
 	 * The pitch tracker currently in use.
 	 */
 	pitch_tracker_current,
@@ -150,6 +145,12 @@ public enum ConfKey {
 	 * accept only some pitches. Default value is 0.05.
 	 */
 	ipem_pitch_threshold,
+
+	/**
+	 * The marks used in plots the value should be one of the following: none,
+	 * points, dots, various, bigdots or pixels. The default value is points.
+	 */
+	plot_marks,
 
 	/**
 	 * An index for a General MIDI instrument
@@ -185,7 +186,7 @@ public enum ConfKey {
 	 * @return True if the configured value is a required directory, false
 	 *         otherwise.
 	 */
-	boolean isRequiredDirectory() {
+	public boolean isRequiredDirectory() {
 		return isRequiredDir;
 	}
 }

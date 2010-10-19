@@ -23,13 +23,13 @@ import be.hogent.tarsos.midi.LogReceiver;
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
-import be.hogent.tarsos.sampled.pitch.AubioPitchDetection;
 import be.hogent.tarsos.sampled.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.sampled.pitch.Sample;
 import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
+import be.hogent.tarsos.sampled.pitch.VampPitchDetection;
 import be.hogent.tarsos.ui.virtualkeyboard.PianoTestFrame;
 import be.hogent.tarsos.ui.virtualkeyboard.VirtualKeyboard;
 import be.hogent.tarsos.util.AudioFile;
@@ -97,7 +97,7 @@ public final class PlayAlong {
 		final AudioFile fileToPlayAlongWith = new AudioFile(fileName);
 		PitchDetector detector = new TarsosPitchDetection(fileToPlayAlongWith, PitchDetectionMode.TARSOS_YIN);
 		if (detectorString.equals("AUBIO")) {
-			detector = new AubioPitchDetection(fileToPlayAlongWith, PitchDetectionMode.AUBIO_YIN);
+			detector = new VampPitchDetection(fileToPlayAlongWith, PitchDetectionMode.VAMP_YIN);
 		} else if (detectorString.equals("IPEM_SIX")) {
 			detector = new IPEMPitchDetection(fileToPlayAlongWith, PitchDetectionMode.IPEM_SIX);
 		}

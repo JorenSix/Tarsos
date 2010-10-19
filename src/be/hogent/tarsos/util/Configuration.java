@@ -1,6 +1,5 @@
 package be.hogent.tarsos.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -312,36 +311,6 @@ public final class Configuration {
 			}
 		}
 		return configuredDir;
-	}
-
-	/**
-	 * Creates all the required directories if needed. Iterates over all
-	 * configuration values and creates the ones marked as required directory.
-	 */
-	public static void createRequiredDirectories() {
-		for (final ConfKey confKey : ConfKey.values()) {
-			if (confKey.isRequiredDirectory()) {
-				String directory = get(confKey);
-				boolean isWindows = System.getProperty("os.name").startsWith("Windows");
-
-				String baseDirectory;
-				if (isWindows) {
-					baseDirectory = System.getenv("LOCALAPPDATA");
-					if (baseDirectory == null || "".equals(baseDirectory.trim())) {
-						baseDirectory = System.getProperty("user.home");
-					}
-				} else {
-					baseDirectory = System.getProperty("user.home");
-				}
-
-				if (!new File(directory).isAbsolute()) {
-					directory = FileUtils.combine(baseDirectory, directory);
-				}
-				if (FileUtils.mkdirs(directory)) {
-					LOG.info("Created directory: " + get(directory));
-				}
-			}
-		}
 	}
 
 	private static boolean isActualConfiguredValue(final String key) {

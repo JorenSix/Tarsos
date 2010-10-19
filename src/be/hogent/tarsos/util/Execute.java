@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import be.hogent.tarsos.Tarsos;
+
 public final class Execute {
 	private static final Logger LOG = Logger.getLogger(Execute.class.getName());
 
@@ -26,36 +28,66 @@ public final class Execute {
 	 */
 	public static int command(final String command, final String redirectOutputToFile) {
 		int exitValue = -1;
-		BufferedReader stdout = null;
+
+		final String[] cmd = buildCommand(command, redirectOutputToFile);
+		LOG.info(String.format("Executing %s %s %s", cmd[0], cmd[1], cmd[2]));
+		final Runtime rt = Runtime.getRuntime();
+		Process proc;
 		try {
-			final String[] cmd = buildCommand(command, redirectOutputToFile);
-			LOG.info("Executing " + cmd[0] + " " + cmd[1] + " " + cmd[2]);
-			final Runtime rt = Runtime.getRuntime();
-			final Process proc = rt.exec(cmd);
-			stdout = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-			String line = stdout.readLine();
-			while (line != null) {
-				LOG.finer(line);
-				line = stdout.readLine();
-			}
+			proc = rt.exec(cmd);
+			final BufferedReader stdOut = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			final BufferedReader stdErr = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+			new Thread(new OutputProcessor(stdOut, false), "Proc stdout data").start();
+			new Thread(new OutputProcessor(stdErr, false), "Proc stderr data").start();
 			exitValue = proc.waitFor();
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			LOG.log(Level.SEVERE, "Error while communicating with process", e);
-		} catch (final InterruptedException e) {
-			LOG.log(Level.SEVERE, "Process interuppted", e);
-		} finally {
-			try {
-				stdout.close();
-			} catch (final IOException e) {
-				LOG.log(Level.SEVERE, "Could not close communication channel with proc.", e);
-			} catch (final NullPointerException e) {
-				LOG.log(Level.SEVERE, "Failed to initialize communication channel with proc.", e);
-			}
+		} catch (InterruptedException e) {
+			LOG.log(Level.SEVERE, "Error while communicating with process", e);
 		}
 		if (exitValue != 0) {
-			LOG.warning("Process stopped with exit value: " + exitValue);
+			LOG.warning("Abnormal process termination, exit status: " + exitValue);
 		}
+		LOG.info(String.format("Finished executing (exit status %s) '%s'", exitValue, cmd[2]));
+
 		return exitValue;
+	}
+
+	/**
+	 * Reads and optionally prints data from BufferedReader.
+	 */
+	private static class OutputProcessor implements Runnable {
+		private final BufferedReader outputReader;
+		private final boolean printToStandardOut;
+
+		public OutputProcessor(final BufferedReader reader, final boolean print) {
+			outputReader = reader;
+			printToStandardOut = print;
+		}
+
+		public void run() {
+			String line;
+			try {
+				line = outputReader.readLine();
+				while (line != null) {
+					LOG.finer(line);
+					line = outputReader.readLine();
+					if (printToStandardOut) {
+						Tarsos.println(line);
+					}
+				}
+			} catch (IOException e) {
+				LOG.log(Level.SEVERE, "Error while communicating with process", e);
+			} finally {
+				try {
+					outputReader.close();
+				} catch (final IOException e) {
+					LOG.log(Level.SEVERE, "Could not close communication channel with proc.", e);
+				} catch (final NullPointerException e) {
+					LOG.log(Level.SEVERE, "Failed to initialize communication channel with proc.", e);
+				}
+			}
+		}
 	}
 
 	/**

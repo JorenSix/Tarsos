@@ -49,16 +49,35 @@ public final class IPEMPitchDetection implements PitchDetector {
 		this.file = audioFile;
 		this.samples = new ArrayList<Sample>();
 		this.mode = detectionMode;
+		copyBinaryFiles();
+	}
 
+	/**
+	 * Copies the exe files from the jar to disk.
+	 */
+	private void copyBinaryFiles() {
 		// check files and copy them if needed
-		final String[] files = { "ipem_pitch_detection.sh", "libsndfile.dll",
-				mode.getParametername() + ".exe" };
-		for (final String ipemFile : files) {
-			final String target = FileUtils.combine(FileUtils.getRuntimePath(), ipemFile);
+		for (final String target : ipemFiles()) {
 			if (!FileUtils.exists(target)) {
-				FileUtils.copyFileFromJar("/be/hogent/tarsos/sampled/pitch/resources/" + ipemFile, target);
+				final String name = FileUtils.basename(target) + "." + FileUtils.extension(target);
+				FileUtils.copyFileFromJar("/be/hogent/tarsos/sampled/pitch/resources/" + name, target);
 			}
 		}
+	}
+
+	/**
+	 * @return A list of absolute paths
+	 */
+	private String[] ipemFiles() {
+		final String[] names = { "ipem_pitch_detection.sh", "libsndfile.dll",
+				mode.getParametername() + ".exe" };
+		final String[] paths = new String[names.length];
+		final String dataDirectory = Configuration.get(ConfKey.data_directory);
+		int i = 0;
+		for (final String ipemFile : names) {
+			paths[i++] = FileUtils.combine(dataDirectory, ipemFile);
+		}
+		return paths;
 	}
 
 	public void executePitchDetection() {
@@ -67,25 +86,24 @@ public final class IPEMPitchDetection implements PitchDetector {
 		FileUtils.writeFile(transcodedBaseName + "\n", "lijst.txt");
 		final String name = mode.getParametername();
 
-		// TODO: FIX directories
-		final String annotationsDirectory = "";// Configuration.get(ConfKey.raw_ipem_annotations_directory);
-		String outputDirectory = FileUtils.combine(FileUtils.getRuntimePath(), annotationsDirectory, name)
-				+ "/";
+		String outputDirectory = FileUtils.combine(file.transcodedDirectory(), name) + "/";
+		FileUtils.mkdirs(outputDirectory);
+
 		final String csvFileName = FileUtils.combine(outputDirectory, transcodedBaseName + ".txt");
 		String command = null;
 
-		// TODO: FIX directories
-		String audioDirectory = "";// FileUtils.combine(AudioFile.TRANSCODED_AUDIO_DIR,
-									// "") + "/";
+		String audioDirectory = file.transcodedDirectory() + "/";
+		String executableDirectory = Configuration.get(ConfKey.data_directory);
 
 		if (System.getProperty("os.name").contains("indows")) {
 			audioDirectory = audioDirectory.replace("/", "\\").replace(":\\", "://");
 			outputDirectory = outputDirectory.replace("/", "\\").replace(":\\", "://");
 			if (mode == PitchDetectionMode.IPEM_ONE) {
-				command = name + ".exe  " + audioDirectory + transcodedBaseName + ".wav " + outputDirectory
-						+ transcodedBaseName + ".txt";
+				command = FileUtils.combine(executableDirectory, name + ".exe  ") + audioDirectory
+						+ transcodedBaseName + ".wav " + outputDirectory + transcodedBaseName + ".txt";
 			} else {
-				command = name + ".exe  lijst.txt " + audioDirectory + " " + outputDirectory;
+				command = FileUtils.combine(executableDirectory, name + ".exe  ") + "lijst.txt "
+						+ audioDirectory + " " + outputDirectory;
 			}
 
 		} else { // on linux use wine's Z-directory
@@ -93,7 +111,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 			outputDirectory = "z://" + outputDirectory.replace("/", "\\\\");
 			audioDirectory = audioDirectory.replace("//\\\\", "//");
 			outputDirectory = outputDirectory.replace("//\\\\", "//");
-			command = FileUtils.getRuntimePath() + "/ipem_pitch_detection.sh \"" + audioDirectory + "\" \""
+			command = FileUtils.runtimeDirectory() + "/ipem_pitch_detection.sh \"" + audioDirectory + "\" \""
 					+ outputDirectory + "\"";
 		}
 

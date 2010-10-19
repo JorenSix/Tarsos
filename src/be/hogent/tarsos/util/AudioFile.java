@@ -51,24 +51,49 @@ public final class AudioFile {
 	}
 
 	/**
-	 * @return the originalPath of the transcoded audio file.
+	 * @return the path of the transcoded audio file.
 	 */
 	public String transcodedPath() {
+		// 01. qsdflj.mp3 => 01._qsdfj
 		final String baseName = FileUtils.basename(StringUtils.sanitize(originalPath));
-		final String fileName = baseName + "." + Configuration.get(ConfKey.transcoded_audio_format);
-		final String md5 = StringUtils.messageDigestFive(originalPath);
-		final String dataFolder = Configuration.get(ConfKey.data_directory);
-		return FileUtils.combine(dataFolder, fileName);
+		// 01._qsdfj => 01._qsdfj.wav
+		final String fileName = baseName + "_transcoded."
+				+ Configuration.get(ConfKey.transcoded_audio_format);
+		// return the name where the transcoded file should go
+		return FileUtils.combine(transcodedDirectory(), fileName);
 	}
 
 	/**
-	 * @return the originalPath of the original file
+	 * @return the directory where the transcoded audio file resides.
 	 */
-	public String path() {
+	public String transcodedDirectory() {
+		// 01. qsdflj.mp3 => 01._qsdfj
+		final String baseName = FileUtils.basename(StringUtils.sanitize(originalPath));
+		// /home/user/music/01. qsdflj.mp3 => MD5 hash
+		// The MD5 hash is to prevent name clashes: track 01.mp3 and track
+		// 01.mp3 in different folders have other hashes. Only half of the hash
+		// is used because a MD5 hash of half the length is also really
+		// improbable and you get shorter path names.
+		final String md5 = StringUtils.messageDigestFive(originalPath).substring(16);
+		// Configured data directory
+		final String dataFolder = Configuration.get(ConfKey.data_directory);
+		// Sub folder of data directory where annotations are stored =>
+		// /01._qsdfj_MD5HASH
+		final String subFolder = baseName + "_" + md5;
+		// create the directory if it is not already there
+		FileUtils.mkdirs(FileUtils.combine(dataFolder, subFolder));
+		// return the name where the transcoded file should go
+		return FileUtils.combine(dataFolder, subFolder);
+	}
+
+	/**
+	 * @return the path of the original file
+	 */
+	public String originalPath() {
 		return this.originalPath;
 	}
 
-	
+	@Override
 	public String toString() {
 		return FileUtils.basename(originalPath);
 	}

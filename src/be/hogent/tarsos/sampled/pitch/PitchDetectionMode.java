@@ -11,24 +11,33 @@ public enum PitchDetectionMode {
 	/**
 	 * The AUBIO_YIN algorithm.
 	 */
-	AUBIO_YIN("yin"),
+	VAMP_YIN("yin"),
 	/**
 	 * A faster version of AUBIO_YIN: spectral AUBIO_YIN. It should yield very
 	 * similar results as AUBIO_YIN, only faster.
 	 */
-	AUBIO_YINFFT("yinfft"),
+	VAMP_YIN_FFT("yin_fft"),
 	/**
-	 * Fast spectral comb.
+	 * Fast harmonic comb.
 	 */
-	AUBIO_FCOMB("fcomb"),
+	VAMP_FAST_HARMONIC_COMB("fast_harmonic_comb"),
+
 	/**
-	 * Multi comb with spectral smoothing.
+	 * Uses a basic estimate of the pitch extracted from the spectrum. The pitch
+	 * estimate needs elaboration, just finding the max at the moment but need
+	 * to correct for sub-harmonics which are really the fundamental. See
+	 * http://www.mazurka.org.uk/software/sv/plugin/MzHarmonicSpectrum/
 	 */
-	AUBIO_MCOMB("mcomb"),
+	VAMP_MAZURKA_PITCH("mazurka_pitch"),
+
 	/**
 	 * Schmitt trigger.
 	 */
-	AUBIO_SCHMITT("schmitt"),
+	VAMP_SCHMITT("schmitt"),
+	/**
+	 * Spectral comb.
+	 */
+	VAMP_SPECTRAL_COMB("spectral_comb"),
 
 	/**
 	 * The IPEM pitch tracker outputs six weighted pitch candidates.
@@ -100,8 +109,11 @@ public enum PitchDetectionMode {
 		case TARSOS_MPM:
 			detector = new TarsosPitchDetection(audioFile, this);
 			break;
+		case TARSOS_META:
+			detector = new TarsosPitchDetection(audioFile, this);
+			break;
 		default:
-			detector = new AubioPitchDetection(audioFile, this);
+			detector = new VampPitchDetection(audioFile, this);
 			break;
 		}
 		return detector;

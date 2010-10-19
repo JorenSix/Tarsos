@@ -205,9 +205,9 @@ public final class ScalaFile {
 			contents.append("! ").append(FileUtils.basename(scalaFile)).append(".scl \n");
 			contents.append("!\n");
 			contents.append(description).append("\n");
-			contents.append(pitches.length - 1).append("\n!\n");
-			for (int i = 1; i < pitches.length; i++) {
-				final double peakPosition = pitches[i] - pitches[0];
+			contents.append(pitches.length).append("\n!\n");
+			for (int i = 0; i < pitches.length; i++) {
+				final double peakPosition = pitches[i];
 				contents.append(peakPosition);
 				if (pitchNames != null && pitchNames[i] != null) {
 					contents.append(" ").append(pitchNames[i]);
@@ -216,7 +216,7 @@ public final class ScalaFile {
 			}
 
 			if (pitches[pitches.length - 1] != OCTAVE_IN_CENTS) {
-				contents.append(OCTAVE_IN_CENTS).append("\n");
+				// contents.append(OCTAVE_IN_CENTS).append("\n");
 			}
 
 			FileUtils.writeFile(contents.toString(), scalaFile);
