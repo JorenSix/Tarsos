@@ -153,7 +153,7 @@ public class ConfigurationPanel extends JPanel {
 
 		final JComboBox pitchDetectorsComboBox = new JComboBox(PitchDetectionMode.values());
 		pitchDetectorsComboBox.setSelectedItem(Configuration
-				.getPitchDetectionMode(ConfKey.pitch_tracker_default));
+				.getPitchDetectionMode(ConfKey.pitch_tracker_current));
 		pitchDetectorsComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				PitchDetectionMode mode = (PitchDetectionMode) pitchDetectorsComboBox.getSelectedItem();

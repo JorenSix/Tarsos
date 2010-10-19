@@ -117,9 +117,9 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		processorThread = null;
 		handlers = new ArrayList<SampleHandler>();
 
-		setMaximumSize(new Dimension(1500, 25));
+		setMaximumSize(new Dimension(1500, 45));
 		setMinimumSize(new Dimension(200, 25));
-		setPreferredSize(new Dimension(200, 25));
+		setPreferredSize(new Dimension(200, 30));
 	}
 
 	public final class AudioFileSampleProcessor extends Thread {
@@ -152,7 +152,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			return isPaused;
 		}
 
-		
+		@Override
 		public void run() {
 			running = true;
 			PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
@@ -240,7 +240,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			running = false;
 		}
 
-		
+		@Override
 		public void run() {
 			running = true;
 			AudioFileFormat format = file.fileFormat();

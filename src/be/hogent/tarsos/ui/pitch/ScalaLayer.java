@@ -122,16 +122,15 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 			return index;
 		}
 
-		
+		@Override
 		public void mouseReleased(MouseEvent e) {
 			if (movingElement != -1.0) {
 				layer.scaleChangedPublisher.scaleChanged(layer.scale, false);
 			}
 			movingElement = -1.0;
-
 		}
 
-		
+		@Override
 		public void mousePressed(MouseEvent arg0) {
 
 		}

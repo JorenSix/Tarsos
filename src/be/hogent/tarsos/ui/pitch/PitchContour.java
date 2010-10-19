@@ -21,6 +21,8 @@ import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.sampled.pitch.Sample;
 import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 
 public class PitchContour extends Plot implements AudioFileChangedListener, ScaleChangedListener,
@@ -100,7 +102,6 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 
 	JButton button;
 
-	
 	public void audioFileChanged(final AudioFile newAudioFile) {
 		clear(0);
 
@@ -125,7 +126,6 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		button.addActionListener(new ActionListener() {
 			final StringBuffer stringBuffer = new StringBuffer();
 
-			
 			public void actionPerformed(ActionEvent arg0) {
 				// EPS
 				OutputStream out;
@@ -154,7 +154,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		setTitle(title);
 		setXLabel("Time (seconds)");
 
-		setMarksStyle("pixels");
+		setMarksStyle(Configuration.get(ConfKey.plot_marks));
 
 		setYTicks();
 
@@ -162,7 +162,6 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		repaint();
 	}
 
-	
 	public void scaleChanged(double[] newScale, boolean isChanging) {
 		scale = newScale;
 		clearYTicks();
@@ -170,7 +169,6 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		repaint();
 	}
 
-	
 	public void addSample(Sample sample) {
 		List<Double> pitches = sample.getPitchesIn(PitchUnit.HERTZ);
 		double time = sample.getStart() / 1000.0;
@@ -185,7 +183,6 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 
 	}
 
-	
 	public void removeSample(Sample sample) {
 		// TODO Auto-generated method stub
 	}

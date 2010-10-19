@@ -2,6 +2,7 @@ package be.hogent.tarsos.ui.pitch;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
 import javax.sound.midi.MidiUnavailableException;
@@ -15,6 +16,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import be.hogent.tarsos.midi.PitchSynth;
+import be.hogent.tarsos.sampled.pitch.PitchConverter;
 import be.hogent.tarsos.util.ScalaFile;
 
 public final class IntervalTable extends JTable implements ScaleChangedListener {
@@ -35,6 +37,20 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 		getColumnModel().getSelectionModel().addListSelectionListener(selectionListener);
 		setDefaultRenderer(Object.class, new BackgroundColorCellRenderer());
 		setMaximumSize(new Dimension(650, 160));
+	}
+
+	@Override
+	public String getToolTipText(final MouseEvent e) {
+		String tip = null;
+		java.awt.Point p = e.getPoint();
+		int rowIndex = rowAtPoint(p);
+		int colIndex = columnAtPoint(p);
+		int realColumnIndex = convertColumnIndexToModel(colIndex);
+
+		if (getValueAt(rowIndex, realColumnIndex) != null) {
+			tip = PitchConverter.closestRatio((Long) getValueAt(rowIndex, realColumnIndex));
+		}
+		return tip;
 	}
 
 	public void scaleChanged(final double[] newScale, final boolean isChanging) {
@@ -99,7 +115,7 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 			super();
 		}
 
-		
+		@Override
 		public Component getTableCellRendererComponent(JTable table, Object color, boolean isSelected,
 				boolean hasFocus, int row, int column) {
 			int selectedRow = table.getSelectionModel().getLeadSelectionIndex();

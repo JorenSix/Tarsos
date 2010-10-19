@@ -21,6 +21,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
@@ -127,7 +128,7 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 			graphics.drawOval(x, y, 2, 2);
 		}
 
-		LOG.fine("Histogram layer redrawn.");
+		LOG.finer("Histogram layer redrawn.");
 
 	}
 
@@ -191,7 +192,9 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 				public void actionPerformed(ActionEvent e) {
 					if (scale != null) {
 						ScalaFile file = new ScalaFile("Tarsos exported scala file", scale);
-						file.write(audioFile.basename() + ".scl");
+						String path = FileUtils.combine(audioFile.transcodedDirectory(), audioFile.basename()
+								+ ".scl");
+						file.write(path);
 					}
 				}
 			});

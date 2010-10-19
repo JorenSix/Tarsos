@@ -57,27 +57,27 @@ public class Frame extends JFrame {
 		setProgramIcon();
 
 		tabbedPane = new JTabbedPane();
-		tabbedPane.setBorder(new EmptyBorder(10, 5, 5, 5));
+		tabbedPane.setBorder(new EmptyBorder(10, 0, 5, 0));
 		ImageIcon icon;
 
 		icon = null; // createImageIcon("temp.gif");
 		JComponent tarsosPanel = makeTarsosPanel();
-		tarsosPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		tarsosPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		tabbedPane.addTab("Analysis", icon, tarsosPanel, "Analysis");
 
 		icon = null;
 		JComponent configurationPanel = makeConfigurationPanel();
-		configurationPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		configurationPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		tabbedPane.addTab("Config", icon, configurationPanel, "Configuration");
 
 		icon = null;
 		JComponent logPanel = makeLogPanel();
-		configurationPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		configurationPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		tabbedPane.addTab("Log", icon, logPanel, "Log");
 
 		icon = null;
 		JComponent helpPanel = makeHelpanel();
-		helpPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		helpPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		tabbedPane.addTab("Help", icon, helpPanel, "Help?");
 
 		add(new HeaderPanel(), BorderLayout.NORTH);
@@ -107,14 +107,18 @@ public class Frame extends JFrame {
 		output.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		output.setAutoscrolls(true);
 		output.setEditable(false);
+		output.setLineWrap(true);
 		TextAreaHandler.setupLoggerHandler(output);
-		return new JScrollPane(output);
+		output.setBorder(new EmptyBorder(5, 2, 5, 2));
+		JScrollPane scrollPane = new JScrollPane(output);
+		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+		return scrollPane;
 	}
 
 	private JComponent makeTarsosPanel() {
 		AnalysisPanel analysisPanel = new AnalysisPanel();
 		analysisPanel.addAudioFileChangedListener(new AudioFileChangedListener() {
-			public void audioFileChanged(AudioFile newAudioFile) {
+			public void audioFileChanged(final AudioFile newAudioFile) {
 				String newTitle = String.format("Analysis - %s", newAudioFile.basename());
 				tabbedPane.setTitleAt(0, newTitle);
 			}
@@ -144,6 +148,8 @@ public class Frame extends JFrame {
 	}
 
 	protected JComponent makeConfigurationPanel() {
-		return new JScrollPane(new ConfigurationPanel());
+		JScrollPane configurationPane = new JScrollPane(new ConfigurationPanel());
+		configurationPane.getVerticalScrollBar().setUnitIncrement(16);
+		return configurationPane;
 	}
 }

@@ -41,7 +41,8 @@ public final class KeyboardPanel extends JPanel implements ScaleChangedListener 
 			Runnable tuneRunnable = new Runnable() {
 				public void run() {
 					keyboard.connectToTunedSynth(newScale);
-					LOG.log(Level.FINE, "Tuned the keboard using a new scale %s", Arrays.toString(newScale));
+					LOG.log(Level.FINE, String.format("Tuned the keboard using a new scale %s",
+							Arrays.toString(newScale)));
 				}
 			};
 			new Thread(tuneRunnable, "Piano tuner.").start();

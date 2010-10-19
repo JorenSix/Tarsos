@@ -189,9 +189,9 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 	private void addFileDropListener() {
 		new FileDrop(this, new FileDrop.Listener() {
 			public void filesDropped(final java.io.File[] files) {
-				if (files.length != 0) {
-					LOG.log(Level.WARNING, "Dropped %s files. For the moment only 1 file should be dropped",
-							files.length);
+				if (files.length != 1) {
+					LOG.log(Level.WARNING, String.format(
+							"Dropped %s files. For the moment only ONE file should be dropped", files.length));
 				}
 				final File droppedFile = files[0];
 				if (droppedFile.getName().endsWith(".scl")) {
