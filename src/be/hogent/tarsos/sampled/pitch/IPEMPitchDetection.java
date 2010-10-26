@@ -81,7 +81,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		return paths;
 	}
 
-	public void executePitchDetection() {
+	public List<Annotation> executePitchDetection() {
 
 		final String transcodedBaseName = FileUtils.basename(file.transcodedPath());
 		FileUtils.writeFile(transcodedBaseName + "\n", "lijst.txt");
@@ -133,6 +133,8 @@ public final class IPEMPitchDetection implements PitchDetector {
 		}
 
 		LOG.fine(String.format("%s pitch detection finished for %s.", mode.name(), file.basename()));
+
+		return annotations;
 	}
 
 	/**

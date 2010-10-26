@@ -9,20 +9,18 @@ import java.util.List;
  */
 public interface PitchDetector {
 
-    /**
-     * Execute the pitch detection process. Should take care of caching
-     * annotations: e.g. execute the annotation process once per song, write a
-     * CSV-file with annotations and read that file when needed
-     */
-    void executePitchDetection();
+	/**
+	 * Execute the pitch detection process.
+	 */
+	List<Annotation> executePitchDetection();
 
-    /**
-     * @return a list of annotated samples
-     */
-    List<Annotation> getAnnotations();
+	/**
+	 * @return a list of annotated samples
+	 */
+	List<Annotation> getAnnotations();
 
-    /**
-     * @return the name of the detector possibly with parameters e.g. aubio_YIN
-     */
-    String getName();
+	/**
+	 * @return the name of the detector possibly with parameters e.g. aubio_YIN
+	 */
+	String getName();
 }

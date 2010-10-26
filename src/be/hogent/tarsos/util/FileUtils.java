@@ -87,13 +87,14 @@ public final class FileUtils {
 	}
 
 	public static List<Annotation> readPitchAnnotations(final String fileName) {
-		final List<Annotation> samples = new ArrayList<Annotation>();
+		final List<Annotation> annotations = new ArrayList<Annotation>();
 		final String contents = FileUtils.readFile(fileName);
 		final String[] lines = contents.split("\n");
+		// Skip the first line, the header.
 		for (int i = 1; i < lines.length; i++) {
-			samples.add(Annotation.parse(lines[i]));
+			annotations.add(Annotation.parse(lines[i]));
 		}
-		return samples;
+		return annotations;
 	}
 
 	public static String temporaryDirectory() {
@@ -104,7 +105,7 @@ public final class FileUtils {
 		return tempDir;
 	}
 
-	// disable the default constructor
+	// Disable the default constructor.
 	private FileUtils() {
 	}
 
@@ -113,8 +114,8 @@ public final class FileUtils {
 	 * "test.wav" combined together should yield /tmp/test.wav on UNIX.
 	 * 
 	 * @param path
-	 *            the path parts part
-	 * @return each element from path joined by the systems path separator.
+	 *            The path parts part.
+	 * @return Each element from path joined by the systems path separator.
 	 */
 	public static String combine(final String... path) {
 		File file = new File(path[0]);

@@ -46,7 +46,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 		this.detectionMode = pitchDetectionMode;
 	}
 
-	public void executePitchDetection() {
+	public List<Annotation> executePitchDetection() {
 		try {
 			processFile(file.transcodedPath(), detectionMode, new AnnotationHandler() {
 				public void handleAnnotation(final Annotation annotation) {
@@ -59,6 +59,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 			LOG.log(Level.SEVERE,
 					"Exception while reading audio file: " + file.basename() + " " + e.getMessage(), e);
 		}
+		return annotations;
 	}
 
 	public String getName() {
@@ -89,8 +90,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 	 *             If there is an error reading the file.
 	 */
 	public static void processFile(final String fileName, final PitchDetectionMode detectionMode,
-			final AnnotationHandler detectedPitchHandler) throws UnsupportedAudioFileException,
-			IOException {
+			final AnnotationHandler detectedPitchHandler) throws UnsupportedAudioFileException, IOException {
 		final AudioInputStream ais = AudioSystem.getAudioInputStream(new File(fileName));
 		processStream(ais, detectedPitchHandler, detectionMode);
 	}

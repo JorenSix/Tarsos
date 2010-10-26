@@ -10,15 +10,15 @@ import be.hogent.tarsos.util.Execute;
 import be.hogent.tarsos.util.FileUtils;
 
 public final class VampPitchDetection implements PitchDetector {
-	private final List<Annotation> samples;
+	private final List<Annotation> annotations;
 	private final AudioFile file;
 	private final PitchDetectionMode mode;
 
 	private static final Logger LOG = Logger.getLogger(VampPitchDetection.class.getName());
 
 	public VampPitchDetection(final AudioFile audioFile, final PitchDetectionMode pitchDetectionMode) {
-		samples = new ArrayList<Annotation>();
-		this.file = audioFile;
+		annotations = new ArrayList<Annotation>();
+		file = audioFile;
 		mode = pitchDetectionMode;
 		copyDefaultSettings();
 	}
@@ -32,7 +32,7 @@ public final class VampPitchDetection implements PitchDetector {
 		}
 	}
 
-	public void executePitchDetection() {
+	public List<Annotation> executePitchDetection() {
 		String setting = mode.getParametername() + ".n3";
 		final String settingsFile = FileUtils.combine(FileUtils.temporaryDirectory(), setting);
 		final String command = String.format(
@@ -61,6 +61,8 @@ public final class VampPitchDetection implements PitchDetector {
 			// mark for deletion when JVM closes
 			new File(csvFile).deleteOnExit();
 		}
+
+		return annotations;
 	}
 
 	/**
@@ -75,12 +77,12 @@ public final class VampPitchDetection implements PitchDetector {
 			double pitch = Double.parseDouble(row[1]);
 			double time = Double.parseDouble(row[0]);
 			final Annotation sample = new Annotation(time, pitch, mode);
-			samples.add(sample);
+			annotations.add(sample);
 		}
 	}
 
 	public List<Annotation> getAnnotations() {
-		return samples;
+		return annotations;
 	}
 
 	public String getName() {

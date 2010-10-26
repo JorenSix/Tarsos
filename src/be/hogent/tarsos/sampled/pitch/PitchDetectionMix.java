@@ -57,15 +57,15 @@ public final class PitchDetectionMix implements PitchDetector {
 		annotations = new ArrayList<Annotation>();
 	}
 
-	public void executePitchDetection() {
+	public List<Annotation> executePitchDetection() {
 		int nThreads = Configuration.getInt(ConfKey.annotation_threads);
 		ExecutorService threadPool = Executors.newFixedThreadPool(nThreads);
 
+		// execute the pitch detection in parallel.
 		for (final PitchDetector detector : detectors) {
 			Runnable command = new Runnable() {
 				public void run() {
 					detector.executePitchDetection();
-					annotations.addAll(detector.getAnnotations());
 				}
 			};
 			threadPool.execute(command);
@@ -89,8 +89,15 @@ public final class PitchDetectionMix implements PitchDetector {
 					+ "more detection results not available.", detectors.size(), nThreads));
 		}
 
-		// order by sample start and source
+		// add the annotations to a list
+		for (final PitchDetector detector : detectors) {
+			annotations.addAll(detector.getAnnotations());
+		}
+
+		// order the annotations by start time and source
 		Collections.sort(annotations);
+
+		return annotations;
 	}
 
 	public String getName() {

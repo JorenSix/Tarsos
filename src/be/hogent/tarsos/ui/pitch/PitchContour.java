@@ -12,11 +12,13 @@ import java.io.OutputStream;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.SwingUtilities;
 
 import ptolemy.plot.Plot;
 import ptolemy.plot.PlotPoint;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchConverter;
+import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
 import be.hogent.tarsos.util.AudioFile;
@@ -42,7 +44,6 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 
 	public PitchContour() {
 		pitchUnit = PitchUnit.HERTZ;
-
 	}
 
 	private void setYTicks() {
@@ -102,7 +103,10 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 	JButton button;
 
 	public void audioFileChanged(final AudioFile newAudioFile) {
-		clear(0);
+
+		for (int i = 0; i < PitchDetectionMode.values().length; i++) {
+			clear(i);
+		}
 
 		if (pitchUnit == PitchUnit.HERTZ) {
 			setYLog(true);
@@ -165,17 +169,26 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		scale = newScale;
 		clearYTicks();
 		setYTicks();
-		repaint();
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				repaint();
+			}
+		});
 	}
 
 	public void addSample(Annotation sample) {
 		final double convertedPitch = sample.getPitch(pitchUnit);
 		final int dataset = sample.getSource().ordinal();
-
 		LOG.finest(String.format("Added %.2f %s to pitch contour", convertedPitch, pitchUnit.getHumanName()));
 		addPoint(dataset, sample.getStart(), convertedPitch, false);
 		if (getLegend(dataset) == null) {
 			addLegend(dataset, sample.getSource().name());
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					repaint();
+				}
+			});
+
 		}
 
 	}

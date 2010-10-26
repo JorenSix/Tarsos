@@ -15,7 +15,7 @@ import be.hogent.tarsos.util.FileUtils;
  * @author Joren Six
  */
 public final class CachingDetector implements PitchDetector {
-	private final List<Annotation> annotations;
+	private List<Annotation> annotations;
 	private final AudioFile file;
 	private final PitchDetector detector;
 
@@ -38,21 +38,23 @@ public final class CachingDetector implements PitchDetector {
 		annotations = new ArrayList<Annotation>();
 	}
 
-	public void executePitchDetection() {
+	public List<Annotation> executePitchDetection() {
 		String directory = file.transcodedDirectory();
 		String annotationsFileName = detector.getName() + "_" + file.basename() + ".txt";
 		annotationsFileName = FileUtils.combine(directory, annotationsFileName);
 		if (FileUtils.exists(annotationsFileName)) {
-			annotations.addAll(FileUtils.readPitchAnnotations(annotationsFileName));
+			annotations = FileUtils.readPitchAnnotations(annotationsFileName);
 			LOG.info(String.format("Read cached annotations for %s from %s", detector.getName(),
 					annotationsFileName));
 		} else {
 			detector.executePitchDetection();
-			annotations.addAll(detector.getAnnotations());
+			// Do not copy the annotations, use the same list:
+			annotations = detector.getAnnotations();
 			FileUtils.writePitchAnnotations(annotationsFileName, annotations);
 			LOG.info(String.format("Cached annotation results for %s to %s", detector.getName(),
 					annotationsFileName));
 		}
+		return annotations;
 	}
 
 	public List<Annotation> getAnnotations() {
