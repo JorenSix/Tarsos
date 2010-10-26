@@ -48,8 +48,8 @@ public final class TarsosPitchDetection implements PitchDetector {
 
 	public void executePitchDetection() {
 		try {
-			processFile(file.transcodedPath(), detectionMode, new DetectedPitchHandler() {
-				public void handleDetectedPitch(final Annotation annotation) {
+			processFile(file.transcodedPath(), detectionMode, new AnnotationHandler() {
+				public void handleAnnotation(final Annotation annotation) {
 					annotations.add(annotation);
 				}
 			});
@@ -89,7 +89,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 	 *             If there is an error reading the file.
 	 */
 	public static void processFile(final String fileName, final PitchDetectionMode detectionMode,
-			final DetectedPitchHandler detectedPitchHandler) throws UnsupportedAudioFileException,
+			final AnnotationHandler detectedPitchHandler) throws UnsupportedAudioFileException,
 			IOException {
 		final AudioInputStream ais = AudioSystem.getAudioInputStream(new File(fileName));
 		processStream(ais, detectedPitchHandler, detectionMode);
@@ -109,7 +109,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 	 *             If there is an error reading the stream.
 	 */
 	public static void processStream(final AudioInputStream ais,
-			final DetectedPitchHandler detectedPitchHandler, final PitchDetectionMode detectionMode)
+			final AnnotationHandler detectedPitchHandler, final PitchDetectionMode detectionMode)
 			throws UnsupportedAudioFileException, IOException {
 		final float sampleRate = ais.getFormat().getSampleRate();
 		final PurePitchDetector pureDetector;
@@ -156,7 +156,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 					if (isPitched) {
 						final float time = samplesProcessed / sampleRate;
 						final Annotation annotation = new Annotation(time, pitch, detectionMode);
-						detectedPitchHandler.handleDetectedPitch(annotation);
+						detectedPitchHandler.handleAnnotation(annotation);
 					}
 				}
 			}
