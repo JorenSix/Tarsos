@@ -52,163 +52,165 @@ import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
  *         instrument).
  */
 public final class ToneScaleHistogram extends Histogram {
-    private static final Logger LOG = Logger.getLogger(ToneScaleHistogram.class.getName());
+	private static final Logger LOG = Logger.getLogger(ToneScaleHistogram.class.getName());
 
-    /**
-     * Create a new tone scale using the configured bin width. A tone scale is a
-     * wrapping histogram with values from 0 to 1200 cents.
-     */
-    public ToneScaleHistogram() {
-        super(0, 1200, 1200 / Configuration.getInt(ConfKey.histogram_bin_width), true);
-    }
+	/**
+	 * Create a new tone scale using the configured bin width. A tone scale is a
+	 * wrapping histogram with values from 0 to 1200 cents.
+	 */
+	public ToneScaleHistogram() {
+		super(0, 1200, 1200 / Configuration.getInt(ConfKey.histogram_bin_width), true);
+	}
 
-    /**
-     * Executes peak detection on this histogram and saves the scale in the <a
-     * href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala scale
-     * file format</a>: <bufferCount>This file format for musical tunings is becoming a
-     * standard for exchange of scales, owing to the size of the scale archive
-     * of over 3700+ scales and the popularity of the Scala program.</bufferCount>
-     */
-    public void exportToScalaScaleFileFormat(final String fileName, final String toneScaleName) {
-        final List<Peak> peaks = PeakDetector.detect(this, 15, 0.5);
-        exportPeaksToScalaFileFormat(fileName, toneScaleName, peaks);
-    }
+	/**
+	 * Executes peak detection on this histogram and saves the scale in the <a
+	 * href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala scale
+	 * file format</a>: <bufferCount>This file format for musical tunings is
+	 * becoming a standard for exchange of scales, owing to the size of the
+	 * scale archive of over 3700+ scales and the popularity of the Scala
+	 * program.</bufferCount>
+	 */
+	public void exportToScalaScaleFileFormat(final String fileName, final String toneScaleName) {
+		final List<Peak> peaks = PeakDetector.detect(this, 15);
+		exportPeaksToScalaFileFormat(fileName, toneScaleName, peaks);
+	}
 
-    /**
-     * Saves the scale in the <a
-     * href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala scale
-     * file format</a>: <bufferCount>This file format for musical tunings is becoming a
-     * standard for exchange of scales, owing to the size of the scale archive
-     * of over 3700+ scales and the popularity of the Scala program.</bufferCount>
-     * @param fileName
-     * @param toneScaleName
-     * @param peaks
-     */
-    public static void exportPeaksToScalaFileFormat(final String fileName, final String toneScaleName,
-            final List<Peak> peaks) {
-        if (peaks.isEmpty()) {
-            LOG.warning("No peaks detected: file: " + fileName + " not created");
-        } else {
-            final double[] notes = new double[peaks.size()];
-            for (int i = 0; i < peaks.size(); i++) {
-                notes[i] = peaks.get(i).getPosition();
-            }
-            final ScalaFile scalaFile = new ScalaFile(toneScaleName, notes);
-            scalaFile.write(fileName);
-        }
-    }
+	/**
+	 * Saves the scale in the <a
+	 * href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala scale
+	 * file format</a>: <bufferCount>This file format for musical tunings is
+	 * becoming a standard for exchange of scales, owing to the size of the
+	 * scale archive of over 3700+ scales and the popularity of the Scala
+	 * program.</bufferCount>
+	 * 
+	 * @param fileName
+	 * @param toneScaleName
+	 * @param peaks
+	 */
+	public static void exportPeaksToScalaFileFormat(final String fileName, final String toneScaleName,
+			final List<Peak> peaks) {
+		if (peaks.isEmpty()) {
+			LOG.warning("No peaks detected: file: " + fileName + " not created");
+		} else {
+			final double[] notes = new double[peaks.size()];
+			for (int i = 0; i < peaks.size(); i++) {
+				notes[i] = peaks.get(i).getPosition();
+			}
+			final ScalaFile scalaFile = new ScalaFile(toneScaleName, notes);
+			scalaFile.write(fileName);
+		}
+	}
 
-    public static ToneScaleHistogram createToneScale(final double[] peaks) {
-        final double[] heights = new double[peaks.length];
-        for (int i = 0; i < peaks.length; i++) {
-            heights[i] = 200.0;
-        }
-        return createToneScale(peaks, heights);
-    }
+	public static ToneScaleHistogram createToneScale(final double[] peaks) {
+		final double[] heights = new double[peaks.length];
+		for (int i = 0; i < peaks.length; i++) {
+			heights[i] = 200.0;
+		}
+		return createToneScale(peaks, heights);
+	}
 
-    public static ToneScaleHistogram createToneScale(final double[] peaks, final double[] heights) {
-        final double[] widths = new double[peaks.length];
-        for (int i = 0; i < peaks.length; i++) {
-            widths[i] = 25;
-        }
-        return createToneScale(peaks, heights, widths);
-    }
+	public static ToneScaleHistogram createToneScale(final double[] peaks, final double[] heights) {
+		final double[] widths = new double[peaks.length];
+		for (int i = 0; i < peaks.length; i++) {
+			widths[i] = 25;
+		}
+		return createToneScale(peaks, heights, widths);
+	}
 
-    public static ToneScaleHistogram createToneScale(final double[] peaks, final double[] heights,
-            final double[] widths) {
-        final double[] standardDeviations = new double[peaks.length];
-        for (int i = 0; i < peaks.length; i++) {
-            standardDeviations[i] = 1;
-        }
-        return createToneScale(peaks, heights, widths, standardDeviations);
-    }
+	public static ToneScaleHistogram createToneScale(final double[] peaks, final double[] heights,
+			final double[] widths) {
+		final double[] standardDeviations = new double[peaks.length];
+		for (int i = 0; i < peaks.length; i++) {
+			standardDeviations[i] = 1;
+		}
+		return createToneScale(peaks, heights, widths, standardDeviations);
+	}
 
+	/**
+	 * Creates a theoretical tone scale using a mixture of Gaussian functions
+	 * See <a href=
+	 * "http://www.informaworld.com/smpp/content~content=a901755973~db=all~jumptype=rss"
+	 * > an automatic pitch analysis method for Turkish maqam music</a>. The
+	 * theoretic scale can be used to search for similar tone scales using
+	 * histogram correlation. <br>
+	 * 
+	 * @param peaks
+	 *            the position of the peaks. The position is defined in cents.
+	 * @param heights
+	 *            the heights of the peaks. If null the heights for all peaks is
+	 *            200.
+	 * @param widths
+	 *            the widths of the peaks in cents. If null the width is 25
+	 *            cents for all peaks. The width is measured at a certain
+	 *            height. The mean?
+	 * @param standardDeviations
+	 *            defines the shape of the peak. If null the standard deviation
+	 *            is 1. Bigger values give a wider peak.
+	 * @return a histogram with values from 0 to 1200 and the requested peaks.
+	 */
+	public static ToneScaleHistogram createToneScale(final double[] peaks, final double[] heights,
+			final double[] widths, final double[] standardDeviations) {
+		final ToneScaleHistogram toneScaleHistogram = new ToneScaleHistogram();
+		// unwrapped histogram of 3 x 1200 cents wide. Used to correctly
+		// calculate wrapping peaks
+		// The middle octave is the 'real' octave, the other two are used to
+		// 'fold' onto the middle one
+		final Histogram unWrappedHistogram = new Histogram(0, 3 * 1200,
+				3600 / Configuration.getInt(ConfKey.histogram_bin_width));
 
-    /**
-     * Creates a theoretical tone scale using a mixture of Gaussian functions
-     * See <a href="http://www.informaworld.com/smpp/content~content=a901755973~db=all~jumptype=rss"
-     * > an automatic pitch analysis method for Turkish maqam music</a>. The
-     * theoretic scale can be used to search for similar tone scales using
-     * histogram correlation. <br>
-     * @param peaks
-     *            the position of the peaks. The position is defined in cents.
-     * @param heights
-     *            the heights of the peaks. If null the heights for all peaks is
-     *            200.
-     * @param widths
-     *            the widths of the peaks in cents. If null the width is 25
-     *            cents for all peaks. The width is measured at a certain
-     *            height. The mean?
-     * @param standardDeviations
-     *            defines the shape of the peak. If null the standard deviation
-     *            is 1. Bigger values give a wider peak.
-     * @return a histogram with values from 0 to 1200 and the requested peaks.
-     */
-    public static ToneScaleHistogram createToneScale(final double[] peaks, final double[] heights, final double[] widths,
-            final double[] standardDeviations) {
-        final ToneScaleHistogram toneScaleHistogram = new ToneScaleHistogram();
-        // unwrapped histogram of 3 x 1200 cents wide. Used to correctly
-        // calculate wrapping peaks
-        // The middle octave is the 'real' octave, the other two are used to
-        // 'fold' onto the middle one
-        final Histogram unWrappedHistogram = new Histogram(0, 3 * 1200, 3600 / Configuration
-                .getInt(ConfKey.histogram_bin_width));
+		// shift the peaks to the middle octave + sanity checks
+		for (int i = 0; i < peaks.length; i++) {
+			assert peaks[i] >= 0 && peaks[i] <= 1200;
+			peaks[i] += 1200.0;
+		}
 
-        // shift the peaks to the middle octave + sanity checks
-        for (int i = 0; i < peaks.length; i++) {
-            assert peaks[i] >= 0 && peaks[i] <= 1200;
-            peaks[i] += 1200.0;
-        }
+		for (final Double key : unWrappedHistogram.keySet()) {
+			double currentValue = 0.0;
+			for (int i = 0; i < peaks.length; i++) {
+				final double difference = key - peaks[i];
+				// do not calculate values that are
+				// (very) nearly zero.
+				// Skip elements at width x 10.
+				if (Math.abs(difference) > 10 * widths[i]) {
+					continue;
+				}
+				final double power = Math.pow(difference / (widths[i] / 2 * standardDeviations[i]), 2.0);
+				currentValue += heights[i] * Math.pow(Math.E, -0.5 * power);
+			}
+			// add to the current value (for correct folding)
+			final long currentCount = toneScaleHistogram.getCount(key);
+			final long newCount = currentCount + Math.round(currentValue);
+			toneScaleHistogram.setCount(key, newCount);
+		}
+		return toneScaleHistogram;
+	}
 
+	/**
+	 * Checks if the tone scale is "melodic": it has one or more clearly defined
+	 * peaks. Talking people, noise or other random sounds are not melodic.
+	 * 
+	 * @return true if the tone scale has clearly defined peaks, false
+	 *         otherwise.
+	 */
+	public boolean isMelodic() {
+		// 1 calculate a fitting function
+		// 1a smooth the original histogram for better peak detection
+		final ToneScaleHistogram smoothed = (ToneScaleHistogram) new ToneScaleHistogram().add(this)
+				.gaussianSmooth(1.0);
 
-
-        for (final Double key : unWrappedHistogram.keySet()) {
-            double currentValue = 0.0;
-            for (int i = 0; i < peaks.length; i++) {
-                final double difference = key - peaks[i];
-                // do not calculate values that are
-                // (very) nearly zero.
-                // Skip elements at width x 10.
-                if (Math.abs(difference) > 10 * widths[i]) {
-                    continue;
-                }
-                final double power = Math.pow(difference / (widths[i] / 2 * standardDeviations[i]), 2.0);
-                currentValue += heights[i] * Math.pow(Math.E, -0.5 * power);
-            }
-            // add to the current value (for correct folding)
-            final long currentCount = toneScaleHistogram.getCount(key);
-            final long newCount = currentCount + Math.round(currentValue);
-            toneScaleHistogram.setCount(key, newCount);
-        }
-        return toneScaleHistogram;
-    }
-
-    /**
-     * Checks if the tone scale is "melodic": it has one or more clearly defined
-     * peaks. Talking people, noise or other random sounds are not melodic.
-     * 
-     * @return true if the tone scale has clearly defined peaks, false
-     *         otherwise.
-     */
-    public boolean isMelodic() {
-        // 1 calculate a fitting function
-        // 1a smooth the original histogram for better peak detection
-        final ToneScaleHistogram smoothed = (ToneScaleHistogram) (new ToneScaleHistogram()).add(this)
-        .gaussianSmooth(1.0);
-
-        // 1b detect peaks
-        final List<Peak> peaks = PeakDetector.detect(smoothed, 20, 0.8);
-        final Histogram fittingHistogram = PeakDetector.newPeakDetection(peaks);
-        // 2 calculate difference between original histogram and fitting
-        // histogram
-        // using the intersection measure. The result is a measure for peakiness
-        // of
-        // the original histogram
-        final double peakiness = fittingHistogram.correlation(this, CorrelationMeasure.INTERSECTION);
-        // if more than 50% of the fitting histogram and the original histogram
-        // overlap
-        // the original is peaky or melodic
-        return peakiness > 0.5;
-    }
+		// 1b detect peaks
+		final List<Peak> peaks = PeakDetector.detect(smoothed, 20);
+		final Histogram fittingHistogram = PeakDetector.newPeakDetection(peaks);
+		// 2 calculate difference between original histogram and fitting
+		// histogram
+		// using the intersection measure. The result is a measure for peakiness
+		// of
+		// the original histogram
+		final double peakiness = fittingHistogram.correlation(this, CorrelationMeasure.INTERSECTION);
+		// if more than 50% of the fitting histogram and the original histogram
+		// overlap
+		// the original is peaky or melodic
+		return peakiness > 0.5;
+	}
 
 }

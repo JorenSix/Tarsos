@@ -5,23 +5,23 @@ import java.util.List;
 
 import ptolemy.plot.Plot;
 import ptolemy.plot.PlotApplication;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
-import be.hogent.tarsos.sampled.pitch.Sample;
 import be.hogent.tarsos.util.StopWatch;
 
 public final class PlotThread extends Thread {
 
 	// private String title;
-	private final List<Sample> samples;
+	private final List<Annotation> samples;
 	private final StopWatch watch;
 
-	public PlotThread(final String title, final List<Sample> sampleList, final StopWatch stopWatch) {
+	public PlotThread(final String title, final List<Annotation> sampleList, final StopWatch stopWatch) {
 		// this.title = title;
 		this.samples = sampleList;
 		this.watch = stopWatch;
 	}
 
-	
+	@Override
 	public void run() {
 		// TODO Auto-generated method stub
 
@@ -33,8 +33,8 @@ public final class PlotThread extends Thread {
 		livePlot.setYRange(2000, 6000);
 		// livePlot.setYLog(true);
 
-		final Iterator<Sample> sampleIterator = samples.iterator();
-		Sample currentSample = sampleIterator.next();
+		final Iterator<Annotation> sampleIterator = samples.iterator();
+		Annotation currentSample = sampleIterator.next();
 
 		new PlotApplication(livePlot);
 
@@ -42,11 +42,8 @@ public final class PlotThread extends Thread {
 		for (; currentTick <= samples.get(samples.size() - 1).getStart(); currentTick += 100) {
 
 			while (sampleIterator.hasNext() && currentSample.getStart() <= currentTick) {
-				for (final Double pitch : currentSample.getPitchesWithoutHarmonicsIn(
-						PitchUnit.ABSOLUTE_CENTS, 0.07)) {
-					final double yValue = pitch;
-					livePlot.addPoint(1, currentTick, yValue, false);
-				}
+				final double yValue = currentSample.getPitch().getPitch(PitchUnit.HERTZ);
+				livePlot.addPoint(1, currentTick, yValue, false);
 				currentSample = sampleIterator.next();
 			}
 

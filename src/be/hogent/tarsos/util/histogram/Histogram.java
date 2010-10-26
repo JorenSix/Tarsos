@@ -130,7 +130,7 @@ public class Histogram implements Cloneable {
 		} else {
 			stopValue = lastKey + getClassWidth() / 2;
 		}
-		for (double current = startVal + getClassWidth() / 2; current < stopValue;) {
+		for (double current = startVal + getClassWidth() / 2; current <= stopValue;) {
 			freqTable.put(current, 0L);
 			current = preventRoundingErrors(current + getClassWidth());
 		}
@@ -334,13 +334,13 @@ public class Histogram implements Cloneable {
 			roundedValue = preventRoundingErrors(start + (roundedValue - start) % interval);
 		}
 
-		assert validValue(roundedValue);
+		// assert validValue(roundedValue);
 
 		final double classes = Math.floor((roundedValue + start) / classWidth);
 		final double offset = classWidth / 2 - start;
 		final double key = preventRoundingErrors(classes * classWidth + offset);
-		assert key >= freqTable.firstKey();
-		assert key <= freqTable.lastKey();
+		// assert key >= freqTable.firstKey();
+		// assert key <= freqTable.lastKey();
 		return key;
 	}
 
@@ -396,7 +396,8 @@ public class Histogram implements Cloneable {
 	 * @return the starting value
 	 */
 	public final double getStart() {
-		assert Math.abs(start - freqTable.firstKey() - classWidth / 2.0) < 0.0001;
+		// assert Math.abs(start - freqTable.firstKey() - classWidth / 2.0) <
+		// 0.0001;
 		return start;
 	}
 
@@ -407,7 +408,8 @@ public class Histogram implements Cloneable {
 	 * @return the stop value
 	 */
 	public double getStop() {
-		assert Math.abs(stop - freqTable.lastKey() + classWidth / 2.0) < 0.001;
+		// assert Math.abs(stop - freqTable.lastKey() + classWidth / 2.0) <
+		// 0.001;
 		// stop is cached for performance reasons
 		return stop;
 	}
@@ -627,7 +629,8 @@ public class Histogram implements Cloneable {
 	 * 
 	 * @return a string representation.
 	 */
-	
+
+	@Override
 	public String toString() {
 		return toString(false);
 	}
@@ -860,7 +863,8 @@ public class Histogram implements Cloneable {
 	 * 
 	 * @see java.lang.Object#clone()
 	 */
-	
+
+	@Override
 	public Histogram clone() throws CloneNotSupportedException {
 		final Histogram clone = (Histogram) super.clone();
 		for (final double key : this.freqTable.keySet()) {

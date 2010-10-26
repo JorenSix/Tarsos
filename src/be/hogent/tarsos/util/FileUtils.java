@@ -26,9 +26,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.Pitch;
+import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
-import be.hogent.tarsos.sampled.pitch.Sample;
 
 /**
  * Exports a DatabaseResult to a CSV-file.
@@ -60,8 +61,8 @@ public final class FileUtils {
 	 *            The Tartini pitch file.
 	 * @return
 	 */
-	public static List<Sample> parseTartiniPitchFile(final String fileName) {
-		final List<Sample> samples = new ArrayList<Sample>();
+	public static List<Annotation> parseTartiniPitchFile(final String fileName) {
+		final List<Annotation> samples = new ArrayList<Annotation>();
 		final String contents = FileUtils.readFile(fileName);
 		final String[] lines = contents.split("\n");
 		for (int i = 1; i < lines.length; i++) {
@@ -69,28 +70,28 @@ public final class FileUtils {
 			final double time = Double.parseDouble(data[1]);
 			final double midiCents = Double.parseDouble(data[2]);
 			final Pitch pitch = Pitch.getInstance(PitchUnit.MIDI_CENT, midiCents);
-			final Sample s = new Sample((long) (time * 1000), pitch.getPitch(PitchUnit.HERTZ));
+			final Annotation s = new Annotation(time, pitch.getPitch(PitchUnit.HERTZ),
+					PitchDetectionMode.TARTINI_CSV);
 			samples.add(s);
 		}
 		return samples;
 	}
 
-	public static void writePitchAnnotations(final String fileName, final List<Sample> samples) {
+	public static void writePitchAnnotations(final String fileName, final List<Annotation> samples) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(Sample.headerString());
-		sb.append("\n");
-		for (Sample s : samples) {
+		sb.append("Start(s),Pitch(Hz),Probability[0-1.0],Source\n");
+		for (Annotation s : samples) {
 			sb.append(s.toString()).append("\n");
 		}
 		writeFile(sb.toString(), fileName);
 	}
 
-	public static List<Sample> readPitchAnnotations(final String fileName) {
-		final List<Sample> samples = new ArrayList<Sample>();
+	public static List<Annotation> readPitchAnnotations(final String fileName) {
+		final List<Annotation> samples = new ArrayList<Annotation>();
 		final String contents = FileUtils.readFile(fileName);
 		final String[] lines = contents.split("\n");
 		for (int i = 1; i < lines.length; i++) {
-			samples.add(Sample.parse(lines[i]));
+			samples.add(Annotation.parse(lines[i]));
 		}
 		return samples;
 	}

@@ -17,10 +17,10 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.hogent.tarsos.sampled.BlockingAudioPlayer;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
-import be.hogent.tarsos.sampled.pitch.Sample;
 
 /**
  * Represents an audio file. Facilitates transcoding, handling of originalPath
@@ -270,24 +270,24 @@ public final class AudioFile {
 			final PitchUnit unit) {
 		final PitchDetector pitchDetector = detectionMode.getPitchDetector(this);
 		pitchDetector.executePitchDetection();
-		final List<Sample> samples = pitchDetector.getSamples();
-		List<Long> startPositions = new ArrayList<Long>();
-		for (Sample sample : samples) {
-			List<Double> pitchList = sample.getPitchesIn(unit);
-			if (pitchList.size() > 0 && pitchList.get(0) > from && pitchList.get(0) < to) {
+		final List<Annotation> samples = pitchDetector.getAnnotations();
+		List<Double> startPositions = new ArrayList<Double>();
+		for (Annotation sample : samples) {
+			double pitch = sample.getPitch().getPitch(PitchUnit.RELATIVE_CENTS);
+			if (pitch > from && pitch < to) {
 				startPositions.add(sample.getStart());
 			}
 		}
 
-		HashMap<Long, Long> selections = new HashMap<Long, Long>();
+		HashMap<Double, Double> selections = new HashMap<Double, Double>();
 		if (startPositions.size() > 1) {
 			int last = startPositions.size() - 1;
-			long startSegment = startPositions.get(0);
+			double startSegment = startPositions.get(0);
 			selections.put(startSegment, startPositions.get(last));
 			for (int i = 0; i < startPositions.size() - 1; i++) {
-				long start = startPositions.get(i);
-				long nextStart = startPositions.get(i + 1);
-				if (nextStart - start > 100) {
+				double start = startPositions.get(i);
+				double nextStart = startPositions.get(i + 1);
+				if (nextStart - start > 0.1) {
 					selections.put(startSegment, start);
 					startSegment = nextStart;
 					selections.put(startSegment, startPositions.get(last));
@@ -297,9 +297,9 @@ public final class AudioFile {
 
 		double[] selectionsDouble = new double[selections.size() * 2];
 		int index = 0;
-		for (Map.Entry<Long, Long> entry : selections.entrySet()) {
-			selectionsDouble[index++] = entry.getKey() / 1000.0;
-			selectionsDouble[index++] = entry.getValue() / 1000.0;
+		for (Map.Entry<Double, Double> entry : selections.entrySet()) {
+			selectionsDouble[index++] = entry.getKey();
+			selectionsDouble[index++] = entry.getValue();
 		}
 		Arrays.sort(selectionsDouble);
 		playSelections(selectionsDouble);

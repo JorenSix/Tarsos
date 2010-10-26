@@ -43,11 +43,9 @@ public final class PeakDetector {
 	 * @param histogram
 	 * @param windowSize
 	 *            Number of bins.
-	 * @param meanFactorThreshold
 	 * @return
 	 */
-	public static List<Peak> detect(final Histogram histogram, final int windowSize,
-			final double meanFactorThreshold) {
+	public static List<Peak> detect(final Histogram histogram, final int windowSize) {
 		final double[] peakFunctionValues = new double[histogram.getNumberOfClasses()];
 		final PeakScore differenceScore = new DifferenceScore(histogram, windowSize);
 		final PeakScore localHeightScore = new LocalHeightScore();
@@ -64,7 +62,7 @@ public final class PeakDetector {
 		// value.
 		final List<Integer> peakPositions = new ArrayList<Integer>();
 		for (int i = 0; i < histogram.getNumberOfClasses(); i++) {
-			if (peakFunctionValues[i] > meanFactorThreshold) {
+			if (peakFunctionValues[i] > 0.5) {
 				peakPositions.add(i);
 			}
 		}
