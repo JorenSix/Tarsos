@@ -23,11 +23,11 @@ import be.hogent.tarsos.midi.LogReceiver;
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
-import be.hogent.tarsos.sampled.pitch.Sample;
 import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.sampled.pitch.VampPitchDetection;
 import be.hogent.tarsos.ui.virtualkeyboard.PianoTestFrame;
@@ -103,7 +103,7 @@ public final class PlayAlong {
 		}
 
 		detector.executePitchDetection();
-		final List<Sample> samples = detector.getSamples();
+		final List<Annotation> samples = detector.getAnnotations();
 		final String baseName = FileUtils.basename(fileName);
 
 		FileUtils.mkdirs("data/octave/" + baseName);
@@ -111,8 +111,8 @@ public final class PlayAlong {
 
 		// String toneScalefileName = baseName + '/' + baseName + "_" +
 		// detector.getName() + "_octave.txt";
-		final Histogram octaveHistogram = Sample.ambitusHistogram(samples).toneScaleHistogram();
-		final List<Peak> peaks = PeakDetector.detect(octaveHistogram, 15, 0.5);
+		final Histogram octaveHistogram = Annotation.ambitusHistogram(samples).toneScaleHistogram();
+		final List<Peak> peaks = PeakDetector.detect(octaveHistogram, 15);
 
 		Tarsos.println(peaks.size() + " peaks found in: " + FileUtils.basename(fileName));
 		Tarsos.println("");
@@ -162,24 +162,24 @@ public final class PlayAlong {
 		final JFrame f = new PianoTestFrame(keyboard, rebasedTuning);
 		f.setVisible(true);
 
-		final List<Double> midiKeysUnfiltered = new ArrayList<Double>();
-		final List<Long> time = new ArrayList<Long>();
+		final List<Integer> midiKeysUnfiltered = new ArrayList<Integer>();
+		final List<Double> time = new ArrayList<Double>();
 
-		final Iterator<Sample> sampleIterator = samples.iterator();
-		Sample currentSample = sampleIterator.next();
-		final int currentMidiKey = 0;
+		final Iterator<Annotation> sampleIterator = samples.iterator();
+		Annotation currentSample = sampleIterator.next();
+		int currentMidiKey = 0;
 		while (sampleIterator.hasNext()) {
-			final List<Double> currentPitches = currentSample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS);
-			if (currentPitches.size() == 1) {
-				// double pitch = currentPitches.get(0);
-				/*
-				 * for (int midiKey = 0; midiKey < 128; midiKey++) { if(pitch >
-				 * tuningMin[midiKey] && pitch < tuningMax[midiKey]){
-				 * currentMidiKey = midiKey; } }
-				 */
-				midiKeysUnfiltered.add(currentMidiKey + 0.0);
-				time.add(currentSample.getStart());
-			}
+			currentMidiKey = (int) currentSample.getPitch().getPitch(PitchUnit.MIDI_KEY);
+
+			// double pitch = currentPitches.get(0);
+			/*
+			 * for (int midiKey = 0; midiKey < 128; midiKey++) { if(pitch >
+			 * tuningMin[midiKey] && pitch < tuningMax[midiKey]){ currentMidiKey
+			 * = midiKey; } }
+			 */
+			midiKeysUnfiltered.add(currentMidiKey);
+			time.add(currentSample.getStart());
+
 			currentSample = sampleIterator.next();
 		}
 	}

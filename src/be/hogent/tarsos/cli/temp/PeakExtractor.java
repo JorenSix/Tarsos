@@ -3,11 +3,11 @@ package be.hogent.tarsos.cli.temp;
 import java.util.ArrayList;
 import java.util.List;
 
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMix;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Sample;
 import be.hogent.tarsos.sampled.pitch.VampPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
@@ -57,19 +57,19 @@ public final class PeakExtractor {
 			final String peaksDirectory = FileUtils.combine(annotationsDirectory, "peaks");
 			FileUtils.mkdirs(peaksDirectory);
 
-			List<Sample> samples;
+			List<Annotation> samples;
 			final List<PitchDetector> detectors = new ArrayList<PitchDetector>();
 
 			detectors.add(new VampPitchDetection(file, PitchDetectionMode.VAMP_YIN));
 			detectors.add(new IPEMPitchDetection(file, PitchDetectionMode.IPEM_SIX));
 
-			final PitchDetector mix = new PitchDetectionMix(new ArrayList<PitchDetector>(detectors), 0.02);
+			final PitchDetector mix = new PitchDetectionMix(new ArrayList<PitchDetector>(detectors));
 			detectors.add(mix);
 
 			for (final PitchDetector detector : detectors) {
 				detector.executePitchDetection();
-				samples = detector.getSamples();
-				final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
+				samples = detector.getAnnotations();
+				final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
 				final String ambitusTextFileName = FileUtils.combine(annotationsDirectory, baseName + "_"
 						+ detector.getName() + "_ambitus.txt");
 				final String ambitusPNGFileName = FileUtils.combine(annotationsDirectory, baseName + "_"
@@ -96,8 +96,7 @@ public final class PeakExtractor {
 						for (double element2 : threshold) {
 							FileUtils.appendFile(baseName + ";" + detector.getName() + ";" + element2 + ";"
 									+ element + ";" + gaussian + ";", "peaks.csv");
-							final List<Peak> peaks = PeakDetector.detect(toneScaleHistogram, element,
-									element2);
+							final List<Peak> peaks = PeakDetector.detect(toneScaleHistogram, element);
 							final Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
 							final String peaksTitle = detector.getName() + "_" + baseName + "_peaks_"
 									+ gaussian + "_" + element + "_" + element2;

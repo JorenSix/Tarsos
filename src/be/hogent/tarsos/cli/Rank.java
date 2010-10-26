@@ -11,7 +11,7 @@ import joptsimple.OptionSpec;
 import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -132,10 +132,10 @@ public final class Rank extends AbstractTarsosApp {
 			final AudioFile audioFile = new AudioFile(path);
 			final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
 			pitchDetector.executePitchDetection();
-			final List<Sample> samples = pitchDetector.getSamples();
-			final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
+			final List<Annotation> samples = pitchDetector.getAnnotations();
+			final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
 			final List<Peak> peakList = PeakDetector.detect(ambitusHistogram.toneScaleHistogram()
-					.gaussianSmooth(0.8), 15, 0.1);
+					.gaussianSmooth(0.8), 15);
 			final double[] peaks = new double[peakList.size()];
 			for (int i = 0; i < peaks.length; i++) {
 				peaks[i] = peakList.get(i).getPosition();

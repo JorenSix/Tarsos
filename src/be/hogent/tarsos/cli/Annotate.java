@@ -10,7 +10,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -54,8 +54,8 @@ public final class Annotate extends AbstractTarsosApp {
 
 		final String prefix = baseName + "_" + pitchDetector.getName();
 
-		final List<Sample> samples = pitchDetector.getSamples();
-		final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
+		final List<Annotation> samples = pitchDetector.getAnnotations();
+		final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
 		final String ambitusTXT = FileUtils.combine(directory, prefix + "_ambitus.txt");
 		final String ambitusPNG = FileUtils.combine(directory, prefix + "_ambitus.png");
 		final String toneScaleColor = prefix + "_tone_scale_colored.png";
@@ -69,7 +69,7 @@ public final class Annotate extends AbstractTarsosApp {
 		toneScaleHisto.plot(toneScalePNG, "Tone scale " + baseName + " " + pitchDetector.getName());
 
 		toneScaleHisto.gaussianSmooth(1.0);
-		final List<Peak> peaks = PeakDetector.detect(toneScaleHisto, 15, 0.8);
+		final List<Peak> peaks = PeakDetector.detect(toneScaleHisto, 15);
 		final Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
 		final String peaksTitle = prefix + "_peaks_" + 1.0 + "_" + 15 + "_" + 0.8;
 		final SimplePlot plot = new SimplePlot(peaksTitle);
@@ -89,7 +89,7 @@ public final class Annotate extends AbstractTarsosApp {
 		}
 	}
 
-	
+	@Override
 	public void run(final String... args) {
 
 		final OptionParser parser = new OptionParser();
@@ -119,7 +119,7 @@ public final class Annotate extends AbstractTarsosApp {
 		}
 	}
 
-	
+	@Override
 	public String description() {
 		return "Annotate can be used to annotate audio files. It transcodes "
 				+ "audio to an understandable format, detects pitch and stores information about the files. "
@@ -127,7 +127,7 @@ public final class Annotate extends AbstractTarsosApp {
 				+ "option or all the audiofiles in the audio directory.";
 	}
 
-	
+	@Override
 	public String name() {
 		return "annotate";
 	}

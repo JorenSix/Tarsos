@@ -5,7 +5,7 @@ import java.util.List;
 import be.hogent.tarsos.sampled.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.sampled.pitch.VampPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
@@ -24,20 +24,20 @@ public final class HistogramSummationTest {
 		final AudioFile audioFile = new AudioFile("audio\\maghreb\\4_ABERDAG___LA_DANSE.wav");
 		PitchDetector pitchDetector = new TarsosPitchDetection(audioFile, PitchDetectionMode.TARSOS_YIN);
 		pitchDetector.executePitchDetection();
-		List<Sample> samples = pitchDetector.getSamples();
-		AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
+		List<Annotation> samples = pitchDetector.getAnnotations();
+		AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
 		final ToneScaleHistogram toneScaleHistogramTarsosYin = ambitusHistogram.toneScaleHistogram();
 
 		pitchDetector = new VampPitchDetection(audioFile, PitchDetectionMode.VAMP_YIN);
 		pitchDetector.executePitchDetection();
-		samples = pitchDetector.getSamples();
-		ambitusHistogram = Sample.ambitusHistogram(samples);
+		samples = pitchDetector.getAnnotations();
+		ambitusHistogram = Annotation.ambitusHistogram(samples);
 		final ToneScaleHistogram toneScaleHistogramAbioYin = ambitusHistogram.toneScaleHistogram();
 
 		pitchDetector = new IPEMPitchDetection(audioFile, PitchDetectionMode.IPEM_SIX);
 		pitchDetector.executePitchDetection();
-		samples = pitchDetector.getSamples();
-		ambitusHistogram = Sample.ambitusHistogram(samples);
+		samples = pitchDetector.getAnnotations();
+		ambitusHistogram = Annotation.ambitusHistogram(samples);
 		final ToneScaleHistogram toneScaleHistogramIPEM = ambitusHistogram.toneScaleHistogram();
 
 		toneScaleHistogramTarsosYin.normalize();

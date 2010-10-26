@@ -8,7 +8,7 @@ import joptsimple.OptionSpec;
 import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.util.AudioFile;
 
 /**
@@ -46,7 +46,7 @@ public final class DetectPitch extends AbstractTarsosApp {
             final AudioFile audioFile = new AudioFile(inputFile.getAbsolutePath());
             final PitchDetector detector = detectionMode.getPitchDetector(audioFile);
             detector.executePitchDetection();
-            for (final Sample sample : detector.getSamples()) {
+            for (final Annotation sample : detector.getAnnotations()) {
                 Tarsos.println(sample.toString());
             }
         }

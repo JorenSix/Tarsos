@@ -4,7 +4,7 @@ import java.util.List;
 
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
@@ -29,8 +29,8 @@ public final class PolyOrMonophonicPitchTracker {
         for (final AudioFile file : files) {
             final PitchDetector detector = new TarsosPitchDetection(file, PitchDetectionMode.TARSOS_YIN);
             detector.executePitchDetection();
-            final List<Sample> samples = detector.getSamples();
-            final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
+            final List<Annotation> samples = detector.getAnnotations();
+            final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
             final ToneScaleHistogram toneScaleHistogram = ambitusHistogram.toneScaleHistogram();
             final String title = detector.getName() + "_" + file.basename();
             toneScaleHistogram.plot("data/tests/" + title + ".png", file.basename());

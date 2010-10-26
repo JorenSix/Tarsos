@@ -10,7 +10,7 @@ import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.sampled.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.VampPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
@@ -84,11 +84,11 @@ public final class ToneScaleMatcher {
 				pitchDetector = new IPEMPitchDetection(audioFile, PitchDetectionMode.IPEM_SIX);
 			}
 			pitchDetector.executePitchDetection();
-			final List<Sample> samples = pitchDetector.getSamples();
-			final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
+			final List<Annotation> samples = pitchDetector.getAnnotations();
+			final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
 			final ToneScaleHistogram toneScaleHistogram = ambitusHistogram.toneScaleHistogram();
 			toneScaleHistogram.gaussianSmooth(1.0);
-			final List<Peak> detectedPeaks = PeakDetector.detect(toneScaleHistogram, 10, 0.8);
+			final List<Peak> detectedPeaks = PeakDetector.detect(toneScaleHistogram, 10);
 			peaks = new double[detectedPeaks.size()];
 			for (int i = 0; i < detectedPeaks.size(); i++) {
 				peaks[i] = detectedPeaks.get(i).getPosition();
