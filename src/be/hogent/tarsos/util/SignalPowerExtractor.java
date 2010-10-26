@@ -301,4 +301,8 @@ public final class SignalPowerExtractor {
 	public static boolean isSilence(final float[] buffer, final double silenceThreshold) {
 		return soundPressureLevel(buffer) < silenceThreshold;
 	}
+
+	public static boolean isSilence(final float[] buffer) {
+		return SignalPowerExtractor.isSilence(buffer, Configuration.getDouble(ConfKey.silence_threshold));
+	}
 }

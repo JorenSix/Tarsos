@@ -155,7 +155,12 @@ public enum ConfKey {
 	/**
 	 * An index for a General MIDI instrument
 	 */
-	midi_instrument_index;
+	midi_instrument_index,
+
+	/**
+	 * A threshold used in the silence detector.
+	 */
+	silence_threshold;
 
 	/**
 	 * True if the configured key is a required directory. False otherwise.
