@@ -64,8 +64,9 @@ public final class AnnotationSynth extends AbstractTarsosApp {
 				.accepts(
 						"filter",
 						"Defines the number of samples are used in a median filter. "
-								+ "With samples every 10ms and a median filter of 5 there can be a 50/2 ms delay")
-				.withRequiredArg().ofType(Integer.class).defaultsTo(0);
+								+ "With samples every 10ms and a median filter of 5 "
+								+ "there can be a 50/2 ms delay").withRequiredArg().ofType(Integer.class)
+				.defaultsTo(0);
 
 		final OptionSet options = parse(args, parser, this);
 

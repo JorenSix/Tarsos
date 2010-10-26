@@ -685,7 +685,7 @@ public final class FileDrop {
 	 * <code>
 	 *      ...
 	 *      MyCoolClass myObj = new MyCoolClass();
-	 *      Transferable xfer = new TransferableObject( myObj );
+	 *      Transferable xfer = new be.hogent.tarsos.util.FileDrop.TransferableObject( myObj );
 	 *      ...
 	 * </code>
 	 * </pre>

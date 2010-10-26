@@ -45,18 +45,18 @@ public final class WaveForm extends JComponent {
 		g.drawImage(image, 0, 0, null);
 	}
 
-	public void draw(final Graphics2D graphics) {
+	public void draw(final Graphics2D g) {
 		final int width = 1000;
 		final int height = 280;
 
-		graphics.setColor(Color.BLACK);
+		g.setColor(Color.BLACK);
 
 		final double secondsToX;
 		final double powerToY;
 
 		secondsToX = 1000 * width / (float) audioFile.getLengthInMilliSeconds();
 		powerToY = height / 2.0;
-		graphics.drawLine(0, (int) powerToY, width, (int) powerToY);
+		g.drawLine(0, (int) powerToY, width, (int) powerToY);
 		SignalPowerExtractor spex = new SignalPowerExtractor(audioFile);
 
 		spex.waveFormPlot(new WaveFormDataAggregator() {
@@ -67,7 +67,7 @@ public final class WaveForm extends JComponent {
 				int x = (int) (secondsToX * seconds);
 				int y = (int) (Math.log10(power) * powerToY + powerToY);
 				System.out.println("[" + x + "," + y + "]");
-				graphics.drawLine(prevx, prevy, x, y);
+				g.drawLine(prevx, prevy, x, y);
 				prevx = x;
 				prevy = y;
 			}

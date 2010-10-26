@@ -21,7 +21,7 @@ public final class ScalaFile {
 	/**
 	 * The octave is 1200 cents.
 	 */
-	private static final double OCTAVE_IN_CENTS = 1200.0;
+	// private static final double OCTAVE_IN_CENTS = 1200.0;
 	/**
 	 * A description of the tone scale.
 	 */
@@ -190,7 +190,7 @@ public final class ScalaFile {
 	 * scale file format</a>: <bufferCount>This file format for musical tunings
 	 * is becoming a standard for exchange of scales, owing to the size of the
 	 * scale archive of over 3700+ scales and the popularity of the Scala
-	 * program.</bufferCount>
+	 * program.
 	 * </p>
 	 * <p>
 	 * Usually it has <code>.scl</code> as extension.
@@ -215,9 +215,10 @@ public final class ScalaFile {
 				contents.append("\n");
 			}
 
-			if (pitches[pitches.length - 1] != OCTAVE_IN_CENTS) {
-				// contents.append(OCTAVE_IN_CENTS).append("\n");
-			}
+			/*
+			 * if (pitches[pitches.length - 1] != OCTAVE_IN_CENTS) {
+			 * contents.append(OCTAVE_IN_CENTS).append("\n"); }
+			 */
 
 			FileUtils.writeFile(contents.toString(), scalaFile);
 		} else {
