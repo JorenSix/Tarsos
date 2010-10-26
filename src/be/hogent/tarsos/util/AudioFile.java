@@ -273,7 +273,7 @@ public final class AudioFile {
 		final List<Annotation> samples = pitchDetector.getAnnotations();
 		List<Double> startPositions = new ArrayList<Double>();
 		for (Annotation sample : samples) {
-			double pitch = sample.getPitch().getPitch(PitchUnit.RELATIVE_CENTS);
+			double pitch = sample.getPitch(PitchUnit.RELATIVE_CENTS);
 			if (pitch > from && pitch < to) {
 				startPositions.add(sample.getStart());
 			}

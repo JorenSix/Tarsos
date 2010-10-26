@@ -169,7 +169,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 	}
 
 	public void addSample(Annotation sample) {
-		final double convertedPitch = sample.getPitch().getPitch(pitchUnit);
+		final double convertedPitch = sample.getPitch(pitchUnit);
 		final int dataset = sample.getSource().ordinal();
 
 		LOG.finest(String.format("Added %.2f %s to pitch contour", convertedPitch, pitchUnit.getHumanName()));

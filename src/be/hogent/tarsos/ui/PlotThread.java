@@ -42,7 +42,7 @@ public final class PlotThread extends Thread {
 		for (; currentTick <= samples.get(samples.size() - 1).getStart(); currentTick += 100) {
 
 			while (sampleIterator.hasNext() && currentSample.getStart() <= currentTick) {
-				final double yValue = currentSample.getPitch().getPitch(PitchUnit.HERTZ);
+				final double yValue = currentSample.getPitch(PitchUnit.HERTZ);
 				livePlot.addPoint(1, currentTick, yValue, false);
 				currentSample = sampleIterator.next();
 			}

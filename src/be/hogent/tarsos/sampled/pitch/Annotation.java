@@ -91,6 +91,10 @@ public final class Annotation implements Comparable<Annotation> {
 		return pitch;
 	}
 
+	public double getPitch(final PitchUnit unit) {
+		return pitch.getPitch(unit);
+	}
+
 	public int compareTo(final Annotation o) {
 		// start time first
 		final int startCompare = Double.valueOf(start).compareTo(Double.valueOf(o.start));
@@ -121,8 +125,8 @@ public final class Annotation implements Comparable<Annotation> {
 
 	@Override
 	public String toString() {
-		return String.format(Locale.US, "%.5f,%.5f,%.5f,%s", start, getPitch().getPitch(PitchUnit.HERTZ),
-				probability, source);
+		return String.format(Locale.US, "%.5f,%.5f,%.5f,%s", start, getPitch(PitchUnit.HERTZ), probability,
+				source);
 	}
 
 	public static Annotation parse(final String line) {
@@ -138,7 +142,7 @@ public final class Annotation implements Comparable<Annotation> {
 	public static AmbitusHistogram ambitusHistogram(final List<Annotation> annotations) {
 		final AmbitusHistogram ambitusHistogram = new AmbitusHistogram();
 		for (final Annotation annotation : annotations) {
-			ambitusHistogram.add(annotation.getPitch().getPitch(PitchUnit.ABSOLUTE_CENTS));
+			ambitusHistogram.add(annotation.getPitch(PitchUnit.ABSOLUTE_CENTS));
 		}
 		return ambitusHistogram;
 	}

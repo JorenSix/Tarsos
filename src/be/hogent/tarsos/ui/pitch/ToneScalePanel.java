@@ -15,6 +15,8 @@ import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.histogram.Histogram;
 
@@ -82,10 +84,13 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 	}
 
 	public void addSample(Annotation sample) {
-		histo.add(sample.getPitch().getPitch(PitchUnit.ABSOLUTE_CENTS));
-		if ((int) (sample.getStart() * 1000) % 5 == 0) {
-			// histoLayer.setMarkers(markers);
-			repaint();
+		double pitchInAbsCents = sample.getPitch(PitchUnit.ABSOLUTE_CENTS);
+		if (pitchInAbsCents > 0 && pitchInAbsCents <= Configuration.getInt(ConfKey.ambitus_stop)) {
+			histo.add(pitchInAbsCents);
+			if ((int) (sample.getStart() * 1000) % 5 == 0) {
+				// histoLayer.setMarkers(markers);
+				repaint();
+			}
 		}
 
 	}

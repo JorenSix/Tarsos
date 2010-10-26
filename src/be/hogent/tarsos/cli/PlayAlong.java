@@ -169,7 +169,7 @@ public final class PlayAlong {
 		Annotation currentSample = sampleIterator.next();
 		int currentMidiKey = 0;
 		while (sampleIterator.hasNext()) {
-			currentMidiKey = (int) currentSample.getPitch().getPitch(PitchUnit.MIDI_KEY);
+			currentMidiKey = (int) currentSample.getPitch(PitchUnit.MIDI_KEY);
 
 			// double pitch = currentPitches.get(0);
 			/*

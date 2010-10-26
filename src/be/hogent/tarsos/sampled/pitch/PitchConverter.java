@@ -68,11 +68,12 @@ public final class PitchConverter {
 	}
 
 	/**
-	 * Folds the pitch values to one octave. E.g. 1203 becomes 3 and 956 remains
-	 * 956, -3 is 1197
+	 * Converts a Hertz value to relative cents. E.g. 440Hz is converted to 900
+	 * if the reference is a C.
 	 * 
 	 * @param hertzValue
-	 *            a list of double values in cent
+	 *            A value in hertz.
+	 * @return A value in relative cents.
 	 */
 	public static double hertzToRelativeCent(final double hertzValue) {
 		double absoluteCentValue = hertzToAbsoluteCent(hertzValue);
