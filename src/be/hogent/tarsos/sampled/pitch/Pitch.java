@@ -88,8 +88,13 @@ public final class Pitch {
 		return name;
 	}
 
+	@Override
+	public String toString() {
+		return String.valueOf(pitchInHertz);
+	}
+
 	/**
-	 * A pitch is seen as a western musical pitch if it is less than 20 cents
+	 * A pitch is seen as a western musical pitch if it is less than 15 cents
 	 * removed from the 'correct' pitch. The correct pitch is tuned using A4 =
 	 * 440Hz.
 	 * 
@@ -98,7 +103,7 @@ public final class Pitch {
 	public boolean isWesternMusicalPitch() {
 		final double midiCent = getPitch(PitchUnit.MIDI_CENT);
 		final double midiKey = getPitch(PitchUnit.MIDI_KEY);
-		return Math.abs(midiCent - (int) midiKey) < 0.2;
+		return Math.abs(midiCent - (int) midiKey) < 0.15;
 	}
 
 	/**

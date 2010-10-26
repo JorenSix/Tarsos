@@ -1,5 +1,6 @@
 package be.hogent.tarsos.sampled.pitch;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -39,7 +40,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 
 	private final AudioFile file;
 
-	private final List<Sample> samples;
+	private final List<Annotation> annotations;
 
 	/**
 	 * @param file
@@ -47,7 +48,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 	 */
 	public IPEMPitchDetection(final AudioFile audioFile, final PitchDetectionMode detectionMode) {
 		this.file = audioFile;
-		this.samples = new ArrayList<Sample>();
+		this.annotations = new ArrayList<Annotation>();
 		this.mode = detectionMode;
 		copyBinaryFiles();
 	}
@@ -86,8 +87,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		FileUtils.writeFile(transcodedBaseName + "\n", "lijst.txt");
 		final String name = mode.getParametername();
 
-		String outputDirectory = FileUtils.combine(file.transcodedDirectory(), name) + "/";
-		FileUtils.mkdirs(outputDirectory);
+		String outputDirectory = FileUtils.combine(file.transcodedDirectory()) + "/";
 
 		final String csvFileName = FileUtils.combine(outputDirectory, transcodedBaseName + ".txt");
 		String command = null;
@@ -115,14 +115,21 @@ public final class IPEMPitchDetection implements PitchDetector {
 					+ outputDirectory + "\"";
 		}
 
-		if (!FileUtils.exists(csvFileName)) {
-			Execute.command(command, null);
-		}
+		Execute.command(command, null);
 
 		if (mode == PitchDetectionMode.IPEM_ONE) {
 			parseIpemOne(csvFileName);
 		} else {
 			parseIpemSix(csvFileName);
+		}
+
+		// Is keeping the intermediate CSV file required?
+		// I don't think so:
+		if (new File(csvFileName).delete()) {
+			LOG.fine(String.format("Deleted intermediate CSV file %s", csvFileName));
+		} else {
+			// mark for deletion when JVM closes
+			LOG.fine(String.format("Failed to deleted intermediate CSV file %s", csvFileName));
 		}
 
 		LOG.fine(String.format("%s pitch detection finished for %s.", mode.name(), file.basename()));
@@ -146,11 +153,9 @@ public final class IPEMPitchDetection implements PitchDetector {
 				pitchIndex = 2;
 			}
 			try {
-
 				double pitch = Double.parseDouble(row[pitchIndex]);
-				final Sample sample = new Sample(start, pitch);
-				sample.setSource(mode);
-				samples.add(sample);
+				final Annotation sample = new Annotation(start / 1000.0, pitch, mode);
+				annotations.add(sample);
 			} catch (final NumberFormatException e) {
 				LOG.info("Ignored incorrectly formatted pitch: " + row[pitchIndex]);
 			}
@@ -159,8 +164,6 @@ public final class IPEMPitchDetection implements PitchDetector {
 	}
 
 	private void parseIpemSix(final String csvFileName) {
-		final List<Double> probabilities = new ArrayList<Double>();
-		final List<Double> pitches = new ArrayList<Double>();
 		long start = 0;
 
 		final double minimumAcceptableProbability = Configuration.getDouble(ConfKey.ipem_pitch_threshold);
@@ -168,6 +171,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		final List<String[]> csvData = FileUtils.readCSVFile(csvFileName, " ", 12);
 
 		for (final String[] row : csvData) {
+			double timeStamp = start / 1000.0;
 			for (int index = 0; index < 6; index++) {
 				Double probability = 0.0;
 				try {
@@ -179,7 +183,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 				Double pitch = row[index * 2].equals("-1.#IND00") || row[index * 2].equals("-1.#QNAN0") ? 0.0
 						: Double.parseDouble(row[index * 2]);
 				// only accept values smaller than 25000Hz
-				// bigger values are probably annotated incorrectly
+				// bigger values are annotated incorrectly
 				// With the ipem pitchdetector this happens sometimes, on wine
 				// a big value is
 				if (pitch > 25000) {
@@ -187,21 +191,12 @@ public final class IPEMPitchDetection implements PitchDetector {
 				}
 
 				// Do not store 0 Hz values
-				if (pitch != 0.0) {
-					probabilities.add(probability);
-					pitches.add(pitch);
+				if (pitch != 0.0 && probability > minimumAcceptableProbability) {
+					final Annotation annotation = new Annotation(timeStamp, pitch, mode, probability);
+					annotations.add(annotation);
 				}
 			}
-			final Sample sample = new Sample(start, pitches, probabilities, minimumAcceptableProbability);
-			sample.setSource(mode);
-			samples.add(sample);
 			start += 10;
-
-			assert pitches.size() == 6;
-			assert probabilities.size() == 6;
-
-			probabilities.clear();
-			pitches.clear();
 		}
 	}
 
@@ -209,7 +204,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		return this.mode.getParametername();
 	}
 
-	public List<Sample> getSamples() {
-		return this.samples;
+	public List<Annotation> getAnnotations() {
+		return this.annotations;
 	}
 }

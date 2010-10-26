@@ -11,11 +11,10 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.AudioProcessor;
 import be.hogent.tarsos.util.AudioFile;
-import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.SignalPowerExtractor;
 
 /**
  * @author Joren Six
@@ -28,18 +27,13 @@ public final class TarsosPitchDetection implements PitchDetector {
 	private static final Logger LOG = Logger.getLogger(TarsosPitchDetection.class.getName());
 
 	/**
-	 * Ticks per second.
-	 */
-	private static final double TICKS_PER_SEC = 1000.0;
-
-	/**
 	 * The file to process.
 	 */
 	private final AudioFile file;
 	/**
-	 * A list of samples.
+	 * A list of annotations.
 	 */
-	private final List<Sample> samples;
+	private final List<Annotation> annotations;
 
 	/**
 	 * Which pitch detector to use.
@@ -48,34 +42,17 @@ public final class TarsosPitchDetection implements PitchDetector {
 
 	public TarsosPitchDetection(final AudioFile audioFile, final PitchDetectionMode pitchDetectionMode) {
 		this.file = audioFile;
-		this.samples = new ArrayList<Sample>();
+		this.annotations = new ArrayList<Annotation>();
 		this.detectionMode = pitchDetectionMode;
 	}
 
 	public void executePitchDetection() {
 		try {
-			String directory = file.transcodedDirectory();
-			String annotationsFileName = detectionMode.getParametername() + "_" + file.basename() + ".txt";
-			annotationsFileName = FileUtils.combine(directory, annotationsFileName);
-			if (FileUtils.exists(annotationsFileName)) {
-				samples.addAll(FileUtils.readPitchAnnotations(annotationsFileName));
-			} else {
-				processFile(file.transcodedPath(), detectionMode, new DetectedPitchHandler() {
-
-					public void handleDetectedPitch(final float time, final float pitch) {
-						final long start = (long) (time * TICKS_PER_SEC);
-						final Sample s;
-						if (pitch == -1) {
-							s = new Sample(start);
-						} else {
-							s = new Sample(start, pitch);
-						}
-						samples.add(s);
-					}
-				});
-				FileUtils.writePitchAnnotations(annotationsFileName, samples);
-				LOG.fine(String.format("Cached pitch detection results to %s", annotationsFileName));
-			}
+			processFile(file.transcodedPath(), detectionMode, new DetectedPitchHandler() {
+				public void handleDetectedPitch(final Annotation annotation) {
+					annotations.add(annotation);
+				}
+			});
 		} catch (final UnsupportedAudioFileException e) {
 			LOG.log(Level.SEVERE, "Unsupported audio file: " + file.basename() + " " + e.getMessage(), e);
 		} catch (final IOException e) {
@@ -88,16 +65,14 @@ public final class TarsosPitchDetection implements PitchDetector {
 		final String name;
 		if (PitchDetectionMode.TARSOS_MPM == detectionMode) {
 			name = "tarsos_mpm";
-		} else if (PitchDetectionMode.TARSOS_YIN == detectionMode) {
-			name = "tarsos_yin";
 		} else {
-			name = "tarsos_meta";
+			name = "tarsos_yin";
 		}
 		return name;
 	}
 
-	public List<Sample> getSamples() {
-		return samples;
+	public List<Annotation> getAnnotations() {
+		return annotations;
 	}
 
 	/**
@@ -145,14 +120,10 @@ public final class TarsosPitchDetection implements PitchDetector {
 			pureDetector = new McLeodPitchMethod(sampleRate);
 			bufferSize = McLeodPitchMethod.DEFAULT_BUFFER_SIZE;
 			overlapSize = McLeodPitchMethod.DEFAULT_OVERLAP;
-		} else if (PitchDetectionMode.TARSOS_YIN == detectionMode) {
+		} else {
 			pureDetector = new Yin(sampleRate, Yin.DEFAULT_BUFFER_SIZE);
 			bufferSize = Yin.DEFAULT_BUFFER_SIZE;
 			overlapSize = Yin.DEFAULT_OVERLAP;
-		} else {
-			bufferSize = Yin.DEFAULT_BUFFER_SIZE;
-			overlapSize = Yin.DEFAULT_OVERLAP;
-			pureDetector = new MetaPitchDetector(sampleRate);
 		}
 
 		final int bufferStepSize = bufferSize - overlapSize;
@@ -160,7 +131,6 @@ public final class TarsosPitchDetection implements PitchDetector {
 		final AudioDispatcher dispatcher = new AudioDispatcher(ais, bufferSize, overlapSize);
 		dispatcher.addAudioProcessor(new AudioProcessor() {
 			private long samplesProcessed = 0;
-			private float time = 0;
 
 			public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
 				samplesProcessed += audioFloatBuffer.length;
@@ -173,25 +143,22 @@ public final class TarsosPitchDetection implements PitchDetector {
 			}
 
 			private void processBuffer(final float[] audioFloatBuffer) {
-				final float pitch = pureDetector.getPitch(audioFloatBuffer);
-				time = samplesProcessed / sampleRate;
-				detectedPitchHandler.handleDetectedPitch(time, pitch);
+				boolean isSilence = SignalPowerExtractor.isSilence(audioFloatBuffer);
+				if (!isSilence) {
+					final float pitch = pureDetector.getPitch(audioFloatBuffer);
+					boolean isPitched = pitch != -1;
+					assert pitch != 0;
+					if (isPitched) {
+						final float time = samplesProcessed / sampleRate;
+						final Annotation annotation = new Annotation(time, pitch, detectionMode);
+						detectedPitchHandler.handleDetectedPitch(annotation);
+					}
+				}
 			}
 
 			public void processingFinished() {
 			}
 		});
-
 		new Thread(dispatcher).run();
-
 	}
-
-	/**
-	 * Prints the detected pitch to STD OUT.
-	 */
-	public static final DetectedPitchHandler PRINT_DETECTED_PITCH_HANDLER = new DetectedPitchHandler() {
-		public void handleDetectedPitch(final float time, final float pitch) {
-			Tarsos.println(time + "\t" + pitch);
-		}
-	};
 }

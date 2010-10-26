@@ -12,7 +12,7 @@ import javax.swing.border.EmptyBorder;
 
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Sample;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -55,8 +55,8 @@ public class BrowserPanel extends JPanel {
 				PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
 				final PitchDetector pitchDetector = mode.getPitchDetector(audioFile);
 				pitchDetector.executePitchDetection();
-				final List<Sample> samples = pitchDetector.getSamples();
-				final AmbitusHistogram ambitusHistogram = Sample.ambitusHistogram(samples);
+				final List<Annotation> samples = pitchDetector.getAnnotations();
+				final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
 				final ToneScaleHistogram toneScaleHisto = ambitusHistogram.toneScaleHistogram();
 				JComponent component = new ToneScalePanel(toneScaleHisto, null);
 				JPanel panel = new JPanel(new BorderLayout());

@@ -219,7 +219,8 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 	}
 
 	private void notifyAudioFileChangedListeners() {
-		LOG.log(Level.FINE, "Notify listeners of audio file change: %s .", getAudioFile().basename());
+		LOG.log(Level.FINE,
+				String.format("Notify listeners of audio file change: %s .", getAudioFile().basename()));
 		for (AudioFileChangedListener listener : audioFileChangedListeners) {
 			listener.audioFileChanged(getAudioFile());
 		}

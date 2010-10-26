@@ -11,8 +11,8 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
-import be.hogent.tarsos.sampled.pitch.Sample;
 import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ScalaFile;
@@ -54,7 +54,7 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 		histoLayer.audioFileChanged(audioFile);
 	}
 
-	
+	@Override
 	public void paint(final Graphics g) {
 		final Graphics2D graphics = (Graphics2D) g;
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -81,20 +81,16 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 		histoLayer.scaleChanged(newScale, isChanging);
 	}
 
-	public void addSample(Sample sample) {
-		List<Double> pitches = sample.getPitchesIn(PitchUnit.ABSOLUTE_CENTS);
-		for (double pitch : pitches) {
-			histo.add(pitch);
-		}
-
-		if ((int) sample.getStart() % 5 == 0) {
+	public void addSample(Annotation sample) {
+		histo.add(sample.getPitch().getPitch(PitchUnit.ABSOLUTE_CENTS));
+		if ((int) (sample.getStart() * 1000) % 5 == 0) {
 			// histoLayer.setMarkers(markers);
 			repaint();
 		}
 
 	}
 
-	public void removeSample(Sample sample) {
+	public void removeSample(Annotation sample) {
 		// TODO Auto-generated method stub
 
 	}

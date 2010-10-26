@@ -61,6 +61,12 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 	private static final double SMALL_CUTOFF = 0.5;
 
 	/**
+	 * Pitch annotations below this threshold are considered unprecise, they are
+	 * ignored.
+	 */
+	private static final double LOWER_PITCH_CUTOFF = 80.0; // Hz
+
+	/**
 	 * Defines the relative size the chosen peak (pitch) has.
 	 */
 	private final double cutoff;
@@ -163,9 +169,10 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 	 * @see be.hogent.tarsos.pitch.pure.PurePitchDetector#getPitch(float[])
 	 */
 	public float getPitch(final float[] audioBuffer) {
-		float pitch;
+		final float pitch;
 
-		// 0. Clear previous results (should be faster than initializing again?)
+		// 0. Clear previous results (Is this faster than initializing a list
+		// again and again?)
 		maxPositions.clear();
 		periodEstimates.clear();
 		ampEstimates.clear();
@@ -207,7 +214,12 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 			}
 
 			final double period = periodEstimates.get(periodIndex);
-			pitch = (float) (sampleRate / period);
+			final float pitchEstimate = (float) (sampleRate / period);
+			if (pitchEstimate > LOWER_PITCH_CUTOFF) {
+				pitch = pitchEstimate;
+			} else {
+				pitch = -1;
+			}
 		}
 
 		return pitch;

@@ -1,5 +1,8 @@
 package be.hogent.tarsos.sampled.pitch;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import be.hogent.tarsos.util.AudioFile;
 
 /**
@@ -57,12 +60,17 @@ public enum PitchDetectionMode {
 	/**
 	 * The pure java MPM (Tartini pitch tracker) implementation of Tarsos.
 	 */
-	TARSOS_MPM("tarsos_yin"),
+	TARSOS_MPM("tarsos_mpm"),
 
 	/**
-	 * The pure java Meta pitch tracker, uses MPM and YIN in the background.
+	 * All.
 	 */
-	TARSOS_META("tarsos_meta");
+	TARSOS_ALL("tarsos_ALL"),
+
+	/**
+	 * The pure java MPM (Tartini pitch tracker) implementation of Tarsos.
+	 */
+	TARTINI_CSV("tartini_csv");
 
 	/**
 	 * The name of the parameter.
@@ -109,14 +117,25 @@ public enum PitchDetectionMode {
 		case TARSOS_MPM:
 			detector = new TarsosPitchDetection(audioFile, this);
 			break;
-		case TARSOS_META:
-			detector = new TarsosPitchDetection(audioFile, this);
+		case TARSOS_ALL:
+			List<PitchDetector> subDetectors = new ArrayList<PitchDetector>();
+			subDetectors.add(new CachingDetector(audioFile, new IPEMPitchDetection(audioFile,
+					PitchDetectionMode.IPEM_ONE)));
+			subDetectors.add(new CachingDetector(audioFile, new IPEMPitchDetection(audioFile,
+					PitchDetectionMode.IPEM_SIX)));
+			subDetectors.add(new CachingDetector(audioFile, new TarsosPitchDetection(audioFile,
+					PitchDetectionMode.TARSOS_YIN)));
+			subDetectors.add(new CachingDetector(audioFile, new VampPitchDetection(audioFile,
+					PitchDetectionMode.VAMP_YIN_FFT)));
+			subDetectors.add(new CachingDetector(audioFile, new TarsosPitchDetection(audioFile,
+					PitchDetectionMode.TARSOS_MPM)));
+			detector = new PitchDetectionMix(subDetectors);
 			break;
 		default:
 			detector = new VampPitchDetection(audioFile, this);
 			break;
 		}
-		return detector;
+		return new CachingDetector(audioFile, detector);
 	}
 
 	public String getDetectionModeName() {

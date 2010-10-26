@@ -19,7 +19,7 @@ public interface PitchDetector {
     /**
      * @return a list of annotated samples
      */
-    List<Sample> getSamples();
+    List<Annotation> getAnnotations();
 
     /**
      * @return the name of the detector possibly with parameters e.g. aubio_YIN

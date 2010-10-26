@@ -24,10 +24,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import be.hogent.tarsos.sampled.BlockingAudioPlayer;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.PitchUnit;
-import be.hogent.tarsos.sampled.pitch.Sample;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -129,10 +128,10 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		private final List<SampleHandler> handlers;
 		private boolean running;
 		private boolean isPaused;
-		private int currentSampleStart;
+		private double currentSampleStart;
 
 		AudioFileSampleProcessor(final AudioFile audioFile, final List<SampleHandler> someHandlers) {
-			super("Sample data publisher.");
+			super("Annotation data publisher.");
 			file = audioFile;
 			speedFactor = 10.0;
 			this.handlers = someHandlers;
@@ -158,9 +157,9 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
 			final PitchDetector pitchDetector = mode.getPitchDetector(file);
 			pitchDetector.executePitchDetection();
-			final List<Sample> samples = pitchDetector.getSamples();
-			long previousSample = 0L;
-			for (Sample sample : samples) {
+			final List<Annotation> samples = pitchDetector.getAnnotations();
+			double previousSample = 0.0;
+			for (Annotation sample : samples) {
 				if (!running) {
 					break;
 				}
@@ -171,29 +170,27 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 						// sleep interrupted
 					}
 				}
-				currentSampleStart = (int) sample.getStart();
-				List<Double> pitchList = sample.getPitchesIn(PitchUnit.HERTZ);
-				if (pitchList.size() > 0) {
-					for (SampleHandler handler : handlers) {
-						handler.addSample(sample);
-					}
+				currentSampleStart = sample.getStart();
+
+				for (SampleHandler handler : handlers) {
+					handler.addSample(sample);
 				}
 
 				try {
-					long sleepTime = (long) ((currentSampleStart - previousSample) / getSpeedFactor());
+					long sleepTime = (long) ((currentSampleStart - previousSample) * 1000 / getSpeedFactor());
 					Thread.sleep(sleepTime);
 				} catch (InterruptedException e) {
 					// sleep interrupted
 				}
-				slider.setValue(currentSampleStart);
+				slider.setValue((int) (currentSampleStart * 1000));
 				previousSample = currentSampleStart;
 			}
 		}
 
 		/**
-		 * @return the starting position of the current sample (in ms).
+		 * @return the starting position of the current sample in seconds.
 		 */
-		public int getCurrentSampleStart() {
+		public double getCurrentSampleStart() {
 			return currentSampleStart;
 		}
 
@@ -214,14 +211,14 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		private final AudioFile file;
 		private boolean running;
 		private boolean isPaused;
-		private final int offsetInMilliSeconds;
+		private final double offsetInSeconds;
 
-		AudioPlayingThread(final AudioFile audioFile, int startAtInMilliSeconds) {
+		AudioPlayingThread(final AudioFile audioFile, double startAtSeconds) {
 			super("Audio playing thread.");
 			file = audioFile;
 			running = false;
 			isPaused = false;
-			offsetInMilliSeconds = startAtInMilliSeconds;
+			offsetInSeconds = startAtSeconds;
 		}
 
 		public void pauzePlaying() {
@@ -248,7 +245,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 																	// second
 			int frameSize = format.getFormat().getFrameSize(); // bytes / frame
 			// bytes = bytes / frame * frame/second * second
-			long bytesToSkip = frameSize * Math.round(offsetInMilliSeconds / 1000.0f * frameRate);
+			long bytesToSkip = frameSize * Math.round(offsetInSeconds * frameRate);
 			try {
 				AudioInputStream stream = AudioSystem.getAudioInputStream(new File(file.transcodedPath()));
 				stream.skip(bytesToSkip);
@@ -312,9 +309,9 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 	}
 
 	public interface SampleHandler {
-		public void addSample(Sample sample);
+		public void addSample(Annotation sample);
 
-		public void removeSample(Sample sample);
+		public void removeSample(Annotation sample);
 	}
 
 }

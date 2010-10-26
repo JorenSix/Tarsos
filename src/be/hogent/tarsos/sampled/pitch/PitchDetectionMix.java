@@ -11,9 +11,8 @@ import java.util.List;
  */
 public final class PitchDetectionMix implements PitchDetector {
 	private final List<PitchDetector> detectors;
-	private final List<Sample> samples;
+	private final List<Annotation> samples;
 	private final String name;
-	private final double pitchDeviation;
 
 	/**
 	 * Creates a new PitchdetectionMix.
@@ -27,9 +26,8 @@ public final class PitchDetectionMix implements PitchDetector {
 	 *            detected with AUBIO_YIN and the next sample of 101HZ detected
 	 *            with AUBIO_SCHMITT is accepted when pitchDeviation >= 0.01
 	 */
-	public PitchDetectionMix(final List<PitchDetector> subDetectors, final double errorMargin) {
+	public PitchDetectionMix(final List<PitchDetector> subDetectors) {
 		this.detectors = subDetectors;
-		this.pitchDeviation = errorMargin;
 
 		final List<String> names = new ArrayList<String>();
 		for (final PitchDetector detector : subDetectors) {
@@ -40,46 +38,32 @@ public final class PitchDetectionMix implements PitchDetector {
 		for (final String subDetectorName : names) {
 			sb.append(subDetectorName).append("_");
 		}
-		name = "mix_" + sb.toString() + errorMargin;
+		name = "mix_" + sb.toString();
 
-		samples = new ArrayList<Sample>();
+		samples = new ArrayList<Annotation>();
 	}
 
 	public void executePitchDetection() {
 
 		for (final PitchDetector detector : detectors) {
-			if (detector.getSamples().size() == 0) {
+			if (detector.getAnnotations().size() == 0) {
 				detector.executePitchDetection();
 			}
 		}
 
-		final List<Sample> allSamples = new ArrayList<Sample>();
 		for (final PitchDetector detector : detectors) {
-			allSamples.addAll(detector.getSamples());
+			samples.addAll(detector.getAnnotations());
 		}
 
 		// order by sample start and source
-		Collections.sort(allSamples);
-
-		// accept some samples
-		for (int i = 0; i < allSamples.size() - 1; i++) {
-			final Sample currentSample = allSamples.get(i);
-			final Sample nextSample = allSamples.get(i + 1);
-			if (currentSample.getSource() != nextSample.getSource()) {
-				final double pitch = currentSample.returnMatchingPitch(nextSample, pitchDeviation);
-
-				if (pitch > 0) {
-					samples.add(new Sample((nextSample.getStart() + nextSample.getStart()) / 2, pitch));
-				}
-			}
-		}
+		Collections.sort(samples);
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
-	public List<Sample> getSamples() {
+	public List<Annotation> getAnnotations() {
 		return this.samples;
 	}
 

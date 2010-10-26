@@ -151,7 +151,7 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 					final double value = source.getValue();
 
 					if (histo.getMaxBinCount() != 0) {
-						final List<Peak> peaks = PeakDetector.detect(histo, (int) value, 0.5);
+						final List<Peak> peaks = PeakDetector.detect(histo, (int) value);
 						final double[] peaksInCents = new double[peaks.size()];
 						int i = 0;
 						for (final Peak peak : peaks) {
