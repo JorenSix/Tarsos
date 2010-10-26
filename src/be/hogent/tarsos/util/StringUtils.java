@@ -13,6 +13,19 @@ import java.security.NoSuchAlgorithmException;
 
 public final class StringUtils {
 
+	/**
+	 * Hides the default constructor.
+	 */
+	private StringUtils() {
+	}
+
+	/**
+	 * Replaces UTF-8 characters with _.
+	 * 
+	 * @param inString
+	 *            The string to filter.
+	 * @return A string with non ASCII chars replaced by underscore.
+	 */
 	private static String filterNonAscii(final String inString) {
 		// Create the encoder and decoder for the character encoding
 		final Charset charset = Charset.forName("US-ASCII");
@@ -73,7 +86,7 @@ public final class StringUtils {
 			BigInteger i = new BigInteger(1, m.digest());
 			return String.format("%1$032X", i);
 		} catch (NoSuchAlgorithmException e) {
-			// MD5 Should be supported!
+			// MD5 Should be supported by the runtime!
 			throw new IllegalStateException(e);
 		}
 	}
