@@ -144,9 +144,14 @@ public final class TarsosPitchDetection implements PitchDetector {
 
 			private void processBuffer(final float[] audioFloatBuffer) {
 				boolean isSilence = SignalPowerExtractor.isSilence(audioFloatBuffer);
+				// Do not detect pitch on silence.
 				if (!isSilence) {
 					final float pitch = pureDetector.getPitch(audioFloatBuffer);
+					// The pure pitch detectors return -1 when no pitch is
+					// detected. Creating an annotation without pitch is not
+					// useful.
 					boolean isPitched = pitch != -1;
+					// The pitch detectors should not return 0 Hz.
 					assert pitch != 0;
 					if (isPitched) {
 						final float time = samplesProcessed / sampleRate;
