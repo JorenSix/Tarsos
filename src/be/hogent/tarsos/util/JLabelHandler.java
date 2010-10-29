@@ -1,22 +1,31 @@
 package be.hogent.tarsos.util;
 
 import java.util.logging.Filter;
+import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.SimpleFormatter;
 
-import javax.swing.JTextArea;
+import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 /**
- * Utility class to handle logging with a JTextArea
+ * Utility class to handle logging with a JLabel (status bar)
  * 
  * @author Joren Six
  */
-public final class TextAreaHandler extends Handler {
+public final class JLabelHandler extends Handler {
 
-	private static JTextArea jTextArea = null;
+	public static final class JLabelFormatter extends Formatter {
+
+		@Override
+		public String format(final LogRecord record) {
+			return String.format(" %s: %s ", record.getLevel().getName(), record.getMessage());
+		}
+
+	}
+
+	private static JLabel label = null;
 
 	/**
 	 * Set the JTextArea to log to.
@@ -24,8 +33,8 @@ public final class TextAreaHandler extends Handler {
 	 * @param textArea
 	 *            The JTextArea to log to.
 	 */
-	private static void setTextArea(final JTextArea textArea) {
-		TextAreaHandler.jTextArea = textArea;
+	private static void setTextArea(final JLabel jLabel) {
+		JLabelHandler.label = jLabel;
 	}
 
 	/**
@@ -33,9 +42,9 @@ public final class TextAreaHandler extends Handler {
 	 * @param logJTextArea
 	 *            setup logging for a JTextarea
 	 */
-	public static void setupLoggerHandler(final JTextArea logJTextArea) {
+	public static void setupLoggerHandler(final JLabel jLabel) {
 		// This code attaches the handler to the text area
-		setTextArea(logJTextArea);
+		setTextArea(jLabel);
 	}
 
 	private Level level = Level.INFO; // The logging level for this handler,
@@ -45,14 +54,14 @@ public final class TextAreaHandler extends Handler {
 	 * Include filtering mechanism as it is not included in the (lame) Abstract
 	 * Handler class.
 	 */
-	public TextAreaHandler() {
+	public JLabelHandler() {
 		Filter filter = new Filter() {
 			public boolean isLoggable(final LogRecord record) {
 				return record.getLevel().intValue() >= level.intValue();
 			}
 		};
 		this.setFilter(filter);
-		this.setFormatter(new SimpleFormatter());
+		this.setFormatter(new JLabelFormatter());
 	}
 
 	/*
@@ -71,11 +80,11 @@ public final class TextAreaHandler extends Handler {
 
 		final String message = getFormatter().format(logRecord);
 
-		// Append formatted message to textareas using the Swing Thread.
+		//
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				if (jTextArea != null) {
-					jTextArea.append(message);
+				if (label != null) {
+					label.setText(message);
 				}
 			}
 		});
