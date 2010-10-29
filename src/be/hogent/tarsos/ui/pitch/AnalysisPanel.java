@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -56,9 +57,9 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 
 		addFileDropListener();
 
-		final ToneScalePanel toneScalePanel = new ToneScalePanel(new ToneScaleHistogram(), this);
-		addAudioFileChangedListener(toneScalePanel);
-		addScaleChangedListener(toneScalePanel);
+		final ToneScalePane toneScalePane = new ToneScalePane(new ToneScaleHistogram(), this);
+		addAudioFileChangedListener(toneScalePane);
+		addScaleChangedListener(toneScalePane);
 
 		final ToneScalePanel ambitusPanel = new ToneScalePanel(new AmbitusHistogram(), this);
 		addAudioFileChangedListener(ambitusPanel);
@@ -73,7 +74,7 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 
 		final ControlPanel controlPanel = new ControlPanel();
 		addAudioFileChangedListener(controlPanel);
-		controlPanel.addHandler(toneScalePanel);
+		controlPanel.addHandler(toneScalePane);
 		controlPanel.addHandler(ambitusPanel);
 		controlPanel.addHandler(pitchContourPanel);
 
@@ -83,25 +84,22 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 		final JPanel dynamicPanel = new JPanel();
 		BoxLayout boxLayout = new BoxLayout(dynamicPanel, BoxLayout.Y_AXIS);
 		dynamicPanel.setLayout(boxLayout);
-		toneScalePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		dynamicPanel.add(toneScalePanel);
-
-		List<Layer> layers = toneScalePanel.getLayers();
+		// toneScalePane.setAlignmentX(Component.CENTER_ALIGNMENT);
+		dynamicPanel.add(toneScalePane);
 
 		JPanel layersJPanel = new JPanel(new BorderLayout());
 		layersJPanel.setInheritsPopupMenu(true);
 
-		Component histogramComponent = layers.get(0).ui();
+		Component histogramComponent = new JLabel();
 
 		AudioFileBrowserPanel browser = new AudioFileBrowserPanel(new GridLayout(0, 2));
 		addAudioFileChangedListener(browser);
 		browser.setBorder(new EmptyBorder(0, 0, 0, 0));
-		browser.setInheritsPopupMenu(true);
 		browser.setBackground(Color.WHITE);
 
 		final JCheckBox toneScaleCheckBox = new JCheckBox("Tone scale");
 		toneScaleCheckBox.getModel().setSelected(true);
-		toneScaleCheckBox.addActionListener(new ShowPanelActionListener(dynamicPanel, toneScalePanel, this));
+		toneScaleCheckBox.addActionListener(new ShowPanelActionListener(dynamicPanel, toneScalePane, this));
 
 		final JCheckBox ambitusCheckBox = new JCheckBox("Ambitus");
 		ambitusCheckBox.addActionListener(new ShowPanelActionListener(dynamicPanel, ambitusPanel, this));
@@ -143,7 +141,7 @@ public final class AnalysisPanel extends JPanel implements ScaleChangedListener 
 
 		JScrollPane browserScollPane = new JScrollPane(browser);
 		browserScollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		browserScollPane.setBackground(Color.WHITE);
+		browserScollPane.getViewport().setBackground(Color.WHITE);
 
 		layersJPanel.add(histogramComponent, BorderLayout.NORTH);
 		layersJPanel.add(browserScollPane, BorderLayout.CENTER);

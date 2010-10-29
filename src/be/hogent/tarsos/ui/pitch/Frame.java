@@ -3,6 +3,7 @@
 package be.hogent.tarsos.ui.pitch;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
@@ -15,6 +16,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -22,6 +24,7 @@ import javax.swing.border.EmptyBorder;
 
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.JLabelHandler;
 import be.hogent.tarsos.util.TextAreaHandler;
 
 /**
@@ -83,6 +86,11 @@ public class Frame extends JFrame {
 		add(new HeaderPanel(), BorderLayout.NORTH);
 
 		add(tabbedPane, BorderLayout.CENTER);
+
+		JLabel statusBarLabel = new JLabel();
+		statusBarLabel.setForeground(Color.GRAY);
+		JLabelHandler.setupLoggerHandler(statusBarLabel);
+		add(statusBarLabel, BorderLayout.SOUTH);
 	}
 
 	/*

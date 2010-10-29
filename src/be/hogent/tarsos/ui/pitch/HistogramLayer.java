@@ -41,6 +41,7 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 	private final int maxMarkers = 50;
 	private final List<Double> markerPositions;
 	private final ScaleChangedListener scaleChangedPublisher;
+	private final Color histogramColor;
 
 	/**
 	 * Log messages.
@@ -48,7 +49,7 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 	private static final Logger LOG = Logger.getLogger(HistogramLayer.class.getName());
 
 	public HistogramLayer(final JComponent component, final Histogram histogram,
-			final ScaleChangedListener scalePublisher) {
+			final ScaleChangedListener scalePublisher, final Color color) {
 		parent = component;
 		mouseDrag = new MouseDragListener(component, MouseEvent.BUTTON1);
 		histo = histogram;
@@ -56,6 +57,7 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 		component.addMouseMotionListener(mouseDrag);
 		markerPositions = new ArrayList<Double>();
 		scaleChangedPublisher = scalePublisher;
+		histogramColor = color;
 	}
 
 	public void setMarkers(final List<Double> newMarkers) {
@@ -94,7 +96,7 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 		graphics.setColor(Color.GRAY);
 		graphics.drawLine(0, height - yOffset, width, height - yOffset);
 
-		graphics.setColor(Color.RED);
+		graphics.setColor(histogramColor);
 
 		int prevOctave = 0;
 		for (final double key : histo.keySet()) {
@@ -134,6 +136,19 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 
 	public double getXOffset() {
 		return mouseDrag.calculateXOffset();
+	}
+
+	double[] scale;
+	AudioFile audioFile;
+
+	public void scaleChanged(final double[] newScale, final boolean isChanging) {
+		if (!isChanging) {
+			scale = newScale;
+		}
+	}
+
+	public void audioFileChanged(final AudioFile newAudioFile) {
+		audioFile = newAudioFile;
 	}
 
 	JComponent ui;
@@ -214,18 +229,5 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 
 		}
 		return ui;
-	}
-
-	double[] scale;
-	AudioFile audioFile;
-
-	public void scaleChanged(final double[] newScale, final boolean isChanging) {
-		if (!isChanging) {
-			scale = newScale;
-		}
-	}
-
-	public void audioFileChanged(final AudioFile newAudioFile) {
-		audioFile = newAudioFile;
 	}
 }
