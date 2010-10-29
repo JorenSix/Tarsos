@@ -1,5 +1,6 @@
 package be.hogent.tarsos;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -123,6 +124,22 @@ public final class Tarsos {
 	}
 
 	/**
+	 * Colors used by ptplot.
+	 */
+	public static final Color[] COLORS = { new Color(0xff0000), // red
+			new Color(0x0000ff), // blue
+			new Color(0x00aaaa), // cyan-ish
+			new Color(0x000000), // black
+			new Color(0xffa500), // orange
+			new Color(0x53868b), // cadetblue4
+			new Color(0xff7f50), // coral
+			new Color(0x45ab1f), // dark green-ish
+			new Color(0x90422d), // sienna-ish
+			new Color(0xa0a0a0), // grey-ish
+			new Color(0x14ff14), // green-ish
+	};
+
+	/**
 	 * Register a Tarsos application.
 	 * 
 	 * @param name
@@ -153,6 +170,7 @@ public final class Tarsos {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
+
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				} catch (Exception e) {
 					log.log(Level.WARNING, "Unable to set system L&F, continue with default L&F", e);
