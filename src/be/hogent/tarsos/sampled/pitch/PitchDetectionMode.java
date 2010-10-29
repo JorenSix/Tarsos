@@ -119,14 +119,17 @@ public enum PitchDetectionMode {
 			break;
 		case TARSOS_ALL:
 			List<PitchDetector> subDetectors = new ArrayList<PitchDetector>();
-			subDetectors.add(new CachingDetector(audioFile, new IPEMPitchDetection(audioFile,
-					PitchDetectionMode.IPEM_ONE)));
-			subDetectors.add(new CachingDetector(audioFile, new IPEMPitchDetection(audioFile,
-					PitchDetectionMode.IPEM_SIX)));
+			// subDetectors.add(new CachingDetector(audioFile, new
+			// IPEMPitchDetection(audioFile,
+			// PitchDetectionMode.IPEM_ONE)));
+			// subDetectors.add(new CachingDetector(audioFile, new
+			// IPEMPitchDetection(audioFile,
+			// PitchDetectionMode.IPEM_SIX)));
 			subDetectors.add(new CachingDetector(audioFile, new TarsosPitchDetection(audioFile,
 					PitchDetectionMode.TARSOS_YIN)));
-			subDetectors.add(new CachingDetector(audioFile, new VampPitchDetection(audioFile,
-					PitchDetectionMode.VAMP_YIN_FFT)));
+			// subDetectors.add(new CachingDetector(audioFile, new
+			// VampPitchDetection(audioFile,
+			// PitchDetectionMode.VAMP_YIN_FFT)));
 			subDetectors.add(new CachingDetector(audioFile, new TarsosPitchDetection(audioFile,
 					PitchDetectionMode.TARSOS_MPM)));
 			detector = new PitchDetectionMix(subDetectors);

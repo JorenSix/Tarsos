@@ -63,7 +63,7 @@ public final class Annotation implements Comparable<Annotation> {
 		this.source = annotationSource;
 		if (salience > 1.0 || 0.0 > salience) {
 			throw new IllegalArgumentException(
-					"The salience should be a value between zero and one (inclusive).");
+					"The salience should be a value between zero and one (inclusive): " + salience);
 		}
 	}
 

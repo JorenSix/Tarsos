@@ -31,9 +31,12 @@ import java.util.List;
  * the desired number of ACF coefficients. The implementation can be optimized
  * to <code>O((W+w)log(W+w))</code> by using an <abbr
  * title="Fast Fourier Transform">FFT</abbr> to calculate the <abbr
- * title="Auto-Correlation Function">ACF</abbr>.
+ * title="Auto-Correlation Function">ACF</abbr>. But I am still afraid of the
+ * dark magic of the FFT and clinging to the familiar, friendly, laggard time
+ * domain.
  * </p>
  * 
+ * @author Phillip McLeod
  * @author Joren Six
  */
 public final class McLeodPitchMethod implements PurePitchDetector {
@@ -61,7 +64,7 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 	private static final double SMALL_CUTOFF = 0.5;
 
 	/**
-	 * Pitch annotations below this threshold are considered unprecise, they are
+	 * Pitch annotations below this threshold are considered invalid, they are
 	 * ignored.
 	 */
 	private static final double LOWER_PITCH_CUTOFF = 80.0; // Hz
@@ -104,6 +107,11 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 	private final List<Float> ampEstimates = new ArrayList<Float>();
 
 	/**
+	 * The probability of the last detected pitch.
+	 */
+	private float probability;
+
+	/**
 	 * Initializes the normalized square difference value array and stores the
 	 * sample rate.
 	 * 
@@ -141,6 +149,7 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 		this.sampleRate = audioSampleRate;
 		nsdf = new float[audioBufferSize];
 		this.cutoff = cutoffMPM;
+		probability = 0;
 	}
 
 	/**
@@ -198,6 +207,7 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 
 		if (periodEstimates.isEmpty()) {
 			pitch = -1;
+			probability = 0;
 		} else {
 			// use the overall maximum to calculate a cutoff.
 			// The cutoff value is based on the highest value and a relative
@@ -217,8 +227,10 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 			final float pitchEstimate = (float) (sampleRate / period);
 			if (pitchEstimate > LOWER_PITCH_CUTOFF) {
 				pitch = pitchEstimate;
+				probability = (float) highestAmplitude;
 			} else {
 				pitch = -1;
+				probability = 0;
 			}
 		}
 
@@ -354,5 +366,12 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 		if (curMaxPos > 0) { // if there was a maximum in the last part
 			maxPositions.add(curMaxPos); // add it to the vector of maxima
 		}
+	}
+
+	public float getProbability() {
+		if (probability > 1.0) {
+			probability = 1;
+		}
+		return probability;
 	}
 }

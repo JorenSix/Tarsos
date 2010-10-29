@@ -155,7 +155,8 @@ public final class TarsosPitchDetection implements PitchDetector {
 					assert pitch != 0;
 					if (isPitched) {
 						final float time = samplesProcessed / sampleRate;
-						final Annotation annotation = new Annotation(time, pitch, detectionMode);
+						final float probability = pureDetector.getProbability();
+						final Annotation annotation = new Annotation(time, pitch, detectionMode, probability);
 						detectedPitchHandler.handleAnnotation(annotation);
 					}
 				}

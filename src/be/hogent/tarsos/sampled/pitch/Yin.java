@@ -3,10 +3,11 @@ package be.hogent.tarsos.sampled.pitch;
 /**
  * An implementation of the AUBIO_YIN pitch tracking algorithm. See <a href=
  * "http://recherche.ircam.fr/equipes/pcm/cheveign/ps/2002_JASA_YIN_proof.pdf"
- * >the AUBIO_YIN paper.</a> Implementation based on <a
+ * >the YIN paper.</a> Implementation based on <a
  * href="http://aubio.org">aubio</a>
  * 
  * @author Joren Six
+ * @author Paul Brossier
  */
 public final class Yin implements PurePitchDetector {
 	/**
@@ -40,6 +41,11 @@ public final class Yin implements PurePitchDetector {
 	 * of the input buffer.
 	 */
 	private final float[] yinBuffer;
+
+	/**
+	 * The probability of the last detected pitch.
+	 */
+	private float probability;
 
 	public Yin(final float audioSampleRate, final int bufferSize) {
 		this(audioSampleRate, bufferSize, DEFAULT_THRESHOLD);
@@ -119,7 +125,7 @@ public final class Yin implements PurePitchDetector {
 		// Very small optimization in comparison with AUBIO
 		// start the running sum with the correct value:
 		// the first value of the yinBuffer
-		float runningSum = yinBuffer[1];
+		float runningSum = yinBuffer[1] + 1;
 		// yinBuffer[1] is always 1
 		yinBuffer[1] = 1;
 		// now start at tau = 2
@@ -142,6 +148,15 @@ public final class Yin implements PurePitchDetector {
 					tau++;
 				}
 				// found tau, exit loop and return
+				// store the probability
+				// From the YIN paper: The threshold determines the list of
+				// candidates admitted to the set, and can be interpreted as the
+				// proportion of aperiodic power tolerated
+				// within a ‘‘periodic’’ signal.
+				//
+				// Since we want the periodicity and and not aperiodicity:
+				// periodicity = 1 - aperiodicity
+				probability = 1 - yinBuffer[tau];
 				break;
 			}
 		}
@@ -149,6 +164,7 @@ public final class Yin implements PurePitchDetector {
 		// if no pitch found, tau => -1
 		if (tau == yinBuffer.length || yinBuffer[tau] >= threshold) {
 			tau = -1;
+			probability = 0;
 		}
 
 		return tau;
@@ -157,7 +173,9 @@ public final class Yin implements PurePitchDetector {
 	/**
 	 * Implements step 5 of the AUBIO_YIN paper. It refines the estimated tau
 	 * value using parabolic interpolation. This is needed to detect higher
-	 * frequencies more precisely. See http://fizyka.umk.pl/nrbook/c10-2.pdf
+	 * frequencies more precisely. See http://fizyka.umk.pl/nrbook/c10-2.pdf and
+	 * for more background
+	 * http://fedc.wiwi.hu-berlin.de/xplore/tutorials/xegbohtmlnode62.html
 	 * 
 	 * @param tauEstimate
 	 *            the estimated tau value.
@@ -201,4 +219,9 @@ public final class Yin implements PurePitchDetector {
 		}
 		return betterTau;
 	}
+
+	public float getProbability() {
+		return probability;
+	}
+
 }

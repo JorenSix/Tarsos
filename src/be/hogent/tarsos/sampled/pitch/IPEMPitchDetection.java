@@ -156,8 +156,10 @@ public final class IPEMPitchDetection implements PitchDetector {
 			}
 			try {
 				double pitch = Double.parseDouble(row[pitchIndex]);
-				final Annotation sample = new Annotation(start / 1000.0, pitch, mode);
-				annotations.add(sample);
+				if (pitch != 0) {
+					final Annotation sample = new Annotation(start / 1000.0, pitch, mode);
+					annotations.add(sample);
+				}
 			} catch (final NumberFormatException e) {
 				LOG.info("Ignored incorrectly formatted pitch: " + row[pitchIndex]);
 			}
