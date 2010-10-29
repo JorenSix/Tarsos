@@ -147,12 +147,6 @@ public enum ConfKey {
 	ipem_pitch_threshold,
 
 	/**
-	 * The marks used in plots the value should be one of the following: none,
-	 * points, dots, various, bigdots or pixels. The default value is points.
-	 */
-	plot_marks,
-
-	/**
 	 * An index for a General MIDI instrument
 	 */
 	midi_instrument_index,
@@ -160,7 +154,20 @@ public enum ConfKey {
 	/**
 	 * A threshold used in the silence detector.
 	 */
-	silence_threshold;
+	silence_threshold,
+
+	/**
+	 * The marks used in plots the value should be one of the following: none,
+	 * points, dots, various, bigdots or pixels. The default value is points.
+	 */
+	pitch_contour_marks,
+
+	/**
+	 * Defines the unit used in the pitch contour diagram. One of the PitchUnit
+	 * enumeration names
+	 * (HERTZ|RELATIVE_CENTS|ABSOLUTE_CENTS|MIDI_KEY|MIDI_CENT).
+	 */
+	pitch_contour_unit;
 
 	/**
 	 * True if the configured key is a required directory. False otherwise.

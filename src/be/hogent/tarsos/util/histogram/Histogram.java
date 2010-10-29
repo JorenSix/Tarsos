@@ -1131,6 +1131,22 @@ public class Histogram implements Cloneable {
 		return displacementForOptimalCorrelation(otherHistogram, CorrelationMeasure.INTERSECTION);
 	}
 
+	public void displace(final int displacement) {
+		try {
+			Histogram original = clone();
+			// Makes sure the displacement is positive.
+			final int actualDisplacement = (displacement + numberOfClasses) % numberOfClasses;
+
+			for (final double key : freqTable.keySet()) {
+				final double displacedValue = (key + actualDisplacement * classWidth)
+						% (numberOfClasses * classWidth);
+				this.setCount(key, original.getCount(displacedValue));
+			}
+		} catch (CloneNotSupportedException e) {
+			throw new AssertionError("Cloning a histogram is supported!");
+		}
+	}
+
 	public double correlationWithDisplacement(final int displacement, final Histogram otherHistogram,
 			final CorrelationMeasure correlationMeasure) {
 		return correlationMeasure.getHistogramCorrelation().correlation(this, displacement, otherHistogram);
@@ -1169,6 +1185,18 @@ public class Histogram implements Cloneable {
 		return correlation(otherHistogram, CorrelationMeasure.INTERSECTION);
 	}
 
+	/**
+	 * Returns the number of classes the other histogram needs to be displaced
+	 * to get optimal correlation with this histogram. The correlation is
+	 * defined by the chosen correlation measure.
+	 * 
+	 * @param otherHistogram
+	 *            The other histogram.
+	 * @param correlationMeasure
+	 *            The correlation strategy.
+	 * @return Returns the number of classes the other histogram needs to be
+	 *         displaced to get optimal correlation with this histogram.
+	 */
 	public int displacementForOptimalCorrelation(final Histogram otherHistogram,
 			final CorrelationMeasure correlationMeasure) {
 		int optimalDisplacement = 0; // displacement with best correlation
