@@ -219,7 +219,6 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		final int dataset = sample.getSource().ordinal();
 		LOG.finest(String.format("Added %.2f %s to pitch contour", convertedPitch, pitchUnit.getHumanName()));
 		addPoint(dataset, sample.getStart(), convertedPitch, false);
-		addPoint(dataset, sample.getStart(), sample.getProbability(), false);
 		if (getLegend(dataset) == null) {
 			addLegend(dataset, sample.getSource().name());
 			SwingUtilities.invokeLater(new Runnable() {
@@ -227,9 +226,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 					repaint();
 				}
 			});
-
 		}
-
 	}
 
 	public void removeSample(Annotation sample) {
