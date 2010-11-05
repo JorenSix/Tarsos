@@ -194,6 +194,9 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 		double highestAmplitude = Double.NEGATIVE_INFINITY;
 
 		for (final Integer tau : maxPositions) {
+			// make sure every annotation has a probability attached
+			highestAmplitude = Math.max(highestAmplitude, nsdf[tau]);
+
 			if (nsdf[tau] > SMALL_CUTOFF) {
 				// calculates turningPointX and Y
 				prabolicInterpolation(tau);
@@ -207,7 +210,6 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 
 		if (periodEstimates.isEmpty()) {
 			pitch = -1;
-			probability = 0;
 		} else {
 			// use the overall maximum to calculate a cutoff.
 			// The cutoff value is based on the highest value and a relative
@@ -227,12 +229,12 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 			final float pitchEstimate = (float) (sampleRate / period);
 			if (pitchEstimate > LOWER_PITCH_CUTOFF) {
 				pitch = pitchEstimate;
-				probability = (float) highestAmplitude;
 			} else {
 				pitch = -1;
-				probability = 0;
 			}
+
 		}
+		probability = (float) highestAmplitude;
 
 		return pitch;
 	}
