@@ -23,10 +23,12 @@ import javax.swing.SwingUtilities;
 
 import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.AudioProcessor;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
+import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
 import be.hogent.tarsos.util.AudioFile;
 
-public final class WaveForm extends JComponent implements AudioFileChangedListener {
+public final class WaveForm extends JComponent implements AudioFileChangedListener, SampleHandler {
 
 	/**
 	 * 
@@ -97,6 +99,7 @@ public final class WaveForm extends JComponent implements AudioFileChangedListen
 	@Override
 	public void paint(final Graphics g) {
 		Graphics2D graphics = (Graphics2D) g;
+		graphics.setTransform(new AffineTransform());
 		initializeGraphics(graphics);
 		if (audioFile != null) {
 			drawWaveForm(graphics);
@@ -296,7 +299,6 @@ public final class WaveForm extends JComponent implements AudioFileChangedListen
 		try {
 			Thread.sleep(2500);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		waveForm.audioFileChanged(audioFile);
@@ -306,5 +308,14 @@ public final class WaveForm extends JComponent implements AudioFileChangedListen
 		this.audioFile = newAudioFile;
 		this.waveFormImage = null;
 		requestRepaint();
+	}
+
+	public void addSample(Annotation sample) {
+		setMarker(sample.getStart());
+
+	}
+
+	public void removeSample(Annotation sample) {
+		// TODO Auto-generated method stub
 	}
 }

@@ -25,7 +25,7 @@ public class HeaderPanel extends JPanel {
 	private static final long serialVersionUID = 4852979337236606173L;
 	private final ImageIcon icon;
 	private final String title = "Tarsos";
-	private final String help = "Drag and drop audio files to the analysis panel to start.";
+	private final String help = "Drag and drop audio files here to start.";
 
 	public HeaderPanel() {
 		super(new BorderLayout());
@@ -59,7 +59,7 @@ public class HeaderPanel extends JPanel {
 		setPreferredSize(new Dimension(640, this.icon.getIconHeight() + 12));
 	}
 
-	
+	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		if (!isOpaque()) {

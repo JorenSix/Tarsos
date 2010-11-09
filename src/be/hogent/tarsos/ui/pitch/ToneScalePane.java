@@ -5,7 +5,6 @@ import java.awt.Dimension;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.JToolBar;
 
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
@@ -29,12 +28,8 @@ public final class ToneScalePane extends JPanel implements ScaleChangedListener,
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setPreferredSize(new Dimension(640, 480));
 		splitPane.setDividerLocation(400);
-		JToolBar toolbar = new JToolBar("Tone Scale");
-
-		toolbar.add(splitPane);
-
-		add(toolbar, BorderLayout.CENTER);
-
+		splitPane.setResizeWeight(1.0);
+		add(splitPane, BorderLayout.CENTER);
 	}
 
 	public void audioFileChanged(final AudioFile newAudioFile) {
