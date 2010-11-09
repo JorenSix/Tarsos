@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.math.stat.StatUtils;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import ptolemy.plot.Plot;
@@ -468,9 +467,10 @@ public final class PitchFunctions {
 			 * h.addXTick("Grote terts",reference - 400); h.setWrap(true);
 			 */
 
-			h.addYTick("Gem", histogram.getSumFreq() / (float) histogram.getNumberOfClasses());
-			h.addYTick("Med", StatUtils.percentile(values, 0.5));
-			h.setXRange(43, 1147);
+			// h.addYTick("Gem", histogram.getSumFreq() / (float)
+			// histogram.getNumberOfClasses());
+			// h.addYTick("Med", StatUtils.percentile(values, 0.5));
+			// h.setXRange(43, 1147);
 		}
 
 		h.setSize(1024, 786);
