@@ -5,10 +5,22 @@ import org.apache.commons.math.stat.StatUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
 
 /**
+ * The local height score defines a measure for the height of a peak within a
+ * window. The score is the height minus the mean (height in the window) divided
+ * by the standard deviation (of the height in the window) with a lower bound of
+ * zero. The window size is defined in number of classes in the given histogram.
+ * 
  * @author Joren Six
  */
 public final class LocalHeightScore implements PeakScore {
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * be.hogent.tarsos.util.histogram.peaks.PeakScore#score(be.hogent.tarsos
+	 * .util.histogram.Histogram, int, int)
+	 */
 	public double score(final Histogram originalHistogram, final int index, final int windowSize) {
 		int before = 0;
 		int after = 0;

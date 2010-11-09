@@ -5,6 +5,10 @@ import org.apache.commons.math.stat.StatUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
 
 /**
+ * I have no idea what happens here. It seems to be code that does something but
+ * it I have been staring at it for five minutes and don't get it and I wrote it
+ * myself about a year ago. That is not a sign of good code. \\TODO refactor the
+ * (sm|h)ell out of it.
  * 
  * @author Joren Six
  */

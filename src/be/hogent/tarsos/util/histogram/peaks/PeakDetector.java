@@ -98,4 +98,9 @@ public final class PeakDetector {
 		}
 		return peaks;
 	}
+
+	public static List<Peak> detectSize(final Histogram histogram, final int windowSize) {
+		final List<Peak> peaks = new ArrayList<Peak>();
+		return peaks;
+	}
 }

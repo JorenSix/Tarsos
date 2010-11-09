@@ -1,8 +1,11 @@
 package be.hogent.tarsos.util;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
@@ -84,10 +87,16 @@ public final class SimplePlot {
 		} catch (final InterruptedException e) {
 			LOG.log(Level.SEVERE, "Interrupted while sleeping.", e);
 		}
-		final BufferedImage image = plot.exportImage();
 
 		try {
-			ImageIO.write(image, "png", new File(fileName));
+			if (fileName.endsWith(".eps")) {
+				final OutputStream out = new BufferedOutputStream(new FileOutputStream(new File(fileName)));
+				plot.export(out);
+				out.close();
+			} else {
+				final BufferedImage image = plot.exportImage();
+				ImageIO.write(image, "png", new File(fileName));
+			}
 		} catch (final IOException e) {
 			LOG.log(Level.SEVERE, "Could not write: " + fileName, e);
 		}
@@ -95,19 +104,20 @@ public final class SimplePlot {
 
 	public void toneScaleify(final double reference) {
 		plot.setXRange(0, 1200);
-		plot.setXLabel("n (cents)");
-		plot.setXLabel("frequency of ocurrence");
-		plot.setImpulses(true);
-
-		plot.addPoint(1, reference - 600, 300, false);
-		plot.addPoint(1, reference + 600, 300, false);
-
-		plot.addPoint(2, reference + 300, 300, false);
-		plot.addPoint(2, reference - 200, 300, false);
-
-		plot.addLegend(0, "Tone scale");
-		plot.addLegend(1, "Fifth");
-		plot.addLegend(2, "Tritonus");
+		plot.setXLabel("cents");
+		plot.setYLabel("frequency of ocurrence");
+		/*
+		 * plot.setImpulses(true);
+		 * 
+		 * plot.addPoint(1, reference - 600, 300, false); plot.addPoint(1,
+		 * reference + 600, 300, false);
+		 * 
+		 * plot.addPoint(2, reference + 300, 300, false); plot.addPoint(2,
+		 * reference - 200, 300, false);
+		 * 
+		 * plot.addLegend(0, "Tone scale"); plot.addLegend(1, "Fifth");
+		 * plot.addLegend(2, "Tritonus");
+		 */
 
 	}
 
