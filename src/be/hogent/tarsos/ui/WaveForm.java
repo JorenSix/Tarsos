@@ -17,8 +17,8 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import be.hogent.tarsos.sampled.AudioDispatcher;
@@ -28,7 +28,7 @@ import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
 import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
 import be.hogent.tarsos.util.AudioFile;
 
-public final class WaveForm extends JComponent implements AudioFileChangedListener, SampleHandler {
+public final class WaveForm extends JPanel implements AudioFileChangedListener, SampleHandler {
 
 	/**
 	 * 
@@ -49,7 +49,6 @@ public final class WaveForm extends JComponent implements AudioFileChangedListen
 	private static final Font AXIS_FONT = new Font("SansSerif", Font.TRUETYPE_FONT, 10);
 
 	public WaveForm() {
-
 		this.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseDragged(final MouseEvent event) {
@@ -62,8 +61,7 @@ public final class WaveForm extends JComponent implements AudioFileChangedListen
 				setMarkerInPixels(event.getX());
 			}
 		});
-		setSize(640, 80);
-		setMinimumSize(new Dimension(640, 80));
+		setMarker(0);
 	}
 
 	/**
@@ -284,26 +282,6 @@ public final class WaveForm extends JComponent implements AudioFileChangedListen
 		g.setColor(Color.BLACK);
 	}
 
-	public static void main(final String... strings) {
-		JFrame f = new JFrame();
-		f.setMinimumSize(new Dimension(640, 480));
-		f.setSize(new Dimension(550, 100));
-		f.setLayout(new BorderLayout());
-		String fileName = "C:\\Users\\jsix666\\eclipse_workspace\\Tarsos\\audio\\dekkmma_voice_all\\MR.1954.1.8-1.wav";
-		AudioFile audioFile = new AudioFile(fileName);
-		WaveForm waveForm = new WaveForm();
-
-		f.add(waveForm, BorderLayout.CENTER);
-		f.setVisible(true);
-
-		try {
-			Thread.sleep(2500);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		waveForm.audioFileChanged(audioFile);
-	}
-
 	public void audioFileChanged(final AudioFile newAudioFile) {
 		this.audioFile = newAudioFile;
 		this.waveFormImage = null;
@@ -312,10 +290,29 @@ public final class WaveForm extends JComponent implements AudioFileChangedListen
 
 	public void addSample(Annotation sample) {
 		setMarker(sample.getStart());
-
+		invalidate();
 	}
 
 	public void removeSample(Annotation sample) {
 		// TODO Auto-generated method stub
 	}
+
+	public static void main(final String... strings) {
+		JFrame f = new JFrame();
+		f.setMinimumSize(new Dimension(640, 480));
+		f.setSize(new Dimension(550, 100));
+		f.setLayout(new BorderLayout());
+		String fileName = "C:\\Users\\jsix666\\eclipse_workspace\\Tarsos\\audio\\dekkmma_voice_all\\MR.1954.1.8-1.wav";
+		AudioFile audioFile = new AudioFile(fileName);
+		WaveForm waveForm = new WaveForm();
+		f.add(waveForm, BorderLayout.CENTER);
+		f.setVisible(true);
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		waveForm.audioFileChanged(audioFile);
+	}
+
 }
