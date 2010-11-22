@@ -105,23 +105,33 @@ class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 		this.xOffset = newXOffset;
 	}
 
-	public double getRelativeCents(final MouseEvent e) {
+	/**
+	 * Returns a value between 0 and delta.
+	 * 
+	 * @param e
+	 *            The mouse event.
+	 * @param delta
+	 *            The delta. E.g. 1200 for a tone scale, 9600 for an ambitus.
+	 * @return A value between 0 and delta (inclusive) representing a value in
+	 *         cents.
+	 */
+	public double getCents(final MouseEvent e, final double delta) {
 		double currentXOffset = calculateXOffset();
 		final int width = parent.getWidth();
 
-		double xOffsetCents = currentXOffset * 1200.0;
+		double xOffsetCents = currentXOffset * delta;
 
 		if (currentXOffset < 0) {
 			currentXOffset = 1.0 + currentXOffset;
 		}
-		double pitchInRelativeCents = e.getX() * 1200.0 / width;
+		double pitchInCents = e.getX() * delta / width;
 
-		pitchInRelativeCents = (pitchInRelativeCents - xOffsetCents) % 1200.0;
-		if (pitchInRelativeCents < 0) {
-			pitchInRelativeCents += 1200;
+		pitchInCents = (pitchInCents - xOffsetCents) % delta;
+		if (pitchInCents < 0) {
+			pitchInCents += delta;
 		}
 
-		return pitchInRelativeCents;
+		return pitchInCents;
 
 	}
 

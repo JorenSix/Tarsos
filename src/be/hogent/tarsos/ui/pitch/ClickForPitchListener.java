@@ -15,20 +15,30 @@ class ClickForPitchListener extends MouseAdapter {
 	private final JComponent parent;
 	private final PitchSynth synth;
 	private final MouseDragListener mouseDrag;
+	/**
+	 * The delta in cents, 0 - 1200 for a tone scale (1200), 9600 for an ambitus
+	 */
+	private final double delta;
 
-	public ClickForPitchListener(final JComponent component, final MouseDragListener mouseDragListener)
-			throws MidiUnavailableException {
+	public ClickForPitchListener(final JComponent component, final MouseDragListener mouseDragListener,
+			double histogramDelta) throws MidiUnavailableException {
 		parent = component;
+		delta = histogramDelta;
 		synth = new PitchSynth();
 		mouseDrag = mouseDragListener;
 		component.addMouseListener(this);
 	}
 
-	
+	@Override
 	public void mouseClicked(final MouseEvent e) {
 		final int height = parent.getHeight();
-		final double pitchInRelativeCents = mouseDrag.getRelativeCents(e);
+		final double pitchCents = mouseDrag.getCents(e, delta);
 		final int velocity = (int) (e.getY() / (double) height * 127);
-		synth.play(pitchInRelativeCents, velocity);
+		if (delta > 1200) {
+			synth.playAbsoluteCents(pitchCents, velocity);
+		} else {
+			synth.playRelativeCents(pitchCents, velocity);
+		}
+
 	}
 }

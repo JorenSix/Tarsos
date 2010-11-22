@@ -41,7 +41,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		scaleChangedPublisher = scalePublisher;
 
 		try {
-			new ClickForPitchListener(component, mouseDrag);
+			new ClickForPitchListener(component, mouseDrag, delta);
 		} catch (MidiUnavailableException e1) {
 			LOG.log(Level.WARNING, "MIDI device not available, disabled the click for pitch function.", e1);
 		}
@@ -75,7 +75,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 					if (index == -1) {
 						movingElement = -1.0;
 					} else {
-						layer.scale[index] = mouseDrag.getRelativeCents(e);
+						layer.scale[index] = mouseDrag.getCents(e, 1200.0);
 						movingElement = layer.scale[index];
 					}
 
@@ -84,7 +84,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 					for (int i = 0; i < layer.scale.length; i++) {
 						newScale[i] = layer.scale[i];
 					}
-					newScale[newScale.length - 1] = mouseDrag.getRelativeCents(e);
+					newScale[newScale.length - 1] = mouseDrag.getCents(e, 1200.0);
 					movingElement = newScale[newScale.length - 1];
 					Arrays.sort(newScale);
 					layer.scale = newScale;
@@ -93,12 +93,12 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 				layer.scaleChangedPublisher.scaleChanged(layer.scale, true);
 			} else if (e.isControlDown()) {
 				if (movingElement == -1.0) {
-					int index = closestIndex(mouseDrag.getRelativeCents(e));
+					int index = closestIndex(mouseDrag.getCents(e, 1200.0));
 					movingElement = layer.scale[index];
 				}
 				for (int i = 0; i < layer.scale.length; i++) {
 					if (layer.scale[i] == movingElement) {
-						layer.scale[i] = mouseDrag.getRelativeCents(e);
+						layer.scale[i] = mouseDrag.getCents(e, 1200.0);
 						movingElement = layer.scale[i];
 					}
 				}

@@ -24,6 +24,7 @@ import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.ScalaFile;
+import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 
@@ -44,6 +45,7 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 	private final List<Layer> layers;
 	private final ScalaLayer scalaLayer;
 	private final ScaleChangedListener scaleChangedPublisher;
+	private final double stop;
 	/**
 	 * Hehe, feces.
 	 */
@@ -51,6 +53,7 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 
 	public ToneScalePanel(final Histogram histogram, final ScaleChangedListener scaleChangedPublisher) {
 		super(new BorderLayout());
+		stop = histogram.getStop();
 		setSize(640, 480);
 		histos = new HashMap<PitchDetectionMode, Histogram>();
 		this.scaleChangedPublisher = scaleChangedPublisher;
@@ -117,7 +120,11 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 
 			final Histogram histo;
 			if (!histos.containsKey(sample.getSource())) {
-				histo = new ToneScaleHistogram();
+				if (stop > 1200) {
+					histo = new AmbitusHistogram();
+				} else {
+					histo = new ToneScaleHistogram();
+				}
 				histos.put(sample.getSource(), histo);
 				Color color = Tarsos.COLORS[sample.getSource().ordinal() % Tarsos.COLORS.length];
 				HistogramLayer layer = new HistogramLayer(this, histo, scaleChangedPublisher, color);
