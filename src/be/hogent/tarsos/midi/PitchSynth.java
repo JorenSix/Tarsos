@@ -54,7 +54,7 @@ public final class PitchSynth implements ConfigChangeListener {
 	/**
 	 * Send note off after 250ms.
 	 */
-	private static final int NOTE_OFF_AFTER = 250;
+	private static final int NOTE_OFF_AFTER = 350;
 
 	/**
 	 * The octave used to send relative pitch messages: If you want to hear 0
@@ -147,14 +147,17 @@ public final class PitchSynth implements ConfigChangeListener {
 	 * @param velocity
 	 *            The MIDI key velocity. A value in [0,127].
 	 */
-	public void play(final double relativeCents, final int velocity) {
+	public void playRelativeCents(final double relativeCents, final int velocity) {
+		final double absoluteCent = baseOctave * CENTS_IN_OCTAVE + relativeCents;
+		playAbsoluteCents(absoluteCent, velocity);
+	}
 
+	public void playAbsoluteCents(final double absoluteCent, final int velocity) {
 		if (velocity < 0 || velocity > MAX_VELOCITY) {
 			throw new IllegalArgumentException("Velocity should be in [0,127]");
 		}
-
 		try {
-			final double absoluteCent = baseOctave * CENTS_IN_OCTAVE + relativeCents;
+
 			final double pitchInHertz = PitchConverter.absoluteCentToHertz(absoluteCent);
 			final double pitchInMidiCent = PitchConverter.hertzToMidiCent(pitchInHertz);
 			final int pitchInMidiKey = (int) Math.round(pitchInMidiCent);
@@ -165,14 +168,15 @@ public final class PitchSynth implements ConfigChangeListener {
 
 			final ShortMessage noteOnMessage = new ShortMessage();
 			noteOnMessage.setMessage(ShortMessage.NOTE_ON, MIDI_CHANNEL, pitchInMidiKey, velocity);
-
+			LOG.info(String.format("NOTE_ON  message %.2f abs cents, %s midi key, %s velocity, %.2fHz ",
+					absoluteCent, pitchInMidiKey, velocity, pitchInHertz));
 			final ShortMessage noteOffMessage = new ShortMessage();
 			noteOffMessage.setMessage(ShortMessage.NOTE_OFF, MIDI_CHANNEL, pitchInMidiKey, 0);
 
 			receiver.send(noteOnMessage, -1);
 
 			final Runnable noteOffThread = new Runnable() {
-				
+
 				public void run() {
 					try {
 						Thread.sleep(NOTE_OFF_AFTER);
@@ -180,6 +184,9 @@ public final class PitchSynth implements ConfigChangeListener {
 						LOG.log(Level.WARNING, "Failed to sleep before sending NOTE OFF", e);
 					} finally {
 						receiver.send(noteOffMessage, -1);
+						LOG.info(String.format(
+								"NOTE_OFF message %.2f abs cents, %s midi key, %s velocity, %.2fHz",
+								absoluteCent, pitchInMidiKey, velocity, pitchInHertz));
 					}
 				}
 			};
@@ -189,7 +196,6 @@ public final class PitchSynth implements ConfigChangeListener {
 		}
 	}
 
-	
 	public void configurationChanged(final ConfKey key) {
 		// change the instrument
 		if (key == ConfKey.midi_instrument_index) {

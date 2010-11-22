@@ -170,12 +170,11 @@ public final class Tarsos {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
-
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				} catch (Exception e) {
 					log.log(Level.WARNING, "Unable to set system L&F, continue with default L&F", e);
 				}
-				final Frame frame = new Frame();
+				final Frame frame = Frame.getInstance();
 				frame.setVisible(true);
 			}
 		});

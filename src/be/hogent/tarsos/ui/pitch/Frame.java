@@ -4,15 +4,13 @@ package be.hogent.tarsos.ui.pitch;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -37,6 +35,7 @@ import org.noos.xing.mydoggy.MultiSplitConstraint;
 import org.noos.xing.mydoggy.MultiSplitContentManagerUI;
 import org.noos.xing.mydoggy.TabbedContentManagerUI;
 import org.noos.xing.mydoggy.TabbedContentUI;
+import org.noos.xing.mydoggy.ToolWindow;
 import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.ToolWindowManager;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
@@ -59,11 +58,11 @@ public class Frame extends JFrame implements ScaleChangedListener {
 	/**
 	 * Default height.
 	 */
-	private static final int INITIAL_HEIGHT = 480;
+	private static final int INITIAL_HEIGHT = 600;
 	/**
 	 * Default width.
 	 */
-	private static final int INITIAL_WIDTH = 640;
+	private static final int INITIAL_WIDTH = 800;
 	/**
      */
 	private static final long serialVersionUID = -8095965296377515567L;
@@ -73,18 +72,41 @@ public class Frame extends JFrame implements ScaleChangedListener {
 	 */
 	private static final Logger LOG = Logger.getLogger(Frame.class.getName());
 
+	private static Frame instance;
+
+	public static Frame getInstance() {
+		if (instance == null) {
+			instance = new Frame();
+		}
+		return instance;
+	}
+
 	private final ToolWindowManager toolWindowManager;
 
 	private AudioFile audioFile;
 
 	private double[] scale;
 
-	public Frame() {
+	/**
+	 * Is there processing going on?
+	 */
+	public synchronized void setWaitState(final boolean isWaiting) {
+		Component glassPane = this.getGlassPane();
+		if (isWaiting) {
+			glassPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			glassPane.setVisible(true);
+		} else {
+			glassPane.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			glassPane.setVisible(false);
+		}
+	}
+
+	private Frame() {
 		super("Tarsos");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 		setSize(INITIAL_WIDTH, INITIAL_HEIGHT);
-		setMinimumSize(new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT));
+		// setMinimumSize(new Dimension( , INITIAL_HEIGHT));
 		// center
 		setLocationRelativeTo(null);
 		setProgramIcon();
@@ -125,7 +147,7 @@ public class Frame extends JFrame implements ScaleChangedListener {
 		WaveForm waveForm = new WaveForm();
 		addAudioFileChangedListener(waveForm);
 
-		final ControlPanel controlPanel = new ControlPanel();
+		final ControlPanel controlPanel = new ControlPanel(waveForm);
 		addAudioFileChangedListener(controlPanel);
 		controlPanel.addHandler(toneScalePane);
 		controlPanel.addHandler(ambitusPanel);
@@ -162,14 +184,19 @@ public class Frame extends JFrame implements ScaleChangedListener {
 		content.setMinimized(false);
 
 		MultiSplitConstraint constraint = new MultiSplitConstraint(content, 1);
-		contentManager.addContent("Configuration", "Configuration", null, configurationPanel, null,
+		content = contentManager.addContent("Configuration", "Configuration", null, configurationPanel, null,
 				constraint);
+		setDefaultTabbedContentOptions(content);
+		content.setMinimized(false);
 
-		content = contentManager.addContent("Ambitus", "Ambitus", null, ambitusPanel);
+		constraint = new MultiSplitConstraint(content, 2);
+		content = contentManager.addContent("Ambitus", "Ambitus", null, ambitusPanel, null, constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 
-		content = contentManager.addContent("Keyboard", "Keyboard", null, keyboardPanel);
+		constraint = new MultiSplitConstraint(content, 3);
+		content = contentManager.addContent("Annotations", "Annotations", null, pitchContourPanel, null,
+				constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 
@@ -177,62 +204,48 @@ public class Frame extends JFrame implements ScaleChangedListener {
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 
-		content = contentManager.addContent("Annotations", "Annotations", null, pitchContourPanel);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(true);
-
 		content = contentManager.addContent("Controls", "Controls", null, controlPanel);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(false);
 
-		content = contentManager.addContent("WaveForm", "WaveForm", null, waveForm);
+		constraint = new MultiSplitConstraint(content, 1);
+		content = contentManager.addContent("Keyboard", "Keyboard", null, keyboardPanel, null, constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 
-		toolWindowManager.registerToolWindow("Logging", "Logging", null, logPanel, ToolWindowAnchor.BOTTOM);
-		toolWindowManager.registerToolWindow("Help", "Help", null, helpPanel, ToolWindowAnchor.BOTTOM);
+		// content = contentManager.addContent("WaveForm", "WaveForm", null,
+		// waveForm, null);
+		// setDefaultTabbedContentOptions(content);
+		// content.setMinimized(true);
+
+		toolWindowManager.registerToolWindow("Help", "Help", null, helpPanel, ToolWindowAnchor.RIGHT);
 		toolWindowManager.registerToolWindow("Browser", "Browser", null, browser, ToolWindowAnchor.RIGHT);
+		toolWindowManager.registerToolWindow("Logging", "Logging", null, logPanel, ToolWindowAnchor.BOTTOM);
 
 		// Make all tools available
-		// for (ToolWindow window : toolWindowManager.getToolWindows()) {
-		// window.setAvailable(true);
-		// }
+		for (ToolWindow window : toolWindowManager.getToolWindows()) {
+			window.setAvailable(true);
+		}
 
-		addWindowListeners();
-
-	}
-
-	private void addWindowListeners() {
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowOpened(final WindowEvent e) {
-				try {
-					File workspaceFile = new File("workspace.xml");
-					if (workspaceFile.exists()) {
-						FileInputStream inputStream = new FileInputStream("workspace.xml");
-						toolWindowManager.getPersistenceDelegate().apply(inputStream);
-
-						inputStream.close();
-					}
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-			}
-
-			@Override
-			public void windowClosing(final WindowEvent e) {
-				try {
-					FileOutputStream output = new FileOutputStream("workspace.xml");
-					toolWindowManager.getPersistenceDelegate().save(output);
-					output.close();
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-			}
-		});
+		// addWindowListeners();
 
 	}
 
+	/*
+	 * private void addWindowListeners() { addWindowListener(new WindowAdapter()
+	 * {
+	 * 
+	 * @Override public void windowOpened(final WindowEvent e) { try { File
+	 * workspaceFile = new File("workspace.xml"); if (workspaceFile.exists()) {
+	 * FileInputStream inputStream = new FileInputStream("workspace.xml"); //
+	 * toolWindowManager.getPersistenceDelegate().apply(inputStream);
+	 * inputStream.close(); } } catch (Exception e1) { e1.printStackTrace(); } }
+	 * 
+	 * @Override public void windowClosing(final WindowEvent e) { try {
+	 * FileOutputStream output = new FileOutputStream("workspace.xml");
+	 * toolWindowManager.getPersistenceDelegate().save(output); output.close();
+	 * } catch (Exception e1) { e1.printStackTrace(); } } }); }
+	 */
 	private JComponent makeStatusBar() {
 		JLabel statusBarLabel = new JLabel();
 		statusBarLabel.setForeground(Color.GRAY);
@@ -244,9 +257,7 @@ public class Frame extends JFrame implements ScaleChangedListener {
 		TabbedContentUI tabbedContent = (TabbedContentUI) content.getContentUI();
 		tabbedContent.setCloseable(false);
 		tabbedContent.setDetachable(true);
-		tabbedContent.setTransparentMode(true);
-		tabbedContent.setTransparentRatio(0.7f);
-		tabbedContent.setTransparentDelay(1000);
+		tabbedContent.setTransparentMode(false);
 		tabbedContent.setMinimizable(true);
 	}
 
@@ -303,6 +314,7 @@ public class Frame extends JFrame implements ScaleChangedListener {
 	}
 
 	private void addFileDropListener() {
+
 		new FileDrop(this, new FileDrop.Listener() {
 			public void filesDropped(final java.io.File[] files) {
 				if (files.length != 1) {

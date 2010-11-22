@@ -16,7 +16,6 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
@@ -27,6 +26,7 @@ import be.hogent.tarsos.sampled.BlockingAudioPlayer;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
+import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -46,11 +46,10 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 	private final List<SampleHandler> handlers;
 	private final JButton playButton;
 	private final JButton stopButton;
-	private final JSlider slider;
 	private final JSpinner speedSpinner;
 	private AudioFile audioFile;
 
-	public ControlPanel() {
+	public ControlPanel(final WaveForm waveForm) {
 		super(new BorderLayout());
 		ButtonBarBuilder2 builder = ButtonBarBuilder2.createLeftToRightBuilder();
 		playButton = new JButton("Play");
@@ -94,7 +93,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 				if (playerThread != null) {
 					if (value == 1.0) {
 						playerThread = new AudioPlayingThread(audioFile, processorThread
-								.getCurrentSampleStart());
+								.getCurrentSampleStart(), processorThread);
 						playerThread.start();
 					} else {
 						playerThread.stopPlaying();
@@ -104,15 +103,13 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		});
 		speedSpinner.setEnabled(false);
 
-		slider = new JSlider(0, 20);
-		slider.setValue(0);
-		slider.setEnabled(false);
 		builder.addButton(playButton);
 		builder.addButton(stopButton);
 		builder.addButton(speedSpinner);
 
-		builder.addButton(slider);
-		this.add(builder.getPanel(), BorderLayout.CENTER);
+		this.add(builder.getPanel(), BorderLayout.EAST);
+		this.add(waveForm, BorderLayout.CENTER);
+		waveForm.setSize(getPreferredSize());
 		processorThread = null;
 		handlers = new ArrayList<SampleHandler>();
 
@@ -129,6 +126,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		private boolean running;
 		private boolean isPaused;
 		private double currentSampleStart;
+		private boolean extractingPitch;
 
 		AudioFileSampleProcessor(final AudioFile audioFile, final List<SampleHandler> someHandlers) {
 			super("Annotation data publisher.");
@@ -137,6 +135,11 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			this.handlers = someHandlers;
 			running = false;
 			isPaused = false;
+			extractingPitch = true;
+		}
+
+		public boolean isExtractingPitch() {
+			return extractingPitch;
 		}
 
 		public void pauzeAnalysis() {
@@ -156,8 +159,11 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			running = true;
 			PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
 			final PitchDetector pitchDetector = mode.getPitchDetector(file);
+			Frame.getInstance().setWaitState(true);
 			pitchDetector.executePitchDetection();
+			Frame.getInstance().setWaitState(false);
 			final List<Annotation> samples = pitchDetector.getAnnotations();
+			extractingPitch = false;
 			double previousSample = 0.0;
 			for (Annotation sample : samples) {
 				if (!running) {
@@ -182,7 +188,6 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 				} catch (InterruptedException e) {
 					// sleep interrupted
 				}
-				slider.setValue((int) (currentSampleStart * 1000));
 				previousSample = currentSampleStart;
 			}
 		}
@@ -212,13 +217,16 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		private boolean running;
 		private boolean isPaused;
 		private final double offsetInSeconds;
+		private final AudioFileSampleProcessor sampleProcessor;
 
-		AudioPlayingThread(final AudioFile audioFile, double startAtSeconds) {
+		AudioPlayingThread(final AudioFile audioFile, final double startAtSeconds,
+				final AudioFileSampleProcessor sampleProcessor) {
 			super("Audio playing thread.");
 			file = audioFile;
 			running = false;
 			isPaused = false;
 			offsetInSeconds = startAtSeconds;
+			this.sampleProcessor = sampleProcessor;
 		}
 
 		public void pauzePlaying() {
@@ -246,7 +254,11 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			int frameSize = format.getFormat().getFrameSize(); // bytes / frame
 			// bytes = bytes / frame * frame/second * second
 			long bytesToSkip = frameSize * Math.round(offsetInSeconds * frameRate);
+
 			try {
+				while (sampleProcessor.isExtractingPitch()) {
+					Thread.sleep(10);
+				}
 				AudioInputStream stream = AudioSystem.getAudioInputStream(new File(file.transcodedPath()));
 				stream.skip(bytesToSkip);
 				int bufferSize = 2048;
@@ -274,6 +286,9 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 			} catch (LineUnavailableException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
 		}
@@ -296,15 +311,13 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener {
 		processorThread.setSpeedFactor((Double) speedSpinner.getValue());
 		processorThread.start();
 		if (1.0 == (Double) speedSpinner.getValue()) {
-			playerThread = new AudioPlayingThread(newAudioFile, 0);
+			playerThread = new AudioPlayingThread(newAudioFile, 0, processorThread);
 			playerThread.start();
 		}
-
 		playButton.setText("Pauze");
 		playButton.setEnabled(true);
 		stopButton.setEnabled(true);
 		speedSpinner.setEnabled(true);
-		slider.setMaximum((int) newAudioFile.getLengthInMilliSeconds());
 
 	}
 

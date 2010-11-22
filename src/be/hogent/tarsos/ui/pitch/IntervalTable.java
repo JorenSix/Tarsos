@@ -86,17 +86,14 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 					ToneScaleTableModel tableModel = (ToneScaleTableModel) table.getModel();
 					int column = tableModel.getLeftIndex(row, col);
 					long pitch = (Long) tableModel.getValueAt(0, column);
-					synth.play(pitch, 100);
+					synth.playRelativeCents(pitch, 100);
 					column = tableModel.getRightIndex(row, col);
 					pitch = (Long) tableModel.getValueAt(0, column);
-					synth.play(pitch, 100);
-
+					synth.playRelativeCents(pitch, 100);
 				}
 				SwingUtilities.invokeLater(new Runnable() {
-
 					public void run() {
 						table.repaint();
-
 					}
 				});
 			}
