@@ -42,7 +42,6 @@ public final class ToneScalePane extends JPanel implements ScaleChangedListener,
 
 	public void addSample(final Annotation sample) {
 		plot.addSample(sample);
-
 	}
 
 	public void removeSample(final Annotation sample) {

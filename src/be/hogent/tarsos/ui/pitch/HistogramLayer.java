@@ -98,25 +98,13 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 
 		graphics.setColor(histogramColor);
 
-		int prevOctave = 0;
 		for (final double key : histo.keySet()) {
-
 			x = (int) (key / delta * width + xOffsetPixels) % width;
 			y = height - yOffset - (int) (histo.getCount(key) / (double) maxCount * height * 0.9);
 			if (x > previousPoint.x) {
 				graphics.drawLine(previousPoint.x, previousPoint.y, x, y);
 			}
 			previousPoint = new Point(x, y);
-
-			int octave = (int) key / 1200;
-			if (prevOctave != octave) {
-				graphics.setColor(Color.GRAY);
-				x = (int) (octave * 1200 / delta * width + xOffsetPixels) % width;
-				graphics.drawLine(x, 0, x, height - yOffset);
-				graphics.drawString("" + octave * 1200, x, height - 5);
-				graphics.setColor(Color.RED);
-				prevOctave = octave;
-			}
 		}
 
 		// draw markers

@@ -46,6 +46,7 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 	private final ScalaLayer scalaLayer;
 	private final ScaleChangedListener scaleChangedPublisher;
 	private final double stop;
+	private AudioFile audioFile;
 	/**
 	 * Hehe, feces.
 	 */
@@ -65,25 +66,17 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 		layerUserInterfeces = new JTabbedPane();
 	}
 
-	public void audioFileChanged(final AudioFile audioFile) {
+	public void audioFileChanged(final AudioFile newAudioFile) {
+		audioFile = newAudioFile;
 		for (Layer layer : layers) {
 			if (layer instanceof HistogramLayer) {
-				((HistogramLayer) layer).audioFileChanged(audioFile);
+				((HistogramLayer) layer).audioFileChanged(newAudioFile);
 			}
 		}
 
 		for (Histogram histogram : histos.values()) {
 			histogram.clear();
 		}
-
-		/*
-		 * List<Histogram> histograms = new
-		 * ArrayList<Histogram>(histos.values()); for (Histogram histogram :
-		 * histograms) { for (Histogram other : histograms) { int displacement =
-		 * other.displacementForOptimalCorrelation(histogram);
-		 * other.displace(displacement); } }
-		 */
-
 	}
 
 	@Override
@@ -128,6 +121,7 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 				histos.put(sample.getSource(), histo);
 				Color color = Tarsos.COLORS[sample.getSource().ordinal() % Tarsos.COLORS.length];
 				HistogramLayer layer = new HistogramLayer(this, histo, scaleChangedPublisher, color);
+				layer.audioFileChanged(audioFile);
 				layers.add(layer);
 				layerUserInterfeces.addTab(sample.getSource().name(), layer.ui());
 			} else {

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -22,9 +23,16 @@ public final class VirtualKeyboard12 extends VirtualKeyboard {
 
 	public VirtualKeyboard12() {
 		super(12, 12 * 4);
+		setToolTipText("");
 	}
 
-	
+	@Override
+	public String getToolTipText(final MouseEvent event) {
+		int note = getMidiNote(event.getX(), event.getY());
+		return String.format("%.0f", getTuning()[note] % 1200);
+	}
+
+	@Override
 	public int getMidiNote(final int x, final int y) {
 		final int w = getWidth();
 		final int h = getHeight();
@@ -80,7 +88,7 @@ public final class VirtualKeyboard12 extends VirtualKeyboard {
 
 	}
 
-	
+	@Override
 	public void paint(final Graphics g) {
 		super.paint(g);
 		final Graphics2D g2 = (Graphics2D) g;

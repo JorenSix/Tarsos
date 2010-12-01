@@ -3,6 +3,8 @@ package be.hogent.tarsos.ui.pitch;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -13,6 +15,15 @@ import java.util.logging.Logger;
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JComponent;
 
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
+
+/**
+ * The scala layer can be seen as a background grid (with on the foreground a
+ * pitch class or ambitus histogram).
+ * 
+ * @author Joren Six
+ */
 public final class ScalaLayer implements Layer, ScaleChangedListener {
 
 	/**
@@ -35,9 +46,6 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		mouseDrag = new MouseDragListener(component, MouseEvent.BUTTON3);
 		component.addMouseListener(mouseDrag);
 		component.addMouseMotionListener(mouseDrag);
-		editor = new ScaleEditor(mouseDrag, this, parent);
-		component.addMouseListener(editor);
-		component.addMouseMotionListener(editor);
 		scaleChangedPublisher = scalePublisher;
 
 		try {
@@ -45,9 +53,22 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		} catch (MidiUnavailableException e1) {
 			LOG.log(Level.WARNING, "MIDI device not available, disabled the click for pitch function.", e1);
 		}
+
+		if (isAmbitus()) {
+			editor = null;
+		} else {
+			editor = new ScaleEditor(mouseDrag, this, parent);
+			component.addMouseListener(editor);
+			component.addMouseMotionListener(editor);
+		}
+
 	}
 
-	private static class ScaleEditor extends MouseAdapter implements MouseMotionListener {
+	private boolean isAmbitus() {
+		return delta > 1200;
+	}
+
+	private static class ScaleEditor extends MouseAdapter implements MouseMotionListener, KeyListener {
 		private final MouseDragListener mouseDrag;
 		private final ScalaLayer layer;
 		private final JComponent parent;
@@ -64,7 +85,9 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		}
 
 		public void mouseMoved(MouseEvent e) {
+
 			if (e.isAltDown() || e.isAltGraphDown()) {
+				// add new element
 				if (movingElement != -1.0) {
 					int index = -1;
 					for (int i = 0; i < layer.scale.length; i++) {
@@ -92,6 +115,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 				parent.repaint();
 				layer.scaleChangedPublisher.scaleChanged(layer.scale, true);
 			} else if (e.isControlDown()) {
+				// move the closest element
 				if (movingElement == -1.0) {
 					int index = closestIndex(mouseDrag.getCents(e, 1200.0));
 					movingElement = layer.scale[index];
@@ -105,7 +129,6 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 				parent.repaint();
 				layer.scaleChangedPublisher.scaleChanged(layer.scale, true);
 			}
-
 		}
 
 		private int closestIndex(double key) {
@@ -138,6 +161,20 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		public double getMovingElement() {
 			return movingElement;
 		}
+
+		public void keyPressed(KeyEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
+
+		public void keyReleased(KeyEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
+
+		public void keyTyped(KeyEvent arg0) {
+			LOG.info(arg0.getKeyChar() + "");
+		}
 	}
 
 	public void draw(final Graphics2D graphics) {
@@ -157,7 +194,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 			final int labelLength = text.length();
 			final double labelWidth = graphics.getFontMetrics().getStringBounds(text, graphics).getWidth();
 			final int start = (int) labelWidth / 2 - labelLength / 2;
-			if (editor.getMovingElement() == reference) {
+			if (editor != null && editor.getMovingElement() == reference) {
 				graphics.setColor(Color.BLUE);
 				graphics.drawLine(x, 0, x, height - yOffset);
 				graphics.drawString(text, x - start, height - yLabelsOffset);
@@ -166,9 +203,22 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 				graphics.drawLine(x, 0, x, height - yOffset);
 				graphics.drawString(text, x - start, height - yLabelsOffset);
 			}
-
 		}
-
+		// draw octave borders
+		if (delta > 1200) {
+			for (int i = 1200; i < delta; i += 1200) {
+				final int x = (int) (i / delta * width + xOffsetPixels) % width;
+				graphics.drawLine(x, 0, x, height - yOffset);
+				final String text = Integer.valueOf(i + Configuration.getInt(ConfKey.ambitus_start))
+						.toString();
+				final int labelLength = text.length();
+				final double labelWidth = graphics.getFontMetrics().getStringBounds(text, graphics)
+						.getWidth();
+				final int start = (int) labelWidth / 2 - labelLength / 2;
+				graphics.drawString(text, x - start, height - yLabelsOffset);
+				graphics.drawLine(x, 0, x, height - yOffset);
+			}
+		}
 	}
 
 	public void scaleChanged(double[] newScale, boolean isChanging) {

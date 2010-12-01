@@ -126,12 +126,13 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		this.numberOfKeys = totalOfKeys;
 		this.numberOfKeysPerOctave = numberOfKeysInOctave;
 		this.currentlyPressedMidiNote = -1;
-		setLowestAssignedKey(3 * numberOfKeysInOctave); // start at octave 3
+		setLowestAssignedKey(5 * numberOfKeysInOctave); // start at octave 3
 
 		keyDown = new boolean[VirtualKeyboard.NUMBER_OF_MIDI_KEYS];
 
 		addMouseListener(new MouseAdapter() {
-			
+
+			@Override
 			public void mousePressed(final MouseEvent e) {
 				grabFocus();
 				final Point p = e.getPoint();
@@ -139,7 +140,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 				sendNoteMessage(currentlyPressedMidiNote, true);
 			}
 
-			
+			@Override
 			public void mouseReleased(final MouseEvent e) {
 				sendNoteMessage(currentlyPressedMidiNote, false);
 				currentlyPressedMidiNote = -1;
@@ -147,12 +148,11 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		});
 
 		addFocusListener(new FocusListener() {
-			
+
 			public void focusGained(final FocusEvent e) {
 				repaint();
 			}
 
-			
 			public void focusLost(final FocusEvent e) {
 				allKeysOff(); // is this behavior wanted?
 				repaint();
@@ -160,13 +160,13 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		});
 
 		addKeyListener(new KeyListener() {
-			
+
 			public void keyPressed(final KeyEvent e) {
 				final int pressedKeyChar = e.getKeyChar();
 				for (int i = 0; i < VirtualKeyboard.getMappedKeys().length(); i++) {
 					if (VirtualKeyboard.getMappedKeys().charAt(i) == pressedKeyChar) {
 						final int midiKey = i + getLowestAssignedKey();
-						if (midiKey < VirtualKeyboard.this.getNumberOfKeys() && !keyDown[midiKey]) {
+						if (midiKey < 128 && !keyDown[midiKey]) {
 							sendNoteMessage(midiKey, true);
 						}
 						return;
@@ -174,7 +174,6 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 				}
 			}
 
-			
 			public void keyReleased(final KeyEvent e) {
 				final char pressedKeyChar = e.getKeyChar();
 				for (int i = 0; i < VirtualKeyboard.getMappedKeys().length(); i++) {
@@ -188,7 +187,6 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 				}
 			}
 
-			
 			public void keyTyped(final KeyEvent e) {
 				if (e.getKeyChar() == '-') {
 					setLowestAssignedKey(getLowestAssignedKey() - getNumberOfKeysPerOctave());
@@ -355,7 +353,6 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		LOG.info(String.format("Configured %s as MIDI OUT.", synthInfo.getName()));
 	}
 
-	
 	public void setReceiver(final Receiver newReceiver) {
 		receiver = newReceiver;
 	}
@@ -371,6 +368,12 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 			channel.programChange(patch.getBank(), patch.getProgram());
 			LOG.info(String.format("Configured synth with %s.", configuredInstrument.getName()));
 		}
+	}
+
+	private double tuning[];
+
+	protected double[] getTuning() {
+		return tuning;
 	}
 
 	/**
@@ -390,6 +393,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 				final double[] rebasedTuning = MidiCommon.tuningFromPeaks(tuning);
 				MidiUtils.sendTunings(receiver, 0, 2, "tuning", rebasedTuning);
 				MidiUtils.sendTuningChange(receiver, MIDI_CHANNEL, 2);
+				this.tuning = rebasedTuning;
 			}
 		} catch (MidiUnavailableException e) {
 			LOG.log(Level.WARNING, "Tuning failed: MIDI device not available", e);

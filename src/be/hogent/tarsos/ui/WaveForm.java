@@ -97,14 +97,13 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 	@Override
 	public void paint(final Graphics g) {
 		Graphics2D graphics = (Graphics2D) g;
-		graphics.setTransform(new AffineTransform());
 		initializeGraphics(graphics);
 		if (audioFile != null) {
 			drawWaveForm(graphics);
 		} else {
-			graphics.setTransform(getSaneTransform());
+			graphics.transform(getSaneTransform());
 			drawReference(graphics);
-			graphics.setTransform(new AffineTransform());
+			graphics.transform(getInverseSaneTransform());
 		}
 		drawMarker(graphics);
 	}
@@ -131,12 +130,14 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 		return new AffineTransform(1.0, 0.0, 0.0, -1.0, 0, (float) getHeight() / 2);
 	}
 
+	private AffineTransform getInverseSaneTransform() {
+		return new AffineTransform(1.0, 0.0, 0.0, -1.0, 0, (float) getHeight() / 2);
+	}
+
 	private void drawMarker(final Graphics2D graphics) {
-		graphics.setTransform(getSaneTransform());
 		int x = (int) secondsToPixels(markerPosition);
 		graphics.setColor(Color.red);
 		graphics.drawLine(x, getHeight() / 2, x, -getHeight() / 2);
-		graphics.setTransform(new AffineTransform());
 	}
 
 	private void initializeGraphics(final Graphics2D g) {
@@ -154,7 +155,7 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 			waveFormImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_BGR);
 			final Graphics2D waveFormGraphics = waveFormImage.createGraphics();
 			initializeGraphics(waveFormGraphics);
-			waveFormGraphics.setTransform(getSaneTransform());
+			waveFormGraphics.transform(getSaneTransform());
 			drawReference(waveFormGraphics);
 			AudioDispatcher adp;
 			try {
@@ -194,7 +195,7 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 			}
 		}
 		// Render the cached image.
-		g.setTransform(new AffineTransform());
+		g.transform(getInverseSaneTransform());
 		g.drawImage(waveFormImage, 0, 0, null);
 	}
 
@@ -215,10 +216,10 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 		Point2D source = new Point2D.Double(x, y);
 		Point2D destination = new Point2D.Double();
 		AffineTransform transform = graphics.getTransform();
-		graphics.setTransform(new AffineTransform());
+		graphics.transform(new AffineTransform());
 		transform.transform(source, destination);
 		graphics.drawString(text, (int) destination.getX(), (int) destination.getY());
-		graphics.setTransform(transform);
+		graphics.transform(transform);
 	}
 
 	private double secondsToPixels(double seconds) {
