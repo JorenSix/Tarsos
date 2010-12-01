@@ -50,8 +50,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 
 import be.hogent.tarsos.Tarsos;
-import be.hogent.tarsos.cli.PlayAlong;
-import be.hogent.tarsos.sampled.pitch.PitchConverter;
 
 /** Utility methods for MIDI examples. */
 public final class MidiCommon {
@@ -72,7 +70,7 @@ public final class MidiCommon {
 			allowsOutput = output;
 		}
 
-		
+		@Override
 		public String toString() {
 			String descr = "MIDI";
 			if (allowsInput) {
@@ -87,12 +85,12 @@ public final class MidiCommon {
 			return String.format("%s - %s", descr, deviceInfo.getName());
 		}
 
-		
+		@Override
 		public boolean equals(final Object other) {
 			return deviceInfo.equals(((MoreMidiInfo) other).deviceInfo);
 		}
 
-		
+		@Override
 		public int hashCode() {
 			return deviceInfo.hashCode();
 		}
@@ -265,37 +263,21 @@ public final class MidiCommon {
 	 * @return
 	 */
 	public static double[] tuningFromPeaks(final double[] peaks) {
+		// c4 = midi key 60, the most explosive key in the known universe.
+		final int startMidiKey = 60;
+		final int startOctave = 4;
 		final double[] tuning = new double[128];
-	
-		// align tuning to MIDI note 69, A4 or 440Hz.
-		final double referencePitch = 440.0;
-		final Double referenceNote = PitchConverter.hertzToAbsoluteCent(referencePitch);
-		final int referenceNoteMidiNumber = PitchConverter.hertzToMidiKey(referencePitch);
-	
-		int midiNoteClosestToReference = -1;
-		double closestDistance = Double.MAX_VALUE;
-		for (int i = 0; i < tuning.length; i++) {
-			final int octave = i / peaks.length;
-			final double centOffset = peaks[i % peaks.length];
-			tuning[i] = octave * 1200 + centOffset;
-			final double distanceToReferenceNote = Math.abs(tuning[i] - referenceNote); // cents
-			if (distanceToReferenceNote < closestDistance) {
-				closestDistance = distanceToReferenceNote;
-				midiNoteClosestToReference = i;
-			}
+		// from startoctave up
+		for (int i = startMidiKey; i < tuning.length; i++) {
+			final int octave = startOctave + (i - startMidiKey) / peaks.length;
+			tuning[i] = octave * 1200 + peaks[i % peaks.length];
 		}
-	
-		PlayAlong.LOG.info("Closest to " + referenceNote + " cents) is the tuned midi key "
-				+ midiNoteClosestToReference + " at " + tuning[midiNoteClosestToReference] + " cents");
-	
-		final double[] rebasedTuning = new double[128];
-		final int diff = referenceNoteMidiNumber - midiNoteClosestToReference;
-		for (int i = 0; i < tuning.length; i++) {
-			if (i + diff >= 0 && i + diff < 128) {
-				rebasedTuning[i] = tuning[(i + diff) % 128];
-			}
+		// from startoctave down
+		for (int i = startMidiKey - 1; i >= 0; i--) {
+			final int octave = startOctave - 1 - (startMidiKey - i) / peaks.length;
+			tuning[i] = octave * 1200 + peaks[i % peaks.length];
 		}
-		return rebasedTuning;
+		return tuning;
 	}
 }
 
