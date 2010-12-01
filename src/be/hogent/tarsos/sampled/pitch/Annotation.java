@@ -146,4 +146,33 @@ public final class Annotation implements Comparable<Annotation> {
 		}
 		return ambitusHistogram;
 	}
+
+	/**
+	 * Calculates a maximum possible number of annotations and compares it with
+	 * the actual number of annotations. The result is an indication how much of
+	 * the audio is annotated and therefore possibly how 'pitched' the original
+	 * audio is (or how easily it can be annotated using the chosen algorithm).
+	 * E.g. ten actual annotations from YIN at a sample rate of 100HZ with an
+	 * audio file of two seconds gives 10 /(2s x 100Hz) = 5%
+	 * 
+	 * @param annotations
+	 *            A list of annotations for an audio file.
+	 * @param audioLenght
+	 *            The length of the annotated audio.
+	 * @return A percentage indicating how much of the audio is annotated
+	 */
+	public static double percentAnnotated(List<Annotation> annotations, double audioLenght) {
+		double percentage;
+		double delta = Double.MAX_VALUE;
+		double previousTimeStamp = 0;
+		for (Annotation annotation : annotations) {
+			double currentTimeStamp = annotation.getStart();
+			delta = Math.min(delta, currentTimeStamp - previousTimeStamp);
+			previousTimeStamp = currentTimeStamp;
+		}
+		int actualAnnotations = annotations.size();
+		int maxAnnotations = (int) (audioLenght / delta);
+		percentage = actualAnnotations / (double) maxAnnotations;
+		return percentage;
+	}
 }
