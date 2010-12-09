@@ -3,6 +3,8 @@ package be.hogent.tarsos.util.histogram;
 import java.util.List;
 import java.util.logging.Logger;
 
+import be.hogent.tarsos.sampled.pitch.Annotation;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.ScalaFile;
@@ -183,6 +185,56 @@ public final class ToneScaleHistogram extends Histogram {
 			toneScaleHistogram.setCount(key, newCount);
 		}
 		return toneScaleHistogram;
+	}
+
+	/**
+	 * Create a tone scale histogram using a kernel instead of an ordinary
+	 * count. This construction uses a paradigm described here:
+	 * http://en.wikipedia.org/wiki/Kernel_density_estimation
+	 * 
+	 * It uses Gaussian kernels of a defined width. The width should be around
+	 * the just noticeable threshold of about 7 cents.
+	 * 
+	 * @param annotations
+	 *            A list of annotations.s
+	 * @return A histogram build with Gaussian kernels.
+	 */
+	public static ToneScaleHistogram createToneScaleHistogram(final List<Annotation> annotations,
+			final double width) {
+		// 1200 pitch classes should be enough for everybody!
+		double[] values = new double[1200];
+		/*
+		 * start at 1200 - 200 and go to 1200 + 1200 + 200 to calculate the
+		 * wrapping overlap. If a kernel is placed at 1 it should also have
+		 * impact on bin 1200 => place the bin at position 1201 and calculate
+		 * the surroundings from 1001 to e.g. 1401 an place the results in the
+		 * values vector modulo 1200. If you know what I mean.
+		 */
+		for (int i = 1000; i < 2600; i += 1) {
+			int index = i % 1200;
+			// TODO This algorithm is O(1600 x n) with n the number of
+			// annotations =>
+			// not so efficient. Possible optimization: sort annotations by
+			// relative cents and add them in order. Only the non zero values
+			// should be added so for each annotation only 10 * width * 2
+			// additions should occur and without conditional checks => O(n
+			// lg(n) + 20 * width * n). Just repeat the mantra: when in doubt
+			// sort!
+
+			for (Annotation annotation : annotations) {
+				double difference = i - (annotation.getPitch(PitchUnit.RELATIVE_CENTS) + 1200);
+				if (Math.abs(difference) < 10 * width) {
+					double power = Math.pow(difference / (width / 2), 2.0);
+					values[index] += Math.pow(Math.E, -0.5 * power);
+				}
+			}
+		}
+
+		ToneScaleHistogram toneScale = new ToneScaleHistogram();
+		for (int i = 0; i < 1200; i++) {
+			toneScale.setCount(i, (long) values[i]);
+		}
+		return toneScale;
 	}
 
 	/**
