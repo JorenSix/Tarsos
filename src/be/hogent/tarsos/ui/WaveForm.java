@@ -136,8 +136,10 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 
 	private void drawMarker(final Graphics2D graphics) {
 		int x = (int) secondsToPixels(markerPosition);
+		graphics.transform(getSaneTransform());
 		graphics.setColor(Color.red);
 		graphics.drawLine(x, getHeight() / 2, x, -getHeight() / 2);
+		graphics.transform(getInverseSaneTransform());
 	}
 
 	private void initializeGraphics(final Graphics2D g) {
@@ -195,7 +197,6 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 			}
 		}
 		// Render the cached image.
-		g.transform(getInverseSaneTransform());
 		g.drawImage(waveFormImage, 0, 0, null);
 	}
 
@@ -216,10 +217,10 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 		Point2D source = new Point2D.Double(x, y);
 		Point2D destination = new Point2D.Double();
 		AffineTransform transform = graphics.getTransform();
-		graphics.transform(new AffineTransform());
+		graphics.transform(getInverseSaneTransform());
 		transform.transform(source, destination);
 		graphics.drawString(text, (int) destination.getX(), (int) destination.getY());
-		graphics.transform(transform);
+		graphics.transform(getSaneTransform());
 	}
 
 	private double secondsToPixels(double seconds) {
@@ -309,7 +310,7 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 		f.add(waveForm, BorderLayout.CENTER);
 		f.setVisible(true);
 		try {
-			Thread.sleep(100);
+			Thread.sleep(400);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
