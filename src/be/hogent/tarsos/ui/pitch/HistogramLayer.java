@@ -78,7 +78,6 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 	 * @see be.hogent.tarsos.ui.Layer#draw()
 	 */
 	public void draw(final Graphics2D graphics) {
-
 		double xOffset = mouseDrag.calculateXOffset();
 		int yOffset = 20;
 		final double delta = histo.getStop() - histo.getStart();
@@ -189,15 +188,42 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 				}
 			});
 
-			JButton exportButton = new JButton("Export");
-			exportButton.setToolTipText("Export scala file.");
-			exportButton.addActionListener(new ActionListener() {
+			JButton exportScalaButton = new JButton("Export Scala");
+			exportScalaButton.setToolTipText("Export scala file.");
+			exportScalaButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					if (scale != null) {
 						ScalaFile file = new ScalaFile("Tarsos exported scala file", scale);
 						String path = FileUtils.combine(audioFile.transcodedDirectory(), audioFile.basename()
 								+ ".scl");
 						file.write(path);
+						LOG.info(String.format("Saved a scala file to %s", path));
+					}
+				}
+			});
+
+			JButton exportHistoButton = new JButton("Export Histogram");
+			exportHistoButton.setToolTipText("Export Histogram file.");
+			exportHistoButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (scale != null) {
+						String path = FileUtils.combine(audioFile.transcodedDirectory(), audioFile.basename()
+								+ "_histo.txt");
+						histo.export(path);
+						LOG.info(String.format("Saved a histogram file to %s", path));
+					}
+				}
+			});
+
+			JButton exportHistoMatlabButton = new JButton("Export Histogram (Matlab)");
+			exportHistoMatlabButton.setToolTipText("Export matlab Histogram file.");
+			exportHistoMatlabButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (scale != null) {
+						String path = FileUtils.combine(audioFile.transcodedDirectory(), audioFile.basename()
+								+ "_histo_matlab.m");
+						histo.exportMatLab(path);
+						LOG.info(String.format("Saved a matlab histogram file to %s", path));
 					}
 				}
 			});
@@ -209,7 +235,9 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 			builder.append("Peakpicking:", peakSlider, true);
 			builder.append("Smooth:", smoothButton, true);
 			builder.append("Reset:", resetButton, true);
-			builder.append("Scala export:", exportButton, true);
+			builder.append("Scala export:", exportScalaButton, true);
+			builder.append("Histo export:", exportHistoButton, true);
+			builder.append("Histo (matlab) export:", exportHistoMatlabButton, true);
 
 			ui = builder.getPanel();
 			ui.setInheritsPopupMenu(true);

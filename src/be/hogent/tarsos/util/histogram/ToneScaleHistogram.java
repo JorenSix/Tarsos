@@ -203,30 +203,25 @@ public final class ToneScaleHistogram extends Histogram {
 			final double width) {
 		// 1200 pitch classes should be enough for everybody!
 		double[] values = new double[1200];
-		/*
-		 * start at 1200 - 200 and go to 1200 + 1200 + 200 to calculate the
-		 * wrapping overlap. If a kernel is placed at 1 it should also have
-		 * impact on bin 1200 => place the bin at position 1201 and calculate
-		 * the surroundings from 1001 to e.g. 1401 an place the results in the
-		 * values vector modulo 1200. If you know what I mean.
-		 */
-		for (int i = 1000; i < 2600; i += 1) {
-			int index = i % 1200;
-			// TODO This algorithm is O(1600 x n) with n the number of
-			// annotations =>
-			// not so efficient. Possible optimization: sort annotations by
-			// relative cents and add them in order. Only the non zero values
-			// should be added so for each annotation only 10 * width * 2
-			// additions should occur and without conditional checks => O(n
-			// lg(n) + 20 * width * n). Just repeat the mantra: when in doubt
-			// sort!
 
-			for (Annotation annotation : annotations) {
-				double difference = i - (annotation.getPitch(PitchUnit.RELATIVE_CENTS) + 1200);
-				if (Math.abs(difference) < 10 * width) {
-					double power = Math.pow(difference / (width / 2), 2.0);
-					values[index] += Math.pow(Math.E, -0.5 * power);
-				}
+		/*
+		 * When a kernel with a width of 7 is added at 1 cents it has influence
+		 * on the bins from 1200 - 7 * 10 + 1 to 1 + 7 * 10 so from 1131 to 71.
+		 * To make the modulo calculation easy 1200 is added to each value: -69
+		 * % 1200 is -69, (-69 + 1200) % 1200 is the expected 1131. If you know
+		 * what I mean. This algorithm is O(2 * 10 * width * x n) with n the
+		 * number of annotations => not so efficient.
+		 */
+
+		for (Annotation annotation : annotations) {
+			double pitch = annotation.getPitch(PitchUnit.RELATIVE_CENTS);
+			int start = (int) (pitch + 1200 - 10 * width);
+			int stop = (int) (pitch + 1200 + 10 * width);
+			double difference = start - (pitch + 1200);
+			for (int i = start; i < stop; i++) {
+				double power = Math.pow(difference / (width / 2), 2.0);
+				values[i % 1200] += Math.pow(Math.E, -0.5 * power);
+				difference++;
 			}
 		}
 
@@ -235,6 +230,20 @@ public final class ToneScaleHistogram extends Histogram {
 			toneScale.setCount(i, (long) values[i]);
 		}
 		return toneScale;
+	}
+
+	public static void addAnnotationTo(final double[] values, final Annotation annotation,
+			final double kernelWidth, final PitchUnit unit) {
+
+		double pitch = annotation.getPitch(unit);
+		int start = (int) (pitch + values.length - 10 * kernelWidth);
+		int stop = (int) (pitch + values.length + 10 * kernelWidth);
+		double difference = start - (pitch + values.length);
+		for (int i = start; i < stop; i++) {
+			double power = Math.pow(difference / (kernelWidth / 2), 2.0);
+			values[i % values.length] += Math.pow(Math.E, -0.5 * power);
+			difference++;
+		}
 	}
 
 	/**

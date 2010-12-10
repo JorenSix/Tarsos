@@ -151,13 +151,23 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 					e.printStackTrace();
 				}
 				// CSV
-				stringBuffer.append("Time(sec);Frequency(" + pitchUnit.getHumanName() + ")\n");
+				stringBuffer.append("Time(sec);Pitch(" + pitchUnit.getHumanName() + ")\n");
 				for (ArrayList<PlotPoint> dataset : _points) {
 					for (PlotPoint p : dataset) {
 						stringBuffer.append(String.format("%.5f;%.5f\n", p.x, p.y));
 					}
 				}
 				FileUtils.writeFile(stringBuffer.toString(), newAudioFile.basename() + ".csv");
+				stringBuffer.delete(0, stringBuffer.length());
+				// Matlab
+				stringBuffer.append("%Time(sec);Pitch(" + pitchUnit.getHumanName() + ")\n");
+				stringBuffer.append("annotations = [");
+				for (ArrayList<PlotPoint> dataset : _points) {
+					for (PlotPoint p : dataset) {
+						stringBuffer.append(String.format("%s,", p.y));
+					}
+				}
+				FileUtils.writeFile(stringBuffer.toString(), newAudioFile.basename() + "_annotations.m");
 				stringBuffer.delete(0, stringBuffer.length());
 			}
 		});

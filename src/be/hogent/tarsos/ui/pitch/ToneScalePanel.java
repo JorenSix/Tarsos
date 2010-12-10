@@ -107,28 +107,40 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 		}
 	}
 
+	double[] histoValues;
+
 	public void addSample(Annotation sample) {
 		double pitchInAbsCents = sample.getPitch(PitchUnit.ABSOLUTE_CENTS);
 		if (pitchInAbsCents > 0 && pitchInAbsCents <= Configuration.getInt(ConfKey.ambitus_stop)) {
 
 			final Histogram histo;
 			if (!histos.containsKey(sample.getSource())) {
+				final int delta;
 				if (stop > 1200) {
 					histo = new AmbitusHistogram();
+					delta = Configuration.getInt(ConfKey.ambitus_stop)
+							- Configuration.getInt(ConfKey.ambitus_start);
 				} else {
 					histo = new ToneScaleHistogram();
+					delta = 1200;
 				}
 				histos.put(sample.getSource(), histo);
 				Color color = Tarsos.COLORS[sample.getSource().ordinal() % Tarsos.COLORS.length];
 				HistogramLayer layer = new HistogramLayer(this, histo, scaleChangedPublisher, color);
+				KDELayer kdeLayer = new KDELayer(this, delta);
+				histoValues = kdeLayer.getValues();
 				layer.audioFileChanged(audioFile);
 				layers.add(layer);
+				layers.add(kdeLayer);
 				layerUserInterfeces.addTab(sample.getSource().name(), layer.ui());
 			} else {
 				histo = histos.get(sample.getSource());
 			}
 
 			histo.add(pitchInAbsCents);
+
+			ToneScaleHistogram.addAnnotationTo(histoValues, sample, 5, stop > 1200 ? PitchUnit.ABSOLUTE_CENTS
+					: PitchUnit.RELATIVE_CENTS);
 
 			if ((int) (sample.getStart() * 1000) % 5 == 0) {
 				repaint();

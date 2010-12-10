@@ -130,9 +130,10 @@ public class Histogram implements Cloneable {
 		} else {
 			stopValue = lastKey + getClassWidth() / 2;
 		}
+		freqTable.put(preventRoundingErrors(startVal + getClassWidth() / 2), 0L);
 		for (double current = startVal + getClassWidth() / 2; current <= stopValue;) {
-			freqTable.put(current, 0L);
-			current = preventRoundingErrors(current + getClassWidth());
+			freqTable.put(valueToKey(current), 0L);
+			current = current + getClassWidth();
 		}
 
 		this.numberOfClasses = freqTable.keySet().size();
@@ -1282,7 +1283,7 @@ public class Histogram implements Cloneable {
 			}
 		}
 		sb.append("]\n");
-		sb.append("histo(histogram_values)");
+		sb.append("hist(histogram_values,1200)");
 		FileUtils.writeFile(sb.toString(), fileName);
 	}
 
