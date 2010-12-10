@@ -54,7 +54,7 @@ import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 /**
  * @author Joren Six
  */
-public class Frame extends JFrame implements ScaleChangedListener {
+public final class Frame extends JFrame implements ScaleChangedListener {
 	/**
 	 * Default height.
 	 */
@@ -195,7 +195,7 @@ public class Frame extends JFrame implements ScaleChangedListener {
 		content.setMinimized(true);
 
 		constraint = new MultiSplitConstraint(content, 3);
-		content = contentManager.addContent("Annotations", "Annotations", null, pitchContourPanel, null,
+		content = contentManager.addContent("AnnotationTree", "AnnotationTree", null, pitchContourPanel, null,
 				constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
