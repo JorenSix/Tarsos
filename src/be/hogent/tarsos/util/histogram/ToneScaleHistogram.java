@@ -232,6 +232,14 @@ public final class ToneScaleHistogram extends Histogram {
 		return toneScale;
 	}
 
+	public static ToneScaleHistogram createToneScaleHistogram(final List<Annotation> annotations) {
+		final ToneScaleHistogram histogram = new ToneScaleHistogram();
+		for (Annotation annotation : annotations) {
+			histogram.add(annotation.getPitch(PitchUnit.RELATIVE_CENTS));
+		}
+		return histogram;
+	}
+
 	public static void addAnnotationTo(final double[] values, final Annotation annotation,
 			final double kernelWidth, final PitchUnit unit) {
 
