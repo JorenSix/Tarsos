@@ -6,10 +6,10 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -23,12 +23,12 @@ import javax.swing.SwingUtilities;
 
 import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.AudioProcessor;
-import be.hogent.tarsos.sampled.pitch.Annotation;
+import be.hogent.tarsos.ui.pitch.AnnotationPublisher;
 import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
-import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
+import be.hogent.tarsos.ui.pitch.ControlPanel;
 import be.hogent.tarsos.util.AudioFile;
 
-public final class WaveForm extends JPanel implements AudioFileChangedListener, SampleHandler {
+public final class WaveForm extends JPanel implements AudioFileChangedListener {
 
 	/**
 	 * 
@@ -36,7 +36,8 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 	private static final long serialVersionUID = 3730361987954996673L;
 
 	private AudioFile audioFile;
-	private double markerPosition; // position in seconds
+	private double minMarkerPosition; // position in seconds
+	private double maxMarkerPosition; // position in seconds
 
 	/**
 	 * A cached waveform.
@@ -49,19 +50,27 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 	private static final Font AXIS_FONT = new Font("SansSerif", Font.TRUETYPE_FONT, 10);
 
 	public WaveForm() {
-		this.addMouseMotionListener(new MouseMotionAdapter() {
-			@Override
-			public void mouseDragged(final MouseEvent event) {
-				setMarkerInPixels(event.getX());
-			}
-		});
+
 		this.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(final MouseEvent event) {
-				setMarkerInPixels(event.getX());
+				System.out.println(event);
+				if (event.getButton() == MouseEvent.BUTTON1) {
+					setMarkerInPixels(event.getX(), false);
+					if (controlPanel != null) {
+						controlPanel.startPlaybackFrom(maxMarkerPosition);
+					}
+				} else {
+					setMarkerInPixels(event.getX(), true);
+				}
+				AnnotationPublisher.getInstance().delegateClearAnnotations();
+				AnnotationPublisher.getInstance()
+						.delegateAddAnnotations(minMarkerPosition, maxMarkerPosition);
+
 			}
 		});
-		setMarker(0);
+		setMarker(0, true);
+		setMarker(0, false);
 	}
 
 	/**
@@ -70,9 +79,9 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 	 * @param newPosition
 	 *            The new position in pixels.
 	 */
-	private void setMarkerInPixels(final int newPosition) {
+	private void setMarkerInPixels(final int newPosition, final boolean minMarker) {
 		double pixelsToSeconds = getLengthInMilliSeconds() / 1000.0 / getWidth();
-		setMarker(pixelsToSeconds * newPosition);
+		setMarker(pixelsToSeconds * newPosition, minMarker);
 	}
 
 	/**
@@ -81,9 +90,23 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 	 * @param newPosition
 	 *            The new position of the marker in seconds.
 	 */
-	public void setMarker(final double newPosition) {
-		markerPosition = newPosition;
+	public void setMarker(final double newPosition, final boolean minMarker) {
+		if (minMarker && newPosition < maxMarkerPosition) {
+			minMarkerPosition = newPosition;
+		} else if (!minMarker && newPosition > minMarkerPosition) {
+			maxMarkerPosition = newPosition;
+		}
 		requestRepaint();
+	}
+
+	public double getMarker(final boolean minMarker) {
+		final double markerValue;
+		if (minMarker) {
+			markerValue = minMarkerPosition;
+		} else {
+			markerValue = maxMarkerPosition;
+		}
+		return markerValue;
 	}
 
 	private void requestRepaint() {
@@ -135,10 +158,19 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 	}
 
 	private void drawMarker(final Graphics2D graphics) {
-		int x = (int) secondsToPixels(markerPosition);
+		int minX = (int) secondsToPixels(minMarkerPosition);
 		graphics.transform(getSaneTransform());
-		graphics.setColor(Color.red);
-		graphics.drawLine(x, getHeight() / 2, x, -getHeight() / 2);
+		graphics.setColor(Color.black);
+		graphics.drawLine(minX, getHeight() / 2, minX, -getHeight() / 2);
+		int maxX = (int) secondsToPixels(maxMarkerPosition);
+		graphics.setColor(Color.black);
+		graphics.drawLine(maxX, getHeight() / 2, maxX, -getHeight() / 2);
+		Color color = new Color(0.0f, 0.0f, 0.0f, 0.15f); // black
+		// graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+		// 0.5f));
+		graphics.setPaint(color);
+		Rectangle rectangle = new Rectangle(minX + 1, -getHeight() / 2, maxX - minX, getHeight() * 4);
+		graphics.fill(rectangle);
 		graphics.transform(getInverseSaneTransform());
 	}
 
@@ -290,15 +322,6 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 		requestRepaint();
 	}
 
-	public void addSample(Annotation sample) {
-		setMarker(sample.getStart());
-		invalidate();
-	}
-
-	public void removeSample(Annotation sample) {
-		// TODO Auto-generated method stub
-	}
-
 	public static void main(final String... strings) {
 		JFrame f = new JFrame();
 		f.setMinimumSize(new Dimension(640, 480));
@@ -315,6 +338,12 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener, 
 			e.printStackTrace();
 		}
 		waveForm.audioFileChanged(audioFile);
+	}
+
+	private ControlPanel controlPanel;
+
+	public void setControlPanel(ControlPanel controlPanel) {
+		this.controlPanel = controlPanel;
 	}
 
 }
