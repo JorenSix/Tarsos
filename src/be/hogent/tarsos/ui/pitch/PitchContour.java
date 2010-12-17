@@ -316,7 +316,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		AnnotationSelection selection = AnnotationPublisher.getInstance().getCurrentSelection();
 		if (selection.getStopTime() - selection.getStartTime() > 1) {
 
-			super.setXRange(selection.getStartTime(), selection.getStopTime() + 15);
+			super.setXRange(selection.getStartTime(), selection.getStopTime());
 
 			final double stopPitch;
 			// TODO make unit independent:
