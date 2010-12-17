@@ -111,8 +111,10 @@ public final class PitchConverter {
 	 */
 	public static double hertzToAbsoluteCent(final double hertzValue) {
 		double pitchInAbsCent = 0.0;
-		if (hertzValue != 0) {
+		if (hertzValue > 0) {
 			pitchInAbsCent = 1200 * Math.log(hertzValue / REF_FREQ) / LOG_TWO;
+		} else {
+			throw new IllegalArgumentException("Pitch in Hz schould be greater than zero, is " + hertzValue);
 		}
 		return pitchInAbsCent;
 	}

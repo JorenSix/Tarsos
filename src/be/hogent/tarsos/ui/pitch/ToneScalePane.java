@@ -7,12 +7,11 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import be.hogent.tarsos.sampled.pitch.Annotation;
-import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.Histogram;
 
 public final class ToneScalePane extends JPanel implements ScaleChangedListener, AudioFileChangedListener,
-		SampleHandler {
+		AnnotationListener {
 
 	/**
 	 * 
@@ -40,11 +39,24 @@ public final class ToneScalePane extends JPanel implements ScaleChangedListener,
 		plot.scaleChanged(newScale, isChanging);
 	}
 
-	public void addSample(final Annotation sample) {
-		plot.addSample(sample);
+	public void addAnnotation(final Annotation annotation) {
+		plot.addAnnotation(annotation);
 	}
 
-	public void removeSample(final Annotation sample) {
-		plot.removeSample(sample);
+	public void clearAnnotations() {
+		plot.clearAnnotations();
+	}
+
+	public void extractionStarted() {
+		// NOOP
+	}
+
+	public void extractionFinished() {
+		// NOOB?
+	}
+
+	public void annotationsAdded() {
+		plot.annotationsAdded();
+
 	}
 }

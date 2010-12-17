@@ -24,14 +24,13 @@ import be.hogent.tarsos.sampled.pitch.Pitch;
 import be.hogent.tarsos.sampled.pitch.PitchConverter;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
-import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 
 public class PitchContour extends Plot implements AudioFileChangedListener, ScaleChangedListener,
-		SampleHandler {
+		AnnotationListener {
 
 	/**
 	 * Log messages.
@@ -169,6 +168,32 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 				}
 				FileUtils.writeFile(stringBuffer.toString(), newAudioFile.basename() + "_annotations.m");
 				stringBuffer.delete(0, stringBuffer.length());
+
+				/*
+				 * try { PitchSynth synth; synth = new PitchSynth();
+				 * 
+				 * double startTime = getXRange()[0]; double stopTime =
+				 * getXRange()[1]; double startPitch = getYRange()[0]; double
+				 * stopPitch = getYRange()[1]; List<Annotation> annotations =
+				 * AnnotationPublisher.getInstance().getAnnotations( startTime,
+				 * stopTime, startPitch, stopPitch); // order by time.
+				 * Collections.sort(annotations); double previousTime = -1;
+				 * double previousPitch = 0;
+				 * 
+				 * for (Annotation annotation : annotations) { double time =
+				 * annotation.getStart(); double pitch =
+				 * annotation.getPitch(pitchUnit); double timeDiff = time -
+				 * previousTime; double pitchDiff = pitch - previousPitch; if
+				 * (previousTime > 0) { Thread.sleep((long) (1000 * timeDiff));
+				 * } previousTime = time; if (pitchDiff > 3 || timeDiff > 0.07)
+				 * { synth.playAbsoluteCents(pitch, 100); } }
+				 * 
+				 * } catch (MidiUnavailableException e) { // TODO Auto-generated
+				 * catch block e.printStackTrace(); } catch
+				 * (InterruptedException e) { // TODO Auto-generated catch block
+				 * e.printStackTrace(); }
+				 */
+
 			}
 		});
 		button.setBorderPainted(false);
@@ -191,7 +216,10 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 
 	}
 
+	boolean scaleIsChanging = false;
+
 	public void scaleChanged(double[] newScale, boolean isChanging) {
+		scaleIsChanging = isChanging;
 		scale = newScale;
 		clearYTicks();
 		setYTicks();
@@ -226,13 +254,14 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		return filteredList;
 	}
 
-	public void addSample(Annotation sample) {
-		final double convertedPitch = sample.getPitch(pitchUnit);
-		final int dataset = sample.getSource().ordinal();
-		LOG.finest(String.format("Added %.2f %s to pitch contour", convertedPitch, pitchUnit.getHumanName()));
-		addPoint(dataset, sample.getStart(), convertedPitch, false);
+	public void addAnnotation(Annotation annotation) {
+		final double convertedPitch = annotation.getPitch(pitchUnit);
+		final int dataset = annotation.getSource().ordinal();
+		// LOG.finest(String.format("Added %.2f %s to pitch contour",
+		// convertedPitch, pitchUnit.getHumanName()));
+		addPoint(dataset, annotation.getStart(), convertedPitch, false);
 		if (getLegend(dataset) == null) {
-			addLegend(dataset, sample.getSource().name());
+			addLegend(dataset, annotation.getSource().name());
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					repaint();
@@ -241,8 +270,63 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		}
 	}
 
-	public void removeSample(Annotation sample) {
-		// TODO Auto-generated method stub
+	public void clearAnnotations() {
+		// clear all data sets
+		for (int i = 0; i < PitchDetectionMode.values().length; i++) {
+			clear(i);
+		}
 	}
 
+	public void extractionStarted() {
+		// NO OP
+	}
+
+	public void extractionFinished() {
+		// NO OP
+	}
+
+	@Override
+	public void setYRange(double min, double max) {
+		super.setYRange(min, max);
+
+		if (!scaleIsChanging) {
+			// This is dangerous: it expects that setXRange is called first,
+			// i.e.
+			// before setYRange()
+			double minPitch = min;
+			double maxPitch = max;
+			double minTime = getXRange()[0];
+			double maxTime = getXRange()[1];
+
+			if (minTime < 0) {
+				minTime = 0;
+			}
+			if (minPitch < 0) {
+				minPitch = 0;
+			}
+			AnnotationPublisher.getInstance().delegateClearAnnotations();
+
+			AnnotationPublisher.getInstance().delegateAddAnnotations(minTime, maxTime, minPitch, maxPitch);
+		}
+	}
+
+	private static final int AMBITUS_STOP = Configuration.getInt(ConfKey.ambitus_stop);
+
+	public void annotationsAdded() {
+		AnnotationSelection selection = AnnotationPublisher.getInstance().getCurrentSelection();
+		if (selection.getStopTime() - selection.getStartTime() > 1) {
+
+			super.setXRange(selection.getStartTime(), selection.getStopTime() + 15);
+
+			final double stopPitch;
+			// TODO make unit independent:
+			if (selection.getStopPitch() > AMBITUS_STOP) {
+				stopPitch = AMBITUS_STOP;
+			} else {
+				stopPitch = selection.getStopPitch();
+			}
+
+			super.setYRange(selection.getStartPitch(), stopPitch);
+		}
+	}
 }

@@ -6,6 +6,9 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
@@ -15,6 +18,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
@@ -26,7 +30,9 @@ import be.hogent.tarsos.sampled.AudioProcessor;
 import be.hogent.tarsos.ui.pitch.AnnotationPublisher;
 import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
 import be.hogent.tarsos.ui.pitch.ControlPanel;
+import be.hogent.tarsos.ui.pitch.Frame;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.StopWatch;
 
 public final class WaveForm extends JPanel implements AudioFileChangedListener {
 
@@ -35,14 +41,24 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 	 */
 	private static final long serialVersionUID = 3730361987954996673L;
 
+	/**
+	 * Logs messages.
+	 */
+	private static final Logger LOG = Logger.getLogger(Frame.class.getName());
+
 	private AudioFile audioFile;
 	private double minMarkerPosition; // position in seconds
 	private double maxMarkerPosition; // position in seconds
 
 	/**
-	 * A cached waveform.
+	 * A cached waveform image used to scale to the correct height and width.
 	 */
 	private BufferedImage waveFormImage;
+
+	/**
+	 * The same image scaled to the current height and width.
+	 */
+	private BufferedImage scaledWaveFormImage;
 
 	/**
 	 * The font used to draw axis labels.
@@ -54,11 +70,11 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 		this.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(final MouseEvent event) {
-				System.out.println(event);
 				if (event.getButton() == MouseEvent.BUTTON1) {
 					setMarkerInPixels(event.getX(), false);
-					if (controlPanel != null) {
-						controlPanel.startPlaybackFrom(maxMarkerPosition);
+					if (controlPanel != null && controlPanel.shouldPlay()) {
+
+						controlPanel.startPlayback(maxMarkerPosition);
 					}
 				} else {
 					setMarkerInPixels(event.getX(), true);
@@ -82,6 +98,12 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 	private void setMarkerInPixels(final int newPosition, final boolean minMarker) {
 		double pixelsToSeconds = getLengthInMilliSeconds() / 1000.0 / getWidth();
 		setMarker(pixelsToSeconds * newPosition, minMarker);
+	}
+
+	private boolean waveFormCreationFinished = false;
+
+	private void setWaveFormCreationFinished(boolean isFinished) {
+		waveFormCreationFinished = isFinished;
 	}
 
 	/**
@@ -121,7 +143,7 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 	public void paint(final Graphics g) {
 		Graphics2D graphics = (Graphics2D) g;
 		initializeGraphics(graphics);
-		if (audioFile != null) {
+		if (waveFormImage != null && waveFormCreationFinished) {
 			drawWaveForm(graphics);
 		} else {
 			graphics.transform(getSaneTransform());
@@ -150,11 +172,19 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 	 *         Positive y is up, negative y down.
 	 */
 	private AffineTransform getSaneTransform() {
-		return new AffineTransform(1.0, 0.0, 0.0, -1.0, 0, (float) getHeight() / 2);
+		return getSaneTransform(getHeight());
+	}
+
+	private AffineTransform getSaneTransform(final float heigth) {
+		return new AffineTransform(1.0, 0.0, 0.0, -1.0, 0, heigth / 2);
 	}
 
 	private AffineTransform getInverseSaneTransform() {
-		return new AffineTransform(1.0, 0.0, 0.0, -1.0, 0, (float) getHeight() / 2);
+		return getInverseSaneTransform(getHeight());
+	}
+
+	private AffineTransform getInverseSaneTransform(final float heigth) {
+		return new AffineTransform(1.0, 0.0, 0.0, -1.0, 0, heigth / 2);
 	}
 
 	private void drawMarker(final Graphics2D graphics) {
@@ -183,53 +213,50 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 	}
 
 	private void drawWaveForm(final Graphics2D g) {
-		// if there is no image create a cached image
-		if (waveFormImage == null || getWidth() != waveFormImage.getWidth()
-				|| getHeight() != waveFormImage.getHeight()) {
-			waveFormImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_BGR);
-			final Graphics2D waveFormGraphics = waveFormImage.createGraphics();
-			initializeGraphics(waveFormGraphics);
-			waveFormGraphics.transform(getSaneTransform());
-			drawReference(waveFormGraphics);
-			AudioDispatcher adp;
-			try {
-				final float frameRate = audioFile.fileFormat().getFormat().getFrameRate();
-				int framesPerPixel = audioFile.fileFormat().getFrameLength() / getWidth() / 10;
-				final int one = (int) (getHeight() / 2 * 0.85);
-				final double secondsToX;
-				secondsToX = 1000 * getWidth() / (float) audioFile.getLengthInMilliSeconds();
-				adp = AudioDispatcher.fromFile(new File(audioFile.transcodedPath()), framesPerPixel);
-				adp.addAudioProcessor(new AudioProcessor() {
-
-					private int frame = 0;
-
-					public void processingFinished() {
-					}
-
-					public void processOverlapping(final float[] audioFloatBuffer,
-							final byte[] audioByteBuffer) {
-						double seconds = frame / frameRate;
-						frame += audioFloatBuffer.length;
-						int x = (int) (secondsToX * seconds);
-						int y = (int) (audioFloatBuffer[0] * one);
-						waveFormGraphics.drawLine(x, 0, x, y);
-					}
-
-					public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
-						processOverlapping(audioFloatBuffer, audioByteBuffer);
-					}
-				});
-				adp.run();
-			} catch (UnsupportedAudioFileException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 		// Render the cached image.
-		g.drawImage(waveFormImage, 0, 0, null);
+		scaleWaveFormImage();
+		g.drawImage(scaledWaveFormImage, 0, 0, null);
+	}
+
+	public BufferedImage scaleWaveFormImage() {
+		if (scaledWaveFormImage == null || scaledWaveFormImage.getHeight() != getHeight()
+				|| scaledWaveFormImage.getWidth() != getWidth()) {
+			StopWatch watch = new StopWatch();
+			int sourceWidth = waveFormImage.getWidth();
+			int sourceHeight = waveFormImage.getHeight();
+			int destWidth = getWidth();
+			int destHeight = getHeight();
+
+			double xScale = (double) getWidth() / (double) sourceWidth;
+			double yScale = (double) getHeight() / (double) sourceHeight;
+
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			GraphicsDevice gd = ge.getDefaultScreenDevice();
+			GraphicsConfiguration gc = gd.getDefaultConfiguration();
+
+			scaledWaveFormImage = gc.createCompatibleImage(destWidth, destHeight, waveFormImage
+					.getColorModel().getTransparency());
+			Graphics2D g2d = null;
+			try {
+				g2d = scaledWaveFormImage.createGraphics();
+				g2d.getTransform();
+				g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+						RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+				g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+						RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+				AffineTransform at = AffineTransform.getScaleInstance(xScale, yScale);
+				g2d.drawRenderedImage(waveFormImage, at);
+				g2d.transform(getInverseSaneTransform());
+				drawReference(g2d);
+			} finally {
+				if (g2d != null) {
+					g2d.dispose();
+				}
+			}
+			LOG.fine("Rescaled wave form image in " + watch.formattedToString());
+		}
+		return scaledWaveFormImage;
 	}
 
 	/**
@@ -319,7 +346,67 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 	public void audioFileChanged(final AudioFile newAudioFile) {
 		this.audioFile = newAudioFile;
 		this.waveFormImage = null;
+		this.scaledWaveFormImage = null;
+		setWaveFormCreationFinished(false);
+		createWaveFormImage();
 		requestRepaint();
+	}
+
+	private void createWaveFormImage() {
+		final StopWatch watch = new StopWatch();
+
+		try {
+			final int waveFormHeight = 200;
+			final int waveFormWidth = 2000;
+			waveFormImage = new BufferedImage(waveFormWidth, waveFormHeight, BufferedImage.TYPE_INT_RGB);
+			final Graphics2D waveFormGraphics = waveFormImage.createGraphics();
+			initializeGraphics(waveFormGraphics);
+			waveFormGraphics.clearRect(0, 0, waveFormWidth, waveFormHeight);
+			waveFormGraphics.transform(getSaneTransform(waveFormHeight));
+			final float frameRate = audioFile.fileFormat().getFormat().getFrameRate();
+			int framesPerPixel = audioFile.fileFormat().getFrameLength() / waveFormWidth / 8;
+
+			waveFormGraphics.setColor(Color.black);
+
+			final int one = (int) (waveFormHeight / 2 * 0.85);
+
+			final double secondsToX;
+			secondsToX = 1000 * waveFormWidth / (float) audioFile.getLengthInMilliSeconds();
+			AudioDispatcher adp = AudioDispatcher.fromFile(new File(audioFile.transcodedPath()),
+					framesPerPixel);
+			adp.addAudioProcessor(new AudioProcessor() {
+
+				private int frame = 0;
+
+				public void processingFinished() {
+					setWaveFormCreationFinished(true);
+					invalidate();
+					requestRepaint();
+					LOG.fine("Created wave form image in " + watch.formattedToString());
+				}
+
+				public void processOverlapping(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
+					double seconds = frame / frameRate;
+					frame += audioFloatBuffer.length;
+					int x = (int) (secondsToX * seconds);
+					int y = (int) (audioFloatBuffer[0] * one);
+					waveFormGraphics.drawLine(x, 0, x, y);
+				}
+
+				public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
+					processOverlapping(audioFloatBuffer, audioByteBuffer);
+				}
+			});
+
+			new Thread(adp, "Waveform image builder").start();
+		} catch (UnsupportedAudioFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	public static void main(final String... strings) {

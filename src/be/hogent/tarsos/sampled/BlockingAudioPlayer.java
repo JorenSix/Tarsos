@@ -26,9 +26,9 @@ public final class BlockingAudioPlayer implements AudioProcessor {
 	private final SourceDataLine line;
 
 	/**
-	 * The overlap and stepsize defined not in samples but in bytes. So it
-	 * depends on the bit depth. Since the int datatype is used only 8,16,24,...
-	 * bits or 1,2,3,... bytes are supported.
+	 * The overlap and step size defined not in samples but in bytes. So it
+	 * depends on the bit depth. Since the integer data type is used only
+	 * 8,16,24,... bits or 1,2,3,... bytes are supported.
 	 */
 	private final int byteOverlap, byteStepSize;
 

@@ -212,14 +212,16 @@ public final class ToneScaleHistogram extends Histogram {
 		 * what I mean. This algorithm is O(2 * 10 * width * x n) with n the
 		 * number of annotations => not so efficient.
 		 */
+		double calculationAria = 5 * width;
+		double halfWidth = width / 2.0;
 
 		for (Annotation annotation : annotations) {
 			double pitch = annotation.getPitch(PitchUnit.RELATIVE_CENTS);
-			int start = (int) (pitch + 1200 - 10 * width);
-			int stop = (int) (pitch + 1200 + 10 * width);
+			int start = (int) (pitch + 1200 - calculationAria);
+			int stop = (int) (pitch + 1200 + calculationAria);
 			double difference = start - (pitch + 1200);
 			for (int i = start; i < stop; i++) {
-				double power = Math.pow(difference / (width / 2), 2.0);
+				double power = Math.pow(difference / halfWidth, 2.0);
 				values[i % 1200] += Math.pow(Math.E, -0.5 * power);
 				difference++;
 			}
@@ -243,12 +245,15 @@ public final class ToneScaleHistogram extends Histogram {
 	public static void addAnnotationTo(final double[] values, final Annotation annotation,
 			final double kernelWidth, final PitchUnit unit) {
 
+		double calculationArea = 5 * kernelWidth;
+		double halfKernelWidth = kernelWidth / 2.0;
+
 		double pitch = annotation.getPitch(unit);
-		int start = (int) (pitch + values.length - 10 * kernelWidth);
-		int stop = (int) (pitch + values.length + 10 * kernelWidth);
+		int start = (int) (pitch + values.length - calculationArea);
+		int stop = (int) (pitch + values.length + calculationArea);
 		double difference = start - (pitch + values.length);
 		for (int i = start; i < stop; i++) {
-			double power = Math.pow(difference / (kernelWidth / 2), 2.0);
+			double power = Math.pow(difference / halfKernelWidth, 2.0);
 			values[i % values.length] += Math.pow(Math.E, -0.5 * power);
 			difference++;
 		}

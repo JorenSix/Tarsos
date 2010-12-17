@@ -41,6 +41,7 @@ import org.noos.xing.mydoggy.ToolWindowManager;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
 
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileDrop;
@@ -54,7 +55,7 @@ import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
 /**
  * @author Joren Six
  */
-public final class Frame extends JFrame implements ScaleChangedListener {
+public final class Frame extends JFrame implements ScaleChangedListener, AnnotationListener {
 	/**
 	 * Default height.
 	 */
@@ -90,7 +91,7 @@ public final class Frame extends JFrame implements ScaleChangedListener {
 	/**
 	 * Is there processing going on?
 	 */
-	public synchronized void setWaitState(final boolean isWaiting) {
+	private synchronized void setWaitState(final boolean isWaiting) {
 		Component glassPane = this.getGlassPane();
 		if (isWaiting) {
 			glassPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -126,40 +127,44 @@ public final class Frame extends JFrame implements ScaleChangedListener {
 		JComponent statusBar = makeStatusBar();
 
 		final ToneScalePane toneScalePane = new ToneScalePane(new ToneScaleHistogram(), this);
-		addAudioFileChangedListener(toneScalePane);
-		addScaleChangedListener(toneScalePane);
-
 		final ToneScalePanel ambitusPanel = new ToneScalePanel(new AmbitusHistogram(), this);
-		addAudioFileChangedListener(ambitusPanel);
-		addScaleChangedListener(ambitusPanel);
-
 		final PitchContour pitchContourPanel = new PitchContour();
-		addAudioFileChangedListener(pitchContourPanel);
-		addScaleChangedListener(pitchContourPanel);
-
 		final PitchContour regression = new PitchContour();
-		addAudioFileChangedListener(regression);
-		addScaleChangedListener(regression);
-
 		final IntervalTable intervalTable = new IntervalTable();
-		addScaleChangedListener(intervalTable);
-
-		WaveForm waveForm = new WaveForm();
-		addAudioFileChangedListener(waveForm);
-
+		final WaveForm waveForm = new WaveForm();
 		final ControlPanel controlPanel = new ControlPanel(waveForm);
-		addAudioFileChangedListener(controlPanel);
-		controlPanel.addHandler(toneScalePane);
-		controlPanel.addHandler(ambitusPanel);
-		controlPanel.addHandler(pitchContourPanel);
-		controlPanel.addHandler(waveForm);
-
 		final KeyboardPanel keyboardPanel = new KeyboardPanel();
-		addScaleChangedListener(keyboardPanel);
+
+		// The annotation publisher is not a ui element.
+		final AnnotationPublisher annotationPublisher = AnnotationPublisher.getInstance();
 
 		AudioFileBrowserPanel browser = new AudioFileBrowserPanel(new GridLayout(0, 2));
 		browser.setBackground(Color.WHITE);
+
+		// patch the scale changed listeners
+		addScaleChangedListener(toneScalePane);
+		addScaleChangedListener(ambitusPanel);
+		addScaleChangedListener(pitchContourPanel);
+		addScaleChangedListener(regression);
+		addScaleChangedListener(intervalTable);
+		addScaleChangedListener(keyboardPanel);
+
+		// Patch the audio file changed listeners.
+		addAudioFileChangedListener(annotationPublisher);
+		addAudioFileChangedListener(toneScalePane);
+		addAudioFileChangedListener(ambitusPanel);
+		addAudioFileChangedListener(pitchContourPanel);
+		addAudioFileChangedListener(regression);
+		addAudioFileChangedListener(waveForm);
+		addAudioFileChangedListener(controlPanel);
 		addAudioFileChangedListener(browser);
+
+		// Patch the annotation listeners
+		annotationPublisher.addListener(toneScalePane);
+		annotationPublisher.addListener(ambitusPanel);
+		annotationPublisher.addListener(pitchContourPanel);
+		annotationPublisher.addListener(controlPanel);
+		annotationPublisher.addListener(this);
 
 		// initialize content and tool window manager of the 'mydoggy'
 		// framework.
@@ -195,7 +200,7 @@ public final class Frame extends JFrame implements ScaleChangedListener {
 		content.setMinimized(true);
 
 		constraint = new MultiSplitConstraint(content, 3);
-		content = contentManager.addContent("AnnotationTree", "AnnotationTree", null, pitchContourPanel, null,
+		content = contentManager.addContent("Annotations", "Annotations", null, pitchContourPanel, null,
 				constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
@@ -213,11 +218,6 @@ public final class Frame extends JFrame implements ScaleChangedListener {
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 
-		// content = contentManager.addContent("WaveForm", "WaveForm", null,
-		// waveForm, null);
-		// setDefaultTabbedContentOptions(content);
-		// content.setMinimized(true);
-
 		toolWindowManager.registerToolWindow("Help", "Help", null, helpPanel, ToolWindowAnchor.RIGHT);
 		toolWindowManager.registerToolWindow("Browser", "Browser", null, browser, ToolWindowAnchor.RIGHT);
 		toolWindowManager.registerToolWindow("Logging", "Logging", null, logPanel, ToolWindowAnchor.BOTTOM);
@@ -226,26 +226,8 @@ public final class Frame extends JFrame implements ScaleChangedListener {
 		for (ToolWindow window : toolWindowManager.getToolWindows()) {
 			window.setAvailable(true);
 		}
-
-		// addWindowListeners();
-
 	}
 
-	/*
-	 * private void addWindowListeners() { addWindowListener(new WindowAdapter()
-	 * {
-	 * 
-	 * @Override public void windowOpened(final WindowEvent e) { try { File
-	 * workspaceFile = new File("workspace.xml"); if (workspaceFile.exists()) {
-	 * FileInputStream inputStream = new FileInputStream("workspace.xml"); //
-	 * toolWindowManager.getPersistenceDelegate().apply(inputStream);
-	 * inputStream.close(); } } catch (Exception e1) { e1.printStackTrace(); } }
-	 * 
-	 * @Override public void windowClosing(final WindowEvent e) { try {
-	 * FileOutputStream output = new FileOutputStream("workspace.xml");
-	 * toolWindowManager.getPersistenceDelegate().save(output); output.close();
-	 * } catch (Exception e1) { e1.printStackTrace(); } } }); }
-	 */
 	private JComponent makeStatusBar() {
 		JLabel statusBarLabel = new JLabel();
 		statusBarLabel.setForeground(Color.GRAY);
@@ -383,5 +365,34 @@ public final class Frame extends JFrame implements ScaleChangedListener {
 
 	private double[] getScale() {
 		return scale;
+	}
+
+	public void addAnnotations(List<Annotation> annotations) {
+		// NO OP
+	}
+
+	public void clearAnnotations() {
+		// NO OP
+	}
+
+	public void extractionStarted() {
+		// Show waiting cursor.
+		setWaitState(true);
+	}
+
+	public void extractionFinished() {
+		// Show normal cursor again.
+		setWaitState(false);
+		LOG.fine("Wait state disabled.");
+	}
+
+	public void addAnnotation(Annotation annotation) {
+		// NO OP
+
+	}
+
+	public void annotationsAdded() {
+		// TODO Auto-generated method stub
+
 	}
 }

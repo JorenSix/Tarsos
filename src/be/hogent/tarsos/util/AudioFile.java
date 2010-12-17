@@ -36,6 +36,7 @@ public final class AudioFile {
 	private static final Logger LOG = Logger.getLogger(AudioFile.class.getName());
 
 	private final String originalPath;
+	private final long lengthInMicroSeconds;
 
 	/**
 	 * Create and transcode an audio file.
@@ -48,6 +49,7 @@ public final class AudioFile {
 		if (AudioTranscoder.transcodingRequired(transcodedPath())) {
 			AudioTranscoder.transcode(filePath, transcodedPath());
 		}
+		lengthInMicroSeconds = calculateLengthInMilliSeconds();
 	}
 
 	/**
@@ -134,20 +136,24 @@ public final class AudioFile {
 	 *         be determined -1 is returned.
 	 */
 	public long getLengthInMilliSeconds() {
-		long lengtInMicroSeconds = -1;
+		return lengthInMicroSeconds;
+	}
+
+	private long calculateLengthInMilliSeconds() {
+		long length = -1;
 		try {
 			AudioFileFormat fileFormat;
 			fileFormat = AudioSystem.getAudioFileFormat(new File(transcodedPath()));
 			int frames = fileFormat.getFrameLength();
 			float frameRate = fileFormat.getFormat().getFrameRate();
-			lengtInMicroSeconds = (long) (frames / frameRate * 1000);
-			LOG.finest(String.format("Determined the lenght of %s: %s µs", basename(), lengtInMicroSeconds));
+			length = (long) (frames / frameRate * 1000);
+			LOG.finest(String.format("Determined the lenght of %s: %s µs", basename(), lengthInMicroSeconds));
 		} catch (UnsupportedAudioFileException e) {
 			LOG.log(Level.WARNING, "Could not determine audio file length.", e);
 		} catch (IOException e) {
 			LOG.log(Level.SEVERE, "Could not determine audio file length.", e);
 		}
-		return lengtInMicroSeconds;
+		return length;
 	}
 
 	public double getMicrosecondsPositionOfFrame(final long frame) {

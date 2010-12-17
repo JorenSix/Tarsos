@@ -19,7 +19,6 @@ import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
-import be.hogent.tarsos.ui.pitch.ControlPanel.SampleHandler;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -32,7 +31,7 @@ import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
  * @author Joren Six
  */
 public final class ToneScalePanel extends JPanel implements AudioFileChangedListener, ScaleChangedListener,
-		SampleHandler {
+		AnnotationListener {
 
 	public static final int X_BORDER = 5; // pixels
 	public static final int Y_BORDER = 5; // pixels
@@ -40,6 +39,8 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 	/**
      */
 	private static final long serialVersionUID = 5493280409705136547L;
+	private static final int AMBITUS_STOP = Configuration.getInt(ConfKey.ambitus_stop);
+	private static final int AMBITUS_START = Configuration.getInt(ConfKey.ambitus_start);
 
 	private final HashMap<PitchDetectionMode, Histogram> histos;
 	private final List<Layer> layers;
@@ -109,51 +110,65 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 
 	double[] histoValues;
 
-	public void addSample(Annotation sample) {
-		double pitchInAbsCents = sample.getPitch(PitchUnit.ABSOLUTE_CENTS);
-		if (pitchInAbsCents > 0 && pitchInAbsCents <= Configuration.getInt(ConfKey.ambitus_stop)) {
+	public Component controls() {
+		return layerUserInterfeces;
+	}
 
+	public void addAnnotation(Annotation annotation) {
+		double pitchInAbsCents = annotation.getPitch(PitchUnit.ABSOLUTE_CENTS);
+		if (pitchInAbsCents > 0 && pitchInAbsCents <= AMBITUS_STOP) {
 			final Histogram histo;
-			if (!histos.containsKey(sample.getSource())) {
+			if (!histos.containsKey(annotation.getSource())) {
 				final int delta;
 				if (stop > 1200) {
 					histo = new AmbitusHistogram();
-					delta = Configuration.getInt(ConfKey.ambitus_stop)
-							- Configuration.getInt(ConfKey.ambitus_start);
+					delta = AMBITUS_STOP - AMBITUS_START;
 				} else {
 					histo = new ToneScaleHistogram();
 					delta = 1200;
 				}
-				histos.put(sample.getSource(), histo);
-				Color color = Tarsos.COLORS[sample.getSource().ordinal() % Tarsos.COLORS.length];
+				histos.put(annotation.getSource(), histo);
+				Color color = Tarsos.COLORS[annotation.getSource().ordinal() % Tarsos.COLORS.length];
 				HistogramLayer layer = new HistogramLayer(this, histo, scaleChangedPublisher, color);
-				KDELayer kdeLayer = new KDELayer(this, delta);
-				histoValues = kdeLayer.getValues();
+				// KDELayer kdeLayer = new KDELayer(this, delta);
+				// histoValues = kdeLayer.getValues();
 				layer.audioFileChanged(audioFile);
 				layers.add(layer);
-				layers.add(kdeLayer);
-				layerUserInterfeces.addTab(sample.getSource().name(), layer.ui());
+				// layers.add(kdeLayer);
+				layerUserInterfeces.addTab(annotation.getSource().name(), layer.ui());
 			} else {
-				histo = histos.get(sample.getSource());
+				histo = histos.get(annotation.getSource());
 			}
 
 			histo.add(pitchInAbsCents);
 
-			ToneScaleHistogram.addAnnotationTo(histoValues, sample, 5, stop > 1200 ? PitchUnit.ABSOLUTE_CENTS
-					: PitchUnit.RELATIVE_CENTS);
+			// ToneScaleHistogram.addAnnotationTo(histoValues, annotation, 5,
+			// stop > 1200 ? PitchUnit.ABSOLUTE_CENTS :
+			// PitchUnit.RELATIVE_CENTS);
+		}
+	}
 
-			if ((int) (sample.getStart() * 1000) % 5 == 0) {
-				repaint();
+	public void clearAnnotations() {
+		for (Histogram histogram : histos.values()) {
+			histogram.clear();
+		}
+
+		if (histoValues != null) {
+			for (int i = 0; i < histoValues.length; i++) {
+				histoValues[i] = 0;
 			}
 		}
 	}
 
-	public void removeSample(Annotation sample) {
-		// TODO Auto-generated method stub
-
+	public void extractionStarted() {
+		// NO OP
 	}
 
-	public Component controls() {
-		return layerUserInterfeces;
+	public void extractionFinished() {
+		// NO OP
+	}
+
+	public void annotationsAdded() {
+		repaint();
 	}
 }

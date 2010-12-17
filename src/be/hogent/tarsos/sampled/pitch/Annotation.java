@@ -19,31 +19,21 @@ public final class Annotation implements Comparable<Annotation> {
 	private final double start;
 
 	/**
-	 * The pitch: an object defining a value in Hz.
+	 * A lookup table with pitch values in different units. The calculation is
+	 * cached to prevent a lot of unnecessary unit conversion calculations.
 	 */
-	private final Pitch pitch;
+	private final double[] pitchValues;
 
 	/**
 	 * The probability or salience. A value between zero and one (inclusive).
 	 */
-	private final double probability; // values from 0 to 1 (inclusive).
-	// One probability per pitch.
+	private final double probability;
 
 	/**
 	 * The source of the sample.
 	 */
 	private final PitchDetectionMode source;
 
-	/**
-	 * Create a new annotation.
-	 * 
-	 * @param timeStamp
-	 * 
-	 * @param pitchList
-	 *            the pitches: one or more, in Hz).
-	 * @param probabilityList
-	 *            The probabilities corresponding with the pitches [0,1].
-	 */
 	/**
 	 * @param timeStamp
 	 *            The starting time (in seconds).
@@ -57,14 +47,34 @@ public final class Annotation implements Comparable<Annotation> {
 	 */
 	public Annotation(final double timeStamp, final double pitchInHz,
 			final PitchDetectionMode annotationSource, final double salience) {
-		this.start = timeStamp;
-		this.pitch = Pitch.getInstance(PitchUnit.HERTZ, pitchInHz);
-		this.probability = salience;
-		this.source = annotationSource;
+		// sanity check
 		if (salience > 1.0 || 0.0 > salience) {
 			throw new IllegalArgumentException(
 					"The salience should be a value between zero and one (inclusive): " + salience);
 		}
+		if (pitchInHz <= 0) {
+			throw new IllegalArgumentException("The pitch in Hz should be a value above zero, it is: "
+					+ pitchInHz);
+		}
+		if (timeStamp < 0) {
+			throw new IllegalArgumentException(
+					"The timestamp in seconds should be equal or above zero, it is: " + timeStamp);
+		}
+
+		// Initialize members.
+		this.start = timeStamp;
+		this.probability = salience;
+		this.source = annotationSource;
+
+		// Pitch object to calculate unit conversions.
+		final Pitch pitch = Pitch.getInstance(PitchUnit.HERTZ, pitchInHz);
+
+		// Cache pitch in different units.
+		this.pitchValues = new double[PitchUnit.values().length];
+		for (int i = 0; i < pitchValues.length; i++) {
+			pitchValues[i] = pitch.getPitch(PitchUnit.values()[i]);
+		}
+
 	}
 
 	public Annotation(final double timeStamp, final double pitchInHz,
@@ -73,7 +83,9 @@ public final class Annotation implements Comparable<Annotation> {
 	}
 
 	/**
-	 * @return the starting time of the sample in ms
+	 * Returns the starting time in seconds.
+	 * 
+	 * @return The starting time of the sample (in seconds).
 	 */
 	public double getStart() {
 		return this.start;
@@ -83,18 +95,34 @@ public final class Annotation implements Comparable<Annotation> {
 		return source;
 	}
 
+	/**
+	 * The probability for the annotation. If the algorithm does not define a
+	 * probability the default is 1.0.
+	 * 
+	 * @return The probability or salience for the annotation (a value between 0
+	 *         and 1).
+	 */
 	public double getProbability() {
 		return probability;
 	}
 
-	public Pitch getPitch() {
-		return pitch;
-	}
-
+	/**
+	 * Return the pitch in the requested unit. The conversion is cached
+	 * automatically.
+	 * 
+	 * @param unit
+	 *            The unit requested.
+	 * @return The converted value.
+	 */
 	public double getPitch(final PitchUnit unit) {
-		return pitch.getPitch(unit);
+		return pitchValues[unit.ordinal()];
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
 	public int compareTo(final Annotation o) {
 		// start time first
 		final int startCompare = Double.valueOf(start).compareTo(Double.valueOf(o.start));
@@ -108,6 +136,11 @@ public final class Annotation implements Comparable<Annotation> {
 		return compareValue;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(final Object o) {
 		boolean isEqual = false;
@@ -118,17 +151,34 @@ public final class Annotation implements Comparable<Annotation> {
 		return isEqual;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		return Double.valueOf(start).hashCode() + getSource().hashCode();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		return String.format(Locale.US, "%.5f,%.5f,%.5f,%s", start, getPitch(PitchUnit.HERTZ), probability,
 				source);
 	}
 
+	/**
+	 * Parses an annotation as written by the toString() method.
+	 * 
+	 * @param line
+	 *            The line to parse.
+	 * @return A
+	 */
 	public static Annotation parse(final String line) {
 		final String[] data = line.split(",");
 		final double timeStamp = Double.parseDouble(data[0]);
@@ -161,7 +211,7 @@ public final class Annotation implements Comparable<Annotation> {
 	 *            The length of the annotated audio.
 	 * @return A percentage indicating how much of the audio is annotated
 	 */
-	public static double percentAnnotated(List<Annotation> annotations, double audioLenght) {
+	public static double percentAnnotated(final List<Annotation> annotations, final double audioLenght) {
 		double percentage;
 		double delta = Double.MAX_VALUE;
 		double previousTimeStamp = 0;
