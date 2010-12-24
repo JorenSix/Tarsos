@@ -16,6 +16,7 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.Transmitter;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 
 import be.hogent.tarsos.Tarsos;
@@ -94,94 +95,102 @@ public final class PlayAlong {
 			System.exit(-1);
 		}
 
-		final AudioFile fileToPlayAlongWith = new AudioFile(fileName);
-		PitchDetector detector = new TarsosPitchDetection(fileToPlayAlongWith, PitchDetectionMode.TARSOS_YIN);
-		if (detectorString.equals("AUBIO")) {
-			detector = new VampPitchDetection(fileToPlayAlongWith, PitchDetectionMode.VAMP_YIN);
-		} else if (detectorString.equals("IPEM_SIX")) {
-			detector = new IPEMPitchDetection(fileToPlayAlongWith, PitchDetectionMode.IPEM_SIX);
-		}
-
-		detector.executePitchDetection();
-		final List<Annotation> samples = detector.getAnnotations();
-		final String baseName = FileUtils.basename(fileName);
-
-		FileUtils.mkdirs("data/octave/" + baseName);
-		FileUtils.mkdirs("data/range/" + baseName);
-
-		// String toneScalefileName = baseName + '/' + baseName + "_" +
-		// detector.getName() + "_octave.txt";
-		final Histogram octaveHistogram = Annotation.ambitusHistogram(samples).toneScaleHistogram();
-		final List<Peak> peaks = PeakDetector.detect(octaveHistogram, 15);
-
-		Tarsos.println(peaks.size() + " peaks found in: " + FileUtils.basename(fileName));
-		Tarsos.println("");
-		final double[] peakPositions = new double[peaks.size()];
-		int peakIndex = 0;
-		for (final Peak p : peaks) {
-			peakPositions[peakIndex] = p.getPosition();
-			Tarsos.println(p.getPosition() + "");
-			peakIndex++;
-		}
-		Tarsos.println("");
-
-		final VirtualKeyboard keyboard = VirtualKeyboard.createVirtualKeyboard(peaks.size());
-		final double[] rebasedTuning = MidiCommon.tuningFromPeaks(peakPositions);
-
+		AudioFile fileToPlayAlongWith;
 		try {
-			final MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("Gervill", true);
-			MidiDevice synthDevice = null;
-			synthDevice = MidiSystem.getMidiDevice(synthInfo);
-			synthDevice.open();
-
-			Receiver recv;
-			recv = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
-			keyboard.setReceiver(recv);
-
-			MidiDevice virtualMidiInputDevice;
-			if (device == -1) {
-				virtualMidiInputDevice = MidiCommon.chooseMidiDevice(true, false);
-			} else {
-				final Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[device];
-				virtualMidiInputDevice = MidiSystem.getMidiDevice(midiDeviceInfo);
+			fileToPlayAlongWith = new AudioFile(fileName);
+			PitchDetector detector = new TarsosPitchDetection(fileToPlayAlongWith,
+					PitchDetectionMode.TARSOS_YIN);
+			if (detectorString.equals("AUBIO")) {
+				detector = new VampPitchDetection(fileToPlayAlongWith, PitchDetectionMode.VAMP_YIN);
+			} else if (detectorString.equals("IPEM_SIX")) {
+				detector = new IPEMPitchDetection(fileToPlayAlongWith, PitchDetectionMode.IPEM_SIX);
 			}
-			virtualMidiInputDevice.open();
-			final Transmitter midiInputTransmitter = virtualMidiInputDevice.getTransmitter();
-			midiInputTransmitter.setReceiver(keyboard);
 
-			MidiUtils.sendTunings(recv, 0, 2, "african", rebasedTuning);
-			MidiUtils.sendTuningChange(recv, VirtualKeyboard.CHANNEL, 2);
-		} catch (final MidiUnavailableException e) {
-			e.printStackTrace();
-		} catch (final IOException e) {
-			e.printStackTrace();
-		} catch (final InvalidMidiDataException e) {
-			e.printStackTrace();
+			detector.executePitchDetection();
+			final List<Annotation> samples = detector.getAnnotations();
+			final String baseName = FileUtils.basename(fileName);
+
+			FileUtils.mkdirs("data/octave/" + baseName);
+			FileUtils.mkdirs("data/range/" + baseName);
+
+			// String toneScalefileName = baseName + '/' + baseName + "_" +
+			// detector.getName() + "_octave.txt";
+			final Histogram octaveHistogram = Annotation.ambitusHistogram(samples).toneScaleHistogram();
+			final List<Peak> peaks = PeakDetector.detect(octaveHistogram, 15);
+
+			Tarsos.println(peaks.size() + " peaks found in: " + FileUtils.basename(fileName));
+			Tarsos.println("");
+			final double[] peakPositions = new double[peaks.size()];
+			int peakIndex = 0;
+			for (final Peak p : peaks) {
+				peakPositions[peakIndex] = p.getPosition();
+				Tarsos.println(p.getPosition() + "");
+				peakIndex++;
+			}
+			Tarsos.println("");
+
+			final VirtualKeyboard keyboard = VirtualKeyboard.createVirtualKeyboard(peaks.size());
+			final double[] rebasedTuning = MidiCommon.tuningFromPeaks(peakPositions);
+
+			try {
+				final MidiDevice.Info synthInfo = MidiCommon.getMidiDeviceInfo("Gervill", true);
+				MidiDevice synthDevice = null;
+				synthDevice = MidiSystem.getMidiDevice(synthInfo);
+				synthDevice.open();
+
+				Receiver recv;
+				recv = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
+				keyboard.setReceiver(recv);
+
+				MidiDevice virtualMidiInputDevice;
+				if (device == -1) {
+					virtualMidiInputDevice = MidiCommon.chooseMidiDevice(true, false);
+				} else {
+					final Info midiDeviceInfo = MidiSystem.getMidiDeviceInfo()[device];
+					virtualMidiInputDevice = MidiSystem.getMidiDevice(midiDeviceInfo);
+				}
+				virtualMidiInputDevice.open();
+				final Transmitter midiInputTransmitter = virtualMidiInputDevice.getTransmitter();
+				midiInputTransmitter.setReceiver(keyboard);
+
+				MidiUtils.sendTunings(recv, 0, 2, "african", rebasedTuning);
+				MidiUtils.sendTuningChange(recv, VirtualKeyboard.CHANNEL, 2);
+			} catch (final MidiUnavailableException e) {
+				e.printStackTrace();
+			} catch (final IOException e) {
+				e.printStackTrace();
+			} catch (final InvalidMidiDataException e) {
+				e.printStackTrace();
+			}
+
+			final JFrame f = new PianoTestFrame(keyboard, rebasedTuning);
+			f.setVisible(true);
+
+			final List<Integer> midiKeysUnfiltered = new ArrayList<Integer>();
+			final List<Double> time = new ArrayList<Double>();
+
+			final Iterator<Annotation> sampleIterator = samples.iterator();
+			Annotation currentSample = sampleIterator.next();
+			int currentMidiKey = 0;
+			while (sampleIterator.hasNext()) {
+				currentMidiKey = (int) currentSample.getPitch(PitchUnit.MIDI_KEY);
+
+				// double pitch = currentPitches.get(0);
+				/*
+				 * for (int midiKey = 0; midiKey < 128; midiKey++) { if(pitch >
+				 * tuningMin[midiKey] && pitch < tuningMax[midiKey]){
+				 * currentMidiKey = midiKey; } }
+				 */
+				midiKeysUnfiltered.add(currentMidiKey);
+				time.add(currentSample.getStart());
+
+				currentSample = sampleIterator.next();
+			}
+		} catch (UnsupportedAudioFileException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 
-		final JFrame f = new PianoTestFrame(keyboard, rebasedTuning);
-		f.setVisible(true);
-
-		final List<Integer> midiKeysUnfiltered = new ArrayList<Integer>();
-		final List<Double> time = new ArrayList<Double>();
-
-		final Iterator<Annotation> sampleIterator = samples.iterator();
-		Annotation currentSample = sampleIterator.next();
-		int currentMidiKey = 0;
-		while (sampleIterator.hasNext()) {
-			currentMidiKey = (int) currentSample.getPitch(PitchUnit.MIDI_KEY);
-
-			// double pitch = currentPitches.get(0);
-			/*
-			 * for (int midiKey = 0; midiKey < 128; midiKey++) { if(pitch >
-			 * tuningMin[midiKey] && pitch < tuningMax[midiKey]){ currentMidiKey
-			 * = midiKey; } }
-			 */
-			midiKeysUnfiltered.add(currentMidiKey);
-			time.add(currentSample.getStart());
-
-			currentSample = sampleIterator.next();
-		}
 	}
 
 	private static void printHelp() {

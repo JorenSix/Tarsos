@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.io.File;
 import java.util.List;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -51,23 +52,31 @@ public class BrowserPanel extends JPanel {
 		Runnable task = new Runnable() {
 
 			public void run() {
-				final AudioFile audioFile = new AudioFile(fileName);
-				PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
-				final PitchDetector pitchDetector = mode.getPitchDetector(audioFile);
-				pitchDetector.executePitchDetection();
-				final List<Annotation> samples = pitchDetector.getAnnotations();
-				final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
-				final ToneScaleHistogram toneScaleHisto = ambitusHistogram.toneScaleHistogram();
-				JComponent component = new ToneScalePanel(toneScaleHisto, null);
-				JPanel panel = new JPanel(new BorderLayout());
-				panel.setSize(128, 128);
-				panel.setBorder(new EmptyBorder(5, 5, 5, 5));
-				panel.setMinimumSize(new Dimension(128, 128));
-				panel.add(component, BorderLayout.CENTER);
+				AudioFile audioFile;
+				try {
+					audioFile = new AudioFile(fileName);
+					PitchDetectionMode mode = Configuration
+							.getPitchDetectionMode(ConfKey.pitch_tracker_current);
+					final PitchDetector pitchDetector = mode.getPitchDetector(audioFile);
+					pitchDetector.executePitchDetection();
+					final List<Annotation> samples = pitchDetector.getAnnotations();
+					final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
+					final ToneScaleHistogram toneScaleHisto = ambitusHistogram.toneScaleHistogram();
+					JComponent component = new ToneScalePanel(toneScaleHisto, null);
+					JPanel panel = new JPanel(new BorderLayout());
+					panel.setSize(128, 128);
+					panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+					panel.setMinimumSize(new Dimension(128, 128));
+					panel.add(component, BorderLayout.CENTER);
 
-				scalePanel.add(panel);
-				scalePanel.invalidate();
-				scalePanel.repaint();
+					scalePanel.add(panel);
+					scalePanel.invalidate();
+					scalePanel.repaint();
+				} catch (UnsupportedAudioFileException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
 		};
 		new Thread(task).start();

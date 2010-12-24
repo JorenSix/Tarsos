@@ -43,8 +43,11 @@ public final class AudioFile {
 	 * 
 	 * @param filePath
 	 *            the originalPath for the audio file
+	 * @throws UnsupportedAudioFileException
+	 *             If FFMPEG fails to transcode the audio an
+	 *             UnsupportedAudioFileException is generated.
 	 */
-	public AudioFile(final String filePath) {
+	public AudioFile(final String filePath) throws UnsupportedAudioFileException {
 		this.originalPath = new File(filePath).getAbsolutePath();
 		if (AudioTranscoder.transcodingRequired(transcodedPath())) {
 			AudioTranscoder.transcode(filePath, transcodedPath());
@@ -122,7 +125,11 @@ public final class AudioFile {
 		for (final String folder : folders) {
 			List<String> audioFiles = FileUtils.glob(folder, pattern, true);
 			for (final String originalFile : audioFiles) {
-				files.add(new AudioFile(originalFile));
+				try {
+					files.add(new AudioFile(originalFile));
+				} catch (UnsupportedAudioFileException e) {
+					LOG.severe(String.format("Transcoding failed: %s is not supported.", originalFile));
+				}
 			}
 		}
 		return files;

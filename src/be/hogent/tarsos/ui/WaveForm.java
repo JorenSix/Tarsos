@@ -415,16 +415,23 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 		f.setSize(new Dimension(550, 100));
 		f.setLayout(new BorderLayout());
 		String fileName = "C:\\Users\\jsix666\\eclipse_workspace\\Tarsos\\audio\\dekkmma_voice_all\\MR.1954.1.8-1.wav";
-		AudioFile audioFile = new AudioFile(fileName);
-		WaveForm waveForm = new WaveForm();
-		f.add(waveForm, BorderLayout.CENTER);
-		f.setVisible(true);
+		AudioFile audioFile;
 		try {
-			Thread.sleep(400);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			audioFile = new AudioFile(fileName);
+			WaveForm waveForm = new WaveForm();
+			f.add(waveForm, BorderLayout.CENTER);
+			f.setVisible(true);
+			try {
+				Thread.sleep(400);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			waveForm.audioFileChanged(audioFile);
+		} catch (UnsupportedAudioFileException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-		waveForm.audioFileChanged(audioFile);
+
 	}
 
 	private ControlPanel controlPanel;

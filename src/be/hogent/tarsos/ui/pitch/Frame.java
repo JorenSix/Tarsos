@@ -20,11 +20,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
@@ -44,6 +46,8 @@ import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileDrop;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.JLabelHandler;
@@ -308,8 +312,28 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 					ScalaFile scalaFile = new ScalaFile(droppedFile.getAbsolutePath());
 					scaleChanged(scalaFile.getPitches(), false);
 				} else if (FileUtils.isAudioFile(droppedFile)) {
-					final AudioFile newAudioFile = new AudioFile(droppedFile.getAbsolutePath());
-					setAudioFile(newAudioFile);
+
+					try {
+						AudioFile newAudioFile;
+						newAudioFile = new AudioFile(droppedFile.getAbsolutePath());
+						setAudioFile(newAudioFile);
+					} catch (UnsupportedAudioFileException e) {
+						String message = String
+								.format("Failed to transcode %s.\n"
+										+ "Tarsos uses a platform dependent FFMPEG binary to transcode audio to %s, %s, %s channel, %s Hz Sampling Rate.\n"
+										+ "Either: \n"
+										+ "\t \t 1) FFMPEG does not know how to convert the audio.\n"
+										+ "\t \t 2) There is no FFMPEG binary included for your platform.\n"
+										+ "Try converting the audio manually to the format mentioned.",
+										droppedFile.getName(),
+										Configuration.get(ConfKey.transcoded_audio_format),
+										Configuration.get(ConfKey.transcoded_audio_codec),
+										Configuration.get(ConfKey.transcoded_audio_number_of_channels),
+										Configuration.get(ConfKey.transcoded_audio_sampling_rate));
+						JOptionPane.showMessageDialog(Frame.this, message, "Transcoding audio failed",
+								JOptionPane.ERROR_MESSAGE);
+					}
+
 				}
 				LOG.fine(String.format("Dropped %s .", droppedFile.getAbsolutePath()));
 			}

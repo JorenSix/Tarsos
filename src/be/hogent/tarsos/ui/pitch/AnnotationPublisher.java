@@ -95,7 +95,7 @@ public final class AnnotationPublisher implements AudioFileChangedListener {
 	public void delegateAddAnnotations(final double startTime, final double stopTime) {
 		if (tree != null) {
 			selection.setTimeSelection(startTime, stopTime);
-			List<Annotation> annotations = tree.selectByTimeAndPitch(selection);
+			List<Annotation> annotations = tree.select(selection);
 			delegateAddAnnotations(annotations);
 		}
 	}
@@ -117,9 +117,18 @@ public final class AnnotationPublisher implements AudioFileChangedListener {
 			final double startPitch, final double stopPitch) {
 		if (tree != null) {
 			selection.setSelection(startTime, stopTime, startPitch, stopPitch);
-			List<Annotation> annotations = tree.selectByTimeAndPitch(selection);
+			List<Annotation> annotations = tree.select(selection);
 			delegateAddAnnotations(annotations);
 		}
+	}
+
+	public void delegateAddAnnotations(final double newMinProbability) {
+		if (tree != null) {
+			selection.setMinProbability(newMinProbability);
+			List<Annotation> annotations = tree.select(selection);
+			delegateAddAnnotations(annotations);
+		}
+
 	}
 
 	/**
@@ -211,4 +220,5 @@ public final class AnnotationPublisher implements AudioFileChangedListener {
 
 		}
 	}
+
 }

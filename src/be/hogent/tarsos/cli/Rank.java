@@ -5,13 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import be.hogent.tarsos.Tarsos;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -129,23 +131,31 @@ public final class Rank extends AbstractTarsosApp {
 		if (extension.equalsIgnoreCase("scl")) {
 			histo = new ScalaFile(path).buildHistogram();
 		} else if (path.matches(Configuration.get(ConfKey.audio_file_name_pattern))) {
-			final AudioFile audioFile = new AudioFile(path);
-			final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
-			pitchDetector.executePitchDetection();
-			final List<Annotation> samples = pitchDetector.getAnnotations();
-			final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
-			final List<Peak> peakList = PeakDetector.detect(ambitusHistogram.toneScaleHistogram()
-					.gaussianSmooth(0.8), 15);
-			final double[] peaks = new double[peakList.size()];
-			for (int i = 0; i < peaks.length; i++) {
-				peaks[i] = peakList.get(i).getPosition();
+			AudioFile audioFile;
+			try {
+				audioFile = new AudioFile(path);
+				final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
+				pitchDetector.executePitchDetection();
+				final List<Annotation> samples = pitchDetector.getAnnotations();
+				final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
+				final List<Peak> peakList = PeakDetector.detect(ambitusHistogram.toneScaleHistogram()
+						.gaussianSmooth(0.8), 15);
+				final double[] peaks = new double[peakList.size()];
+				for (int i = 0; i < peaks.length; i++) {
+					peaks[i] = peakList.get(i).getPosition();
+				}
+				histo = ToneScaleHistogram.createToneScale(peaks);
+				return histo;
+			} catch (UnsupportedAudioFileException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			histo = ToneScaleHistogram.createToneScale(peaks);
+
 		} else {
 			throw new IllegalArgumentException("Tone scale creation failed: " + path
 					+ " should be a scala or audio file!");
 		}
-		return histo;
+		return null;
 	}
 
 }

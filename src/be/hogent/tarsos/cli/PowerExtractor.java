@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -22,17 +24,17 @@ public final class PowerExtractor extends AbstractTarsosApp {
 	 */
 	private static final int SILENCELEVEL = -40;
 
-	
+	@Override
 	public String description() {
 		return "Extracts power features from one or more files.";
 	}
 
-	
+	@Override
 	public String name() {
 		return "power_extractor";
 	}
 
-	
+	@Override
 	public void run(final String... args) {
 		final OptionParser parser = new OptionParser();
 
@@ -46,7 +48,12 @@ public final class PowerExtractor extends AbstractTarsosApp {
 		} else {
 			final List<AudioFile> audioFiles = new ArrayList<AudioFile>();
 			for (final File inputFile : options.valuesOf(inputSpec)) {
-				audioFiles.add(new AudioFile(inputFile.getAbsolutePath()));
+				try {
+					audioFiles.add(new AudioFile(inputFile.getAbsolutePath()));
+				} catch (UnsupportedAudioFileException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			SignalPowerExtractor spex;
 			for (final AudioFile file : audioFiles) {

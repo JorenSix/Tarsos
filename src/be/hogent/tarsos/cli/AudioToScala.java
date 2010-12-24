@@ -3,12 +3,14 @@ package be.hogent.tarsos.cli;
 import java.io.File;
 import java.util.List;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
@@ -71,17 +73,24 @@ public final class AudioToScala extends AbstractTarsosApp {
 	 */
 	private void exportScalaFile(final File scalaFile, final File inputFile,
 			final PitchDetectionMode detectionMode) {
-		final AudioFile audioFile = new AudioFile(inputFile.getAbsolutePath());
-		final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
-		pitchDetector.executePitchDetection();
-		final List<Annotation> samples = pitchDetector.getAnnotations();
-		final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
-		final ToneScaleHistogram scaleHistogram = ambitusHistogram.toneScaleHistogram();
-		scaleHistogram.plot(FileUtils.basename(scalaFile.getAbsolutePath()) + "png",
-				FileUtils.basename(scalaFile.getAbsolutePath()));
-		scaleHistogram.gaussianSmooth(1.0);
-		final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 15);
-		ToneScaleHistogram.exportPeaksToScalaFileFormat(scalaFile.getAbsolutePath(),
-				FileUtils.basename(inputFile.getAbsolutePath()), peaks);
+		AudioFile audioFile;
+		try {
+			audioFile = new AudioFile(inputFile.getAbsolutePath());
+			final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
+			pitchDetector.executePitchDetection();
+			final List<Annotation> samples = pitchDetector.getAnnotations();
+			final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
+			final ToneScaleHistogram scaleHistogram = ambitusHistogram.toneScaleHistogram();
+			scaleHistogram.plot(FileUtils.basename(scalaFile.getAbsolutePath()) + "png",
+					FileUtils.basename(scalaFile.getAbsolutePath()));
+			scaleHistogram.gaussianSmooth(1.0);
+			final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 15);
+			ToneScaleHistogram.exportPeaksToScalaFileFormat(scalaFile.getAbsolutePath(),
+					FileUtils.basename(inputFile.getAbsolutePath()), peaks);
+		} catch (UnsupportedAudioFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 }

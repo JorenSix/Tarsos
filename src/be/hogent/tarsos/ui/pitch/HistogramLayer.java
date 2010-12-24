@@ -142,6 +142,20 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 
 	public Component ui() {
 		if (ui == null) {
+
+			JSlider probabilitySlider = new JSlider(0, 100);
+			probabilitySlider.setValue(0);
+			probabilitySlider.setMajorTickSpacing(1);
+			probabilitySlider.addChangeListener(new ChangeListener() {
+
+				public void stateChanged(final ChangeEvent e) {
+					final JSlider source = (JSlider) e.getSource();
+					final double newMinProbability = source.getValue() / 100.0;
+					AnnotationPublisher.getInstance().delegateClearAnnotations();
+					AnnotationPublisher.getInstance().delegateAddAnnotations(newMinProbability);
+				}
+			});
+
 			JSlider peakSlider = new JSlider(5, 105);
 			peakSlider.setValue(5);
 			peakSlider.setMajorTickSpacing(20);
@@ -233,6 +247,7 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 			builder.setDefaultDialogBorder();
 			builder.setRowGroupingEnabled(true);
 			builder.append("Peakpicking:", peakSlider, true);
+			builder.append("Quality:", probabilitySlider, true);
 			builder.append("Smooth:", smoothButton, true);
 			builder.append("Reset:", resetButton, true);
 			builder.append("Scala export:", exportScalaButton, true);

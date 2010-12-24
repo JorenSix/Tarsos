@@ -35,13 +35,14 @@ public final class AnnotationTree {
 	 */
 	public AnnotationTree(final List<Annotation> annotations, final PitchUnit unit) {
 		StopWatch watch = new StopWatch();
-		tree = new KDTree<Annotation>(2);
+		// Three dimensional tree
+		tree = new KDTree<Annotation>(3);
 		for (Annotation annotation : annotations) {
-			double[] key = { annotation.getStart(), annotation.getPitch(unit) };
+			double[] key = { annotation.getStart(), annotation.getPitch(unit), annotation.getProbability() };
 			try {
 				tree.insert(key, annotation);
 			} catch (KeySizeException e) {
-				new IllegalStateException("The dimenstion of the tree is two,"
+				new IllegalStateException("The dimenstion of the tree is 3,"
 						+ " the dimension of the key also.");
 			} catch (KeyDuplicateException e) {
 				new IllegalStateException(
@@ -54,25 +55,19 @@ public final class AnnotationTree {
 	/**
 	 * Select a subset of all annotations within a pitch - time range.
 	 * 
-	 * @param startTime
-	 *            The start time (in seconds).
-	 * @param stopTime
-	 *            The stop time (in seconds).
-	 * @param startPitch
-	 *            The start pitch (in a predefined unit).
-	 * @param stopPitch
-	 *            The stop pitch (in a predefined unit).
 	 * @return A range selection of annotations.
 	 */
-	public List<Annotation> selectByTimeAndPitch(final AnnotationSelection selection) {
+	public List<Annotation> select(final AnnotationSelection selection) {
 		final StopWatch watch = new StopWatch();
 		double startTime = selection.getStartTime();
 		double stopTime = selection.getStopTime();
 		double startPitch = selection.getStartPitch();
 		double stopPitch = selection.getStopPitch();
+		double startProbability = selection.getMinProbability();
+		double stopProbability = AnnotationSelection.MAX_PROBABILITY;
 
-		double[] lowKey = { startTime, startPitch };
-		double[] upperKey = { stopTime, stopPitch };
+		double[] lowKey = { startTime, startPitch, startProbability };
+		double[] upperKey = { stopTime, stopPitch, stopProbability };
 
 		List<Annotation> selectedAnnotations = null;
 		try {

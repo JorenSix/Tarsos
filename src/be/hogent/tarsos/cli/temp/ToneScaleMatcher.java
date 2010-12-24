@@ -6,11 +6,13 @@ import gnu.getopt.LongOpt;
 import java.util.List;
 import java.util.TreeMap;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import be.hogent.tarsos.Tarsos;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.VampPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
@@ -30,7 +32,7 @@ public final class ToneScaleMatcher {
 	private ToneScaleMatcher() {
 	}
 
-	public static void main(final String... args) {
+	public static void main(final String... args) throws UnsupportedAudioFileException {
 		final LongOpt[] longopts = new LongOpt[3];
 		longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
 		longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');

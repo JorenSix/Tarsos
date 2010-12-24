@@ -42,8 +42,11 @@ public final class PitchConverter {
 	public static int hertzToMidiKey(final Double hertzValue) {
 		final int midiKey = (int) Math.round(hertzToMidiCent(hertzValue));
 		if (midiKey < 0 || midiKey > 127) {
-			throw new IllegalArgumentException("MIDI is only defined between [" + midiKeyToHertz(0) + ","
-					+ midiKeyToHertz(127) + "] " + hertzValue + "does not map to a MIDI key.");
+			// TODO
+			// LOG.warning("MIDI is only defined between [" + midiKeyToHertz(0)
+			// + ","
+			// + midiKeyToHertz(127) + "] " + hertzValue +
+			// "does not map to a MIDI key.");
 		}
 		return midiKey;
 	}

@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -40,8 +42,10 @@ public final class Annotate extends AbstractTarsosApp {
 	 *            The file to annotate.
 	 * @param detector
 	 *            The detector to use.
+	 * @throws UnsupportedAudioFileException
 	 */
-	private void annotateInputFile(final String inputFile, final PitchDetectionMode detectionMode) {
+	private void annotateInputFile(final String inputFile, final PitchDetectionMode detectionMode)
+			throws UnsupportedAudioFileException {
 
 		final AudioFile audioFile = new AudioFile(inputFile);
 
@@ -113,7 +117,12 @@ public final class Annotate extends AbstractTarsosApp {
 					inputFiles.add(inputFile);
 				}
 				for (final String file : inputFiles) {
-					annotateInputFile(file, detectionMode);
+					try {
+						annotateInputFile(file, detectionMode);
+					} catch (UnsupportedAudioFileException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}

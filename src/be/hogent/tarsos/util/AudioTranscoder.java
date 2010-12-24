@@ -10,6 +10,10 @@ import it.sauronsoftware.jave.InputFormatException;
 import java.io.File;
 import java.util.logging.Logger;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
+
+import be.hogent.tarsos.util.jave.DarwinFFMPEGLocator;
+
 /**
  * Transcodes audio. Uses ffmpeg: a vast number of formats are supported. A
  * compiled ffmpeg binary is provided for Windows and Linux (32bit). If support
@@ -58,11 +62,15 @@ public final class AudioTranscoder {
 	 *            The path of the target file. A stereo stream can be down mixed
 	 *            to a mono stream. Converting a mono stream to a stereo stream
 	 *            results in a file with two channels with the same data.
+	 * @throws UnsupportedAudioFileException
+	 *             If FFMPEG fails to transcode the audio an
+	 *             UnsupportedAudioFileException is generated.
 	 * @throws IllegalArgumentException
 	 *             if the source file can not be read or the target file is not
 	 *             writable.
 	 */
-	public static void transcode(final String source, final String target) {
+	public static void transcode(final String source, final String target)
+			throws UnsupportedAudioFileException {
 		transcode(source, target, DEFAULT_NUMBER_OF_CHANNELS, DEFAULT_SAMPLING_RATE);
 	}
 
@@ -81,12 +89,15 @@ public final class AudioTranscoder {
 	 *            same data.
 	 * @param samplingRate
 	 *            The sampling rate the target file should have;
+	 * @throws UnsupportedAudioFileException
+	 *             If FFMPEG fails to transcode the audio an
+	 *             UnsupportedAudioFileException is generated.
 	 * @throws IllegalArgumentException
 	 *             if the source file can not be read or the target file is not
 	 *             writable.
 	 */
 	public static void transcode(final String source, final String target, final Integer channels,
-			final Integer samplingRate) {
+			final Integer samplingRate) throws UnsupportedAudioFileException {
 		final File sourceFile = new File(source);
 		final File targetFile = new File(target);
 
@@ -106,7 +117,7 @@ public final class AudioTranscoder {
 		// if transcoding is enabled transcode
 		if (Configuration.getBoolean(ConfKey.transcode_audio)) {
 			try {
-				final Encoder e = new Encoder();
+				final Encoder e = new Encoder(new DarwinFFMPEGLocator());
 				final EncodingAttributes attributes = new EncodingAttributes();
 				final AudioAttributes audioAttributes = new AudioAttributes();
 				audioAttributes.setChannels(channels);
@@ -115,7 +126,16 @@ public final class AudioTranscoder {
 				attributes.setAudioAttributes(audioAttributes);
 				attributes.setFormat(TARGET_FORMAT);
 				e.encode(sourceFile, targetFile, attributes);
-				LOG.info("Successfully transcoded " + source + " to " + target);
+				if (targetFile.length() == 0) {
+					String message = "Failed to transcode " + source + " to " + target
+							+ ". Check JAVE FFMPEG configuration.";
+					LOG.warning(message);
+					targetFile.delete();
+					throw new UnsupportedAudioFileException(message);
+				} else {
+					LOG.info("Successfully transcoded " + source + " to " + target);
+				}
+
 			} catch (final IllegalArgumentException e1) {
 				LOG.severe("Incorrect encoding parameters");
 				e1.printStackTrace();
