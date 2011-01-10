@@ -4,7 +4,7 @@ In its current form Tarsos is a collection of  classes to create, compare and pr
 
 To see Tarsos in action you can check the "Tarsos screencast":http://www.youtube.com/watch?v=nzDdYvqgcOo. More detailed information, news and updates can be found on the "Tarsos website":http://tarsos.0110.be  
 
-To give Tarsos a try you can "start Tarsos using JAVA WebStart":http://tarsos.0110.be/attachment/tarsos.jnlp or download the "executable Tarsos JAR-file":http://tarsos.0110.be/attachment/tarsos.jar. A JAVA 5 runtime is required, JAVA 6 preferred.
+To give Tarsos a try you can "start Tarsos using JAVA WebStart":http://tarsos.0110.be/attachment/tarsos.jnlp or download the "executable Tarsos JAR-file":http://tarsos.0110.be/attachment/tarsos.jar. A JAVA 5 runtime is required, JAVA 6 preferred. An "API reference for Tarsos":http://tarsos.0110.be/attachment/doc/ is also available. 
 
 h2. Credits
 
