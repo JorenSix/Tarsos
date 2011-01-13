@@ -2,7 +2,11 @@ package be.hogent.tarsos.util.histogram.peaks;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+
+import org.apache.commons.math.stat.StatUtils;
 
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
@@ -46,61 +50,154 @@ public final class PeakDetector {
 	 * @return
 	 */
 	public static List<Peak> detect(final Histogram histogram, final int windowSize) {
-		final double[] peakFunctionValues = new double[histogram.getNumberOfClasses()];
-		final PeakScore differenceScore = new DifferenceScore(histogram, windowSize);
-		final PeakScore localHeightScore = new LocalHeightScore();
+
+		// 1. CALCULATE SCORES
+		final double[] localHeightScores = new double[histogram.getNumberOfClasses()];
 		for (int i = 0; i < histogram.getNumberOfClasses(); i++) {
-			final double score = differenceScore.score(histogram, i, 1);
-			// If the peak is a real peak according to the difference score,
-			// then set the height score value.
-			if (score != 0) {
-				peakFunctionValues[i] = localHeightScore.score(histogram, i, windowSize);
+			final double currentValue = histogram.getCountForClass(i);
+			final double previousValue = histogram.getCountForClass(i - 1);
+			final double nextValue = histogram.getCountForClass(i + 1);
+
+			final boolean isPeak = currentValue >= previousValue && currentValue >= nextValue;
+
+			// Don't bother calculating the local height score if it is not a
+			// peak. This is not strictly needed, only for performance.
+			if (isPeak) {
+				localHeightScores[i] = calculateLocalHeightScore(histogram, i, windowSize);
 			}
 		}
 
-		// add the peaks to a list if the value is bigger than a threshold
-		// value.
-		final List<Integer> peakPositions = new ArrayList<Integer>();
+		// 2. TRESHOLD
+		// Add the peaks to a list if the value is bigger than a threshold
+		// value. This step is not strictly needed but it improves the
+		// performance of the next steps.
+		final double localHeightScoreTreshold = 0.5;
+		final List<Peak> peaks = new ArrayList<Peak>();
 		for (int i = 0; i < histogram.getNumberOfClasses(); i++) {
-			if (peakFunctionValues[i] > 0.5) {
-				peakPositions.add(i);
+			if (localHeightScores[i] > localHeightScoreTreshold) {
+				peaks.add(new Peak(i, localHeightScores[i]));
 			}
 		}
 
-		// Sort the peaks on position.
-		Collections.sort(peakPositions);
-
-		// Remove peaks that are to close to each other.
+		// 3. FILTER
+		// Sort the peaks on local height score, descending.
+		Collections.sort(peaks, new Comparator<Peak>() {
+			public int compare(final Peak first, final Peak second) {
+				final Double firstHeight = Double.valueOf(first.getHeight());
+				final Double secondHeight = Double.valueOf(second.getHeight());
+				return secondHeight.compareTo(firstHeight);
+			}
+		});
+		// Remove peaks that are too close to each other.
 		// If peaks are closer than the window size they are too close.
-		// The one with the smallest value is removed.
-		final List<Integer> elementsToRemove = new ArrayList<Integer>();
-		for (int i = 0; i < peakPositions.size(); i++) {
-			final int firstPeakIndex = peakPositions.get(i);
-			final int secndPeakIndex = peakPositions.get((i + 1) % peakPositions.size());
-			if (Math.abs(secndPeakIndex - firstPeakIndex) <= windowSize) {
-				final int position;
-				if (firstPeakIndex > histogram.getCount(secndPeakIndex)) {
-					position = peakPositions.get((i + 1) % peakPositions.size());
-				} else {
-					position = peakPositions.get(i);
+		// We are starting from the one with the best local height score and
+		// remove the ones with lower scores (within the window).
+		for (int i = 0; i < peaks.size(); i++) {
+			final int firstPeakIndex = (int) peaks.get(i).getPosition();
+			for (int j = i + 1; j < peaks.size(); j++) {
+				final int secondPeakIndex = (int) peaks.get(j).getPosition();
+				if (Math.abs(firstPeakIndex - secondPeakIndex) < windowSize) {
+					peaks.remove(j);
+					// Removed a peak, so shift index j;
+					j--;
 				}
-				elementsToRemove.add((int) histogram.getCount(position));
 			}
 		}
-		peakPositions.removeAll(elementsToRemove);
 
-		// wrap the peaks in objects.
-		final List<Peak> peaks = new ArrayList<Peak>();
-		for (int i = 0; i < peakPositions.size(); i++) {
-			final double position = histogram.getKeyForClass(peakPositions.get(i));
-			final double height = histogram.getCountForClass(peakPositions.get(i));
-			peaks.add(new Peak(position, height));
+		// 4. SANITIZE RESULTS
+		// Correct the peak units. The caller expects position in <em>cents</em>
+		// and height in <em>number of annotations</em> and not position as a
+		// bin index and height as a local height score.
+		for (int i = 0; i < peaks.size(); i++) {
+			final Peak peak = peaks.get(i);
+			final int peakIndex = (int) peak.getPosition();
+			final double position = histogram.getKeyForClass(peakIndex);
+			final double height = histogram.getCountForClass(peakIndex);
+			peak.setPosition(position);
+			peak.setHeight(height);
 		}
+
 		return peaks;
 	}
 
-	public static List<Peak> detectSize(final Histogram histogram, final int windowSize) {
-		final List<Peak> peaks = new ArrayList<Peak>();
+	/**
+	 * The local height score defines a measure for the height of a peak within
+	 * a window. The score is the height minus the mean (height in the window)
+	 * divided by the standard deviation (of the height in the window). The
+	 * window size is defined in number of classes in the given histogram.
+	 * 
+	 * @param histogram
+	 *            The histogram to calculate the local height score for.
+	 * @param index
+	 *            The index of the bin to calculate the score for.
+	 * @param windowSize
+	 *            The window size used to calculate the mean, standard deviation
+	 *            and score.
+	 * @return The local height score.
+	 */
+	public static double calculateLocalHeightScore(final Histogram histogram, final int index,
+			final int windowSize) {
+		assert windowSize % 2 != 0 : "Window size should be odd";
+		assert windowSize >= 3 : "Window size should be minimum 3: a center value and one before and after.";
+
+		int before = 0;
+		int after = 0;
+		// The range is defined by an element in the middle and a number of
+		// elements before and after equal to floor(window size / 2)
+		final double[] heightRange = new double[windowSize];
+		int heightRangeIndex = 0;
+		for (int j = 0; j < (windowSize - 1) / 2; j++) {
+			before--;
+			after++;
+			heightRange[heightRangeIndex] = histogram.getCountForClass(index + before);
+			heightRangeIndex++;
+			heightRange[heightRangeIndex] = histogram.getCountForClass(index + after);
+			heightRangeIndex++;
+		}
+
+		// Middle element.
+		heightRange[heightRangeIndex] = histogram.getCountForClass(index);
+
+		// Calculate mean and STD. Some useful trivia: Calculation is the worlds
+		// most boring way of getting an STD. It is also almost the only way
+		// computer scientists can get an STD.
+		final double mean = StatUtils.mean(heightRange);
+		final double standardDeviation = Math.pow(StatUtils.variance(heightRange, mean), 0.5);
+
+		final double localHeightScore;
+		if (standardDeviation == 0.0) {
+			// If all values are equal the standard deviation is zero,
+			// set the local height score as low as possible.
+			localHeightScore = Double.NEGATIVE_INFINITY;
+		} else {
+			// Otherwise calculate the height score.
+			localHeightScore = (histogram.getCountForClass(index) - mean) / standardDeviation;
+		}
+		return localHeightScore;
+	}
+
+	/**
+	 * Tries to find the best window size for peak detection and returns the
+	 * "best" or "most stable" peaks according to the used metric.
+	 * 
+	 * @param histogram
+	 *            The histo to find peaks for.
+	 * @return A list of "stable" or "best" peaks.
+	 */
+	public static List<Peak> detect(final Histogram histogram) {
+		final List<Peak> peaks = null;
+
+		HashMap<Integer, List<Peak>> peaksPerWindowSize = new HashMap<Integer, List<Peak>>();
+
+		for (int i = 5; i < histogram.getNumberOfClasses() / 2; i += 2) {
+			peaksPerWindowSize.put(i, detect(histogram, i));
+		}
+
+		for (int i = 5; i < histogram.getNumberOfClasses() / 2; i += 2) {
+			peaksPerWindowSize.put(i, detect(histogram, i));
+		}
+
 		return peaks;
 	}
+
 }

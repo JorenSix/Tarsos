@@ -6,8 +6,14 @@ package be.hogent.tarsos.util.histogram.peaks;
  * @author Joren Six
  */
 public final class Peak {
-	private final double position;
-	private final double height;
+	/**
+	 * The position in cents
+	 */
+	private double position;
+	/**
+	 * The peak height
+	 */
+	private double height;
 
 	/**
 	 * Creates a new peak.
@@ -39,4 +45,21 @@ public final class Peak {
 	public double getPosition() {
 		return position;
 	}
+
+	/**
+	 * @param newPosition
+	 */
+	public void setPosition(final double newPosition) {
+		this.position = newPosition;
+
+	}
+
+	/**
+	 * 
+	 * @param newHeight
+	 */
+	public void setHeight(final double newHeight) {
+		this.height = newHeight;
+	}
+
 }

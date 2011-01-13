@@ -209,7 +209,7 @@ public final class ToneScaleHistogram extends Histogram {
 		 * on the bins from 1200 - 7 * 10 + 1 to 1 + 7 * 10 so from 1131 to 71.
 		 * To make the modulo calculation easy 1200 is added to each value: -69
 		 * % 1200 is -69, (-69 + 1200) % 1200 is the expected 1131. If you know
-		 * what I mean. This algorithm is O(2 * 10 * width * x n) with n the
+		 * what I mean. This algorithm is O(2 * 10 * width * n) with n the
 		 * number of annotations => not so efficient.
 		 */
 		double calculationAria = 5 * width;
