@@ -17,7 +17,7 @@ public final class PitchConverter {
 	}
 
 	/**
-	 * C-1 = 16.35 Hz.
+	 * C-1 = 16.35/2 Hz.
 	 */
 	private static final double REF_FREQ = Configuration
 			.getDouble(ConfKey.absolute_cents_reference_frequency);
