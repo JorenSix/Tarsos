@@ -73,13 +73,6 @@ public class DefaultFFMPEGLocator extends FFMPEGLocator {
 		if (!exe.exists()) {
 			copyFile("ffmpeg" + suffix, exe);
 		}
-		// pthreadGC2.dll
-		if (isWindows) {
-			File dll = new File(temp, "pthreadGC2.dll");
-			if (!dll.exists()) {
-				copyFile("pthreadGC2.dll", dll);
-			}
-		}
 		// Need a chmod?
 		if (!isWindows) {
 			Runtime runtime = Runtime.getRuntime();
