@@ -17,6 +17,9 @@ import javax.swing.JSeparator;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
+
 public class HeaderPanel extends JPanel {
 
 	/**
@@ -25,7 +28,8 @@ public class HeaderPanel extends JPanel {
 	private static final long serialVersionUID = 4852979337236606173L;
 	private final ImageIcon icon;
 	private final String title = "Tarsos";
-	private final String help = "Drag and drop audio files here to start.";
+	private final String staticHelp = "Drag and drop audio files here to start.";
+	private final String liveHelp = "Play into the microphone for real time pitch analysis.";
 
 	public HeaderPanel() {
 		super(new BorderLayout());
@@ -43,7 +47,11 @@ public class HeaderPanel extends JPanel {
 		titlesPanel.add(headerTitle);
 
 		JLabel message;
-		message = new JLabel(help);
+		if (Configuration.getBoolean(ConfKey.tarsos_live)) {
+			message = new JLabel(liveHelp);
+		} else {
+			message = new JLabel(staticHelp);
+		}
 		titlesPanel.add(message);
 		police = headerTitle.getFont().deriveFont(Font.PLAIN);
 		message.setFont(police);

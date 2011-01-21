@@ -123,8 +123,20 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		}
 		setYLabel("Pitch (" + pitchUnit.getHumanName() + ")");
 
-		setXRange(0, newAudioFile.getLengthInMilliSeconds() / 1000.0);
-		String title = String.format("%s - pitch in %s", newAudioFile.basename(), pitchUnit.getHumanName());
+		final String title;
+		final String shortTitle;
+		if (newAudioFile == null) {
+			// we should be in recording live mode
+			assert Configuration.getBoolean(ConfKey.tarsos_live);
+			shortTitle = "Live Recorded";
+			setXRange(0, 100); // 100 sec by default
+
+		} else {
+			// not in live mode
+			setXRange(0, newAudioFile.getLengthInMilliSeconds() / 1000.0);
+			shortTitle = newAudioFile.basename();
+		}
+		title = String.format("%s - pitch in %s", shortTitle, pitchUnit.getHumanName());
 
 		setButtons(true);
 		if (button != null) {
@@ -140,8 +152,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 				// EPS
 				OutputStream out;
 				try {
-					out = new BufferedOutputStream(new FileOutputStream(new File(newAudioFile.basename()
-							+ ".eps")));
+					out = new BufferedOutputStream(new FileOutputStream(new File(shortTitle + ".eps")));
 					export(out);
 					out.close();
 				} catch (FileNotFoundException e) {
@@ -156,7 +167,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 						stringBuffer.append(String.format("%.5f;%.5f\n", p.x, p.y));
 					}
 				}
-				FileUtils.writeFile(stringBuffer.toString(), newAudioFile.basename() + ".csv");
+				FileUtils.writeFile(stringBuffer.toString(), shortTitle + ".csv");
 				stringBuffer.delete(0, stringBuffer.length());
 				// Matlab
 				stringBuffer.append("%Time(sec);Pitch(" + pitchUnit.getHumanName() + ")\n");
@@ -166,7 +177,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 						stringBuffer.append(String.format("%s,", p.y));
 					}
 				}
-				FileUtils.writeFile(stringBuffer.toString(), newAudioFile.basename() + "_annotations.m");
+				FileUtils.writeFile(stringBuffer.toString(), shortTitle + "_annotations.m");
 				stringBuffer.delete(0, stringBuffer.length());
 
 				/*
@@ -304,9 +315,12 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 			if (minPitch < 0) {
 				minPitch = 0;
 			}
-			AnnotationPublisher.getInstance().delegateClearAnnotations();
+			if (!Configuration.getBoolean(ConfKey.tarsos_live)) {
+				AnnotationPublisher.getInstance().delegateClearAnnotations();
 
-			AnnotationPublisher.getInstance().delegateAddAnnotations(minTime, maxTime, minPitch, maxPitch);
+				AnnotationPublisher.getInstance()
+						.delegateAddAnnotations(minTime, maxTime, minPitch, maxPitch);
+			}
 		}
 	}
 

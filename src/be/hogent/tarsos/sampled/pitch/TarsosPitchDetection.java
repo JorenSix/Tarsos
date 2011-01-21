@@ -165,6 +165,6 @@ public final class TarsosPitchDetection implements PitchDetector {
 			public void processingFinished() {
 			}
 		});
-		new Thread(dispatcher).run();
+		new Thread(dispatcher, "Annotation publisher").start();
 	}
 }

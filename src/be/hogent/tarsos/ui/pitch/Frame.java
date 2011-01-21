@@ -20,6 +20,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
+import javax.sound.sampled.TargetDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -43,7 +50,13 @@ import org.noos.xing.mydoggy.ToolWindowManager;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
 
+import be.hogent.tarsos.sampled.SampledAudioUtilities;
 import be.hogent.tarsos.sampled.pitch.Annotation;
+import be.hogent.tarsos.sampled.pitch.AnnotationHandler;
+import be.hogent.tarsos.sampled.pitch.AnnotationTree;
+import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
@@ -120,8 +133,10 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		scaleChangedListeners = new ArrayList<ScaleChangedListener>();
 		audioFileChangedListeners = new ArrayList<AudioFileChangedListener>();
 
-		// react to drag and drop
-		addFileDropListener();
+		// react to drag and drop if not in Tarsos Live Mode
+		if (!Configuration.getBoolean(ConfKey.tarsos_live)) {
+			addFileDropListener();
+		}
 
 		// all the components to add to the frame
 		JComponent configurationPanel = makeConfigurationPanel();
@@ -169,6 +184,11 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		annotationPublisher.addListener(pitchContourPanel);
 		annotationPublisher.addListener(controlPanel);
 		annotationPublisher.addListener(this);
+
+		// Initizalize pitch contour if in Tarsos Live Mode
+		if (Configuration.getBoolean(ConfKey.tarsos_live)) {
+			pitchContourPanel.audioFileChanged(null);
+		}
 
 		// initialize content and tool window manager of the 'mydoggy'
 		// framework.
@@ -229,6 +249,57 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		// Make all tools available
 		for (ToolWindow window : toolWindowManager.getToolWindows()) {
 			window.setAvailable(true);
+		}
+
+		checkTarsosLiveMode();
+	}
+
+	private void checkTarsosLiveMode() {
+		if (Configuration.getBoolean(ConfKey.tarsos_live)) {
+			final int selected = 1;// Configuration.getInt(ConfKey.microphone_device_mixer);
+			Mixer.Info selectedMixer = SampledAudioUtilities.getMixerInfo(false, true).get(selected);
+			final Mixer mixer = AudioSystem.getMixer(selectedMixer);
+			final AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
+			final DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
+			TargetDataLine line;
+			try {
+				line = (TargetDataLine) mixer.getLine(dataLineInfo);
+				final int numberOfSamples = (int) (0.1 * 44100);
+				line.open(format, numberOfSamples);
+				line.start();
+				final AudioInputStream stream = new AudioInputStream(line);
+
+				final AnnotationPublisher publisher = AnnotationPublisher.getInstance();
+				final AnnotationTree tree = publisher.getAnnotationTree();
+				try {
+					TarsosPitchDetection.processStream(stream, new AnnotationHandler() {
+						private int i = 0;
+						private double prevTime = 0.0;
+
+						public void handleAnnotation(final Annotation annotation) {
+							i++;
+							tree.add(annotation,
+									PitchUnit.valueOf(Configuration.get(ConfKey.pitch_contour_unit)));
+							if (i % 5 == 0) {
+								double currentTime = annotation.getStart();
+								publisher.delegateAddAnnotations(prevTime, currentTime);
+								prevTime = currentTime;
+							}
+						}
+					}, PitchDetectionMode.TARSOS_MPM);
+				} catch (UnsupportedAudioFileException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			} catch (LineUnavailableException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
 	}
 

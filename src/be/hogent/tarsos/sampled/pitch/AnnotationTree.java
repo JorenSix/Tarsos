@@ -38,16 +38,7 @@ public final class AnnotationTree {
 		// Three dimensional tree
 		tree = new KDTree<Annotation>(3);
 		for (Annotation annotation : annotations) {
-			double[] key = { annotation.getStart(), annotation.getPitch(unit), annotation.getProbability() };
-			try {
-				tree.insert(key, annotation);
-			} catch (KeySizeException e) {
-				new IllegalStateException("The dimenstion of the tree is 3,"
-						+ " the dimension of the key also.");
-			} catch (KeyDuplicateException e) {
-				new IllegalStateException(
-						"No two annotations with the same timestamp and starttime should be present!");
-			}
+			add(annotation, unit);
 		}
 		LOG.fine(String.format("KD Tree with %s annotations constructed in %s.", tree.size(), watch));
 	}
@@ -82,5 +73,18 @@ public final class AnnotationTree {
 
 	public int size() {
 		return tree.size();
+	}
+
+	public void add(final Annotation annotation, final PitchUnit unit) {
+		double[] key = { annotation.getStart(), annotation.getPitch(unit), annotation.getProbability() };
+		try {
+			tree.insert(key, annotation);
+		} catch (KeySizeException e) {
+			new IllegalStateException("The dimenstion of the tree is 3," + " the dimension of the key also.");
+		} catch (KeyDuplicateException e) {
+			new IllegalStateException(
+					"No two annotations with the same timestamp and starttime should be present!");
+		}
+
 	}
 }

@@ -25,7 +25,7 @@ public final class ScalaFile {
 	/**
 	 * A description of the tone scale.
 	 */
-	private final transient String description;
+	private transient String description;
 	/**
 	 * A list of pitches.
 	 */
@@ -140,7 +140,7 @@ public final class ScalaFile {
 	 * @return A ToneScaleHistogram using the correct pitches.
 	 */
 	public ToneScaleHistogram buildHistogram() {
-		return ToneScaleHistogram.createToneScale(pitches);
+		return ToneScaleHistogram.createToneScale(pitches.clone());
 	}
 
 	/**
@@ -204,7 +204,7 @@ public final class ScalaFile {
 			final StringBuilder contents = new StringBuilder();
 			contents.append("! ").append(FileUtils.basename(scalaFile)).append(".scl \n");
 			contents.append("!\n");
-			contents.append(description).append("\n");
+			contents.append(getDescription()).append("\n");
 			contents.append(pitches.length).append("\n!\n");
 			for (int i = 0; i < pitches.length; i++) {
 				final double peakPosition = pitches[i];
@@ -238,6 +238,10 @@ public final class ScalaFile {
 	 */
 	public String getDescription() {
 		return this.description;
+	}
+
+	public void setDescription(final String newDescription) {
+		this.description = newDescription;
 	}
 
 	/**

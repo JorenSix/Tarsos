@@ -218,7 +218,8 @@ public class Histogram implements Cloneable {
 	 */
 	public final double getKeyForClass(final int i) {
 		int classIndex = i;
-		while (classIndex < 0) { // make sure bufferCount is positive
+		// make sure classIndex is positive
+		while (classIndex < 0) {
 			classIndex += getNumberOfClasses();
 		}
 		// make sure bufferCount is within range

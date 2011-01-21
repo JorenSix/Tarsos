@@ -20,6 +20,8 @@ import be.hogent.tarsos.sampled.BlockingAudioPlayer;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 
 import com.jgoodies.forms.builder.ButtonBarBuilder2;
 
@@ -206,23 +208,26 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 	public void annotationsAdded() {
 		AnnotationSelection selection = AnnotationPublisher.getInstance().getCurrentSelection();
 
-		if (selection.getTimeSpan() > 1.0) {
-			final double startTime;
-			if (selection.getStartTime() > audioFile.getLengthInMilliSeconds() / 1000) {
-				startTime = 0;
-			} else {
-				startTime = selection.getStartTime();
-			}
-			waveForm.setMarker(startTime, true);
-		}
+		if (!Configuration.getBoolean(ConfKey.tarsos_live)) {
 
-		final double stopTime;
-		if (selection.getStopTime() > audioFile.getLengthInMilliSeconds() / 1000) {
-			stopTime = audioFile.getLengthInMilliSeconds() / 1000;
-		} else {
-			stopTime = selection.getStopTime();
+			if (selection.getTimeSpan() > 1.0) {
+				final double startTime;
+				if (selection.getStartTime() > audioFile.getLengthInMilliSeconds() / 1000) {
+					startTime = 0;
+				} else {
+					startTime = selection.getStartTime();
+				}
+				waveForm.setMarker(startTime, true);
+			}
+
+			final double stopTime;
+			if (selection.getStopTime() > audioFile.getLengthInMilliSeconds() / 1000) {
+				stopTime = audioFile.getLengthInMilliSeconds() / 1000;
+			} else {
+				stopTime = selection.getStopTime();
+			}
+			waveForm.setMarker(stopTime, false);
 		}
-		waveForm.setMarker(stopTime, false);
 
 	}
 

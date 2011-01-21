@@ -212,7 +212,7 @@ public final class ToneScaleHistogram extends Histogram {
 		 * what I mean. This algorithm is O(2 * 10 * width * n) with n the
 		 * number of annotations => not so efficient.
 		 */
-		double calculationAria = 5 * width;
+		double calculationAria = 5 * width;// hehe aria, not area
 		double halfWidth = width / 2.0;
 
 		for (Annotation annotation : annotations) {

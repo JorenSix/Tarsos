@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiSystem;
+import javax.sound.sampled.Mixer;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -25,6 +26,7 @@ import javax.swing.JTextField;
 
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiCommon.MoreMidiInfo;
+import be.hogent.tarsos.sampled.SampledAudioUtilities;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -116,6 +118,52 @@ public class ConfigurationPanel extends JPanel {
 		}
 	}
 
+	private static class MixerDevicePolling implements Runnable {
+		private final JComboBox optionsComboBox;
+		private final boolean supportsRecording;
+		private final boolean supportsPlayback;
+
+		public MixerDevicePolling(final JComboBox comboBox, final boolean recording, final boolean playback) {
+			optionsComboBox = comboBox;
+			supportsRecording = recording;
+			supportsPlayback = playback;
+		}
+
+		public void run() {
+			while (true) {
+				try {
+					Thread.sleep(6000);
+					poll();
+				} catch (InterruptedException e) {
+					LOG.log(Level.SEVERE, String.format("Thread %s execution interrupted!", Thread
+							.currentThread().getName()), e);
+				}
+			}
+		}
+
+		private void poll() {
+			DefaultComboBoxModel model = (DefaultComboBoxModel) optionsComboBox.getModel();
+			Vector<Mixer.Info> infos = SampledAudioUtilities
+					.getMixerInfo(supportsPlayback, supportsRecording);
+
+			// Add new MIXER device if it is not already present in the
+			// current list.
+			for (Mixer.Info info : infos) {
+				if (model.getIndexOf(info) == -1) {
+					model.addElement(info);
+				}
+			}
+			// Remove a device if the MIXER device is not there any more.
+			for (int i = 0; i < model.getSize(); i++) {
+				Mixer.Info info = (Mixer.Info) model.getElementAt(i);
+				if (!infos.contains(info)) {
+					model.removeElementAt(i);
+					i--;
+				}
+			}
+		}
+	}
+
 	private void addConfigurationComponents(final DefaultFormBuilder builder) {
 		builder.appendSeparator("Runtime configuration parameters");
 
@@ -151,6 +199,24 @@ public class ConfigurationPanel extends JPanel {
 			}
 		});
 
+		final JComboBox microphoneComboBox = new JComboBox(SampledAudioUtilities.getMixerInfo(false, true));
+		Runnable pollingMixers = new MixerDevicePolling(microphoneComboBox, true, false);
+		Thread pollingMixersThread = new Thread(pollingMixers, "Mixer device polling");
+		pollingMixersThread.start();
+		microphoneComboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				Mixer.Info info = (Mixer.Info) microphoneComboBox.getSelectedItem();
+				int index = -1;
+				Vector<Mixer.Info> infos = SampledAudioUtilities.getMixerInfo(false, true);
+				for (int i = 0; i < infos.size(); i++) {
+					if (infos.get(i) == info) {
+						index = i;
+					}
+				}
+				Configuration.set(ConfKey.microphone_device_mixer, index);
+			}
+		});
+
 		final JComboBox pitchDetectorsComboBox = new JComboBox(PitchDetectionMode.values());
 		pitchDetectorsComboBox.setSelectedItem(Configuration
 				.getPitchDetectionMode(ConfKey.pitch_tracker_current));
@@ -165,6 +231,8 @@ public class ConfigurationPanel extends JPanel {
 		builder.append("Pitch Detector", pitchDetectorsComboBox, true);
 		builder.append("MIDI IN", midiInComboBox, true);
 		builder.append("MIDI OUT", midiOutComboBox, true);
+		builder.append("Microphone", microphoneComboBox, true);
+
 	}
 
 	/**

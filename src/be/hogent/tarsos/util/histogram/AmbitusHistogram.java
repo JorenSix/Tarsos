@@ -37,7 +37,8 @@ public final class AmbitusHistogram extends Histogram {
 
 	public AmbitusHistogram() {
 		super(Configuration.getInt(ConfKey.ambitus_start), Configuration.getInt(ConfKey.ambitus_stop),
-				1200 / Configuration.getInt(ConfKey.histogram_bin_width), false, // does
+				(Configuration.getInt(ConfKey.ambitus_stop) - Configuration.getInt(ConfKey.ambitus_start))
+						/ Configuration.getInt(ConfKey.histogram_bin_width), false, // does
 				// not
 				// wrap
 				true// ignore values outside human hearing range
@@ -51,7 +52,7 @@ public final class AmbitusHistogram extends Histogram {
 
 	}
 
-	
+	@Override
 	public void valueAddedHook(final double value) {
 		// keep a histogram for each octave
 		final int octaveIndex = (int) (value / 1200);
@@ -186,7 +187,7 @@ public final class AmbitusHistogram extends Histogram {
 		}
 	}
 
-	
+	@Override
 	public void plot(final String fileName, final String title) {
 		final SimplePlot plot = new SimplePlot(title);
 		double startingValue = getStart();

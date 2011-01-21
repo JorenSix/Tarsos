@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Vector;
 
 import org.apache.commons.math.stat.StatUtils;
 
@@ -31,12 +34,12 @@ public final class PeakDetector {
 	 */
 	public static Histogram newPeakDetection(final List<Peak> peaks) {
 		final double[] peakPositionsDouble = new double[peaks.size()];
-		final double[] peakHeights = new double[peaks.size()];
+		// final double[] peakHeights = new double[peaks.size()];
 		for (int i = 0; i < peaks.size(); i++) {
 			peakPositionsDouble[i] = peaks.get(i).getPosition();
-			peakHeights[i] = peaks.get(i).getHeight();
+			// peakHeights[i] = peaks.get(i).getHeight();
 		}
-		return ToneScaleHistogram.createToneScale(peakPositionsDouble, peakHeights);
+		return ToneScaleHistogram.createToneScale(peakPositionsDouble);
 	}
 
 	/**
@@ -177,24 +180,100 @@ public final class PeakDetector {
 	}
 
 	/**
-	 * Tries to find the best window size for peak detection and returns the
-	 * "best" or "most stable" peaks according to the used metric.
+	 * Finds the requested number of (most salient) peaks in the histogram.
 	 * 
 	 * @param histogram
-	 *            The histo to find peaks for.
-	 * @return A list of "stable" or "best" peaks.
+	 *            The histogram.
+	 * @param numberOfPeaks
+	 *            The number of peaks.
+	 * @return A list of peaks equal in size as the requested number of peaks.
 	 */
-	public static List<Peak> detect(final Histogram histogram) {
-		final List<Peak> peaks = null;
+	public static List<Peak> detectNumberOfPeaks(final Histogram histogram, final int numberOfPeaks) {
+		final List<Peak> peaks = new ArrayList<Peak>();
 
+		// 1. Calculate a list of peaks for each window size.
 		HashMap<Integer, List<Peak>> peaksPerWindowSize = new HashMap<Integer, List<Peak>>();
-
-		for (int i = 5; i < histogram.getNumberOfClasses() / 2; i += 2) {
+		for (int i = 3; i < histogram.getNumberOfClasses() / 2; i += 2) {
 			peaksPerWindowSize.put(i, detect(histogram, i));
 		}
 
+		// 2. Count the number of times each peak occurs (for each window size).
+		HashMap<Double, Integer> peakPositionCount = new HashMap<Double, Integer>();
 		for (int i = 5; i < histogram.getNumberOfClasses() / 2; i += 2) {
+			for (Peak p : peaksPerWindowSize.get(i)) {
+				Double key = p.getPosition();
+				if (peakPositionCount.containsKey(key)) {
+					int current = peakPositionCount.get(key);
+					peakPositionCount.put(key, current + 1);
+				} else {
+					peakPositionCount.put(key, 1);
+				}
+			}
+		}
+
+		// 3. Order a list by the number of times a peak occurs (descending).
+		List<Map.Entry<Double, Integer>> entryList = new Vector<Map.Entry<Double, Integer>>(
+				peakPositionCount.entrySet());
+		Collections.sort(entryList, new Comparator<Map.Entry<Double, Integer>>() {
+			public int compare(final Entry<Double, Integer> firstEntry,
+					final Entry<Double, Integer> secondEntry) {
+				final Integer firstEntryCount = firstEntry.getValue();
+				final Integer secondEntryCount = secondEntry.getValue();
+				return secondEntryCount.compareTo(firstEntryCount);
+			}
+		});
+
+		// 4. Adds the requested number of peaks to the list.
+		for (int i = 0; i < numberOfPeaks; i++) {
+			double positionOfPeak = entryList.get(i).getKey();
+			double heightOfPeak = histogram.getCount(positionOfPeak);
+			peaks.add(new Peak(positionOfPeak, heightOfPeak));
+		}
+
+		return peaks;
+	}
+
+	public static List<Peak> detect(final Histogram histogram) {
+		List<Peak> peaks = new ArrayList<Peak>();
+
+		// 1. Calculate a list of peaks for each window size.
+		HashMap<Integer, List<Peak>> peaksPerWindowSize = new HashMap<Integer, List<Peak>>();
+		for (int i = 3; i < histogram.getNumberOfClasses() / 5; i += 2) {
 			peaksPerWindowSize.put(i, detect(histogram, i));
+		}
+
+		// 2. Count the number of times each number of detected peaks occurs
+		// (for each window size).
+		HashMap<Integer, Integer> peakPositionCount = new HashMap<Integer, Integer>();
+		for (int i = 5; i < histogram.getNumberOfClasses() / 5; i += 2) {
+			Integer key = peaksPerWindowSize.get(i).size();
+			if (peakPositionCount.containsKey(key)) {
+				int current = peakPositionCount.get(key);
+				peakPositionCount.put(key, current + 1);
+			} else {
+				peakPositionCount.put(key, 1);
+			}
+		}
+
+		// 3. Order the entries descending
+		List<Map.Entry<Integer, Integer>> entryList = new Vector<Map.Entry<Integer, Integer>>(
+				peakPositionCount.entrySet());
+		Collections.sort(entryList, new Comparator<Map.Entry<Integer, Integer>>() {
+			public int compare(final Entry<Integer, Integer> firstEntry,
+					final Entry<Integer, Integer> secondEntry) {
+				final Integer firstEntryCount = firstEntry.getValue();
+				final Integer secondEntryCount = secondEntry.getValue();
+				return secondEntryCount.compareTo(firstEntryCount);
+			}
+		});
+
+		// 4. find the first peak list with the most likely number of peaks
+		Integer mostLikelyNumberOfPeaks = entryList.get(0).getKey();
+		for (int i = 3; i < histogram.getNumberOfClasses() / 5; i += 2) {
+			if (peaksPerWindowSize.get(i).size() == mostLikelyNumberOfPeaks) {
+				peaks = peaksPerWindowSize.get(i);
+				break;
+			}
 		}
 
 		return peaks;

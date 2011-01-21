@@ -35,6 +35,8 @@ public final class AnnotationPublisher implements AudioFileChangedListener {
 	private AnnotationPublisher() {
 		listeners = new ArrayList<AnnotationListener>();
 		selection = new AnnotationSelection();
+		tree = new AnnotationTree(new ArrayList<Annotation>(), PitchUnit.valueOf(Configuration
+				.get(ConfKey.pitch_contour_unit)));
 	}
 
 	/**
@@ -57,6 +59,10 @@ public final class AnnotationPublisher implements AudioFileChangedListener {
 		tree = new AnnotationTree(annotations, PitchUnit.valueOf(Configuration
 				.get(ConfKey.pitch_contour_unit)));
 
+	}
+
+	public AnnotationTree getAnnotationTree() {
+		return tree;
 	}
 
 	/**

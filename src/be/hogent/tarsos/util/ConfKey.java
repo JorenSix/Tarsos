@@ -167,7 +167,17 @@ public enum ConfKey {
 	 * enumeration names
 	 * (HERTZ|RELATIVE_CENTS|ABSOLUTE_CENTS|MIDI_KEY|MIDI_CENT).
 	 */
-	pitch_contour_unit;
+	pitch_contour_unit,
+
+	/**
+	 * Start Tarsos in Tarsos Live(tm) mode: analyse microphone input in in
+	 * stead of static files.
+	 */
+	tarsos_live,
+	/**
+	 * Microphone mixer to use with Tarsos Live(tm).
+	 */
+	microphone_device_mixer;
 
 	/**
 	 * True if the configured key is a required directory. False otherwise.
