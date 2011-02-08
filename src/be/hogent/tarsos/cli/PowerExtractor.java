@@ -4,11 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.SignalPowerExtractor;
 
@@ -50,7 +49,7 @@ public final class PowerExtractor extends AbstractTarsosApp {
 			for (final File inputFile : options.valuesOf(inputSpec)) {
 				try {
 					audioFiles.add(new AudioFile(inputFile.getAbsolutePath()));
-				} catch (UnsupportedAudioFileException e) {
+				} catch (EncoderException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}

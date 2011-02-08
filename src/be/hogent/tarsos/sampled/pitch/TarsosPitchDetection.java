@@ -14,6 +14,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.AudioProcessor;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.SignalPowerExtractor;
 
 /**
@@ -165,6 +167,12 @@ public final class TarsosPitchDetection implements PitchDetector {
 			public void processingFinished() {
 			}
 		});
-		new Thread(dispatcher, "Annotation publisher").start();
+		// in live mode start the thread in background
+		if (Configuration.getBoolean(ConfKey.tarsos_live)) {
+			new Thread(dispatcher, "Annotation publisher").start();
+		} else {
+			// in analysis mode: foreground
+			new Thread(dispatcher, "Annotation publisher").run();
+		}
 	}
 }

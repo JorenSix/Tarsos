@@ -86,7 +86,7 @@ class WaveAudioReader implements AudioReader
 			}
 		}
 
-		// Convert encoding.
+		// Convert attributes.
 		ais = AudioSystem.getAudioInputStream(decodedFormat, ais);
 
 		return ais;

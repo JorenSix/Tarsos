@@ -57,6 +57,7 @@ import be.hogent.tarsos.sampled.pitch.AnnotationTree;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
@@ -256,7 +257,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 	private void checkTarsosLiveMode() {
 		if (Configuration.getBoolean(ConfKey.tarsos_live)) {
-			final int selected = 1;// Configuration.getInt(ConfKey.microphone_device_mixer);
+			final int selected = Configuration.getInt(ConfKey.microphone_device_mixer);
 			Mixer.Info selectedMixer = SampledAudioUtilities.getMixerInfo(false, true).get(selected);
 			final Mixer mixer = AudioSystem.getMixer(selectedMixer);
 			final AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
@@ -388,19 +389,15 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 						AudioFile newAudioFile;
 						newAudioFile = new AudioFile(droppedFile.getAbsolutePath());
 						setAudioFile(newAudioFile);
-					} catch (UnsupportedAudioFileException e) {
+					} catch (EncoderException e) {
 						String message = String
 								.format("Failed to transcode %s.\n"
-										+ "Tarsos uses a platform dependent FFMPEG binary to transcode audio to %s, %s, %s channel, %s Hz Sampling Rate.\n"
+										+ "Tarsos uses a platform dependent FFMPEG binary to transcode audio to %s\n"
 										+ "Either: \n"
 										+ "\t \t 1) FFMPEG does not know how to convert the audio.\n"
 										+ "\t \t 2) There is no FFMPEG binary included for your platform.\n"
-										+ "Try converting the audio manually to the format mentioned.",
-										droppedFile.getName(),
-										Configuration.get(ConfKey.transcoded_audio_format),
-										Configuration.get(ConfKey.transcoded_audio_codec),
-										Configuration.get(ConfKey.transcoded_audio_number_of_channels),
-										Configuration.get(ConfKey.transcoded_audio_sampling_rate));
+										+ "Try converting the audio manually to the format mentioned or disable transcoding.",
+										droppedFile.getName(), Configuration.get(ConfKey.transcoded_audio_to));
 						JOptionPane.showMessageDialog(Frame.this, message, "Transcoding audio failed",
 								JOptionPane.ERROR_MESSAGE);
 					}

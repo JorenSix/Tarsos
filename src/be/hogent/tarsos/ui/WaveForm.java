@@ -27,6 +27,7 @@ import javax.swing.SwingUtilities;
 
 import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.AudioProcessor;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.pitch.AnnotationPublisher;
 import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
 import be.hogent.tarsos.ui.pitch.ControlPanel;
@@ -427,7 +428,7 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 				e.printStackTrace();
 			}
 			waveForm.audioFileChanged(audioFile);
-		} catch (UnsupportedAudioFileException e1) {
+		} catch (EncoderException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}

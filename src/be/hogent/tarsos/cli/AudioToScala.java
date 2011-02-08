@@ -3,14 +3,13 @@ package be.hogent.tarsos.cli;
 import java.io.File;
 import java.util.List;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
@@ -87,7 +86,7 @@ public final class AudioToScala extends AbstractTarsosApp {
 			final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 15);
 			ToneScaleHistogram.exportPeaksToScalaFileFormat(scalaFile.getAbsolutePath(),
 					FileUtils.basename(inputFile.getAbsolutePath()), peaks);
-		} catch (UnsupportedAudioFileException e) {
+		} catch (EncoderException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

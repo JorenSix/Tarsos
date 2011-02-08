@@ -200,7 +200,9 @@ public class ConfigurationPanel extends JPanel {
 		});
 
 		final JComboBox microphoneComboBox = new JComboBox(SampledAudioUtilities.getMixerInfo(false, true));
+		microphoneComboBox.setSelectedIndex(Configuration.getInt(ConfKey.microphone_device_mixer));
 		Runnable pollingMixers = new MixerDevicePolling(microphoneComboBox, true, false);
+
 		Thread pollingMixersThread = new Thread(pollingMixers, "Mixer device polling");
 		pollingMixersThread.start();
 		microphoneComboBox.addActionListener(new ActionListener() {

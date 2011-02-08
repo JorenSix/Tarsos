@@ -45,7 +45,6 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-
 import com.sun.media.sound.AudioSynthesizer;
 
 /**
@@ -76,7 +75,13 @@ public final class MidiToWavRenderer {
 	private double[] rebasedTuning;
 
 	public MidiToWavRenderer() throws MidiUnavailableException, InvalidMidiDataException, IOException {
-		synth = (AudioSynthesizer) MidiSystem.getSynthesizer();
+		try {
+			synth = (AudioSynthesizer) MidiSystem.getSynthesizer();
+		} catch (ClassCastException e) {
+			throw new Error("Please make sure Gervill is included in the classpath: "
+					+ "it should be de default synth. These are the currently installed synths: "
+					+ MidiSystem.getMidiDeviceInfo().toString(), e);
+		}
 	}
 
 	private Soundbank loadSoundbank(final File soundbankFile) throws MidiUnavailableException,

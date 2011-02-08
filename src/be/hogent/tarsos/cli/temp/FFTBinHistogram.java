@@ -8,6 +8,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FFT;
 import be.hogent.tarsos.util.FileUtils;
@@ -25,7 +26,7 @@ public final class FFTBinHistogram {
 	 * @throws IOException
 	 * @throws UnsupportedAudioFileException
 	 */
-	public static void main(final String[] args) throws UnsupportedAudioFileException {
+	public static void main(final String[] args) throws EncoderException {
 		final AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test",
 				"data", "power_test.wav"));
 		AudioInputStream stream = null;

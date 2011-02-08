@@ -21,6 +21,7 @@ import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 
 /**
  * Represents an audio file. Facilitates transcoding, handling of originalPath
@@ -43,11 +44,11 @@ public final class AudioFile {
 	 * 
 	 * @param filePath
 	 *            the originalPath for the audio file
-	 * @throws UnsupportedAudioFileException
+	 * @throws EncoderException
 	 *             If FFMPEG fails to transcode the audio an
 	 *             UnsupportedAudioFileException is generated.
 	 */
-	public AudioFile(final String filePath) throws UnsupportedAudioFileException {
+	public AudioFile(final String filePath) throws EncoderException {
 		this.originalPath = new File(filePath).getAbsolutePath();
 		if (AudioTranscoder.transcodingRequired(transcodedPath())) {
 			AudioTranscoder.transcode(filePath, transcodedPath());
@@ -63,7 +64,7 @@ public final class AudioFile {
 		final String baseName = FileUtils.basename(StringUtils.sanitize(originalPath));
 		// 01._qsdfj => 01._qsdfj.wav
 		final String fileName = baseName + "_transcoded."
-				+ Configuration.get(ConfKey.transcoded_audio_format);
+				+ AudioTranscoder.TARGET_ENCODING.getAttributes().getFormat();
 		// return the name where the transcoded file should go
 		return FileUtils.combine(transcodedDirectory(), fileName);
 	}
@@ -127,7 +128,7 @@ public final class AudioFile {
 			for (final String originalFile : audioFiles) {
 				try {
 					files.add(new AudioFile(originalFile));
-				} catch (UnsupportedAudioFileException e) {
+				} catch (EncoderException e) {
 					LOG.severe(String.format("Transcoding failed: %s is not supported.", originalFile));
 				}
 			}

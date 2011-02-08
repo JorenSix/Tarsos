@@ -119,13 +119,10 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 		if (pitchInAbsCents > 0 && pitchInAbsCents <= AMBITUS_STOP) {
 			final Histogram histo;
 			if (!histos.containsKey(annotation.getSource())) {
-				final int delta;
 				if (stop > 1200) {
 					histo = new AmbitusHistogram();
-					delta = AMBITUS_STOP - AMBITUS_START;
 				} else {
 					histo = new ToneScaleHistogram();
-					delta = 1200;
 				}
 				histos.put(annotation.getSource(), histo);
 				Color color = Tarsos.COLORS[annotation.getSource().ordinal() % Tarsos.COLORS.length];

@@ -11,6 +11,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import org.apache.commons.math.complex.Complex;
 import org.apache.commons.math.transform.FastFourierTransformer;
 
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SimplePlot;
@@ -21,7 +22,8 @@ public final class FFTTest {
 	private FFTTest() {
 	}
 
-	public static void main(final String... args) throws UnsupportedAudioFileException, IOException {
+	public static void main(final String... args) throws EncoderException, IOException,
+			UnsupportedAudioFileException {
 		final AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test",
 				"data", "power_test.wav"));
 		final AudioInputStream stream = AudioSystem.getAudioInputStream(new File(audioFile.originalPath()));

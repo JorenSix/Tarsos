@@ -10,6 +10,7 @@ import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.sampled.pitch.VampPitchDetection;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.AmbitusHistogram;
 import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
@@ -24,7 +25,7 @@ public final class HistogramSummationTest {
 	 * 
 	 * @throws UnsupportedAudioFileException
 	 */
-	public static void main(final String[] args) throws UnsupportedAudioFileException {
+	public static void main(final String[] args) throws EncoderException {
 		final AudioFile audioFile = new AudioFile("audio\\maghreb\\4_ABERDAG___LA_DANSE.wav");
 		PitchDetector pitchDetector = new TarsosPitchDetection(audioFile, PitchDetectionMode.TARSOS_YIN);
 		pitchDetector.executePitchDetection();

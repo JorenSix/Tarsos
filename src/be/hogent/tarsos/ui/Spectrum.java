@@ -19,6 +19,7 @@ import javax.swing.JFrame;
 import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.AudioProcessor;
 import be.hogent.tarsos.sampled.BlockingAudioPlayer;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FFT;
 
@@ -44,8 +45,8 @@ public final class Spectrum extends JFrame implements AudioProcessor {
 	private int barWidth; // pixels
 	private int barMaxHeight;
 
-	public Spectrum(final AudioFile audioFile, final int bins) throws UnsupportedAudioFileException,
-			IOException, LineUnavailableException {
+	public Spectrum(final AudioFile audioFile, final int bins) throws EncoderException, IOException,
+			LineUnavailableException, UnsupportedAudioFileException {
 
 		this.setSize(new Dimension(640, 400));
 		barWidth = getWidth() / bins;
@@ -73,7 +74,8 @@ public final class Spectrum extends JFrame implements AudioProcessor {
 		new Thread(rtap).start();
 
 		addComponentListener(new ComponentAdapter() {
-			
+
+			@Override
 			public void componentResized(final ComponentEvent e) {
 				frameWasResized(e);
 			}
@@ -89,13 +91,13 @@ public final class Spectrum extends JFrame implements AudioProcessor {
 		});
 	}
 
-	
+	@Override
 	public void paint(final Graphics g) {
 		g.drawImage(buffer, 0, 0, null);
 	}
 
-	public static void main(final String... args) throws UnsupportedAudioFileException, IOException,
-			LineUnavailableException {
+	public static void main(final String... args) throws EncoderException, IOException,
+			LineUnavailableException, UnsupportedAudioFileException {
 		final AudioFile f = new AudioFile("audio/MR.1975.26.43-4.wav");
 		new Spectrum(f, 128);
 	}

@@ -6,7 +6,6 @@ import java.awt.GridLayout;
 import java.io.File;
 import java.util.List;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -14,6 +13,7 @@ import javax.swing.border.EmptyBorder;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -72,7 +72,7 @@ public class BrowserPanel extends JPanel {
 					scalePanel.add(panel);
 					scalePanel.invalidate();
 					scalePanel.repaint();
-				} catch (UnsupportedAudioFileException e) {
+				} catch (EncoderException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}

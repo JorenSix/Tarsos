@@ -13,6 +13,7 @@ import joptsimple.OptionSpec;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -43,9 +44,10 @@ public final class Annotate extends AbstractTarsosApp {
 	 * @param detector
 	 *            The detector to use.
 	 * @throws UnsupportedAudioFileException
+	 * @throws EncoderException
 	 */
 	private void annotateInputFile(final String inputFile, final PitchDetectionMode detectionMode)
-			throws UnsupportedAudioFileException {
+			throws UnsupportedAudioFileException, EncoderException {
 
 		final AudioFile audioFile = new AudioFile(inputFile);
 
@@ -119,6 +121,9 @@ public final class Annotate extends AbstractTarsosApp {
 				for (final String file : inputFiles) {
 					try {
 						annotateInputFile(file, detectionMode);
+					} catch (EncoderException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					} catch (UnsupportedAudioFileException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

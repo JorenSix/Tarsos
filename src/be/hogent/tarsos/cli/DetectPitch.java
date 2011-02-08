@@ -2,8 +2,6 @@ package be.hogent.tarsos.cli;
 
 import java.io.File;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -11,6 +9,7 @@ import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 
 /**
@@ -54,7 +53,7 @@ public final class DetectPitch extends AbstractTarsosApp {
 				for (final Annotation sample : detector.getAnnotations()) {
 					Tarsos.println(sample.toString());
 				}
-			} catch (UnsupportedAudioFileException e) {
+			} catch (EncoderException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

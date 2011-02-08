@@ -73,44 +73,10 @@ public enum ConfKey {
 	transcode_audio,
 
 	/**
-	 * If the transcoded audio format check is skipped the program only checks
-	 * if the file exists, not its format. Checking each file format takes a
-	 * while on large data sets and is only needed if the transcoded audio file
-	 * format is changed. <br>
-	 * The default is <code>true</code>.
+	 * The format to transcode the audio to. It is one of the enum values
+	 * defined in DefaultAttributes.
 	 */
-	skip_transcoded_audio_format_check,
-
-	/**
-	 * The sampling rate for the transcoded audio. <br>
-	 * The default rate is 44.1 kHz.
-	 */
-	transcoded_audio_sampling_rate,
-
-	/**
-	 * The audio codec used for the transcoded files. <br>
-	 * The default is <code>pcm_s16le</code>: signed 16 bit little endian PCM. <br>
-	 * See <a href="http://www.sauronsoftware.it/projects/jave/manual.php#8">
-	 * The JAVE (Java Audio Video Encoder) library web site. </a>
-	 */
-	transcoded_audio_codec,
-
-	/**
-	 * The audio format (container) used for the transcoded files. <br>
-	 * The default is <code>wav</code>. <br>
-	 * See <a href="http://www.sauronsoftware.it/projects/jave/manual.php#8">
-	 * The JAVE (Java Audio Video Encoder) library web site. </a>
-	 */
-	transcoded_audio_format,
-
-	/**
-	 * The number of channels in the transcoded audio files. If the source is
-	 * mono and the number of channels is 2 a file with two identical channels
-	 * is created. If the source is stereo and the number of channels is 1 the
-	 * two channels are down mixed. <br>
-	 * The default is mono so 1 channel.
-	 */
-	transcoded_audio_number_of_channels,
+	transcoded_audio_to,
 
 	/**
 	 * The pitch tracker currently in use.

@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -14,6 +12,7 @@ import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -146,7 +145,7 @@ public final class Rank extends AbstractTarsosApp {
 				}
 				histo = ToneScaleHistogram.createToneScale(peaks);
 				return histo;
-			} catch (UnsupportedAudioFileException e) {
+			} catch (EncoderException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

@@ -27,7 +27,7 @@ public final class StringUtils {
 	 * @return A string with non ASCII chars replaced by underscore.
 	 */
 	private static String filterNonAscii(final String inString) {
-		// Create the encoder and decoder for the character encoding
+		// Create the encoder and decoder for the character attributes
 		final Charset charset = Charset.forName("US-ASCII");
 		final CharsetDecoder decoder = charset.newDecoder();
 		final CharsetEncoder encoder = charset.newEncoder();
@@ -43,7 +43,7 @@ public final class StringUtils {
 			final CharBuffer cbuf = decoder.decode(bbuf);
 			result = cbuf.toString();
 		} catch (final CharacterCodingException cce) {
-			FileUtils.LOG.severe("Exception during character encoding/decoding: " + cce.getMessage());
+			FileUtils.LOG.severe("Exception during character attributes/decoding: " + cce.getMessage());
 		}
 
 		return result;

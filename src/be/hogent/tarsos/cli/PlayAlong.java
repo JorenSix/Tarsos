@@ -16,7 +16,6 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.Transmitter;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 
 import be.hogent.tarsos.Tarsos;
@@ -31,6 +30,7 @@ import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.sampled.pitch.VampPitchDetection;
+import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.virtualkeyboard.PianoTestFrame;
 import be.hogent.tarsos.ui.virtualkeyboard.VirtualKeyboard;
 import be.hogent.tarsos.util.AudioFile;
@@ -186,9 +186,8 @@ public final class PlayAlong {
 
 				currentSample = sampleIterator.next();
 			}
-		} catch (UnsupportedAudioFileException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (EncoderException e) {
+			e.printStackTrace();
 		}
 
 	}
