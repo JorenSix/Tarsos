@@ -14,7 +14,7 @@ public final class Yin implements PurePitchDetector {
 	 * The default YIN threshold value. Should be around 0.10~0.15. See YIN
 	 * paper for more information.
 	 */
-	private static final double DEFAULT_THRESHOLD = 0.15;
+	private static final double DEFAULT_THRESHOLD = 0.20;
 
 	/**
 	 * The default size of an audio buffer (in samples).
@@ -47,10 +47,31 @@ public final class Yin implements PurePitchDetector {
 	 */
 	private float probability;
 
+	/**
+	 * Create a new pitch detector for a stream with the defined sample rate.
+	 * Processes the audio in blocks of the defined size.
+	 * 
+	 * @param audioSampleRate
+	 *            The sample rate of the audio stream. E.g. 44.1 kHz.
+	 * @param bufferSize
+	 *            The size of a buffer. E.g. 1024.
+	 */
 	public Yin(final float audioSampleRate, final int bufferSize) {
 		this(audioSampleRate, bufferSize, DEFAULT_THRESHOLD);
 	}
 
+	/**
+	 * Create a new pitch detector for a stream with the defined sample rate.
+	 * Processes the audio in blocks of the defined size.
+	 * 
+	 * @param audioSampleRate
+	 *            The sample rate of the audio stream. E.g. 44.1 kHz.
+	 * @param bufferSize
+	 *            The size of a buffer. E.g. 1024.
+	 * @param yinThreshold
+	 *            The parameter that defines which peaks are kept as possible
+	 *            pitch candidates. See the YIN paper for more details.
+	 */
 	public Yin(final float audioSampleRate, final int bufferSize, final double yinThreshold) {
 		this.sampleRate = audioSampleRate;
 		this.threshold = yinThreshold;
@@ -58,8 +79,8 @@ public final class Yin implements PurePitchDetector {
 	}
 
 	/**
-	 * The main flow of the AUBIO_YIN algorithm. Returns a pitch value in Hz or
-	 * -1 if no pitch is detected.
+	 * The main flow of the YIN algorithm. Returns a pitch value in Hz or -1 if
+	 * no pitch is detected.
 	 * 
 	 * @return a pitch value in Hz or -1 if no pitch is detected.
 	 */
@@ -84,7 +105,7 @@ public final class Yin implements PurePitchDetector {
 			// step 6
 			// TODO Implement optimization for the AUBIO_YIN algorithm.
 			// 0.77% => 0.5% error rate,
-			// using the data of the AUBIO_YIN paper
+			// using the data of the YIN paper
 			// bestLocalEstimate()
 
 			// conversion to Hz
@@ -95,8 +116,8 @@ public final class Yin implements PurePitchDetector {
 	}
 
 	/**
-	 * Implements the difference function as described in step 2 of the
-	 * AUBIO_YIN paper.
+	 * Implements the difference function as described in step 2 of the YIN
+	 * paper.
 	 */
 	private void difference(final float[] audioBuffer) {
 		int index, tau;
@@ -114,7 +135,7 @@ public final class Yin implements PurePitchDetector {
 
 	/**
 	 * The cumulative mean normalized difference function as described in step 3
-	 * of the AUBIO_YIN paper. <br>
+	 * of the YIN paper. <br>
 	 * <code>
 	 * yinBuffer[0] == yinBuffer[1] = 1
 	 * </code>
@@ -122,14 +143,8 @@ public final class Yin implements PurePitchDetector {
 	private void cumulativeMeanNormalizedDifference() {
 		int tau;
 		yinBuffer[0] = 1;
-		// Very small optimization in comparison with AUBIO
-		// start the running sum with the correct value:
-		// the first value of the yinBuffer
-		float runningSum = yinBuffer[1] + 1;
-		// yinBuffer[1] is always 1
-		yinBuffer[1] = 1;
-		// now start at tau = 2
-		for (tau = 2; tau < yinBuffer.length; tau++) {
+		float runningSum = 0;
+		for (tau = 1; tau < yinBuffer.length; tau++) {
 			runningSum += yinBuffer[tau];
 			yinBuffer[tau] *= tau / runningSum;
 		}
@@ -141,8 +156,10 @@ public final class Yin implements PurePitchDetector {
 	private int absoluteThreshold() {
 		// Uses another loop construct
 		// than the AUBIO implementation
-		int tau = 1;
-		for (tau = 1; tau < yinBuffer.length; tau++) {
+		int tau;
+		// first two positions in yinBuffer are always 1
+		// So start at the third (index 2)
+		for (tau = 2; tau < yinBuffer.length; tau++) {
 			if (yinBuffer[tau] < threshold) {
 				while (tau + 1 < yinBuffer.length && yinBuffer[tau + 1] < yinBuffer[tau]) {
 					tau++;
@@ -220,6 +237,11 @@ public final class Yin implements PurePitchDetector {
 		return betterTau;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see be.hogent.tarsos.sampled.pitch.PurePitchDetector#getProbability()
+	 */
 	public float getProbability() {
 		return probability;
 	}
