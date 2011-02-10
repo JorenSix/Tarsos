@@ -40,7 +40,7 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
      */
 	private static final long serialVersionUID = 5493280409705136547L;
 	private static final int AMBITUS_STOP = Configuration.getInt(ConfKey.ambitus_stop);
-	private static final int AMBITUS_START = Configuration.getInt(ConfKey.ambitus_start);
+	//private static final int AMBITUS_START = Configuration.getInt(ConfKey.ambitus_start);
 
 	private final HashMap<PitchDetectionMode, Histogram> histos;
 	private final List<Layer> layers;

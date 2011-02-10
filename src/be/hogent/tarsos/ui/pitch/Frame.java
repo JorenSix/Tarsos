@@ -269,6 +269,13 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 				line.open(format, numberOfSamples);
 				line.start();
 				final AudioInputStream stream = new AudioInputStream(line);
+				
+				//only use detectors that can provide live annotations
+				PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
+				if (mode!=PitchDetectionMode.TARSOS_MPM || mode != PitchDetectionMode.TARSOS_YIN ){
+					//default to YIN
+					mode = PitchDetectionMode.TARSOS_YIN;
+				}
 
 				final AnnotationPublisher publisher = AnnotationPublisher.getInstance();
 				final AnnotationTree tree = publisher.getAnnotationTree();
@@ -287,7 +294,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 								prevTime = currentTime;
 							}
 						}
-					}, PitchDetectionMode.TARSOS_MPM);
+					}, mode);
 				} catch (UnsupportedAudioFileException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

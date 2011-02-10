@@ -24,9 +24,7 @@ package be.hogent.tarsos.sampled.hpss;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 
-import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;

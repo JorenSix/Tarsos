@@ -15,7 +15,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 
-import be.hogent.tarsos.util.FileDrop.TransferableObject;
+//import be.hogent.tarsos.util.FileDrop.TransferableObject;
 
 /**
  * This class makes it easy to drag and drop files from the operating system to
