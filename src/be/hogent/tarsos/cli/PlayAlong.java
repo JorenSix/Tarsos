@@ -1,8 +1,5 @@
 package be.hogent.tarsos.cli;
 
-import gnu.getopt.Getopt;
-import gnu.getopt.LongOpt;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -57,39 +54,9 @@ public final class PlayAlong {
 
 	public static void main(final String[] args) throws MidiUnavailableException, InterruptedException,
 			IOException {
-		final LongOpt[] longopts = new LongOpt[4];
-		longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
-		longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
-		longopts[2] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
-		longopts[3] = new LongOpt("midi_in", LongOpt.NO_ARGUMENT, null, 'm');
-
-		final Getopt g = new Getopt("playalong", args, "-bufferCount:d:h:m", longopts);
-		int device = -1;
+		
 		String detectorString = "TARSOS";
 		String fileName = null;
-
-		int c;
-		while ((c = g.getopt()) != -1) {
-			final String arg = g.getOptarg();
-			switch (c) {
-			case 'i':
-				fileName = arg;
-				break;
-			case 'd':
-				detectorString = arg.toUpperCase();
-				break;
-			case 'm':
-				device = Integer.parseInt(arg);
-				break;
-			case 'h':
-			default:
-				printHelp();
-				System.exit(0);
-				return;
-
-			}
-		}
-
 		if (fileName == null || !FileUtils.exists(fileName)) {
 			printHelp();
 			System.exit(-1);
@@ -141,7 +108,7 @@ public final class PlayAlong {
 				Receiver recv;
 				recv = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
 				keyboard.setReceiver(recv);
-
+				int device = -1;
 				MidiDevice virtualMidiInputDevice;
 				if (device == -1) {
 					virtualMidiInputDevice = MidiCommon.chooseMidiDevice(true, false);

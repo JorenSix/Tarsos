@@ -1,8 +1,5 @@
 package be.hogent.tarsos.cli.temp;
 
-import gnu.getopt.Getopt;
-import gnu.getopt.LongOpt;
-
 import java.util.List;
 import java.util.TreeMap;
 
@@ -32,33 +29,10 @@ public final class ToneScaleMatcher {
 	}
 
 	public static void main(final String... args) throws EncoderException {
-		final LongOpt[] longopts = new LongOpt[3];
-		longopts[0] = new LongOpt("in", LongOpt.REQUIRED_ARGUMENT, null, 'i');
-		longopts[1] = new LongOpt("detector", LongOpt.REQUIRED_ARGUMENT, null, 'd');
-		longopts[2] = new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h');
-		final Getopt g = new Getopt("tonescalematcher", args, "-bufferCount:h:d", longopts);
-
+		
 		String detector = "IPEM_SIX";
 		String inputFile = null;
-		int c;
-		while ((c = g.getopt()) != -1) {
-			final String arg = g.getOptarg();
-			switch (c) {
-			case 'i':
-				inputFile = arg;
-				break;
-			case 'd':
-				detector = arg.toUpperCase();
-				break;
-			case 'h':
-				printHelp();
-				System.exit(0);
-				return;
-			default:
-				throw new AssertionError("Your argument is invalid.");
-			}
-		}
-
+		
 		if (inputFile == null || !FileUtils.exists(inputFile)) {
 			printHelp();
 			System.exit(-1);
