@@ -10,6 +10,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 public final class StringUtils {
 
@@ -69,13 +70,32 @@ public final class StringUtils {
 		newBaseName = filterNonAscii(newBaseName);
 		return data.replace(baseName, newBaseName);
 	}
+	
+	
+	/**
+	 * Joins elements in a list with separator.
+	 * @param data
+	 * @param separator
+	 * @return A joined list, joined by the separator.
+	 */
+	public static String join(final List<String> data,String separator) {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0 ; i < data.size();i++){
+			sb.append(data.get(i));
+			//append with separator unless last element
+			if (i != data.size() - 1 ){
+				sb.append(separator);
+			}
+		}
+		return sb.toString();
+	}
 
 	/**
 	 * Calculates an MD5 hash for a text.
 	 * 
 	 * @param dataToEncode
 	 *            The data to encode.
-	 * @return A text representation of a hexadecimal value of lenght 32.
+	 * @return A text representation of a hexadecimal value of length 32.
 	 */
 	public static String messageDigestFive(final String dataToEncode) {
 		MessageDigest m;

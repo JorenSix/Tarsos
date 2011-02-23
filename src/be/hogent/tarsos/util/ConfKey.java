@@ -82,6 +82,11 @@ public enum ConfKey {
 	 * The pitch tracker currently in use.
 	 */
 	pitch_tracker_current,
+	
+	/**
+	 * The pitch trackers currently in use.
+	 */
+	pitch_tracker_list,
 
 	/**
 	 * A MIDI device used as INPUT.
@@ -134,6 +139,21 @@ public enum ConfKey {
 	 * (HERTZ|RELATIVE_CENTS|ABSOLUTE_CENTS|MIDI_KEY|MIDI_CENT).
 	 */
 	pitch_contour_unit,
+	
+	/**
+	 * The location to import a file with a file chooser dialog.
+	 */
+	file_import_dir(true),
+	
+	/**
+	 * The location to export a file with a file chooser dialog.
+	 */
+	file_export_dir(true),
+	
+	/**
+	 * Files recently analysed.
+	 */
+	file_recent,
 
 	/**
 	 * Start Tarsos in Tarsos Live(tm) mode: analyse microphone input in in
@@ -143,7 +163,11 @@ public enum ConfKey {
 	/**
 	 * Microphone mixer to use with Tarsos Live(tm).
 	 */
-	microphone_device_mixer;
+	mixer_input_device,
+	/**
+	 * Sound card device index.
+	 */
+	mixer_output_device;
 
 	/**
 	 * True if the configured key is a required directory. False otherwise.

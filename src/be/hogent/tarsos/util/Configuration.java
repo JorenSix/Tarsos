@@ -1,8 +1,10 @@
 package be.hogent.tarsos.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -32,6 +34,12 @@ public final class Configuration {
 	 * The suffix used for a discription of a configuration setting.
 	 */
 	private static final String DESCIPTION_SUFFIX = "_descr";
+	
+	
+	/**
+	 * A separator to split string lists.
+	 */
+	private static final String SEPARATOR = " __,__ ";
 
 	/**
 	 * A list of listeners that are notified when a configuration setting
@@ -216,7 +224,7 @@ public final class Configuration {
 	public static void set(final ConfKey key, final String value) {
 		if (value == null) {
 			return;
-		}
+		}			
 		try {
 			final String actualValue = sanitizeConfiguredValue(key.name(), value);
 			userPreferences.put(key.name(), actualValue);
@@ -228,6 +236,30 @@ public final class Configuration {
 		for (ConfigChangeListener listener : LISTENERS) {
 			listener.configurationChanged(key);
 		}
+	}
+	
+	/**
+	 * Store a list of strings.
+	 * @param key the configuration key.
+	 * @param list The list of strings.
+	 */
+	private static void setList(final ConfKey key,final List<?> list){
+		List<String> strings = new ArrayList<String>();
+		for(Object o:list){
+			strings.add(o.toString());
+		}
+		String values = StringUtils.join(strings, SEPARATOR);
+		set(key,values);
+	}
+	
+	/**
+	 * Return a list of values stored with a key
+	 * @param key The key.
+	 * @return A list of configured values.
+	 */
+	public static List<String> getList(final ConfKey key){
+		String[] values = get(key).split(SEPARATOR);
+		return new ArrayList<String>(Arrays.asList(values));
 	}
 
 	/**
@@ -256,13 +288,18 @@ public final class Configuration {
 	}
 
 	/**
-	 * See the other set method.
+	 * Delegates to either the set(String) method or setList method to store
+	 * strings or lists respectively.
 	 * 
 	 * @param key
 	 * @param value
 	 */
 	public static void set(final ConfKey key, final Object value) {
-		set(key, value.toString());
+		if(value instanceof List<?>)
+			setList(key, (List<?>) value);
+		else
+			set(key, value.toString());
+		
 	}
 
 	/**
@@ -315,5 +352,9 @@ public final class Configuration {
 
 	private static boolean isActualConfiguredValue(final String key) {
 		return !key.endsWith(DESCIPTION_SUFFIX) && !key.endsWith(HUMAN_NAME_SUFFIX);
+	}
+
+	public static File getFile(ConfKey key) {
+		return new File(get(key));
 	}
 }
