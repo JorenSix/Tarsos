@@ -21,8 +21,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import be.hogent.tarsos.util.AudioFile;
-import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
@@ -202,45 +200,6 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 				}
 			});
 
-			JButton exportScalaButton = new JButton("Export Scala");
-			exportScalaButton.setToolTipText("Export scala file.");
-			exportScalaButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (scale != null) {
-						ScalaFile file = new ScalaFile("Tarsos exported scala file", scale);
-						String path = FileUtils.combine(audioFile.transcodedDirectory(), audioFile.basename()
-								+ ".scl");
-						file.write(path);
-						LOG.info(String.format("Saved a scala file to %s", path));
-					}
-				}
-			});
-
-			JButton exportHistoButton = new JButton("Export Histogram");
-			exportHistoButton.setToolTipText("Export Histogram file.");
-			exportHistoButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (scale != null) {
-						String path = FileUtils.combine(audioFile.transcodedDirectory(), audioFile.basename()
-								+ "_histo.txt");
-						histo.export(path);
-						LOG.info(String.format("Saved a histogram file to %s", path));
-					}
-				}
-			});
-
-			JButton exportHistoMatlabButton = new JButton("Export Histogram (Matlab)");
-			exportHistoMatlabButton.setToolTipText("Export matlab Histogram file.");
-			exportHistoMatlabButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					if (scale != null) {
-						String path = FileUtils.combine(audioFile.transcodedDirectory(), audioFile.basename()
-								+ "_histo_matlab.m");
-						histo.exportMatLab(path);
-						LOG.info(String.format("Saved a matlab histogram file to %s", path));
-					}
-				}
-			});
 
 			FormLayout layout = new FormLayout("right:min,2dlu,min:grow");
 			DefaultFormBuilder builder = new DefaultFormBuilder(layout);
@@ -250,9 +209,6 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 			builder.append("Quality:", probabilitySlider, true);
 			builder.append("Smooth:", smoothButton, true);
 			builder.append("Reset:", resetButton, true);
-			builder.append("Scala export:", exportScalaButton, true);
-			builder.append("Histo export:", exportHistoButton, true);
-			builder.append("Histo (matlab) export:", exportHistoMatlabButton, true);
 
 			ui = builder.getPanel();
 			ui.setInheritsPopupMenu(true);

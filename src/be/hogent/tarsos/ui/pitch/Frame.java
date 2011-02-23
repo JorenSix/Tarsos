@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +37,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 
 import org.noos.xing.mydoggy.Content;
@@ -154,6 +157,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		final WaveForm waveForm = new WaveForm();
 		final ControlPanel controlPanel = new ControlPanel(waveForm);
 		final KeyboardPanel keyboardPanel = new KeyboardPanel();
+		final Menu menu = new Menu();
 
 		// The annotation publisher is not a ui element.
 		final AnnotationPublisher annotationPublisher = AnnotationPublisher.getInstance();
@@ -168,6 +172,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		addScaleChangedListener(regression);
 		addScaleChangedListener(intervalTable);
 		addScaleChangedListener(keyboardPanel);
+		addScaleChangedListener(menu);
 
 		// Patch the audio file changed listeners.
 		addAudioFileChangedListener(annotationPublisher);
@@ -178,6 +183,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		addAudioFileChangedListener(waveForm);
 		addAudioFileChangedListener(controlPanel);
 		addAudioFileChangedListener(browser);
+		addAudioFileChangedListener(menu);
 
 		// Patch the annotation listeners
 		annotationPublisher.addListener(toneScalePane);
@@ -253,11 +259,13 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		}
 
 		checkTarsosLiveMode();
+		
+		setJMenuBar(menu);
 	}
 
 	private void checkTarsosLiveMode() {
 		if (Configuration.getBoolean(ConfKey.tarsos_live)) {
-			final int selected = Configuration.getInt(ConfKey.microphone_device_mixer);
+			final int selected = Configuration.getInt(ConfKey.mixer_input_device);
 			Mixer.Info selectedMixer = SampledAudioUtilities.getMixerInfo(false, true).get(selected);
 			final Mixer mixer = AudioSystem.getMixer(selectedMixer);
 			final AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
@@ -379,7 +387,6 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 	}
 
 	private void addFileDropListener() {
-
 		new FileDrop(this, new FileDrop.Listener() {
 			public void filesDropped(final java.io.File[] files) {
 				if (files.length != 1) {
@@ -387,30 +394,8 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 							"Dropped %s files. For the moment only ONE file should be dropped", files.length));
 				}
 				final File droppedFile = files[0];
-				if (droppedFile.getName().endsWith(".scl")) {
-					ScalaFile scalaFile = new ScalaFile(droppedFile.getAbsolutePath());
-					scaleChanged(scalaFile.getPitches(), false);
-				} else if (FileUtils.isAudioFile(droppedFile)) {
-
-					try {
-						AudioFile newAudioFile;
-						newAudioFile = new AudioFile(droppedFile.getAbsolutePath());
-						setAudioFile(newAudioFile);
-					} catch (EncoderException e) {
-						String message = String
-								.format("Failed to transcode %s.\n"
-										+ "Tarsos uses a platform dependent FFMPEG binary to transcode audio to %s\n"
-										+ "Either: \n"
-										+ "\t \t 1) FFMPEG does not know how to convert the audio.\n"
-										+ "\t \t 2) There is no FFMPEG binary included for your platform.\n"
-										+ "Try converting the audio manually to the format mentioned or disable transcoding.",
-										droppedFile.getName(), Configuration.get(ConfKey.transcoded_audio_to));
-						JOptionPane.showMessageDialog(Frame.this, message, "Transcoding audio failed",
-								JOptionPane.ERROR_MESSAGE);
-					}
-
-				}
 				LOG.fine(String.format("Dropped %s .", droppedFile.getAbsolutePath()));
+				setNewFile(droppedFile);
 			}
 		});
 	}
@@ -423,6 +408,54 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		// set a title
 		notifyAudioFileChangedListeners();
 	}
+	
+	
+	/**
+	 * Set a new audio or scala file.
+	 * @param newFile The new audio or scala file.
+	 */
+	public void setNewFile(final File newFile){
+		LOG.info("Opening: " + newFile.getName());
+		List<String> recentFiles = Configuration.getList(ConfKey.file_recent);
+		String path = newFile.getAbsolutePath();
+		int numberOfRecentFiles = 9;
+		if(recentFiles.contains(path)){
+			int index = recentFiles.indexOf(path);
+			recentFiles.remove(index);
+			recentFiles.add(0,path);
+		} else {
+			recentFiles.add(0,path);
+			while(recentFiles.size() > numberOfRecentFiles){
+				recentFiles.remove(numberOfRecentFiles);
+			}
+		}
+		
+		Configuration.set(ConfKey.file_recent,recentFiles);		
+		if (newFile.getName().toLowerCase().endsWith(".scl")) {
+			ScalaFile scalaFile = new ScalaFile(newFile.getAbsolutePath());
+			scaleChanged(scalaFile.getPitches(), false);
+		} else if (FileUtils.isAudioFile(newFile)) {
+			try {
+				AudioFile newAudioFile;
+				newAudioFile = new AudioFile(newFile.getAbsolutePath());
+				setAudioFile(newAudioFile);
+			} catch (EncoderException e) {
+				String message = String
+						.format("Failed to transcode %s.\n"
+								+ "Tarsos uses a platform dependent FFMPEG binary to transcode audio to %s\n"
+								+ "Either: \n"
+								+ "\t \t 1) FFMPEG does not know how to convert the audio.\n"
+								+ "\t \t 2) There is no FFMPEG binary included for your platform.\n"
+								+ "Try converting the audio manually to the format mentioned or disable transcoding.",
+								newFile.getName(), Configuration.get(ConfKey.transcoded_audio_to));
+				JOptionPane.showMessageDialog(Frame.this, message, "Transcoding audio failed",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		} else {
+			LOG.warning("Unrecognized file: " + newFile.getAbsolutePath());
+		}	
+	}
+
 
 	private AudioFile getAudioFile() {
 		return audioFile;
@@ -473,7 +506,33 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 	public void clearAnnotations() {
 		// NO OP
 	}
+	
+	  class Task extends SwingWorker<Void, Void> {
+	        @Override
+	        public Void doInBackground() {
+	            Random random = new Random();
+	            int progress = 0;
+	            setProgress(0);
+	            try {
+	                Thread.sleep(1000);
+	                while (progress < 100 && !isCancelled()) {
+	                    //Sleep for up to one second.
+	                    Thread.sleep(random.nextInt(1000));
+	                    //Make random progress.
+	                    progress += random.nextInt(10);
+	                    setProgress(Math.min(progress, 100));
+	                }
+	            } catch (InterruptedException ignore) {}
+	            return null;
+	        }
 
+	        @Override
+	        public void done() {
+	        }
+	    }
+
+	  ProgressMonitor progressMonitor;
+	  Task task;
 	public void extractionStarted() {
 		// Show waiting cursor.
 		setWaitState(true);
