@@ -157,7 +157,7 @@ public final class ToneSequenceBuilder {
 			final int overlappingsamples = 3000;
 
 			// signal
-			for (int sample = startSample; sample < stopSample; sample++) {
+			for (int sample = startSample; sample < floatBuffer.length; sample++) {
 				final double time = sample / sampleRate;
 				double fadingAmplitude = amplitude;
 				// fade in
