@@ -211,4 +211,9 @@ public final class IPEMPitchDetection implements PitchDetector {
 	public List<Annotation> getAnnotations() {
 		return this.annotations;
 	}
+
+	@Override
+	public double progress() {
+		return -1;
+	}
 }

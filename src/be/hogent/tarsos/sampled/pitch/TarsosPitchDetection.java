@@ -175,4 +175,9 @@ public final class TarsosPitchDetection implements PitchDetector {
 			new Thread(dispatcher, "Annotation publisher").run();
 		}
 	}
+
+	@Override
+	public double progress() {
+		return -1;
+	}
 }

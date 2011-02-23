@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 
 /**
  * The pitch detection mode defines which algorithm is used to detect pitch.
@@ -141,5 +143,25 @@ public enum PitchDetectionMode {
 
 	public String getDetectionModeName() {
 		return detectionModeName;
+	}
+	
+	/**
+	 * @return An array of pitch detection modes which are configured to be used.
+	 */
+	public static List<PitchDetectionMode> selected(){
+		List<String> trackers = Configuration
+				.getList(ConfKey.pitch_tracker_list);
+		List<PitchDetectionMode> modes = new ArrayList<PitchDetectionMode>();
+		try {
+
+			for (String tracker : trackers) {
+				modes.add(PitchDetectionMode.valueOf(tracker));
+			}
+		} catch (IllegalArgumentException ex) {
+			//fallback on default
+			Configuration.set(ConfKey.pitch_tracker_list, "TARSOS_YIN");
+			modes.add(TARSOS_YIN);
+		}
+		return modes;
 	}
 }

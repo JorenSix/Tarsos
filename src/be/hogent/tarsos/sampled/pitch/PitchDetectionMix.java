@@ -108,4 +108,9 @@ public final class PitchDetectionMix implements PitchDetector {
 		return this.annotations;
 	}
 
+	@Override
+	public double progress() {
+		return -1;
+	}
+
 }

@@ -13,6 +13,13 @@ public interface PitchDetector {
 	 * Execute the pitch detection process.
 	 */
 	List<Annotation> executePitchDetection();
+	
+	/**
+	 * Calculate and return an indicator for progress.
+	 * @return A value between 0.0 and 100. Indicating the progress made in
+	 *         percentage. Or -1 if the task has an inditerminate duration.
+	 */
+	double progress();
 
 	/**
 	 * @return a list of annotated samples
