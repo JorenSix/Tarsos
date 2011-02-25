@@ -170,6 +170,10 @@ public final class Tarsos {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					if(Tarsos.isMac()){
+						System.setProperty("apple.laf.useScreenMenuBar", "true");
+						System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Tarsos");
+					}
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				} catch (Exception e) {
 					log.log(Level.WARNING, "Unable to set system L&F, continue with default L&F", e);
@@ -179,6 +183,13 @@ public final class Tarsos {
 			}
 		});
 
+	}
+	
+	public static boolean isMac(){		 
+		String os = System.getProperty("os.name").toLowerCase();
+		//Mac
+	    return (os.indexOf( "mac" ) >= 0); 
+ 
 	}
 
 	/**
