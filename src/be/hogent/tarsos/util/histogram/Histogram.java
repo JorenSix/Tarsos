@@ -788,6 +788,22 @@ public class Histogram implements Cloneable {
 		}
 		return this;
 	}
+	
+	
+	/**
+	 * Takes the maximum of the bin value in each histogram and keeps it. 
+	 * @param other
+	 * @return
+	 */
+	public Histogram max(final Histogram other){
+		assert freqTable.keySet().size() == other.keySet().size();
+		assert start == other.start;
+		assert stop == other.stop;
+		for (final double key : freqTable.keySet()) {
+			this.setCount(key, Math.max(this.getCount(key),other.getCount(key)));
+		}
+		return this;
+	}
 
 	/**
 	 * Subtracts two histograms. The value for each bin of other is removed to
@@ -841,6 +857,8 @@ public class Histogram implements Cloneable {
 		}
 		return this;
 	}
+	
+
 
 	/**
 	 * Raises each class count to the power of exponent.

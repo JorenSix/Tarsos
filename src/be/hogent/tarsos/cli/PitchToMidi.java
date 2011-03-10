@@ -4,10 +4,12 @@ package be.hogent.tarsos.cli;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
@@ -55,10 +57,9 @@ public class PitchToMidi extends AbstractTarsosApp {
 	private Sequence sequence;
 	private Sequencer sequencer;
 
-	private final boolean[] keyOn;
-	private final boolean[] previousKeys;
-	private final int[] velocities;
-
+	private final Note[] notes;
+	private final List<Note> noteList;
+	
 	private int bufferCount = 0;
 
 	private boolean toFile;
@@ -69,9 +70,11 @@ public class PitchToMidi extends AbstractTarsosApp {
 
 	public PitchToMidi() {
 		track = null;
-		keyOn = new boolean[MIDI_NUMBERS];
-		velocities = new int[MIDI_NUMBERS];
-		previousKeys = new boolean[MIDI_NUMBERS];
+		notes = new Note[128];
+		for(int i = 0; i < MIDI_NUMBERS ; i++){
+			notes[i] = new Note(i);
+		}
+		noteList = Arrays.asList(notes);
 	}
 
 	/*
@@ -84,6 +87,100 @@ public class PitchToMidi extends AbstractTarsosApp {
 	public String description() {
 		return "Listens to incoming audio and fires midi events if the detected "
 				+ "pitch is close to a predefined pitch class.";
+	}
+	
+	private class MidiKey{
+		private final int noteNumber;
+		private boolean isOn;
+		
+		public MidiKey(final int midiNoteNumber){
+			noteNumber = midiNoteNumber;
+			isOn = false;
+		}
+		
+		public void push(Receiver receiver,int velocity){
+			sendNoteMessage(receiver, velocity);
+			isOn = true;
+		}
+		
+		public void release(Receiver receiver){
+			sendNoteMessage(receiver,0);
+			isOn = false;
+		}
+		
+		private void sendNoteMessage(Receiver receiver,int velocity){
+			final ShortMessage sm = new ShortMessage();
+			final int command = isOn ? ShortMessage.NOTE_OFF : ShortMessage.NOTE_ON;
+			try {
+				sm.setMessage(command, 1, noteNumber, velocity);
+			} catch (final InvalidMidiDataException e) {
+				//this should not happen
+			}
+			try{
+				receiver.send(sm, -1);
+			} catch(final IndexOutOfBoundsException e){
+				//when sending multiple midi events to a java synth it can throw
+				//index out of bounds exceptions. Ignore those
+				Tarsos.println("IndexOutOfBoundsException ignored");
+			}
+		}
+		
+		public boolean isOn(){
+			return isOn;
+		}
+	}
+	
+	private class Note{
+		private final int MIN_MIDI_VELOCITY = 15;
+		
+		private final MidiKey key;
+		private int velocity;
+		private boolean bigVelocityChange;
+		private long start;
+		private int maxNoteLength;//milliseconds
+		
+		
+		public Note(final int midiNoteNumber){
+			key = new MidiKey(midiNoteNumber);
+			velocity = -1;
+			start = -1;
+			//a random maximum note length of minimum
+			//100 ms and maximum 350ms.
+			maxNoteLength = (int) (100 + Math.random() * 250);
+		}
+		
+		public void setVelocity(final int newVelocity){
+			if(newVelocity < MIN_MIDI_VELOCITY){
+				if(velocity != -1){
+					bigVelocityChange = true;
+					velocity = -1;
+				} else {
+					bigVelocityChange = false;
+				}
+			} else {
+				if(newVelocity > 2 * velocity || newVelocity < 2 * velocity){
+					bigVelocityChange = true;
+				} else {
+					bigVelocityChange = true;
+				}
+				velocity = newVelocity;
+			}
+		}
+		
+		public void sound(final Receiver receiver){			
+			//send not off to long notes or notes with big change in velocity.			
+			boolean isLongNote = start != -1 && System.currentTimeMillis() - start > maxNoteLength;
+			boolean release = isLongNote || bigVelocityChange;
+			if(key.isOn() && release){
+				key.release(receiver);
+				start = -1;
+			}
+			//send not on to notes with big velocity change and a velocity
+			if(!key.isOn() && bigVelocityChange && velocity!=-1){
+				key.push(receiver, velocity);
+				start = System.currentTimeMillis();
+			}
+		}
 	}
 
 	/*
@@ -173,6 +270,10 @@ public class PitchToMidi extends AbstractTarsosApp {
 					final MidiDevice synth = MidiCommon.chooseMidiDevice(false, true);
 					synth.open();
 					receiver = synth.getReceiver();
+					notes[69].setVelocity(100);
+					notes[69].sound(receiver);
+					
+					
 				}
 
 				final int samplesPerBuffer;
@@ -204,8 +305,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 				}
 
 				proc.addAudioProcessor(processor);
-
-				final Thread thread = new Thread(proc);
+				final Thread thread = new Thread(proc,"Audio processor thread");
 				thread.start();
 				thread.join();
 			} catch (final LineUnavailableException e) {
@@ -224,6 +324,19 @@ public class PitchToMidi extends AbstractTarsosApp {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	@SuppressWarnings("unused")
+	private void sendTestMessage(Receiver receiver){
+		final ShortMessage sm = new ShortMessage();
+		final int command = ShortMessage.NOTE_ON;
+		final int velocity = 100;
+		try {
+			sm.setMessage(command, 1, 69, velocity);
+		} catch (final InvalidMidiDataException e) {
+			e.printStackTrace();
+		}
+		receiver.send(sm,-1);	
 	}
 
 	private class FFTAudioProcessor implements AudioProcessor {
@@ -274,8 +387,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 				final Pitch pitchObj = Pitch.getInstance(PitchUnit.MIDI_KEY, i);
 				final double pitchInHz = pitchObj.getPitch(PitchUnit.HERTZ);
 				final int bin = (int) (pitchInHz * fftSize / sampleRate);
-				keyOn[i] = amplitudes[bin] > MIN_MIDI_VELOCITY;
-				velocities[i] = (int) amplitudes[bin];
+				notes[i].setVelocity((int) amplitudes[bin]);
 			}
 
 			sendNoteMessages();
@@ -333,15 +445,9 @@ public class PitchToMidi extends AbstractTarsosApp {
 						+ Pitch.getInstance(PitchUnit.HERTZ, pitch).noteName() + "\t Frequency: "
 						+ (int) pitch + "Hz \t" + " MIDI note:" + PitchConverter.hertzToMidiCent(pitch);
 				Tarsos.println(lastDetectedNote);
-				for (int i = 0; i < 128; i++) {
-					keyOn[i] = false;
-					velocities[i] = 0;
-				}
-				keyOn[midiKey] = true;
-
 				// SPL is defined in db: 0 db = max => 128-SPL gives a MIDI
 				// velocity
-				velocities[midiKey] = 128 + (int) SignalPowerExtractor.soundPressureLevel(audioBuffer);
+				notes[midiKey].setVelocity(128 + (int) SignalPowerExtractor.soundPressureLevel(audioBuffer));
 				sendNoteMessages();
 			}
 		}
@@ -364,7 +470,6 @@ public class PitchToMidi extends AbstractTarsosApp {
 		 * be.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#processFull
 		 * (float[], byte[])
 		 */
-
 		public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
 			processOverlapping(audioFloatBuffer, audioByteBuffer);
 
@@ -388,33 +493,12 @@ public class PitchToMidi extends AbstractTarsosApp {
 		}
 	}
 
+	
 	public void sendNoteMessages() {
-		for (int i = 0; i < keyOn.length; i++) {
-			if (previousKeys[i] != keyOn[i]) {
-				final ShortMessage sm = new ShortMessage();
-
-				final int command = keyOn[i] ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF;
-				final int velocity = keyOn[i] ? velocities[i] : 0;
-				try {
-					sm.setMessage(command, 1, i, velocity);
-				} catch (final InvalidMidiDataException e) {
-					e.printStackTrace();
-				}
-				final double seconds = bufferCount * 1024.0 / 44100.0;
-				// 40 = the number of ticks per quarter note if the division
-				// type is PPQ
-				// 120 BPM => 2 BPS (second)
-
-				final double ticksPerSecond = 40 * 120 / 60.0;
-				final long ticks = (long) (seconds * ticksPerSecond);
-
-				if (toFile) {
-					track.add(new MidiEvent(sm, ticks * 2));
-				} else {
-					receiver.send(sm, -1);
-				}
-			}
-			previousKeys[i] = keyOn[i];
+		//shuffle order of note on messages
+		Collections.shuffle(noteList);
+		for(Note note : noteList) {
+			note.sound(receiver);
 		}
 	}
 

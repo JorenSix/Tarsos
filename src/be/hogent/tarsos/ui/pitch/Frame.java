@@ -70,8 +70,8 @@ import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.JLabelHandler;
 import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.TextAreaHandler;
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 
 /**
  * @author Joren Six
@@ -149,8 +149,8 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		JComponent headerPanel = new HeaderPanel();
 		JComponent statusBar = makeStatusBar();
 
-		final ToneScalePane toneScalePane = new ToneScalePane(new ToneScaleHistogram(), this);
-		final ToneScalePanel ambitusPanel = new ToneScalePanel(new AmbitusHistogram(), this);
+		final ToneScalePane toneScalePane = new ToneScalePane(new PitchClassHistogram(), this);
+		final ToneScalePanel ambitusPanel = new ToneScalePanel(new PitchHistogram(), this);
 		final PitchContour pitchContourPanel = new PitchContour();
 		final PitchContour regression = new PitchContour();
 		final IntervalTable intervalTable = new IntervalTable();
@@ -215,7 +215,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 		// add components to the window manager.
 
-		Content content = contentManager.addContent("Tone scale", "Tone scale", null, toneScalePane);
+		Content content = contentManager.addContent("Pitch Class Histogram", "Pitch Class Histogram", null, toneScalePane);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(false);
 
@@ -226,7 +226,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		content.setMinimized(false);
 
 		constraint = new MultiSplitConstraint(content, 2);
-		content = contentManager.addContent("Ambitus", "Ambitus", null, ambitusPanel, null, constraint);
+		content = contentManager.addContent("Pitch Histogram", "Pitch Histogram", null, ambitusPanel, null, constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 

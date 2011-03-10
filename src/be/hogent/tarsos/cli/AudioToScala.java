@@ -12,8 +12,8 @@ import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
@@ -78,13 +78,13 @@ public final class AudioToScala extends AbstractTarsosApp {
 			final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
 			pitchDetector.executePitchDetection();
 			final List<Annotation> samples = pitchDetector.getAnnotations();
-			final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
-			final ToneScaleHistogram scaleHistogram = ambitusHistogram.toneScaleHistogram();
+			final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
+			final PitchClassHistogram scaleHistogram = pitchHistogram.pitchClassHistogram();
 			scaleHistogram.plot(FileUtils.basename(scalaFile.getAbsolutePath()) + "png",
 					FileUtils.basename(scalaFile.getAbsolutePath()));
 			scaleHistogram.gaussianSmooth(1.0);
 			final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 15);
-			ToneScaleHistogram.exportPeaksToScalaFileFormat(scalaFile.getAbsolutePath(),
+			PitchClassHistogram.exportPeaksToScalaFileFormat(scalaFile.getAbsolutePath(),
 					FileUtils.basename(inputFile.getAbsolutePath()), peaks);
 		} catch (EncoderException e) {
 			// TODO Auto-generated catch block

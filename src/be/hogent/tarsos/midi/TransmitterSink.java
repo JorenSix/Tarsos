@@ -7,7 +7,7 @@ import javax.sound.midi.Transmitter;
 
 /**
  * Sends messages to a list of Transmitters. Can be used to send MIDI messages
- * to several receivers. Each transmitter in the sin should have the same
+ * to several receivers. Each transmitter in the sink should have the same
  * receiver (or ReceiverSink)
  * 
  * @author Joren Six

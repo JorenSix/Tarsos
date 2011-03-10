@@ -3,7 +3,7 @@ package be.hogent.tarsos.sampled.pitch;
 import java.util.List;
 import java.util.Locale;
 
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
 
 /**
  * An annotation has one time stamp, one pitch and an optional probability. Also
@@ -189,12 +189,12 @@ public final class Annotation implements Comparable<Annotation> {
 
 	}
 
-	public static AmbitusHistogram ambitusHistogram(final List<Annotation> annotations) {
-		final AmbitusHistogram ambitusHistogram = new AmbitusHistogram();
+	public static PitchHistogram pitchHistogram(final List<Annotation> annotations) {
+		final PitchHistogram pitchHistogram = new PitchHistogram();
 		for (final Annotation annotation : annotations) {
-			ambitusHistogram.add(annotation.getPitch(PitchUnit.ABSOLUTE_CENTS));
+			pitchHistogram.add(annotation.getPitch(PitchUnit.ABSOLUTE_CENTS));
 		}
-		return ambitusHistogram;
+		return pitchHistogram;
 	}
 
 	/**

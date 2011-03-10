@@ -71,7 +71,7 @@ public final class FileUtils {
 			final double midiCents = Double.parseDouble(data[2]);
 			final Pitch pitch = Pitch.getInstance(PitchUnit.MIDI_CENT, midiCents);
 			final Annotation s = new Annotation(time, pitch.getPitch(PitchUnit.HERTZ),
-					PitchDetectionMode.TARTINI_CSV);
+					PitchDetectionMode.TARSOS_MPM);
 			samples.add(s);
 		}
 		return samples;

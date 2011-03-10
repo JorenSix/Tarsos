@@ -15,8 +15,8 @@ import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.ScalaFile;
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
@@ -39,15 +39,15 @@ public final class ToneScaleMatcher {
 		}
 
 		double[] peaks = new ScalaFile(inputFile).getPitches();
-		final ToneScaleHistogram needleToneScale = ToneScaleHistogram
+		final PitchClassHistogram needleToneScale = PitchClassHistogram
 				.createToneScale(peaks, null, null, null);
 
 		final String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
 		final String globDirectory = FileUtils.combine(FileUtils.runtimeDirectory(), "audio");
 		final List<String> inputFiles = FileUtils.glob(globDirectory, pattern, false);
 		// two priority queues with info about same histograms
-		final TreeMap<Double, ToneScaleHistogram> toneScaleCorrelations;
-		toneScaleCorrelations = new TreeMap<Double, ToneScaleHistogram>();
+		final TreeMap<Double, PitchClassHistogram> toneScaleCorrelations;
+		toneScaleCorrelations = new TreeMap<Double, PitchClassHistogram>();
 		final TreeMap<Double, String> fileNameCorrelations = new TreeMap<Double, String>();
 
 		for (final String file : inputFiles) {
@@ -60,15 +60,15 @@ public final class ToneScaleMatcher {
 			}
 			pitchDetector.executePitchDetection();
 			final List<Annotation> samples = pitchDetector.getAnnotations();
-			final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
-			final ToneScaleHistogram toneScaleHistogram = ambitusHistogram.toneScaleHistogram();
-			toneScaleHistogram.gaussianSmooth(1.0);
-			final List<Peak> detectedPeaks = PeakDetector.detect(toneScaleHistogram, 10);
+			final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
+			final PitchClassHistogram pitchClassHistogram = pitchHistogram.pitchClassHistogram();
+			pitchClassHistogram.gaussianSmooth(1.0);
+			final List<Peak> detectedPeaks = PeakDetector.detect(pitchClassHistogram, 10);
 			peaks = new double[detectedPeaks.size()];
 			for (int i = 0; i < detectedPeaks.size(); i++) {
 				peaks[i] = detectedPeaks.get(i).getPosition();
 			}
-			final ToneScaleHistogram hayStackHistogram = ToneScaleHistogram.createToneScale(peaks, null,
+			final PitchClassHistogram hayStackHistogram = PitchClassHistogram.createToneScale(peaks, null,
 					null, null);
 
 			final int displacementForOptimalCorrelation = needleToneScale
@@ -91,7 +91,7 @@ public final class ToneScaleMatcher {
 		// if (toneScaleCorrelations.size() > 0) {
 		// final double bestCorrelation =
 		// toneScaleCorrelations.descendingKeySet().first();
-		// final ToneScaleHistogram hayStackHistogram =
+		// final PitchClassHistogram hayStackHistogram =
 		// toneScaleCorrelations.get(bestCorrelation);
 		// needleToneScale.plotCorrelation(hayStackHistogram,
 		// CorrelationMeasure.INTERSECTION);

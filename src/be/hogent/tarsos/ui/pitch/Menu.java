@@ -36,8 +36,8 @@ import be.hogent.tarsos.util.Configuration.ConfigChangeListener;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.SignalPowerExtractor;
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 
 public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileChangedListener {
 
@@ -110,8 +110,14 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		item.addActionListener(exportSynthesizedAnnotations);
 		exportMenu.add(item);
 		
+		final List<String> files = Configuration.getList(ConfKey.file_recent);
+		if(!files.isEmpty()){
+			menu.addSeparator();	
+		}
 		addRecentFilesToMenu(menu);
 		
+		//remove and add recent file menu if a file is opened
+		//or imported (by drag and drop).
 		Configuration.addListener(new ConfigChangeListener(){
 			@Override
 			public void configurationChanged(ConfKey key) {
@@ -130,7 +136,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		JMenuItem item;
 		recentFilesMenuItems = new ArrayList<JMenuItem>();
 		if (!files.isEmpty()) {
-			menu.addSeparator();
 			int index = 1;
 			for (final String recentFile : files) {
 				item = new JMenuItem(index + " "
@@ -451,7 +456,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
-					AmbitusHistogram pitchHistogram = Annotation.ambitusHistogram(annotations);
+					PitchHistogram pitchHistogram = Annotation.pitchHistogram(annotations);
 					String fileName = chosenFile.getAbsolutePath();
 					pitchHistogram.export(fileName);
 				}
@@ -469,7 +474,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
 					String fileName = chosenFile.getAbsolutePath();
-					ToneScaleHistogram pitchClassHistogram = ToneScaleHistogram.createToneScaleHistogram(annotations);
+					PitchClassHistogram pitchClassHistogram = PitchClassHistogram.createToneScaleHistogram(annotations);
 					pitchClassHistogram.export(fileName);
 				}
 			});

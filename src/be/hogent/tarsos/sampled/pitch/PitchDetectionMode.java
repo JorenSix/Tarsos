@@ -62,17 +62,7 @@ public enum PitchDetectionMode {
 	/**
 	 * The pure java MPM (Tartini pitch tracker) implementation of Tarsos.
 	 */
-	TARSOS_MPM("tarsos_mpm"),
-
-	/**
-	 * All.
-	 */
-	TARSOS_ALL("tarsos_ALL"),
-
-	/**
-	 * The pure java MPM (Tartini pitch tracker) implementation of Tarsos.
-	 */
-	TARTINI_CSV("tartini_csv");
+	TARSOS_MPM("tarsos_mpm");
 
 	/**
 	 * The name of the parameter.
@@ -118,21 +108,6 @@ public enum PitchDetectionMode {
 			break;
 		case TARSOS_MPM:
 			detector = new TarsosPitchDetection(audioFile, this);
-			break;
-		case TARSOS_ALL:
-			List<PitchDetector> subDetectors = new ArrayList<PitchDetector>();
-			// subDetectors.add(new CachingDetector(audioFile, new
-			// IPEMPitchDetection(audioFile,
-			// PitchDetectionMode.IPEM_ONE)));
-			subDetectors.add(new CachingDetector(audioFile, new IPEMPitchDetection(audioFile,
-					PitchDetectionMode.IPEM_SIX)));
-			subDetectors.add(new CachingDetector(audioFile, new TarsosPitchDetection(audioFile,
-					PitchDetectionMode.TARSOS_YIN)));
-			subDetectors.add(new CachingDetector(audioFile, new VampPitchDetection(audioFile,
-					PitchDetectionMode.VAMP_YIN_FFT)));
-			subDetectors.add(new CachingDetector(audioFile, new TarsosPitchDetection(audioFile,
-					PitchDetectionMode.TARSOS_MPM)));
-			detector = new PitchDetectionMix(subDetectors);
 			break;
 		default:
 			detector = new VampPitchDetection(audioFile, this);

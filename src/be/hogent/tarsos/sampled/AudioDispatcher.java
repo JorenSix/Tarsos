@@ -140,7 +140,6 @@ public final class AudioDispatcher implements Runnable {
 				// Read, convert and process consecutive overlapping buffers.
 				// Slide the buffer.
 				bytesRead = slideBuffer();
-
 			}
 
 			// as long as the stream has not ended or the number of bytes

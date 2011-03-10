@@ -23,9 +23,9 @@ import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.ScalaFile;
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
 import be.hogent.tarsos.util.histogram.Histogram;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 
 /**
  * @author Joren Six
@@ -120,9 +120,9 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 			final Histogram histo;
 			if (!histos.containsKey(annotation.getSource())) {
 				if (stop > 1200) {
-					histo = new AmbitusHistogram();
+					histo = new PitchHistogram();
 				} else {
-					histo = new ToneScaleHistogram();
+					histo = new PitchClassHistogram();
 				}
 				histos.put(annotation.getSource(), histo);
 				Color color = Tarsos.COLORS[annotation.getSource().ordinal() % Tarsos.COLORS.length];
@@ -139,7 +139,7 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 
 			histo.add(pitchInAbsCents);
 
-			// ToneScaleHistogram.addAnnotationTo(histoValues, annotation, 5,
+			// PitchClassHistogram.addAnnotationTo(histoValues, annotation, 5,
 			// stop > 1200 ? PitchUnit.ABSOLUTE_CENTS :
 			// PitchUnit.RELATIVE_CENTS);
 		}

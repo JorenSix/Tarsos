@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import be.hogent.tarsos.sampled.pitch.PitchConverter;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 
 /**
- * A representation of a scala file.
+ * A representation of a scala file.  See the <a href="http://www.huygens-fokker.org/scala/scl_format.html"> Scala scale file format</a>.
  * 
  * @author Joren Six
  */
@@ -137,10 +137,10 @@ public final class ScalaFile {
 	 * Builds a tone scale histogram using the pitches defined in this scala
 	 * file.
 	 * 
-	 * @return A ToneScaleHistogram using the correct pitches.
+	 * @return A PitchClassHistogram using the correct pitches.
 	 */
-	public ToneScaleHistogram buildHistogram() {
-		return ToneScaleHistogram.createToneScale(pitches.clone());
+	public PitchClassHistogram buildHistogram() {
+		return PitchClassHistogram.createToneScale(pitches.clone());
 	}
 
 	/**

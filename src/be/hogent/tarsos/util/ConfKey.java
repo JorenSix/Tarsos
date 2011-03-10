@@ -164,6 +164,12 @@ public enum ConfKey {
 	 * Microphone mixer to use with Tarsos Live(tm).
 	 */
 	mixer_input_device,
+	
+	/**
+	 * 	A scala file with pitch intervals used to compare detected intervals.
+	 */
+	interval_scala_file,
+	
 	/**
 	 * Sound card device index.
 	 */

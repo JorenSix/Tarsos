@@ -18,9 +18,9 @@ import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.ScalaFile;
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
 import be.hogent.tarsos.util.histogram.CorrelationMeasure;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
@@ -86,12 +86,12 @@ public final class Rank extends AbstractTarsosApp {
 			}
 			final PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
 
-			final ToneScaleHistogram needleHisto = createHisto(needleFile, detectionMode);
+			final PitchClassHistogram needleHisto = createHisto(needleFile, detectionMode);
 
 			final TreeMap<Double, String> tree = new TreeMap<Double, String>();
 
 			for (final File hay : hayStack) {
-				final ToneScaleHistogram hayHisto = createHisto(hay, detectionMode);
+				final PitchClassHistogram hayHisto = createHisto(hay, detectionMode);
 				final int displacement = needleHisto.displacementForOptimalCorrelation(hayHisto);
 				final Double correlation = needleHisto.correlationWithDisplacement(displacement, hayHisto);
 				final String plotFileName = hay.getName() + "_" + needleFile.getName() + ".png";
@@ -123,8 +123,8 @@ public final class Rank extends AbstractTarsosApp {
 		}
 	}
 
-	private ToneScaleHistogram createHisto(final File file, final PitchDetectionMode detectionMode) {
-		ToneScaleHistogram histo;
+	private PitchClassHistogram createHisto(final File file, final PitchDetectionMode detectionMode) {
+		PitchClassHistogram histo;
 		final String path = file.getAbsolutePath();
 		final String extension = FileUtils.extension(path);
 		if (extension.equalsIgnoreCase("scl")) {
@@ -136,14 +136,14 @@ public final class Rank extends AbstractTarsosApp {
 				final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
 				pitchDetector.executePitchDetection();
 				final List<Annotation> samples = pitchDetector.getAnnotations();
-				final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
-				final List<Peak> peakList = PeakDetector.detect(ambitusHistogram.toneScaleHistogram()
+				final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
+				final List<Peak> peakList = PeakDetector.detect(pitchHistogram.pitchClassHistogram()
 						.gaussianSmooth(0.8), 15);
 				final double[] peaks = new double[peakList.size()];
 				for (int i = 0; i < peaks.length; i++) {
 					peaks[i] = peakList.get(i).getPosition();
 				}
-				histo = ToneScaleHistogram.createToneScale(peaks);
+				histo = PitchClassHistogram.createToneScale(peaks);
 				return histo;
 			} catch (EncoderException e) {
 				// TODO Auto-generated catch block

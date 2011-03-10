@@ -1,21 +1,12 @@
 package be.hogent.tarsos.sampled;
 
-import java.util.logging.Logger;
-
 import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
-
-
-import be.hogent.tarsos.util.ConfKey;
-import be.hogent.tarsos.util.Configuration;
 
 /**
  * This AudioProcessor can be used to sync events with sound. It uses a pattern
- * described in JavaFX� Special Effects Taking Java� RIA to the Extreme with
+ * described in JavaFX Special Effects Taking Java RIA to the Extreme with
  * Animation, Multimedia, and Game Element Chapter 9 page 185: <blockquote><i>
  * The variable line is the Java Sound object that actually makes the sound. The
  * write method on line is interesting because it blocks until it is ready for
@@ -27,7 +18,6 @@ import be.hogent.tarsos.util.Configuration;
  */
 public final class BlockingAudioPlayer implements AudioProcessor {
 	
-	private static final Logger LOG = Logger.getLogger(BlockingAudioPlayer.class.getName());
 
 	/**
 	 * The line to send sound to. Is also used to keep everything in sync.
@@ -56,19 +46,7 @@ public final class BlockingAudioPlayer implements AudioProcessor {
 	 */
 	public BlockingAudioPlayer(final AudioFormat format, final int bufferSize, final int overlap)
 			throws LineUnavailableException {
-		final DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-		final Mixer.Info mixer = SampledAudioUtilities.getMixerInfo(true, false).get(Configuration.getInt(ConfKey.mixer_output_device));
-		line = (SourceDataLine) AudioSystem.getMixer(mixer).getLine(info);
-		try{
-			line.open();
-			line.start();
-		} catch(LineUnavailableException e){
-			LOG.warning("Could not open line on mixer '" + mixer.getName() + "' let's try again on the default mixer: " + e.getMessage());
-			line = (SourceDataLine)  AudioSystem.getLine(info);
-			line.open();
-			line.start();
-		}
-		
+		line = SampledAudioUtilities.getOpenLineFromConfiguredMixer(format);		
 		// overlap in samples * nr of bytes / sample = bytes overlap
 		this.byteOverlap = overlap * format.getFrameSize();
 		this.byteStepSize = bufferSize * format.getFrameSize() - byteOverlap;

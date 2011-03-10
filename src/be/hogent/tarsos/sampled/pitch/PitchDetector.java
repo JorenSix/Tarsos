@@ -17,7 +17,7 @@ public interface PitchDetector {
 	/**
 	 * Calculate and return an indicator for progress.
 	 * @return A value between 0.0 and 100. Indicating the progress made in
-	 *         percentage. Or -1 if the task has an inditerminate duration.
+	 *         percentage. Or -1 if the task has an indeterminate duration.
 	 */
 	double progress();
 

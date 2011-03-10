@@ -12,7 +12,7 @@ import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FFT;
 import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
 
 import com.sun.media.sound.AudioFloatInputStream;
 
@@ -57,16 +57,16 @@ public final class FFTBinHistogram {
 				e.printStackTrace();
 			}
 
-			final AmbitusHistogram ambitusHistogram = new AmbitusHistogram();
+			final PitchHistogram pitchHistogram = new PitchHistogram();
 
 			for (int i = 0; i < buffer.length / 2; i++) {
 				double amplitude = spectrum[i];
 				amplitude = 20.0 * Math.log1p(amplitude);
 				final double pitch = i * sampleRate / buffer.length / 2;
-				ambitusHistogram.setCount(pitch, (long) (amplitude * 10000000));
+				pitchHistogram.setCount(pitch, (long) (amplitude * 10000000));
 			}
-			ambitusHistogram.plot("fft amb.png", "amb fft");
-			ambitusHistogram.toneScaleHistogram().plot("fft tone scale.png", "fft tone scale test");
+			pitchHistogram.plot("fft amb.png", "amb fft");
+			pitchHistogram.pitchClassHistogram().plot("fft tone scale.png", "fft tone scale test");
 
 		} catch (final UnsupportedAudioFileException e) {
 			// TODO Auto-generated catch block

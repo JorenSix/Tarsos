@@ -19,8 +19,8 @@ import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileDrop;
 import be.hogent.tarsos.util.FileUtils;
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 
 public class BrowserPanel extends JPanel {
 
@@ -60,8 +60,8 @@ public class BrowserPanel extends JPanel {
 					final PitchDetector pitchDetector = mode.getPitchDetector(audioFile);
 					pitchDetector.executePitchDetection();
 					final List<Annotation> samples = pitchDetector.getAnnotations();
-					final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
-					final ToneScaleHistogram toneScaleHisto = ambitusHistogram.toneScaleHistogram();
+					final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
+					final PitchClassHistogram toneScaleHisto = pitchHistogram.pitchClassHistogram();
 					JComponent component = new ToneScalePanel(toneScaleHisto, null);
 					JPanel panel = new JPanel(new BorderLayout());
 					panel.setSize(128, 128);

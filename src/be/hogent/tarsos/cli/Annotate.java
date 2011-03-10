@@ -20,9 +20,9 @@ import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SignalPowerExtractor;
 import be.hogent.tarsos.util.SimplePlot;
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
 import be.hogent.tarsos.util.histogram.Histogram;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
@@ -61,14 +61,14 @@ public final class Annotate extends AbstractTarsosApp {
 		final String prefix = baseName + "_" + pitchDetector.getName();
 
 		final List<Annotation> samples = pitchDetector.getAnnotations();
-		final AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
+		final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
 		final String ambitusTXT = FileUtils.combine(directory, prefix + "_ambitus.txt");
 		final String ambitusPNG = FileUtils.combine(directory, prefix + "_ambitus.png");
 		final String toneScaleColor = prefix + "_tone_scale_colored.png";
-		ambitusHistogram.plotToneScaleHistogram(FileUtils.combine(directory, toneScaleColor), true);
-		ambitusHistogram.export(ambitusTXT);
-		ambitusHistogram.plot(ambitusPNG, "Ambitus " + baseName + " " + pitchDetector.getName());
-		final ToneScaleHistogram toneScaleHisto = ambitusHistogram.toneScaleHistogram();
+		pitchHistogram.plotToneScaleHistogram(FileUtils.combine(directory, toneScaleColor), true);
+		pitchHistogram.export(ambitusTXT);
+		pitchHistogram.plot(ambitusPNG, "Ambitus " + baseName + " " + pitchDetector.getName());
+		final PitchClassHistogram toneScaleHisto = pitchHistogram.pitchClassHistogram();
 		final String toneScaleTxt = FileUtils.combine(directory, prefix + "_tone_scale.txt");
 		final String toneScalePNG = FileUtils.combine(directory, prefix + "_tone_scale.png");
 		toneScaleHisto.export(toneScaleTxt);
@@ -82,7 +82,7 @@ public final class Annotate extends AbstractTarsosApp {
 		plot.addData(0, toneScaleHisto);
 		plot.addData(1, peakHistogram);
 		plot.save(FileUtils.combine(directory, peaksTitle + ".png"));
-		ToneScaleHistogram.exportPeaksToScalaFileFormat(FileUtils.combine(directory, peaksTitle + ".scl"),
+		PitchClassHistogram.exportPeaksToScalaFileFormat(FileUtils.combine(directory, peaksTitle + ".scl"),
 				peaksTitle, peaks);
 
 		try {

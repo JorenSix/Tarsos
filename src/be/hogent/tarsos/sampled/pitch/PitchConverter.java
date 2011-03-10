@@ -5,6 +5,8 @@ import java.util.List;
 
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.ScalaFile;
 
 /**
  * Converts pitch from one unit to another (and back (and back (and back ...))).
@@ -13,6 +15,9 @@ import be.hogent.tarsos.util.Configuration;
  */
 public final class PitchConverter {
 
+	/**
+	 * Hide the default constructor.
+	 */
 	private PitchConverter() {
 	}
 
@@ -136,7 +141,7 @@ public final class PitchConverter {
 
 	/**
 	 * Converts a frequency in Hz to a MIDI CENT value using
-	 * <code>(12 × log2 (f / 440)) + 69</code> <br>
+	 * <code>(12 ï¿½ log2 (f / 440)) + 69</code> <br>
 	 * E.g.<br>
 	 * <code>69.168 MIDI CENTS = MIDI NOTE 69  + 16,8 cents</code><br>
 	 * <code>69.168 MIDI CENTS = 440Hz + x Hz</code>
@@ -193,23 +198,29 @@ public final class PitchConverter {
 		cent = 1200 / Math.log10(2) * Math.log10(ratio);
 		return cent;
 	}
+	
+	private static ScalaFile scalaFile;
+	
+	private static void initializeScalaFile(){
+		String scalaFilePath = Configuration.get(ConfKey.interval_scala_file);
+		if(!FileUtils.exists(scalaFilePath)){
+			FileUtils.copyFileFromJar("/be/hogent/tarsos/sampled/pitch/resources/ratios.scl",scalaFilePath);
+		}
+		scalaFile = new ScalaFile(scalaFilePath);
+	}
 
 	// see
 	// http://en.wikipedia.org/wiki/Interval_(music)#Size_of_intervals_used_in_different_tuning_systems
 	public static String closestRatio(double cent) {
-		List<Double> ratios = Arrays.asList(1.0 / 1.0, 16.0 / 15.0, 9.0 / 8.0, 6.0 / 5.0, 5.0 / 4.0,
-				4.0 / 3.0, 3.0 / 2.0, 8.0 / 5.0, 5.0 / 3.0, 9.0 / 5.0, 15.0 / 8.0, 2.0 / 1.0);
-
-		List<String> ratioNames = Arrays.asList("Unison 1/1", "Minor second 16/15", "Major second 9/8",
-				"Minor third 6/5", "Major third 5/4", "Perfect fourth 4/3", "Perfect fifth 3/2",
-				"Minor sixth 8/5", "Major sixth 5/3", "Minor seventh 9/5", "Major seventh 15/8",
-				"Perfect octave 2/1");
-
+		if(scalaFile == null){
+			initializeScalaFile();
+		}
+		
 		double ratioToLookFor = centToRatio(cent);
 		double closestDistance = Integer.MAX_VALUE;
 		int closestIndex = -1;
-		for (int i = 0; i < ratios.size(); i++) {
-			double ratio = ratios.get(i);
+		for (int i = 0; i < scalaFile.getPitches().length; i++) {
+			double ratio =  centToRatio(scalaFile.getPitches()[i]);
 			double distance = (ratio - ratioToLookFor) * (ratio - ratioToLookFor);
 			if (distance < closestDistance) {
 				closestDistance = distance;
@@ -217,8 +228,8 @@ public final class PitchConverter {
 			}
 		}
 
-		long distanceInCents = Math.round(cent - ratioToCent(ratios.get(closestIndex)));
-		return String.format("%s %+d cents", ratioNames.get(closestIndex), distanceInCents);
+		long distanceInCents = Math.round(cent - scalaFile.getPitches()[closestIndex]);
+		return String.format("%s %+d cents", scalaFile.getPitchNames()[closestIndex], distanceInCents);
 
 	}
 }

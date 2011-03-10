@@ -12,7 +12,7 @@ import java.util.Vector;
 import org.apache.commons.math.stat.StatUtils;
 
 import be.hogent.tarsos.util.histogram.Histogram;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 
 /**
  * @author Joren Six
@@ -39,7 +39,7 @@ public final class PeakDetector {
 			peakPositionsDouble[i] = peaks.get(i).getPosition();
 			// peakHeights[i] = peaks.get(i).getHeight();
 		}
-		return ToneScaleHistogram.createToneScale(peakPositionsDouble);
+		return PitchClassHistogram.createToneScale(peakPositionsDouble);
 	}
 
 	/**

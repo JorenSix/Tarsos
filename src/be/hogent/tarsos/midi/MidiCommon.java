@@ -38,6 +38,8 @@ package be.hogent.tarsos.midi;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -191,7 +193,12 @@ public final class MidiCommon {
 		MidiDevice device = null;
 		try {
 			// choose MIDI input device
-			listDevices(inputDevice, outputDevice);
+			final List<MidiDevice.Info> aInfos = Arrays.asList(MidiSystem.getMidiDeviceInfo());
+			Vector<MoreMidiInfo> devices = listDevices(inputDevice, outputDevice);
+			for(MoreMidiInfo info : devices){
+				
+				Tarsos.println(aInfos.indexOf(info.getInfo()) + " " + info.toString());
+			}
 			String deviceType = "";
 			if (inputDevice) {
 				deviceType += " IN ";

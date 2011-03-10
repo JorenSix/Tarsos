@@ -12,8 +12,8 @@ import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.sampled.pitch.VampPitchDetection;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
-import be.hogent.tarsos.util.histogram.AmbitusHistogram;
-import be.hogent.tarsos.util.histogram.ToneScaleHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 
 public final class HistogramSummationTest {
 	private HistogramSummationTest() {
@@ -30,20 +30,20 @@ public final class HistogramSummationTest {
 		PitchDetector pitchDetector = new TarsosPitchDetection(audioFile, PitchDetectionMode.TARSOS_YIN);
 		pitchDetector.executePitchDetection();
 		List<Annotation> samples = pitchDetector.getAnnotations();
-		AmbitusHistogram ambitusHistogram = Annotation.ambitusHistogram(samples);
-		final ToneScaleHistogram toneScaleHistogramTarsosYin = ambitusHistogram.toneScaleHistogram();
+		PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
+		final PitchClassHistogram toneScaleHistogramTarsosYin = pitchHistogram.pitchClassHistogram();
 
 		pitchDetector = new VampPitchDetection(audioFile, PitchDetectionMode.VAMP_YIN);
 		pitchDetector.executePitchDetection();
 		samples = pitchDetector.getAnnotations();
-		ambitusHistogram = Annotation.ambitusHistogram(samples);
-		final ToneScaleHistogram toneScaleHistogramAbioYin = ambitusHistogram.toneScaleHistogram();
+		pitchHistogram = Annotation.pitchHistogram(samples);
+		final PitchClassHistogram toneScaleHistogramAbioYin = pitchHistogram.pitchClassHistogram();
 
 		pitchDetector = new IPEMPitchDetection(audioFile, PitchDetectionMode.IPEM_SIX);
 		pitchDetector.executePitchDetection();
 		samples = pitchDetector.getAnnotations();
-		ambitusHistogram = Annotation.ambitusHistogram(samples);
-		final ToneScaleHistogram toneScaleHistogramIPEM = ambitusHistogram.toneScaleHistogram();
+		pitchHistogram = Annotation.pitchHistogram(samples);
+		final PitchClassHistogram toneScaleHistogramIPEM = pitchHistogram.pitchClassHistogram();
 
 		toneScaleHistogramTarsosYin.normalize();
 		toneScaleHistogramAbioYin.normalize();

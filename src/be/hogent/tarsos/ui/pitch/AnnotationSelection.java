@@ -17,7 +17,7 @@ public final class AnnotationSelection {
 	private static final double DEFAULT_MIN_PROBABILITY = 0.0;
 	public static final double MAX_PROBABILITY = 1.0;
 
-	protected AnnotationSelection() {
+	public AnnotationSelection() {
 		setSelection(MINIMUM_TIME, MAXIMUM_TIME, MINIMUM_PITCH, MAXIMUM_PITCH, DEFAULT_MIN_PROBABILITY);
 	}
 

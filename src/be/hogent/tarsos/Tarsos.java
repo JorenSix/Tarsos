@@ -171,8 +171,8 @@ public final class Tarsos {
 			public void run() {
 				try {
 					if(Tarsos.isMac()){
-						System.setProperty("apple.laf.useScreenMenuBar", "true");
-						System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Tarsos");
+						//System.setProperty("apple.laf.useScreenMenuBar", "true");
+						//System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Tarsos");
 					}
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				} catch (Exception e) {
