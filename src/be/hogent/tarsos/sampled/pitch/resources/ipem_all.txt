@@ -1,0 +1,23 @@
+pitchdetection all	=> genereert erg veel info
+
+B. pitchdetection all
+	in deze file wordt alle data bewaard die geëxtraheerd werd.
+	Dit is een overzicht van alle kolommen.
+	De txt is vaak evengroot als de audio!
+kolommen:
+1    : frametijd
+2-41:luidheden per kanaal
+42-81: roughness components per kanaal
+82-121: noisynesscomponents per kanaal
+122: aantal samples of the total loudness (5)
+123-127: samples of the total loudness every 2 ms
+128: the number of following pure tone triplets (8)
+129-152: pure tone triplets (value in cbu,value in Hz and evidence) and their evidences as derived from the auditory spectrum
+153-154: pitch and voicing evidence
+155: lag precision of the autocorrelation function (0.181406 ms)
+156: number of autocorrelation lags  (110)
+157-266: autocorrelation function
+267: aantal pitch kandidaten per frame berekend met AMPEX (6)
+268-279: pitch kandidaten per frame (in kHz) berekend met AMPEX, tesamen met hun evidenties
+280: aantal pitch kandidaten per frame berekend met combo (AMPEX+SHS)
+281-292: pitch kandidaten per frame (in kHz) berekend met combo (AMPEX+SHS), tesamen met hun evidenties
