@@ -1,0 +1,16 @@
+! ratios.scl
+!
+A list of integer ratios present in lots of music.
+ 12
+!
+16/15 Minor second
+9/8 Major second
+6/5 Minor third
+5/4 Major third
+4/3 Perfect fourth
+3/2 Perfect fifth
+8/5 Minor sixth
+5/3 Major sixth
+9/5 Minor seventh
+15/8 Mjor seventh
+2/1 Perfect Octave
