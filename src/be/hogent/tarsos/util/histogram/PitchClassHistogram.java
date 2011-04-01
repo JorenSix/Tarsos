@@ -202,9 +202,23 @@ public final class PitchClassHistogram extends Histogram {
 	public static PitchClassHistogram createToneScaleHistogram(final List<Annotation> annotations,
 			final double width) {
 		// 1200 pitch classes should be enough for everybody!
-		double[] values = new double[1200];
+		double[] accumulator = new double[1200];
+
+		double calculationAria = 5 * width;// hehe aria, not area
+		double halfWidth = width / 2.0;
+		
+		//Compute a kernel: a lookup table with e.g. a gaussian curve
+		double kernel[] = new double[(int)calculationAria*2+1];
+		double difference =  - calculationAria;
+		for(int i = 0 ; i < kernel.length; i++){
+			double power = Math.pow(difference / halfWidth, 2.0);
+			kernel[i] = Math.pow(Math.E, -0.5 * power);
+			difference++;
+		}
 
 		/*
+		 * Add a kernel to an accumulator for each annotation.
+		 * 
 		 * When a kernel with a width of 7 is added at 1 cents it has influence
 		 * on the bins from 1200 - 7 * 10 + 1 to 1 + 7 * 10 so from 1131 to 71.
 		 * To make the modulo calculation easy 1200 is added to each value: -69
@@ -212,24 +226,22 @@ public final class PitchClassHistogram extends Histogram {
 		 * what I mean. This algorithm is O(2 * 10 * width * n) with n the
 		 * number of annotations => not so efficient.
 		 */
-		double calculationAria = 5 * width;// hehe aria, not area
-		double halfWidth = width / 2.0;
-
+	
 		for (Annotation annotation : annotations) {
 			double pitch = annotation.getPitch(PitchUnit.RELATIVE_CENTS);
 			int start = (int) (pitch + 1200 - calculationAria);
 			int stop = (int) (pitch + 1200 + calculationAria);
-			double difference = start - (pitch + 1200);
+			int kernelIndex = 0;
 			for (int i = start; i < stop; i++) {
-				double power = Math.pow(difference / halfWidth, 2.0);
-				values[i % 1200] += Math.pow(Math.E, -0.5 * power);
-				difference++;
+				accumulator[i % 1200] += kernel[kernelIndex];
+				kernelIndex++;
 			}
 		}
 
+		//Wrap the accumulator in a tone scale histo.
 		PitchClassHistogram toneScale = new PitchClassHistogram();
 		for (int i = 0; i < 1200; i++) {
-			toneScale.setCount(i, (long) values[i]);
+			toneScale.setCount(i, (long) accumulator[i]);
 		}
 		return toneScale;
 	}
