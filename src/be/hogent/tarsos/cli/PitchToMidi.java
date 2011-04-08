@@ -271,9 +271,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 					synth.open();
 					receiver = synth.getReceiver();
 					notes[69].setVelocity(100);
-					notes[69].sound(receiver);
-					
-					
+					notes[69].sound(receiver);					
 				}
 
 				final int samplesPerBuffer;
@@ -343,7 +341,6 @@ public class PitchToMidi extends AbstractTarsosApp {
 
 		// piano keys go from MIDI number 21 to 108
 		private final int MAX_MIDI_VELOCITY = 108;
-		private final int MIN_MIDI_VELOCITY = 15;
 		private final int START_MIDI_KEY = 25;
 		private final int STOP_MIDI_KEY = 108;
 
@@ -378,9 +375,13 @@ public class PitchToMidi extends AbstractTarsosApp {
 				minAmpl = Math.min(minAmpl, ampl);
 			}
 			maxAmpl = maxAmpl - minAmpl;
+			float currentMax = 0;
 			for (int i = 0; i < amplitudes.length; i++) {
-				amplitudes[i] = MAX_MIDI_VELOCITY * (amplitudes[i] - minAmpl) / maxAmpl;
+				amplitudes[i] = MAX_MIDI_VELOCITY *  ((amplitudes[i]) - minAmpl) / maxAmpl;
+				currentMax = Math.max(currentMax,amplitudes[i]);
 			}
+			
+			System.out.println(currentMax);
 
 			// piano keys go from MIDI number 21 to 108
 			for (int i = START_MIDI_KEY; i < STOP_MIDI_KEY; i++) {

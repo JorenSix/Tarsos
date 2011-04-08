@@ -67,6 +67,8 @@ public final class StringUtils {
 		newBaseName = newBaseName.replaceAll("\\(", "-");
 		newBaseName = newBaseName.replaceAll("\\)", "-");
 		newBaseName = newBaseName.replaceAll("&", "and");
+		newBaseName = newBaseName.replaceAll("#", "_");
+		newBaseName = newBaseName.replaceAll("'", "_");
 		newBaseName = filterNonAscii(newBaseName);
 		return data.replace(baseName, newBaseName);
 	}

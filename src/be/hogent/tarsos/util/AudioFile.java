@@ -155,7 +155,7 @@ public final class AudioFile {
 			int frames = fileFormat.getFrameLength();
 			float frameRate = fileFormat.getFormat().getFrameRate();
 			length = (long) (frames / frameRate * 1000);
-			LOG.finest(String.format("Determined the lenght of %s: %s µs", basename(), lengthInMicroSeconds));
+			LOG.finest(String.format("Determined the lenght of %s: %s s", basename(), lengthInMicroSeconds));
 		} catch (UnsupportedAudioFileException e) {
 			LOG.log(Level.WARNING, "Could not determine audio file length.", e);
 		} catch (IOException e) {
@@ -171,7 +171,7 @@ public final class AudioFile {
 			fileFormat = AudioSystem.getAudioFileFormat(new File(transcodedPath()));
 			float frameRate = fileFormat.getFormat().getFrameRate();
 			lengtInMicroSeconds = (long) (frame / frameRate * 1000);
-			LOG.finest(String.format("Determined the lenght of %s: %s µs", basename(), lengtInMicroSeconds));
+			LOG.finest(String.format("Determined the lenght of %s: %s ï¿½s", basename(), lengtInMicroSeconds));
 		} catch (UnsupportedAudioFileException e) {
 			LOG.log(Level.WARNING, "Could not determine audio file length.", e);
 		} catch (IOException e) {

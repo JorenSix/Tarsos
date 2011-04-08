@@ -72,21 +72,22 @@ public final class MidiSequenceBuilder {
         // E.G. midiKey = 69 ;deviation in cents is -105.0
         // actualMidiKey = 69 - 1 =68
         final int actualMidiKey = midiKey + (int) (deviationInCents / 100);
+        final int channel = 0;
         // midiKeyDeviation = -5;
         final double midiKeyDeviation = deviationInCents % 100;
-        track.add(createPitchBendEvent(midiKeyDeviation, currentTicks));
+        track.add(createPitchBendEvent(midiKeyDeviation, channel , currentTicks));
         addNote(actualMidiKey, numberOfTicks);
-        track.add(createPitchBendEvent(0.0, currentTicks));
+        track.add(createPitchBendEvent(0.0,channel, currentTicks));
     }
 
-    public static MidiEvent createPitchBendEvent(final double deviationInCents, final int startTick) {
+    public static MidiEvent createPitchBendEvent(final double deviationInCents,final int channel, final int startTick) {
         int bendFactorInMidi = 0;
         // 16384 values for 400 cents
         bendFactorInMidi = (int) (deviationInCents * (16384.0 / 400.0));
         if (bendFactorInMidi < -8191) {
             bendFactorInMidi = -8191;
         }
-        return createPitchBendEvent(bendFactorInMidi, (long) startTick);
+        return createPitchBendEvent(bendFactorInMidi, channel, (long) startTick);
     }
 
     public void export(final String fileName) throws IOException {
@@ -166,7 +167,7 @@ public final class MidiSequenceBuilder {
      * 101 00 MSB Bn 64 00 ; 100 00 LSB Bn 06 18 ; 06 24 MSB Bn 26 00 ; 38 00
      * LSB </pre>
      */
-    public static MidiEvent createPitchBendEvent(final int bendFactor, final long startTick) {
+    public static MidiEvent createPitchBendEvent(final int bendFactor,final int channel, final long startTick) {
 
         final ShortMessage message = new ShortMessage();
 
@@ -182,7 +183,7 @@ public final class MidiSequenceBuilder {
         final int lsb = Integer.parseInt(binary.substring(7, 14), 2);
 
         try {
-            message.setMessage(ShortMessage.PITCH_BEND, 0, lsb, msb);
+            message.setMessage(ShortMessage.PITCH_BEND, channel, lsb, msb);
         } catch (final InvalidMidiDataException e) {
             LOG.log(Level.SEVERE, "Invalid midi data", e);
             // Will this exception ever occur?

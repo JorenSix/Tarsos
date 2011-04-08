@@ -1,9 +1,19 @@
 package be.hogent.tarsos.sampled.pitch;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.PumpStreamHandler;
 
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
@@ -105,17 +115,17 @@ public final class IPEMPitchDetection implements PitchDetector {
 				command = FileUtils.combine(executableDirectory, name + ".exe  ") + "lijst.txt "
 						+ audioDirectory + " " + outputDirectory;
 			}
-
+			Execute.command(command, null);
 		} else { // on linux use wine's Z-directory
-			audioDirectory = "z://" + audioDirectory.replace("/", "\\\\");
-			outputDirectory = "z://" + outputDirectory.replace("/", "\\\\");
-			audioDirectory = audioDirectory.replace("//\\\\", "//");
-			outputDirectory = outputDirectory.replace("//\\\\", "//");
-			command = FileUtils.runtimeDirectory() + "/ipem_pitch_detection.sh \"" + audioDirectory + "\" \""
-					+ outputDirectory + "\"";
-		}
-
-		Execute.command(command, null);
+			audioDirectory = makeWinePath(audioDirectory);
+			outputDirectory = makeWinePath(outputDirectory);
+			String lijstFile = makeWinePath(FileUtils.combine(FileUtils.runtimeDirectory(),"lijst.txt"));
+			String executable = makeWinePath(FileUtils.combine(executableDirectory, name + ".exe"));						
+			command = "wine " + executable  + " " + lijstFile + " " + audioDirectory + " " + outputDirectory + " ";
+			String scriptFile = FileUtils.combine(FileUtils.runtimeDirectory(),"ipem.sh");
+			FileUtils.writeFile("#!/bin/bash\n"+command, scriptFile);
+			executeBashScript(new File(scriptFile));
+		}		
 
 		if (mode == PitchDetectionMode.IPEM_ONE) {
 			parseIpemOne(csvFileName);
@@ -135,6 +145,37 @@ public final class IPEMPitchDetection implements PitchDetector {
 		LOG.fine(String.format("%s pitch detection finished for %s.", mode.name(), file.basename()));
 
 		return annotations;
+	}
+	
+	private void executeBashScript(File bashScript){
+		CommandLine cmdLine = new CommandLine("bash");
+		Map<String,File> map = new HashMap<String,File>();
+		map.put("bashScript", bashScript);
+		cmdLine.addArgument("${bashScript}",false);
+		cmdLine.setSubstitutionMap(map);
+		LOG.info("execute: " + cmdLine);
+		DefaultExecutor executor = new DefaultExecutor();
+		//Wait 20 minutes max
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(60 * 1000 * 20);
+		executor.setWatchdog(watchdog);
+		final ByteArrayOutputStream out =  new ByteArrayOutputStream();
+		final PumpStreamHandler pump = new PumpStreamHandler(out);
+		executor.setStreamHandler(pump);
+		executor.setExitValue(0);
+		try {
+			executor.execute(cmdLine);
+		} catch (ExecuteException e) {
+			LOG.warning("Failed to execute " + bashScript.getAbsolutePath() + ": " + e.getMessage());
+		} catch (IOException e) {
+			LOG.warning("Failed to execute " + bashScript.getAbsolutePath() + ": " + e.getMessage());
+		}
+		LOG.fine(out.toString());
+	}
+	
+	private String makeWinePath(String path){
+		path = ("z://" + path.replace("/", "\\\\")).replace("//\\\\", "//");
+		path = "\"" + path + "\"";
+		return path;
 	}
 
 	/**

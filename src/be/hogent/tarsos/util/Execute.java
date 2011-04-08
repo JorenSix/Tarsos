@@ -10,6 +10,29 @@ import be.hogent.tarsos.Tarsos;
 
 public final class Execute {
 	private static final Logger LOG = Logger.getLogger(Execute.class.getName());
+	
+	/**
+	 * The shell executable used to execute external commands on UNIX; The
+	 * default is <code>/bin/bash</code>.
+	 */
+	private final static String unix_shell_executable = "/bin/bash";
+	/**
+	 * The shell executable option used to execute external commands on UNIX;
+	 * The default is <code>-c</code>.
+	 */
+	private final static String unix_shell_executable_option = "-c";
+	
+	/**
+	 * The shell executable used to execute external commands on windows; The
+	 * default is <code>cmd.exe</code>.
+	 */
+	private final static String win_shell_executable = "cmd.exe";
+	/**
+	 * The shell executable option used to execute external commands on windows;
+	 * The default is <code>\c</code>.
+	 */
+	private final static String win_shell_executable_option="\\c";
+	
 
 	// disable default constructor
 	private Execute() {
@@ -103,28 +126,6 @@ public final class Execute {
 		return command(command, null);
 	}
 
-	/**
-	 * Checks if the external command is available in the path.
-	 * 
-	 * @param command
-	 *            the command to check
-	 * @return <code>true</code> if the command is available, false otherwise.
-	 */
-	public static boolean executableAvailable(final String command) {
-		boolean executableIsInPath = false;
-		final int exitValue = Execute.command(command);
-		int commandNotFoundExitCode;
-		if (System.getProperty("os.name").contains("indows")) {
-			commandNotFoundExitCode = Configuration.getInt(ConfKey.win_shell_executable_not_found_exit_code);
-		} else {
-			commandNotFoundExitCode = Configuration.getInt(ConfKey.unix_shell_executable_not_found_exit_code);
-		}
-		if (exitValue != commandNotFoundExitCode) {
-			executableIsInPath = true;
-		}
-		return executableIsInPath;
-	}
-
 	private static String[] buildCommand(final String command, final String redirectOutputToFile) {
 		String[] cmd;
 		if (System.getProperty("os.name").contains("indows")) {
@@ -143,8 +144,8 @@ public final class Execute {
 		} else {
 			redirectPostfix = " > " + redirectOutputToFile;
 		}
-		cmd[0] = Configuration.get(ConfKey.win_shell_executable);
-		cmd[1] = Configuration.get(ConfKey.win_shell_executable_option);
+		cmd[0] = win_shell_executable;
+		cmd[1] = win_shell_executable_option;
 		cmd[2] = command + redirectPostfix;
 		return cmd;
 	}
@@ -157,8 +158,8 @@ public final class Execute {
 		} else {
 			redirectPostfix = "| cat > " + redirectOutputToFile;
 		}
-		cmd[0] = Configuration.get(ConfKey.unix_shell_executable);
-		cmd[1] = Configuration.get(ConfKey.unix_shell_executable_option);
+		cmd[0] = unix_shell_executable;
+		cmd[1] = unix_shell_executable_option;
 		cmd[2] = command + " 2>&1 " + redirectPostfix;
 		return cmd;
 	}

@@ -20,6 +20,7 @@ import be.hogent.tarsos.midi.LogReceiver;
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
+import be.hogent.tarsos.midi.TarsosSynth;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.IPEMPitchDetection;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
@@ -107,7 +108,6 @@ public final class PlayAlong {
 
 				Receiver recv;
 				recv = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
-				keyboard.setReceiver(recv);
 				int device = -1;
 				MidiDevice virtualMidiInputDevice;
 				if (device == -1) {
@@ -121,7 +121,7 @@ public final class PlayAlong {
 				midiInputTransmitter.setReceiver(keyboard);
 
 				MidiUtils.sendTunings(recv, 0, 2, "african", rebasedTuning);
-				MidiUtils.sendTuningChange(recv, VirtualKeyboard.CHANNEL, 2);
+				MidiUtils.sendTuningChange(recv, TarsosSynth.TUNED_MIDI_CHANNEL, 2);
 			} catch (final MidiUnavailableException e) {
 				e.printStackTrace();
 			} catch (final IOException e) {

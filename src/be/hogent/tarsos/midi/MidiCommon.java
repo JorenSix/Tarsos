@@ -273,19 +273,34 @@ public final class MidiCommon {
 		// c4 = midi key 60, the most explosive key in the known universe.
 		final int startMidiKey = 60;
 		final int startOctave = 4;
+		
+		//check if the array is sorted
+		double[] newPeaks = peaks.clone();
+		Arrays.sort(newPeaks);
+		for(int i = 0 ; i < peaks.length ; i++){
+			if(peaks[i] !=newPeaks[i]){
+				throw new IllegalArgumentException();
+			}
+		}
+		
 		final double[] tuning = new double[128];
 		// from startoctave up
 		for (int i = startMidiKey; i < tuning.length; i++) {
-			final int octave = startOctave + (i - startMidiKey) / peaks.length;
-			tuning[i] = octave * 1200 + peaks[i % peaks.length];
+			final int iteration = (i - startMidiKey);
+			final int octave = startOctave + iteration / peaks.length;
+			final double tuningInCents = octave * 1200 + peaks[iteration % peaks.length];
+			tuning[i] = tuningInCents;
 		}
 		// from startoctave down
 		for (int i = startMidiKey - 1; i >= 0; i--) {
-			final int octave = startOctave - 1 - (startMidiKey - i) / peaks.length;
-			tuning[i] = octave * 1200 + peaks[i % peaks.length];
+			final int iteration = (startMidiKey-1-i);
+			final int octave = startOctave - 1 - iteration / peaks.length;
+			tuning[i] = octave * 1200 + peaks[peaks.length - 1 - ((iteration) % peaks.length) ];
 		}
 		return tuning;
 	}
+	
+	
 }
 
 /*** MidiCommon.java ***/

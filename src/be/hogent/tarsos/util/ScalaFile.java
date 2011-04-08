@@ -107,8 +107,8 @@ public final class ScalaFile {
 				// The second data line is the number of notes.
 				// The other data lines should be valid pitches.
 			} else if (numberOfDataLines > 2) {
-				final boolean isValidRatio = line.matches("\\s*[0-9]+(|/[0-9]+).*");
-				final boolean isValidCent = line.matches("\\s*(-|\\+)?[0-9]+\\.[0-9]*.*");
+				final boolean isValidRatio = line.matches("\\s*[0-9]+(|/[0-9]+)(| .*)");
+				final boolean isValidCent = line.matches("\\s*(-|\\+)?[0-9]+\\.[0-9]*(| .*)");
 				if (isValidRatio || isValidCent) {
 					validPitchRows.add(line);
 				}
@@ -269,5 +269,26 @@ public final class ScalaFile {
 		final double[] notes = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, };
 		final String[] names = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 		return new ScalaFile("The western tone scale", notes, names);
+	}
+
+	/**
+	 * In a list of scala files it finds the closest one. This is currently defined by histogram overlap.
+	 * @param haystack a list of Scala files.
+	 * @return the closest Scala file.
+	 */
+	public ScalaFile findClosest(List<ScalaFile> haystack) {
+		PitchClassHistogram needle = PitchClassHistogram.createToneScale(pitches.clone());
+		ScalaFile closest = haystack.get(0);
+		double closestCorrelation = -1;
+		for(ScalaFile other : haystack){
+			PitchClassHistogram otherHisto = PitchClassHistogram.createToneScale(other.pitches.clone());
+			int displacement = needle.displacementForOptimalCorrelation(otherHisto);
+			double correlation = needle.correlationWithDisplacement(displacement, otherHisto);
+			if(correlation > closestCorrelation){
+				closest = other;
+				closestCorrelation = correlation;
+			}
+		}
+		return closest;
 	}
 }

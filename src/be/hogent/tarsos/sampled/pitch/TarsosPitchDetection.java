@@ -42,15 +42,17 @@ public final class TarsosPitchDetection implements PitchDetector {
 	 */
 	private final PitchDetectionMode detectionMode;
 
+
 	public TarsosPitchDetection(final AudioFile audioFile, final PitchDetectionMode pitchDetectionMode) {
 		this.file = audioFile;
 		this.annotations = new ArrayList<Annotation>();
 		this.detectionMode = pitchDetectionMode;
+		audioFile.getLengthInMilliSeconds();
 	}
 
 	public List<Annotation> executePitchDetection() {
 		try {
-			processFile(file.transcodedPath(), detectionMode, new AnnotationHandler() {
+			processFile(new AnnotationHandler() {
 				public void handleAnnotation(final Annotation annotation) {
 					annotations.add(annotation);
 				}
@@ -96,6 +98,13 @@ public final class TarsosPitchDetection implements PitchDetector {
 		final AudioInputStream ais = AudioSystem.getAudioInputStream(new File(fileName));
 		processStream(ais, detectedPitchHandler, detectionMode);
 	}
+	
+	private void processFile(final AnnotationHandler detectedPitchHandler) throws UnsupportedAudioFileException, IOException {
+		final AudioInputStream ais = AudioSystem.getAudioInputStream(new File(file.transcodedPath()));
+		final float sampleRate = ais.getFormat().getSampleRate();
+		final long totalSamples = (long) (file.getLengthInMilliSeconds()/1000.0*sampleRate);
+		processStream(ais, detectedPitchHandler, detectionMode,this,totalSamples);
+	}
 
 	/**
 	 * Annotate an audio stream: useful for real-time pitch tracking.
@@ -113,6 +122,12 @@ public final class TarsosPitchDetection implements PitchDetector {
 	public static void processStream(final AudioInputStream ais,
 			final AnnotationHandler detectedPitchHandler, final PitchDetectionMode detectionMode)
 			throws UnsupportedAudioFileException, IOException {
+		processStream(ais, detectedPitchHandler, detectionMode,null,0);
+	}
+	
+	private static void processStream(final  AudioInputStream ais,
+	final AnnotationHandler detectedPitchHandler, final PitchDetectionMode detectionMode,final TarsosPitchDetection detector,final long totalSamples)
+	throws UnsupportedAudioFileException, IOException{
 		final float sampleRate = ais.getFormat().getSampleRate();
 		final PurePitchDetector pureDetector;
 		final int bufferSize;
@@ -136,11 +151,17 @@ public final class TarsosPitchDetection implements PitchDetector {
 
 			public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
 				samplesProcessed += audioFloatBuffer.length;
+				if(detector != null){
+					detector.setProgress(samplesProcessed/(float)totalSamples);
+				}
 				processBuffer(audioFloatBuffer);
 			}
 
 			public void processOverlapping(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
 				samplesProcessed += bufferStepSize;
+				if(detector != null){
+					detector.setProgress(samplesProcessed/(float)totalSamples);
+				}
 				processBuffer(audioFloatBuffer);
 			}
 
@@ -175,9 +196,14 @@ public final class TarsosPitchDetection implements PitchDetector {
 			new Thread(dispatcher, "Annotation publisher").run();
 		}
 	}
+	
+	double progress = 0;
+	private void setProgress(final double progress){
+		this.progress = progress;
+	}
 
 	@Override
 	public double progress() {
-		return -1;
+		return progress;
 	}
 }

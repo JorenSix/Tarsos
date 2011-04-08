@@ -67,7 +67,7 @@ public final class CachingDetector implements PitchDetector {
 
 	@Override
 	public double progress() {
-		return -1;
+		return detector.progress();
 	}
 
 }

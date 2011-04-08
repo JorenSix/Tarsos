@@ -6,37 +6,6 @@ package be.hogent.tarsos.util;
  * @author Joren Six
  */
 public enum ConfKey {
-
-	/**
-	 * The shell executable used to execute external commands on UNIX; The
-	 * default is <code>/bin/bash</code>.
-	 */
-	unix_shell_executable,
-	/**
-	 * The shell executable option used to execute external commands on UNIX;
-	 * The default is <code>-c</code>.
-	 */
-	unix_shell_executable_option,
-	/**
-	 * The exit code of a "command not found" operation on UNIX The default is
-	 * <code>9009</code>.
-	 */
-	unix_shell_executable_not_found_exit_code,
-	/**
-	 * The shell executable used to execute external commands on windows; The
-	 * default is <code>cmd.exe</code>.
-	 */
-	win_shell_executable,
-	/**
-	 * The shell executable option used to execute external commands on windows;
-	 * The default is <code>\c</code>.
-	 */
-	win_shell_executable_option,
-	/**
-	 * The exit code of a "command not found" operation on windows The default
-	 * is <code>9009</code>.
-	 */
-	win_shell_executable_not_found_exit_code,
 	/**
 	 * The histogram bin width in cents.
 	 */
@@ -54,17 +23,17 @@ public enum ConfKey {
 	absolute_cents_reference_frequency,
 
 	/**
-	 * The Ambitus (range) start value in cents: <br>
-	 * The default value is 0 (from 16Hz).
+	 * The pitch histogram (range) start value in cents: <br>
+	 * The default value is 0 (from 8Hz).
 	 */
-	ambitus_start,
+	pitch_histogram_start,
 
 	/**
 	 * The Ambitus (range) stop value in cents: <br>
 	 * The default value is <br>
 	 * <code>1200 * 8 = 9600 cents = C8 = 4186.01 Hz</code>.
 	 */
-	ambitus_stop,
+	pitch_histogram_stop,
 
 	/**
 	 * Transcode the audio or just copy it. <br>
@@ -97,6 +66,12 @@ public enum ConfKey {
 	 * A MIDI device used as OUTPUT. Should support the MIDI tuning standard.
 	 */
 	midi_output_device,
+	
+	/**
+	 * An index for a General MIDI instrument
+	 */
+	midi_instrument_index,
+	
 	/**
 	 * Defines the number of threads used to annotate files. Ideally this is the
 	 * same as the number of cores on your CPU. Use one thread less if you want
@@ -117,10 +92,7 @@ public enum ConfKey {
 	 */
 	ipem_pitch_threshold,
 
-	/**
-	 * An index for a General MIDI instrument
-	 */
-	midi_instrument_index,
+
 
 	/**
 	 * A threshold used in the silence detector.
@@ -161,19 +133,21 @@ public enum ConfKey {
 	 */
 	tarsos_live,
 	/**
+	 * 	A scala file with pitch intervals used to compare detected intervals.
+	 */
+	interval_scala_file,	
+	/**
 	 * Microphone mixer to use with Tarsos Live(tm).
 	 */
 	mixer_input_device,
-	
-	/**
-	 * 	A scala file with pitch intervals used to compare detected intervals.
-	 */
-	interval_scala_file,
-	
 	/**
 	 * Sound card device index.
 	 */
-	mixer_output_device;
+	mixer_output_device, 
+	/**
+	 * Reset the histograms when a new file is imported. Or not. 
+	 */
+	reset_on_import;
 
 	/**
 	 * True if the configured key is a required directory. False otherwise.

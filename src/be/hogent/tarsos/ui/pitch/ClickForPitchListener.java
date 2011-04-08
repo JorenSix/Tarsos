@@ -8,7 +8,7 @@ import java.awt.event.MouseEvent;
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JComponent;
 
-import be.hogent.tarsos.midi.PitchSynth;
+import be.hogent.tarsos.midi.TarsosSynth;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 
@@ -18,7 +18,6 @@ import be.hogent.tarsos.util.Configuration;
 class ClickForPitchListener extends MouseAdapter {
 
 	private final JComponent parent;
-	private final PitchSynth synth;
 	private final MouseDragListener mouseDrag;
 	/**
 	 * The delta in cents, 0 - 1200 for a tone scale (1200), 9600 for an
@@ -30,7 +29,6 @@ class ClickForPitchListener extends MouseAdapter {
 			final double histogramDelta) throws MidiUnavailableException {
 		parent = component;
 		delta = histogramDelta;
-		synth = new PitchSynth();
 		mouseDrag = mouseDragListener;
 		component.addMouseListener(this);
 	}
@@ -42,10 +40,10 @@ class ClickForPitchListener extends MouseAdapter {
 		final int velocity = (int) (e.getY() / (double) height * 127);
 		if (delta > 1200) {
 			// ambitus
-			synth.playAbsoluteCents(pitchCents + Configuration.getInt(ConfKey.ambitus_start), velocity);
+			TarsosSynth.getInstance().playAbsoluteCents(pitchCents + Configuration.getInt(ConfKey.pitch_histogram_start), velocity);
 		} else {
 			// tone scale
-			synth.playRelativeCents(pitchCents, velocity);
+			TarsosSynth.getInstance().playRelativeCents(pitchCents, velocity);
 		}
 
 	}

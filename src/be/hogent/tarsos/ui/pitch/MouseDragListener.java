@@ -96,10 +96,10 @@ class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 	}
 
 	/**
-	 * Jumps to a new xOffset.
+	 * Jumps to a new xOffset. A value in [0,1.0] representing the x offset in percentage.
 	 * 
 	 * @param newXOffset
-	 *            The offset to jump to.
+	 *            The offset to jump to. A value in [0,1.0] representing the x offset in percentage.
 	 */
 	public void setXOffset(final double newXOffset) {
 		this.xOffset = newXOffset;

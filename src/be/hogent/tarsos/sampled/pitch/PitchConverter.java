@@ -1,8 +1,5 @@
 package be.hogent.tarsos.sampled.pitch;
 
-import java.util.Arrays;
-import java.util.List;
-
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;

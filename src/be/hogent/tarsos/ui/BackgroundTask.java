@@ -24,14 +24,15 @@ public abstract class BackgroundTask extends SwingWorker<Void, Void>   implement
 	private final JProgressBar progressBar;
 	private final List<BackgroundTask.TaskHandler> handlers;
 	private final boolean determinedLength;
+	private final String name;
 	
 
-	protected BackgroundTask(String name, boolean lengthDetermined) {
+	protected BackgroundTask(String taskName, boolean lengthDetermined) {
 		ui = new JPanel(new GridLayout(0,1));
 		handlers = new ArrayList<BackgroundTask.TaskHandler>();
 		progressBar = new JProgressBar();
 		determinedLength = lengthDetermined;
-		
+		name = taskName;
 		ui.add(new JLabel(name));
 		ui.add(progressBar);
 
@@ -83,6 +84,9 @@ public abstract class BackgroundTask extends SwingWorker<Void, Void>   implement
 	
 	
 	public void interrupt(BackgroundTask backgroundTask,Exception e){
+		progressBar.setIndeterminate(false);
+		progressBar.setValue(100);
+		progressBar.setString("Failed");
 		for(TaskHandler handler : handlers){
 			handler.taskInterrupted(this,e);
 		}
@@ -90,5 +94,13 @@ public abstract class BackgroundTask extends SwingWorker<Void, Void>   implement
 
 	public JComponent ui() {
 		return ui;
+	}
+	
+	public boolean lengthIsDetermined(){
+		return determinedLength;
+	}
+	
+	public String getName(){
+		return name;
 	}
 }

@@ -1,5 +1,9 @@
 package be.hogent.tarsos.midi;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Receiver;
 
@@ -13,7 +17,7 @@ import javax.sound.midi.Receiver;
  */
 public final class ReceiverSink implements Receiver {
 
-	private final Receiver[] receivers;
+	private final List<Receiver> receivers;
 	private final boolean ignoreTiming;
 
 	/**
@@ -21,7 +25,7 @@ public final class ReceiverSink implements Receiver {
 	 *            The list of <code>Receiver</code>s to send messages to
 	 */
 	public ReceiverSink(final boolean ignoreTimingData, final Receiver... receiverList) {
-		this.receivers = receiverList;
+		this.receivers = new ArrayList<Receiver>(Arrays.asList(receiverList));
 		this.ignoreTiming = ignoreTimingData;
 	}
 
@@ -31,7 +35,6 @@ public final class ReceiverSink implements Receiver {
 			receiver.close();
 		}
 	}
-
 	
 	public void send(final MidiMessage message, final long timeStamp) {
 		long actualTimeStamp = timeStamp;
@@ -41,5 +44,14 @@ public final class ReceiverSink implements Receiver {
 		for (final Receiver receiver : receivers) {
 			receiver.send(message, actualTimeStamp);
 		}
+	}
+	
+	/**
+	 * Adds a receiver to the sink (list of receivers).
+	 * 
+	 * @param receiver The receiver to add. 
+	 */
+	public void addReceiver(final Receiver receiver){
+		receivers.add(receiver);
 	}
 }

@@ -26,7 +26,6 @@ public class PianoTestFrame extends JFrame {
 		this.add(keyboard, BorderLayout.CENTER);
 
 		keyboard.connectToTunedSynth(tuning);
-
 	}
 
 	public static void main(final String... strings) {

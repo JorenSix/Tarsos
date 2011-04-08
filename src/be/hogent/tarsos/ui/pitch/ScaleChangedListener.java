@@ -1,5 +1,5 @@
 package be.hogent.tarsos.ui.pitch;
 
 public interface ScaleChangedListener {
-	void scaleChanged(double[] newScale, boolean isChanging);
+	void scaleChanged(double[] newScale, boolean isChanging, boolean shiftHisto);
 }

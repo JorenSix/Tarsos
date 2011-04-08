@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
-import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -15,7 +14,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import be.hogent.tarsos.midi.PitchSynth;
+import be.hogent.tarsos.midi.TarsosSynth;
 import be.hogent.tarsos.sampled.pitch.PitchConverter;
 import be.hogent.tarsos.util.ScalaFile;
 
@@ -53,26 +52,19 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 		return tip;
 	}
 
-	public void scaleChanged(final double[] newScale, final boolean isChanging) {
+	public void scaleChanged(final double[] newScale, final boolean isChanging, boolean shiftHisto) {
 		ScalaFile newFile = new ScalaFile("hmmm", newScale);
 		setModel(new ToneScaleTableModel(newFile));
 		// setRowHeight(getWidth() / getColumnCount());
 	}
 
 	private static class SelectionListener implements ListSelectionListener {
-		private PitchSynth synth;
 		private final JTable table;
 		private int previousRow;
 		private int previousCol;
 
 		public SelectionListener(final JTable theTable) {
 			table = theTable;
-			try {
-				synth = new PitchSynth();
-			} catch (MidiUnavailableException e) {
-
-				e.printStackTrace();
-			}
 		}
 
 		public void valueChanged(final ListSelectionEvent event) {
@@ -86,14 +78,14 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 					ToneScaleTableModel tableModel = (ToneScaleTableModel) table.getModel();
 					int column = tableModel.getLeftIndex(row, col);
 					long pitch = (Long) tableModel.getValueAt(0, column);
-					synth.playRelativeCents(pitch, 100);
+					TarsosSynth.getInstance().playRelativeCents(pitch, 100);
 					column = tableModel.getRightIndex(row, col);
 					pitch = (Long) tableModel.getValueAt(0, column);
-					synth.playRelativeCents(pitch, 100);
+					TarsosSynth.getInstance().playRelativeCents(pitch, 100);
 				} else if (row == 0 && table.getValueAt(0, col) != null) {
 					ToneScaleTableModel tableModel = (ToneScaleTableModel) table.getModel();
 					long pitch = (Long) tableModel.getValueAt(0, col);
-					synth.playRelativeCents(pitch, 100);
+					TarsosSynth.getInstance().playRelativeCents(pitch, 100);
 				}
 
 				SwingUtilities.invokeLater(new Runnable() {

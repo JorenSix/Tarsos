@@ -62,7 +62,7 @@ public class BrowserPanel extends JPanel {
 					final List<Annotation> samples = pitchDetector.getAnnotations();
 					final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
 					final PitchClassHistogram toneScaleHisto = pitchHistogram.pitchClassHistogram();
-					JComponent component = new ToneScalePanel(toneScaleHisto, null);
+					JComponent component = new PitchClassHistogramLayer(toneScaleHisto, null);
 					JPanel panel = new JPanel(new BorderLayout());
 					panel.setSize(128, 128);
 					panel.setBorder(new EmptyBorder(5, 5, 5, 5));

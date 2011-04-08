@@ -109,7 +109,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 			// Byte count to count the number of processed bytes.
 			long byteCount = bytesToSkip;
 
-			publisher.delegateClearAnnotations();
+			publisher.clear();
 			publisher.delegateAddAnnotations(waveForm.getMarker(true), offsetInSeconds);
 
 			try {

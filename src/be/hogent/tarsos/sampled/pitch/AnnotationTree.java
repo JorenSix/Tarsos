@@ -23,24 +23,28 @@ public final class AnnotationTree {
 	 * The backing kd-tree.
 	 */
 	private final KDTree<Annotation> tree;
+	private final PitchUnit unit;
 
 	/**
 	 * Create a new annotation tree.
-	 * 
-	 * @param annotations
-	 *            A list of annotations.
 	 * @param unit
 	 *            The pitch unit. The pitch unit needs to be defined here to be
 	 *            able to do range selection in a certain unit.
+	 * @param annotations
+	 *            A list of annotations.
 	 */
-	public AnnotationTree(final List<Annotation> annotations, final PitchUnit unit) {
-		StopWatch watch = new StopWatch();
+	public AnnotationTree(final PitchUnit pitchUnit) {
 		// Three dimensional tree
 		tree = new KDTree<Annotation>(3);
+		unit = pitchUnit;
+	}
+	
+	public void add(final List<Annotation> annotations){
+		StopWatch watch = new StopWatch();
 		for (Annotation annotation : annotations) {
-			add(annotation, unit);
+			add(annotation);
 		}
-		LOG.fine(String.format("KD Tree with %s annotations constructed in %s.", tree.size(), watch));
+		LOG.fine(String.format("Added %s annotations (new size %s) to KD Tree in %s.", annotations.size(),tree.size(), watch));
 	}
 
 	/**
@@ -74,8 +78,10 @@ public final class AnnotationTree {
 	public int size() {
 		return tree.size();
 	}
+	
+	
 
-	public void add(final Annotation annotation, final PitchUnit unit) {
+	public void add(final Annotation annotation) {
 		double[] key = { annotation.getStart(), annotation.getPitch(unit), annotation.getProbability() };
 		try {
 			tree.insert(key, annotation);

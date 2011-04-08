@@ -17,7 +17,7 @@ import be.hogent.tarsos.midi.LogReceiver;
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiUtils;
 import be.hogent.tarsos.midi.ReceiverSink;
-import be.hogent.tarsos.ui.virtualkeyboard.VirtualKeyboard;
+import be.hogent.tarsos.midi.TarsosSynth;
 import be.hogent.tarsos.util.ScalaFile;
 
 /**
@@ -80,7 +80,7 @@ public final class TuneMidiSynth extends AbstractTarsosApp {
 				midiInputDevice.getTransmitter().setReceiver(sink);
 
 				MidiUtils.sendTunings(sink, 0, 2, "african", rebasedTuning);
-				MidiUtils.sendTuningChange(sink, VirtualKeyboard.CHANNEL, 2);
+				MidiUtils.sendTuningChange(sink, TarsosSynth.TUNED_MIDI_CHANNEL, 2);
 
 				Tarsos.println("Press enter to stop");
 				System.in.read();

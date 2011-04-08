@@ -27,19 +27,19 @@ public interface AnnotationListener {
 	void clearAnnotations();
 
 	/**
-	 * A hook to react to annotation extraction. This method is called when an
-	 * audio file is dropped and extraction of pitch annotations starts.
+	 * Is called after a list of annotations is added.
+	 */
+	void annotationsAdded();
+	
+	/**
+	 * A hook to react to annotation extraction. This method is called when
+	 * pitch annotations starts on an audio file.
 	 */
 	void extractionStarted();
 
 	/**
-	 * A hook to react to annotation extraction. This method is called when an
-	 * audio file is dropped and extraction of pitch annotations is completed.
+	 * A hook to react to annotation extraction. This method is called when
+	 * pitch annotations is completed.
 	 */
 	void extractionFinished();
-
-	/**
-	 * Is called after a list of annotations is added.
-	 */
-	void annotationsAdded();
 }

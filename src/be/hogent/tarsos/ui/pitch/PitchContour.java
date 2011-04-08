@@ -72,7 +72,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 					} else {
 						tickPosition = axisValue;
 					}
-					LOG.fine(String.format("Added %s cents marker at position %s %s", tickValue,
+					LOG.finer(String.format("Added %s cents marker at position %s %s", tickValue,
 							tickPosition, pitchUnit.getHumanName()));
 					if (pitchUnit == PitchUnit.RELATIVE_CENTS) {
 						addYTick(String.format("%.0f", axisValue), tickPosition);
@@ -229,7 +229,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 
 	boolean scaleIsChanging = false;
 
-	public void scaleChanged(double[] newScale, boolean isChanging) {
+	public void scaleChanged(double[] newScale, boolean isChanging, boolean shiftHisto) {
 		scaleIsChanging = isChanging;
 		scale = newScale;
 		clearYTicks();
@@ -316,7 +316,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 				minPitch = 0;
 			}
 			if (!Configuration.getBoolean(ConfKey.tarsos_live)) {
-				AnnotationPublisher.getInstance().delegateClearAnnotations();
+				AnnotationPublisher.getInstance().clear();
 
 				AnnotationPublisher.getInstance()
 						.delegateAddAnnotations(minTime, maxTime, minPitch, maxPitch);
@@ -324,7 +324,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		}
 	}
 
-	private static final int AMBITUS_STOP = Configuration.getInt(ConfKey.ambitus_stop);
+	private static final int AMBITUS_STOP = Configuration.getInt(ConfKey.pitch_histogram_stop);
 
 	public void annotationsAdded() {
 		AnnotationSelection selection = AnnotationPublisher.getInstance().getCurrentSelection();

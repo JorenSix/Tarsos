@@ -10,13 +10,14 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,11 +35,8 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.ProgressMonitor;
-import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 
 import org.noos.xing.mydoggy.Content;
@@ -58,20 +56,24 @@ import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationHandler;
 import be.hogent.tarsos.sampled.pitch.AnnotationTree;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
-import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
+import be.hogent.tarsos.ui.BackgroundTask;
+import be.hogent.tarsos.ui.BackgroundTask.TaskHandler;
+import be.hogent.tarsos.ui.ProgressDialog;
 import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.util.Configuration.ConfigChangeListener;
 import be.hogent.tarsos.util.FileDrop;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.JLabelHandler;
 import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.TextAreaHandler;
-import be.hogent.tarsos.util.histogram.PitchHistogram;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
+import be.hogent.tarsos.util.histogram.PitchHistogram;
 
 /**
  * @author Joren Six
@@ -149,8 +151,8 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		JComponent headerPanel = new HeaderPanel();
 		JComponent statusBar = makeStatusBar();
 
-		final ToneScalePane toneScalePane = new ToneScalePane(new PitchClassHistogram(), this);
-		final ToneScalePanel ambitusPanel = new ToneScalePanel(new PitchHistogram(), this);
+		final PitchClassHistogramPanel pitchClassHistogramPanel = new PitchClassHistogramPanel(new PitchClassHistogram(), this);
+		final PitchClassHistogramLayer ambitusPanel = new PitchClassHistogramLayer(new PitchHistogram(), this);
 		final PitchContour pitchContourPanel = new PitchContour();
 		final PitchContour regression = new PitchContour();
 		final IntervalTable intervalTable = new IntervalTable();
@@ -166,7 +168,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		browser.setBackground(Color.WHITE);
 
 		// patch the scale changed listeners
-		addScaleChangedListener(toneScalePane);
+		addScaleChangedListener(pitchClassHistogramPanel);
 		addScaleChangedListener(ambitusPanel);
 		addScaleChangedListener(pitchContourPanel);
 		addScaleChangedListener(regression);
@@ -175,8 +177,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		addScaleChangedListener(menu);
 
 		// Patch the audio file changed listeners.
-		addAudioFileChangedListener(annotationPublisher);
-		addAudioFileChangedListener(toneScalePane);
+		addAudioFileChangedListener(pitchClassHistogramPanel);
 		addAudioFileChangedListener(ambitusPanel);
 		addAudioFileChangedListener(pitchContourPanel);
 		addAudioFileChangedListener(regression);
@@ -186,7 +187,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		addAudioFileChangedListener(menu);
 
 		// Patch the annotation listeners
-		annotationPublisher.addListener(toneScalePane);
+		annotationPublisher.addListener(pitchClassHistogramPanel);
 		annotationPublisher.addListener(ambitusPanel);
 		annotationPublisher.addListener(pitchContourPanel);
 		annotationPublisher.addListener(controlPanel);
@@ -215,7 +216,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 		// add components to the window manager.
 
-		Content content = contentManager.addContent("Pitch Class Histogram", "Pitch Class Histogram", null, toneScalePane);
+		Content content = contentManager.addContent("Pitch Class Histogram", "Pitch Class Histogram", null, pitchClassHistogramPanel);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(false);
 
@@ -223,34 +224,35 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		content = contentManager.addContent("Configuration", "Configuration", null, configurationPanel, null,
 				constraint);
 		setDefaultTabbedContentOptions(content);
-		content.setMinimized(false);
+		content.setMinimized(true);
 
 		constraint = new MultiSplitConstraint(content, 2);
 		content = contentManager.addContent("Pitch Histogram", "Pitch Histogram", null, ambitusPanel, null, constraint);
 		setDefaultTabbedContentOptions(content);
-		content.setMinimized(true);
-
+		content.setMinimized(false);
+		
 		constraint = new MultiSplitConstraint(content, 3);
+		content = contentManager.addContent("Interval table", "Interval table", null, intervalTable,null,constraint);
+		setDefaultTabbedContentOptions(content);
+		content.setMinimized(true);
+		
+		content = contentManager.addContent("Controls", "Controls", null, controlPanel);
+		setDefaultTabbedContentOptions(content);
+		content.setMinimized(false);
+		
+		constraint = new MultiSplitConstraint(content, 1);
 		content = contentManager.addContent("Annotations", "Annotations", null, pitchContourPanel, null,
 				constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 
-		content = contentManager.addContent("Interval table", "Interval table", null, intervalTable);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(true);
-
-		content = contentManager.addContent("Controls", "Controls", null, controlPanel);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(false);
-
-		constraint = new MultiSplitConstraint(content, 1);
-		content = contentManager.addContent("Keyboard", "Keyboard", null, keyboardPanel, null, constraint);
+		content = contentManager.addContent("Keyboard", "Keyboard", null, keyboardPanel, null);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 
 		toolWindowManager.registerToolWindow("Help", "Help", null, helpPanel, ToolWindowAnchor.RIGHT);
-		toolWindowManager.registerToolWindow("Browser", "Browser", null, browser, ToolWindowAnchor.RIGHT);
+		//Disable the browser for now.
+		//toolWindowManager.registerToolWindow("Browser", "Browser", null, browser, ToolWindowAnchor.RIGHT);
 		toolWindowManager.registerToolWindow("Logging", "Logging", null, logPanel, ToolWindowAnchor.BOTTOM);
 
 		// Make all tools available
@@ -261,6 +263,21 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		checkTarsosLiveMode();
 		
 		setJMenuBar(menu);
+		
+		setupChangeInPitchDetectors();
+	}
+
+	private void setupChangeInPitchDetectors() {
+		//react to change in pitch detectors
+		Configuration.addListener(new ConfigChangeListener() {
+			@Override
+			public void configurationChanged(ConfKey key) {
+				if(key==ConfKey.pitch_tracker_list && audioFile != null){
+					setNewAudioFile(new File(audioFile.originalPath()));
+				}
+			}
+		});
+		
 	}
 
 	private void checkTarsosLiveMode() {
@@ -294,8 +311,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 						public void handleAnnotation(final Annotation annotation) {
 							i++;
-							tree.add(annotation,
-									PitchUnit.valueOf(Configuration.get(ConfKey.pitch_contour_unit)));
+							tree.add(annotation);
 							if (i % 5 == 0) {
 								double currentTime = annotation.getStart();
 								publisher.delegateAddAnnotations(prevTime, currentTime);
@@ -389,13 +405,10 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 	private void addFileDropListener() {
 		new FileDrop(this, new FileDrop.Listener() {
 			public void filesDropped(final java.io.File[] files) {
-				if (files.length != 1) {
-					LOG.log(Level.WARNING, String.format(
-							"Dropped %s files. For the moment only ONE file should be dropped", files.length));
+				for(final File file : files){
+					setNewFile(file);
+					LOG.fine(String.format("Dropped %s .", file.getAbsolutePath()));
 				}
-				final File droppedFile = files[0];
-				LOG.fine(String.format("Dropped %s .", droppedFile.getAbsolutePath()));
-				setNewFile(droppedFile);
 			}
 		});
 	}
@@ -405,10 +418,13 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 	private void setAudioFile(final AudioFile newAudioFile) {
 		this.audioFile = newAudioFile;
-		// set a title
-		notifyAudioFileChangedListeners();
 	}
 	
+	private void notifyAudioFileChange(){
+		// set a title
+		this.setTitle("Tarsos " + audioFile.basename());
+		notifyAudioFileChangedListeners();
+	}
 	
 	/**
 	 * Set a new audio or scala file.
@@ -416,6 +432,8 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 	 */
 	public void setNewFile(final File newFile){
 		LOG.info("Opening: " + newFile.getName());
+		
+		//Keep a list of recent files for the recent file menu.
 		List<String> recentFiles = Configuration.getList(ConfKey.file_recent);
 		String path = newFile.getAbsolutePath();
 		int numberOfRecentFiles = 9;
@@ -428,34 +446,195 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 			while(recentFiles.size() > numberOfRecentFiles){
 				recentFiles.remove(numberOfRecentFiles);
 			}
-		}
+		}		
+		Configuration.set(ConfKey.file_recent,recentFiles);
 		
-		Configuration.set(ConfKey.file_recent,recentFiles);		
+		//add one scala file
 		if (newFile.getName().toLowerCase().endsWith(".scl")) {
 			ScalaFile scalaFile = new ScalaFile(newFile.getAbsolutePath());
-			scaleChanged(scalaFile.getPitches(), false);
-		} else if (FileUtils.isAudioFile(newFile)) {
-			try {
-				AudioFile newAudioFile;
-				newAudioFile = new AudioFile(newFile.getAbsolutePath());
-				setAudioFile(newAudioFile);
-			} catch (EncoderException e) {
-				String message = String
-						.format("Failed to transcode %s.\n"
-								+ "Tarsos uses a platform dependent FFMPEG binary to transcode audio to %s\n"
-								+ "Either: \n"
-								+ "\t \t 1) FFMPEG does not know how to convert the audio.\n"
-								+ "\t \t 2) There is no FFMPEG binary included for your platform.\n"
-								+ "Try converting the audio manually to the format mentioned or disable transcoding.",
-								newFile.getName(), Configuration.get(ConfKey.transcoded_audio_to));
-				JOptionPane.showMessageDialog(Frame.this, message, "Transcoding audio failed",
-						JOptionPane.ERROR_MESSAGE);
+			scaleChanged(scalaFile.getPitches(), false, false);
+		} else if (FileUtils.isAudioFile(newFile)) {//add one audio file
+			setNewAudioFile(newFile);
+		//find closest in scala directory	
+		} else if(newFile.isDirectory() && FileUtils.glob(newFile.getAbsolutePath(),".*\\.scl",false).size()!=0 ) {
+			findClosestScalaFile(newFile);
+		//add audio files in directory recursively
+		} else if(newFile.isDirectory()){
+			String pattern = Configuration.get(ConfKey.audio_file_name_pattern);
+			List<String> audioFiles = FileUtils.glob(newFile.getAbsolutePath(), pattern, true);
+			for(String file:audioFiles){
+				setNewAudioFile(new File(file));
 			}
-		} else {
+		}else{	
 			LOG.warning("Unrecognized file: " + newFile.getAbsolutePath());
 		}	
 	}
+	
+	/**
+	 * Finds the scala file closest to the currently detected scale in a directory with scala files.
+	 * @param directory
+	 */
+	private void findClosestScalaFile(File directory){
+		List<ScalaFile> haystack = new ArrayList<ScalaFile>();
+		for(String scalaFileName : FileUtils.glob(directory.getAbsolutePath(),".*\\.scl",false)){
+			haystack.add(new ScalaFile(scalaFileName));
+		}
+		ScalaFile needle = new ScalaFile("",scale);
+		ScalaFile closest = needle.findClosest(haystack);
+		scale = closest.getPitches();
+		LOG.info("Closest scala file: " + closest.getDescription());
+		for(ScaleChangedListener listeners : scaleChangedListeners){
+			listeners.scaleChanged(scale, false, true);
+		}
+	}
+	
+	private void setNewAudioFile(final File newFile){
+		AnnotationPublisher.getInstance().clearTree();
+		TranscodingTask transcodingTask = new TranscodingTask(newFile);
+		List<BackgroundTask> detectorTasks = createTasks(newFile,transcodingTask);
+		transcodingTask.addHandler(new TaskHandler() {
+			@Override
+			public void taskInterrupted(BackgroundTask backgroundTask, Exception e) {
+				
+			}
+			
+			@Override
+			public void taskDone(BackgroundTask backgroundTask) {
+				if(backgroundTask instanceof TranscodingTask){
+					setAudioFile(((TranscodingTask) backgroundTask).getAudioFile());
+				}
+			}
+		});
+		String title = "Progress: " + FileUtils.basename(newFile.getAbsolutePath());
+		
+		AnnotationPublisher.getInstance().clear();
+		AnnotationPublisher.getInstance().extractionStarted();
+		final ProgressDialog dialog = new ProgressDialog(this,title,transcodingTask,detectorTasks);
+		dialog.addPropertyChangeListener(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if(evt.getPropertyName().equals("allTasksFinished")){
+					notifyAudioFileChange();
+					AnnotationPublisher.getInstance().extractionFinished();
+				}
+			}
+		});
+		dialog.pack();
+		dialog.setVisible(true);			
+	}
+	
+	private List<BackgroundTask> createTasks(final File audioFile,final TranscodingTask transcodingTask){
+		final List<BackgroundTask> detectorTasks = new ArrayList<BackgroundTask>();
+		for (final String name : Configuration
+				.getList(ConfKey.pitch_tracker_list)) {
+			final PitchDetectionMode mode = PitchDetectionMode
+					.valueOf(name);
+			final boolean determinatedLength = (mode == PitchDetectionMode.TARSOS_MPM || PitchDetectionMode.TARSOS_YIN == mode);
+			DetectorTask task = new DetectorTask(mode.getDetectionModeName() + " " + FileUtils.basename(audioFile.getAbsolutePath()), determinatedLength, mode);
+			transcodingTask.addHandler(task);
+			detectorTasks.add(task);
+		}
+		return detectorTasks;
+	}
+	
+	private class TranscodingTask extends BackgroundTask {
 
+		private final File newFile;
+		AudioFile transcodedAudioFile;
+		
+		protected TranscodingTask(final File file) {
+			super("Transcoding " + FileUtils.basename(file.getAbsolutePath()), false);
+			newFile = file;
+		}
+
+		@Override
+		public Void doInBackground() {
+			Runnable runTranscoder = new Runnable(){
+				@Override
+				public void run() {
+					try {
+						transcodedAudioFile = new AudioFile(newFile.getAbsolutePath());
+					} catch (EncoderException e) {
+						interrupt(TranscodingTask.this, e);
+					}
+				}
+			};
+			//Do the actual detection in the background
+			Thread t = new Thread(runTranscoder, getName());
+			t.start();
+			setProgress(0);
+			while (t.isAlive()) {
+				try {
+					setProgress(50);
+					Thread.sleep(30);
+				} catch (InterruptedException e) {
+				}
+			}
+			setProgress(100);
+			return null;
+		}
+
+		public AudioFile getAudioFile() {
+			return transcodedAudioFile;
+		}
+	}
+	
+	private class DetectorTask extends BackgroundTask implements TaskHandler{
+		private AudioFile file;
+		private final PitchDetectionMode mode;
+		
+		protected DetectorTask(String name, boolean lengthDetermined, PitchDetectionMode detectionMode) {
+			super(name, lengthDetermined);
+			mode = detectionMode;
+		}
+
+		@Override
+		public Void doInBackground() {
+			final PitchDetector pitchDetector = mode
+					.getPitchDetector(file);
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					//Do pitch extraction
+					AnnotationPublisher publisher = AnnotationPublisher.getInstance();
+					List<Annotation> annotations = pitchDetector.executePitchDetection();
+					publisher.addAnnotations(annotations);
+				}
+			};
+			//Do the actual detection in the background
+			Thread t = new Thread(r, getName());
+			t.start();
+			
+			setProgress(0);
+			// So progress can be updated in this thread, every 30ms.
+			while (t.isAlive()) {
+				try {
+					if(lengthIsDetermined()){
+						setProgress((int) (pitchDetector.progress() * 100));
+					}else{
+						setProgress(50);
+					}
+					Thread.sleep(30);
+				} catch (InterruptedException e) {
+				}
+			}
+			setProgress(100);
+			return null;
+		}
+
+		@Override
+		public void taskDone(BackgroundTask backgroundTask) {
+			if(backgroundTask instanceof TranscodingTask){
+				file = ((TranscodingTask) backgroundTask).getAudioFile();
+			}
+		}
+
+		@Override
+		public void taskInterrupted(BackgroundTask backgroundTask, Exception e) {
+			//transcoding interrupted!
+		}
+	}
+	
 
 	private AudioFile getAudioFile() {
 		return audioFile;
@@ -472,6 +651,10 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 	public synchronized void addAudioFileChangedListener(AudioFileChangedListener listener) {
 		audioFileChangedListeners.add(listener);
 	}
+	
+	public synchronized void removeAudioFileChangedListener(AudioFileChangedListener listener) {
+		audioFileChangedListeners.remove(listener);
+	}
 
 	/* -- Scale publish subscribe -- */
 	private final List<ScaleChangedListener> scaleChangedListeners;
@@ -482,7 +665,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 						Arrays.toString(getScale())));
 
 		for (ScaleChangedListener listener : scaleChangedListeners) {
-			listener.scaleChanged(getScale(), isChanging);
+			listener.scaleChanged(getScale(), isChanging, false);
 		}
 	}
 
@@ -490,7 +673,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		scaleChangedListeners.add(listener);
 	}
 
-	public void scaleChanged(double[] newScale, boolean isChanging) {
+	public void scaleChanged(double[] newScale, boolean isChanging, boolean shiftHisto) {
 		scale = newScale;
 		notifyScaleChangedListeners(isChanging);
 	}
@@ -507,32 +690,6 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		// NO OP
 	}
 	
-	  class Task extends SwingWorker<Void, Void> {
-	        @Override
-	        public Void doInBackground() {
-	            Random random = new Random();
-	            int progress = 0;
-	            setProgress(0);
-	            try {
-	                Thread.sleep(1000);
-	                while (progress < 100 && !isCancelled()) {
-	                    //Sleep for up to one second.
-	                    Thread.sleep(random.nextInt(1000));
-	                    //Make random progress.
-	                    progress += random.nextInt(10);
-	                    setProgress(Math.min(progress, 100));
-	                }
-	            } catch (InterruptedException ignore) {}
-	            return null;
-	        }
-
-	        @Override
-	        public void done() {
-	        }
-	    }
-
-	  ProgressMonitor progressMonitor;
-	  Task task;
 	public void extractionStarted() {
 		// Show waiting cursor.
 		setWaitState(true);
@@ -540,6 +697,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 	public void extractionFinished() {
 		// Show normal cursor again.
+		
 		setWaitState(false);
 		LOG.fine("Wait state disabled.");
 	}

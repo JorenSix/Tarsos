@@ -80,7 +80,7 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 				} else {
 					setMarkerInPixels(event.getX(), true);
 				}
-				AnnotationPublisher.getInstance().delegateClearAnnotations();
+				AnnotationPublisher.getInstance().clear();
 				AnnotationPublisher.getInstance()
 						.delegateAddAnnotations(minMarkerPosition, maxMarkerPosition);
 

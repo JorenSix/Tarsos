@@ -7,31 +7,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javax.sound.midi.Instrument;
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiChannel;
-import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiMessage;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Patch;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
-import javax.sound.midi.Synthesizer;
-import javax.sound.midi.Transmitter;
 import javax.swing.JComponent;
 
-import ptolemy.kernel.util.InvalidStateException;
-import be.hogent.tarsos.midi.LogReceiver;
 import be.hogent.tarsos.midi.MidiCommon;
-import be.hogent.tarsos.midi.MidiUtils;
-import be.hogent.tarsos.midi.ReceiverSink;
-import be.hogent.tarsos.util.ConfKey;
-import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.midi.TarsosSynth;
 
 /**
  * An abstract class to represent a keyboard.
@@ -46,15 +29,10 @@ import be.hogent.tarsos.util.Configuration;
  * 
  * @author Joren Six
  */
-public abstract class VirtualKeyboard extends JComponent implements Transmitter, Receiver {
-	private static final Logger LOG = Logger.getLogger(VirtualKeyboard.class.getName());
+public abstract class VirtualKeyboard extends JComponent implements Receiver {
 	/**
      */
 	private static final long serialVersionUID = -8109877572069108012L;
-	/**
-	 * Channel to send MIDI events to.
-	 */
-	public static final int CHANNEL = 0; // channel zero.. bad to the bone
 	/**
 	 * The velocity of NOTE_ON events.
 	 */
@@ -65,7 +43,7 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 	public static final int NUMBER_OF_MIDI_KEYS = 128;
 
 	// on a azerty (Belgian) keyboard)
-	private static String mappedKeys = "qsdfghjklmazertyuiop&й\"'(§и!за";
+	private static String mappedKeys = "qsdfghjklmazertyuiop";
 
 	private final int numberOfKeysPerOctave;
 
@@ -187,6 +165,8 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 				}
 			}
 
+			
+
 			public void keyTyped(final KeyEvent e) {
 				if (e.getKeyChar() == '-') {
 					setLowestAssignedKey(getLowestAssignedKey() - getNumberOfKeysPerOctave());
@@ -205,6 +185,16 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 			}
 		});
 
+		TarsosSynth.getInstance().addReceiver(this);
+	}
+	
+	private void sendNoteMessage(int midiKey, boolean noteOn) {
+		if(noteOn){
+			TarsosSynth.getInstance().noteOn(midiKey,VELOCITY,TarsosSynth.TUNED_MIDI_CHANNEL);
+		}else{
+			TarsosSynth.getInstance().noteOff(midiKey,TarsosSynth.TUNED_MIDI_CHANNEL);
+		}
+		
 	}
 
 	protected final boolean isKeyDown(final int midiKey) {
@@ -212,53 +202,9 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		if (midiKey >= VirtualKeyboard.NUMBER_OF_MIDI_KEYS) {
 			throw new IllegalArgumentException("Requested invalid midi key: " + midiKey);
 		}
-
 		return keyDown[midiKey];
 	}
 
-	/**
-	 * Sends a NOTE_ON or NOTE_OFF message on the requested key.
-	 * 
-	 * @param midiKey
-	 *            The midi key to send the message for
-	 *            [0,VirtualKeyboard.NUMBER_OF_MIDI_KEYS[
-	 * @param sendOnMessage
-	 *            <code>true</code> for NOTE_ON messages, <code>false</code> for
-	 *            NOTE_OFF
-	 */
-	protected final void sendNoteMessage(final int midiKey, final boolean sendOnMessage) {
-		// do not send note on messages to pressed keys
-		if (sendOnMessage && keyDown[midiKey]) {
-			return;
-		}
-		// do not send note off messages to keys that are not pressed
-		if (!sendOnMessage && !keyDown[midiKey]) {
-			return;
-		}
-
-		try {
-			final ShortMessage sm = new ShortMessage();
-
-			final int command;
-			final int velocity;
-
-			if (sendOnMessage) {
-				command = ShortMessage.NOTE_ON;
-				velocity = VirtualKeyboard.VELOCITY;
-			} else {
-				command = ShortMessage.NOTE_OFF;
-				velocity = 0;
-			}
-
-			sm.setMessage(command, MIDI_CHANNEL, midiKey, velocity);
-
-			send(sm, -1);
-		} catch (final InvalidMidiDataException e1) {
-			e1.printStackTrace();
-		}
-		// mark key correctly
-		keyDown[midiKey] = sendOnMessage;
-	}
 
 	/**
 	 * Converts x and y coordinate into a MIDI note number.
@@ -277,24 +223,11 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		}
 	}
 
-	public final void close() {
-		receiver.close();
-	}
-
-	public final Receiver getReceiver() {
-		return this.receiver;
-	}
-
 	public final void send(final MidiMessage message, final long timeStamp) {
-		// acts as a "MIDI cable" sends the received messages trough
-		if (receiver != null) {
-			receiver.send(message, timeStamp);
-		}
-
 		// implements Receiver send: makes sure the right keys are marked
 		if (message instanceof ShortMessage) {
 			final ShortMessage sm = (ShortMessage) message;
-			final boolean correctChannel = sm.getChannel() == VirtualKeyboard.CHANNEL;
+			final boolean correctChannel = sm.getChannel() == TarsosSynth.TUNED_MIDI_CHANNEL;
 			final boolean noteOnOrOff = sm.getCommand() == ShortMessage.NOTE_ON
 					|| sm.getCommand() == ShortMessage.NOTE_OFF;
 			if (correctChannel && noteOnOrOff) {
@@ -331,44 +264,8 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 		return keyboard;
 	}
 
-	private MidiDevice synthDevice;
-	private Receiver receiver;
-	/**
-	 * The channel used to send messages on.
-	 */
-	private static final int MIDI_CHANNEL = 0;
 
-	private void setReceiver() throws MidiUnavailableException {
-		final int midiDeviceIndex = Configuration.getInt(ConfKey.midi_output_device);
-		if (synthDevice != null) {
-			synthDevice.close();
-		}
-		final MidiDevice.Info synthInfo = MidiSystem.getMidiDeviceInfo()[midiDeviceIndex];
-		LOG.info(String.format("Configuring %s as MIDI OUT.", synthInfo.getName()));
-		synthDevice = MidiSystem.getMidiDevice(synthInfo);
-		synthDevice.open();
-		receiver = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
-		// configure the instrument as well
-		setConfiguredInstrument();
-		LOG.info(String.format("Configured %s as MIDI OUT.", synthInfo.getName()));
-	}
-
-	public void setReceiver(final Receiver newReceiver) {
-		receiver = newReceiver;
-	}
-
-	private void setConfiguredInstrument() {
-		if (synthDevice instanceof Synthesizer) {
-			Synthesizer synth = (Synthesizer) synthDevice;
-			Instrument[] available = synth.getAvailableInstruments();
-			Instrument configuredInstrument = available[Configuration.getInt(ConfKey.midi_instrument_index)];
-			// synth.loadInstrument(configuredInstrument);
-			MidiChannel channel = synth.getChannels()[MIDI_CHANNEL];
-			Patch patch = configuredInstrument.getPatch();
-			channel.programChange(patch.getBank(), patch.getProgram());
-			LOG.info(String.format("Configured synth with %s.", configuredInstrument.getName()));
-		}
-	}
+	
 
 	private double tuning[];
 
@@ -383,26 +280,8 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 	 *            The tuning for one octave defined in cents.
 	 */
 	public void connectToTunedSynth(double[] tuning) {
-
-		try {
-			if (receiver == null) {
-				setReceiver();
-				setConfiguredInstrument();
-			}
-			if (tuning.length != 0) {
-				final double[] rebasedTuning = MidiCommon.tuningFromPeaks(tuning);
-				MidiUtils.sendTunings(receiver, 0, 2, "tuning", rebasedTuning);
-				MidiUtils.sendTuningChange(receiver, MIDI_CHANNEL, 2);
-				this.tuning = rebasedTuning;
-			}
-		} catch (MidiUnavailableException e) {
-			LOG.log(Level.WARNING, "Tuning failed: MIDI device not available", e);
-		} catch (IOException e) {
-			LOG.log(Level.WARNING, "Tuning failed: MIDI device threw an I/O error.", e);
-		} catch (InvalidMidiDataException e) {
-			LOG.log(Level.WARNING, "Tuning failed: MIDI tuning message incorrectly constructed.", e);
-			throw new InvalidStateException("MIDI tuning message incorrectly constructed");
-		}
+		TarsosSynth.getInstance().tune(tuning);
+		this.tuning = MidiCommon.tuningFromPeaks(tuning);
 	}
 
 	public static void setMappedKeys(String mappedKeys) {
@@ -431,6 +310,10 @@ public abstract class VirtualKeyboard extends JComponent implements Transmitter,
 
 	protected float getNumberOfOctaves() {
 		return numberOfKeys / (float) numberOfKeysPerOctave;
+	}
+	
+	@Override
+	public void close() {
 	}
 
 }

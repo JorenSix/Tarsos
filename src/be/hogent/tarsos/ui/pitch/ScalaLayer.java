@@ -113,7 +113,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 					layer.scale = newScale;
 				}
 				parent.repaint();
-				layer.scaleChangedPublisher.scaleChanged(layer.scale, true);
+				layer.scaleChangedPublisher.scaleChanged(layer.scale, true, false);
 			} else if (e.isControlDown()) {
 				// move the closest element
 				if (movingElement == -1.0) {
@@ -127,7 +127,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 					}
 				}
 				parent.repaint();
-				layer.scaleChangedPublisher.scaleChanged(layer.scale, true);
+				layer.scaleChangedPublisher.scaleChanged(layer.scale, true, false);
 			}
 		}
 
@@ -148,7 +148,8 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			if (movingElement != -1.0) {
-				layer.scaleChangedPublisher.scaleChanged(layer.scale, false);
+				Arrays.sort(layer.scale);
+				layer.scaleChangedPublisher.scaleChanged(layer.scale, false, false);
 			}
 			movingElement = -1.0;
 		}
@@ -209,7 +210,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 			for (int i = 1200; i < delta; i += 1200) {
 				final int x = (int) (i / delta * width + xOffsetPixels) % width;
 				graphics.drawLine(x, 0, x, height - yOffset);
-				final String text = Integer.valueOf(i + Configuration.getInt(ConfKey.ambitus_start))
+				final String text = Integer.valueOf(i + Configuration.getInt(ConfKey.pitch_histogram_start))
 						.toString();
 				final int labelLength = text.length();
 				final double labelWidth = graphics.getFontMetrics().getStringBounds(text, graphics)
@@ -221,7 +222,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		}
 	}
 
-	public void scaleChanged(double[] newScale, boolean isChanging) {
+	public void scaleChanged(double[] newScale, boolean isChanging, boolean shiftHisto) {
 		this.scale = newScale;
 		parent.repaint();
 	}

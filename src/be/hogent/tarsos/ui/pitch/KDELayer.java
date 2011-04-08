@@ -87,7 +87,7 @@ public final class KDELayer implements Layer, ScaleChangedListener, AudioFileCha
 	double[] scale;
 	AudioFile audioFile;
 
-	public void scaleChanged(final double[] newScale, final boolean isChanging) {
+	public void scaleChanged(final double[] newScale, final boolean isChanging, boolean shiftHisto) {
 		if (!isChanging) {
 			scale = newScale;
 		}

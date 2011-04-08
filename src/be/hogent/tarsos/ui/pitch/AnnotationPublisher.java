@@ -6,10 +6,7 @@ import java.util.logging.Logger;
 
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationTree;
-import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
-import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
-import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.StopWatch;
@@ -18,11 +15,12 @@ import be.hogent.tarsos.util.StopWatch;
  * This class is responsible for the extraction and delegation of annotations.
  * It notifies listeners of annotations.
  */
-public final class AnnotationPublisher implements AudioFileChangedListener {
+public final class AnnotationPublisher{
 
 	private AnnotationTree tree;
 	private final List<AnnotationListener> listeners;
 	private final AnnotationSelection selection;
+	private final PitchUnit unit;
 
 	/**
 	 * Log messages.
@@ -35,8 +33,8 @@ public final class AnnotationPublisher implements AudioFileChangedListener {
 	private AnnotationPublisher() {
 		listeners = new ArrayList<AnnotationListener>();
 		selection = new AnnotationSelection();
-		tree = new AnnotationTree(new ArrayList<Annotation>(), PitchUnit.valueOf(Configuration
-				.get(ConfKey.pitch_contour_unit)));
+		unit = PitchUnit.valueOf(Configuration.get(ConfKey.pitch_contour_unit));
+		tree = new AnnotationTree(unit);
 	}
 
 	/**
@@ -49,20 +47,25 @@ public final class AnnotationPublisher implements AudioFileChangedListener {
 		listeners.add(listener);
 	}
 
-	public void audioFileChanged(final AudioFile newAudioFile) {
-		Thread extractorThread = new AnnotationExtractor(newAudioFile, this);
-		extractorThread.start();
-	}
-
-	private void buildTree(final List<Annotation> annotations) {
-		// Build a new KD-tree.
-		tree = new AnnotationTree(annotations, PitchUnit.valueOf(Configuration
-				.get(ConfKey.pitch_contour_unit)));
-
+	public void addAnnotations(final List<Annotation> annotations) {
+		int beforeSize = tree.size();
+		tree.add(annotations);
+		
+		assert tree.size() == beforeSize+annotations.size();
 	}
 
 	public AnnotationTree getAnnotationTree() {
 		return tree;
+	}
+	
+	public void clear(){
+		for (AnnotationListener listener : listeners) {
+			listener.clearAnnotations();
+		}
+	}
+	
+	public void clearTree(){
+		tree = new AnnotationTree(unit);
 	}
 
 	/**
@@ -99,11 +102,9 @@ public final class AnnotationPublisher implements AudioFileChangedListener {
 	 *            The stop time.
 	 */
 	public void delegateAddAnnotations(final double startTime, final double stopTime) {
-		if (tree != null) {
-			selection.setTimeSelection(startTime, stopTime);
-			List<Annotation> annotations = tree.select(selection);
-			delegateAddAnnotations(annotations);
-		}
+		selection.setTimeSelection(startTime, stopTime);
+		List<Annotation> annotations = tree.select(selection);
+		delegateAddAnnotations(annotations);
 	}
 
 	/**
@@ -121,55 +122,32 @@ public final class AnnotationPublisher implements AudioFileChangedListener {
 	 */
 	public void delegateAddAnnotations(final double startTime, final double stopTime,
 			final double startPitch, final double stopPitch) {
-		if (tree != null) {
-			selection.setSelection(startTime, stopTime, startPitch, stopPitch);
-			List<Annotation> annotations = tree.select(selection);
-			delegateAddAnnotations(annotations);
-		}
+		selection.setSelection(startTime, stopTime, startPitch, stopPitch);
+		List<Annotation> annotations = tree.select(selection);
+		delegateAddAnnotations(annotations);
+		
 	}
 
 	public void delegateAddAnnotations(final double newMinProbability) {
-		if (tree != null) {
-			selection.setMinProbability(newMinProbability);
-			List<Annotation> annotations = tree.select(selection);
-			delegateAddAnnotations(annotations);
-		}
-
+		selection.setMinProbability(newMinProbability);
+		List<Annotation> annotations = tree.select(selection);
+		delegateAddAnnotations(annotations);
 	}
 
-	/**
-	 * Clears the annotations for each listener.
-	 */
-	public void delegateClearAnnotations() {
+	public void extractionFinished(){
 		for (AnnotationListener listener : listeners) {
-			listener.clearAnnotations();
+			listener.extractionFinished();
 		}
 	}
-
-	public AnnotationSelection getCurrentSelection() {
-		return selection;
-	}
-
-	/**
-	 * Notifies each listener that the annotation extraction process has
-	 * started.
-	 */
-	private void delegateExtractionStarted() {
-		// delegate to the actual listeners.
+	
+	public void extractionStarted(){
 		for (AnnotationListener listener : listeners) {
 			listener.extractionStarted();
 		}
 	}
 
-	/**
-	 * Notifies each listener that the annotation extraction process has
-	 * finished
-	 */
-	private void delegateExtractionFinished() {
-		// delegate to the actual listeners.
-		for (AnnotationListener listener : listeners) {
-			listener.extractionFinished();
-		}
+	public AnnotationSelection getCurrentSelection() {
+		return selection;
 	}
 
 	/**
@@ -184,47 +162,4 @@ public final class AnnotationPublisher implements AudioFileChangedListener {
 	public static AnnotationPublisher getInstance() {
 		return INSTANCE;
 	}
-
-	/**
-	 * This Thread is responsible for the actual extraction of pitch
-	 * annotations. It starts the extraction and notifies one listener when it
-	 * is finished. The listener can then e.g. delegate the events to other
-	 * listeners.
-	 */
-	private final class AnnotationExtractor extends Thread {
-		/**
-		 * The file to annotate.
-		 */
-		private final AudioFile file;
-		/**
-		 * The listener to notify.
-		 */
-		private final AnnotationPublisher publisher;
-
-		private AnnotationExtractor(final AudioFile audioFile, final AnnotationPublisher annotationPublisher) {
-			super("Annotation data publisher.");
-			file = audioFile;
-			this.publisher = annotationPublisher;
-		}
-
-		@Override
-		public void run() {
-			// Pitch extractor setup.
-			PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
-			final PitchDetector pitchDetector = mode.getPitchDetector(file);
-
-			// Do pitch extraction and notify listener of state.
-			publisher.delegateExtractionStarted();
-			pitchDetector.executePitchDetection();
-
-			// Build a KD-tree
-			final List<Annotation> annotations = pitchDetector.getAnnotations();
-			publisher.buildTree(annotations);
-
-			// notify listeners the annotations can be consumed.
-			publisher.delegateExtractionFinished();
-
-		}
-	}
-
 }

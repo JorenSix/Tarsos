@@ -126,7 +126,8 @@ public final class Tarsos {
 	/**
 	 * Colors used by ptplot.
 	 */
-	public static final Color[] COLORS = { new Color(0xff0000), // red
+	public static final Color[] COLORS = { 
+			new Color(0xff0000), // red
 			new Color(0x0000ff), // blue
 			new Color(0x00aaaa), // cyan-ish
 			new Color(0x000000), // black
@@ -137,6 +138,10 @@ public final class Tarsos {
 			new Color(0x90422d), // sienna-ish
 			new Color(0xa0a0a0), // grey-ish
 			new Color(0x14ff14), // green-ish
+			new Color(0xcc02de), // purple
+			new Color(0x6e4272), // dark purple
+			new Color(0x552209), // brown
+			
 	};
 
 	/**

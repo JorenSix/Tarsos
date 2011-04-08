@@ -43,6 +43,15 @@ public enum PitchDetectionMode {
 	 * Spectral comb.
 	 */
 	VAMP_SPECTRAL_COMB("spectral_comb"),
+	
+	/**
+	 * Spectral comb.
+	 */
+	VAMP_CONSTANT_Q_200("constantq_200"),
+	/**
+	 * Spectral comb.
+	 */
+	VAMP_CONSTANT_Q_400("constantq_400"),
 
 	/**
 	 * The IPEM pitch tracker outputs six weighted pitch candidates.

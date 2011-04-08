@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -109,7 +110,7 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 		for (int i = markerPositions.size() / 2; i < markerPositions.size(); i++) {
 			double position = markerPositions.get(i);
 			x = (int) (position / delta * width + xOffsetPixels) % width;
-			y = height - ToneScalePanel.Y_BORDER
+			y = height - PitchClassHistogramLayer.Y_BORDER
 					- (int) (histo.getCount(position) / (double) maxCount * height * 0.9);
 			graphics.setColor(Color.BLUE);
 			graphics.drawOval(x, y, 2, 2);
@@ -126,7 +127,7 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 	double[] scale;
 	AudioFile audioFile;
 
-	public void scaleChanged(final double[] newScale, final boolean isChanging) {
+	public void scaleChanged(final double[] newScale, final boolean isChanging, boolean shiftHisto) {
 		if (!isChanging) {
 			scale = newScale;
 		}
@@ -149,7 +150,7 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 				public void stateChanged(final ChangeEvent e) {
 					final JSlider source = (JSlider) e.getSource();
 					final double newMinProbability = source.getValue() / 100.0;
-					AnnotationPublisher.getInstance().delegateClearAnnotations();
+					AnnotationPublisher.getInstance().clear();
 					AnnotationPublisher.getInstance().delegateAddAnnotations(newMinProbability);
 				}
 			});
@@ -171,7 +172,8 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 						for (final Peak peak : peaks) {
 							peaksInCents[i++] = peak.getPosition();
 						}
-						scaleChangedPublisher.scaleChanged(peaksInCents, source.getValueIsAdjusting());
+						Arrays.sort(peaksInCents);
+						scaleChangedPublisher.scaleChanged(peaksInCents, source.getValueIsAdjusting(), false);
 					}
 				}
 			});
