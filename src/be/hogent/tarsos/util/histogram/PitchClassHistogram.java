@@ -199,7 +199,7 @@ public final class PitchClassHistogram extends Histogram {
 	 *            A list of annotations.s
 	 * @return A histogram build with Gaussian kernels.
 	 */
-	public static PitchClassHistogram createToneScaleHistogram(final List<Annotation> annotations,
+	public static PitchClassHistogram createPitchClassHistogram(final List<Annotation> annotations,
 			final double width) {
 		// 1200 pitch classes should be enough for everybody!
 		double[] accumulator = new double[1200];
@@ -217,7 +217,7 @@ public final class PitchClassHistogram extends Histogram {
 		}
 
 		/*
-		 * Add a kernel to an accumulator for each annotation.
+		 * Add the kernel to an accumulator for each annotation.
 		 * 
 		 * When a kernel with a width of 7 is added at 1 cents it has influence
 		 * on the bins from 1200 - 7 * 10 + 1 to 1 + 7 * 10 so from 1131 to 71.
@@ -238,7 +238,6 @@ public final class PitchClassHistogram extends Histogram {
 			}
 		}
 
-		//Wrap the accumulator in a tone scale histo.
 		PitchClassHistogram toneScale = new PitchClassHistogram();
 		for (int i = 0; i < 1200; i++) {
 			toneScale.setCount(i, (long) accumulator[i]);
@@ -246,6 +245,11 @@ public final class PitchClassHistogram extends Histogram {
 		return toneScale;
 	}
 
+	/**
+	 * Without kernel.
+	 * @param annotations
+	 * @return
+	 */
 	public static PitchClassHistogram createToneScaleHistogram(final List<Annotation> annotations) {
 		final PitchClassHistogram histogram = new PitchClassHistogram();
 		for (Annotation annotation : annotations) {

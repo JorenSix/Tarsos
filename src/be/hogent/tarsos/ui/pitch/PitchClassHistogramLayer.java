@@ -30,7 +30,7 @@ import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 /**
  * @author Joren Six
  */
-public final class ToneScalePanel extends JPanel implements AudioFileChangedListener, ScaleChangedListener,
+public final class PitchClassHistogramLayer extends JPanel implements AudioFileChangedListener, ScaleChangedListener,
 		AnnotationListener {
 
 	public static final int X_BORDER = 5; // pixels
@@ -39,8 +39,8 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 	/**
      */
 	private static final long serialVersionUID = 5493280409705136547L;
-	private static final int AMBITUS_STOP = Configuration.getInt(ConfKey.ambitus_stop);
-	//private static final int AMBITUS_START = Configuration.getInt(ConfKey.ambitus_start);
+	private static final int AMBITUS_STOP = Configuration.getInt(ConfKey.pitch_histogram_stop);
+	private static final int AMBITUS_START = Configuration.getInt(ConfKey.pitch_histogram_start);
 
 	private final HashMap<PitchDetectionMode, Histogram> histos;
 	private final List<Layer> layers;
@@ -53,7 +53,7 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 	 */
 	private final JTabbedPane layerUserInterfeces;
 
-	public ToneScalePanel(final Histogram histogram, final ScaleChangedListener scaleChangedPublisher) {
+	public PitchClassHistogramLayer(final Histogram histogram, final ScaleChangedListener scaleChangedPublisher) {
 		super(new BorderLayout());
 		stop = histogram.getStop();
 		setSize(640, 480);
@@ -75,8 +75,10 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 			}
 		}
 
-		for (Histogram histogram : histos.values()) {
-			histogram.clear();
+		if (Configuration.getBoolean(ConfKey.reset_on_import)) {
+			for (Histogram histogram : histos.values()) {
+				histogram.clear();
+			}
 		}
 	}
 
@@ -97,13 +99,30 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 		return layers;
 	}
 
-	public void scaleChanged(final double[] newScale, final boolean isChanging) {
-		this.scalaLayer.scaleChanged(newScale, isChanging);
+	public void scaleChanged(final double[] newScale, final boolean isChanging, boolean shiftHisto) {
+		this.scalaLayer.scaleChanged(newScale, isChanging, shiftHisto);
+		Histogram histo = null;
+		if(histos.entrySet().size() > 0){
+			histo =  histos.entrySet().iterator().next().getValue();
+		}
+		boolean setScalaXOffset = shiftHisto && histo instanceof PitchClassHistogram; 
+		if( setScalaXOffset){
+			Histogram oneHistogram = PitchClassHistogram.createToneScale(newScale.clone());
+			int displacement = oneHistogram.normalize().displacementForOptimalCorrelation(histo.normalize());
+			double offsetInCents = displacement * Configuration.getDouble(ConfKey.histogram_bin_width);
+			double offsetInPositiveCents = (offsetInCents + 1200.0 )% 1200.0;
+			double offsetInPercent = offsetInPositiveCents/1200.0;
+			this.scalaLayer.setXOffset(offsetInPercent);
+			
+		}
+		
 		for (Layer layer : layers) {
 			if (layer instanceof HistogramLayer) {
 				HistogramLayer histoLayer = (HistogramLayer) layer;
-				histoLayer.scaleChanged(newScale, isChanging);
-				this.scalaLayer.setXOffset(histoLayer.getXOffset());
+				histoLayer.scaleChanged(newScale, isChanging, shiftHisto);
+				if(!setScalaXOffset){
+					this.scalaLayer.setXOffset(histoLayer.getXOffset());
+				}
 			}
 		}
 	}
@@ -116,7 +135,7 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 
 	public void addAnnotation(Annotation annotation) {
 		double pitchInAbsCents = annotation.getPitch(PitchUnit.ABSOLUTE_CENTS);
-		if (pitchInAbsCents > 0 && pitchInAbsCents <= AMBITUS_STOP) {
+		if (pitchInAbsCents > AMBITUS_START && pitchInAbsCents <= AMBITUS_STOP) {
 			final Histogram histo;
 			if (!histos.containsKey(annotation.getSource())) {
 				if (stop > 1200) {
@@ -149,7 +168,6 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 		for (Histogram histogram : histos.values()) {
 			histogram.clear();
 		}
-
 		if (histoValues != null) {
 			for (int i = 0; i < histoValues.length; i++) {
 				histoValues[i] = 0;
@@ -157,15 +175,19 @@ public final class ToneScalePanel extends JPanel implements AudioFileChangedList
 		}
 	}
 
-	public void extractionStarted() {
-		// NO OP
-	}
-
-	public void extractionFinished() {
-		// NO OP
-	}
-
 	public void annotationsAdded() {
 		repaint();
+	}
+
+	@Override
+	public void extractionStarted() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void extractionFinished() {
+		// TODO Auto-generated method stub
+		
 	}
 }

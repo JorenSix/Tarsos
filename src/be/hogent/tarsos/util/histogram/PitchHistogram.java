@@ -13,6 +13,8 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 import ptolemy.plot.Plot;
+import be.hogent.tarsos.sampled.pitch.Annotation;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
@@ -36,8 +38,8 @@ public final class PitchHistogram extends Histogram {
 	private final List<PitchClassHistogram> toneScaleHistogramPerOctave = new ArrayList<PitchClassHistogram>();
 
 	public PitchHistogram() {
-		super(Configuration.getInt(ConfKey.ambitus_start), Configuration.getInt(ConfKey.ambitus_stop),
-				(Configuration.getInt(ConfKey.ambitus_stop) - Configuration.getInt(ConfKey.ambitus_start))
+		super(Configuration.getInt(ConfKey.pitch_histogram_start), Configuration.getInt(ConfKey.pitch_histogram_stop),
+				(Configuration.getInt(ConfKey.pitch_histogram_stop) - Configuration.getInt(ConfKey.pitch_histogram_start))
 						/ Configuration.getInt(ConfKey.histogram_bin_width), false, // does
 				// not
 				// wrap
@@ -45,8 +47,8 @@ public final class PitchHistogram extends Histogram {
 		);
 
 		// initialize the list of tone scales
-		for (int value = Configuration.getInt(ConfKey.ambitus_start); value < Configuration
-				.getInt(ConfKey.ambitus_stop); value += 1200) {
+		for (int value = Configuration.getInt(ConfKey.pitch_histogram_start); value < Configuration
+				.getInt(ConfKey.pitch_histogram_stop); value += 1200) {
 			toneScaleHistogramPerOctave.add(new PitchClassHistogram());
 		}
 
@@ -212,5 +214,104 @@ public final class PitchHistogram extends Histogram {
 			}
 		}
 		plot.save(fileName);
+	}
+	
+	
+	/**
+	 * Create a tone scale histogram using a kernel instead of an ordinary
+	 * count. This construction uses a paradigm described here:
+	 * http://en.wikipedia.org/wiki/Kernel_density_estimation
+	 * 
+	 * It uses Gaussian kernels of a defined width. The width should be around
+	 * the just noticeable threshold of about 7 cents.
+	 * 
+	 * @param annotations
+	 *            A list of annotations.s
+	 * @return A histogram build with Gaussian kernels.
+	 */
+	public static PitchHistogram createPitchHistogram(final List<Annotation> annotations,
+			final double width) {
+		int pitchHistogramMaximum = Configuration.getInt(ConfKey.pitch_histogram_stop);
+		int pitchHistogramMinimum = Configuration.getInt(ConfKey.pitch_histogram_start);
+		int octaves = (int) Math.ceil((pitchHistogramMaximum - pitchHistogramMinimum)/1200.0);
+		
+		// 1200 pitch classes should be enough for everybody!
+		double[] accumulator = new double[1200 * octaves];
+
+		double calculationAria = 5 * width;// hehe aria, not area
+		double halfWidth = width / 2.0;
+		
+		//Compute a kernel: a lookup table with e.g. a gaussian curve
+		double kernel[] = new double[(int)calculationAria*2+1];
+		double difference =  - calculationAria;
+		for(int i = 0 ; i < kernel.length; i++){
+			double power = Math.pow(difference / halfWidth, 2.0);
+			kernel[i] = Math.pow(Math.E, -0.5 * power);
+			difference++;
+		}
+
+		/*
+		 * Add the kernel to an accumulator for each annotation.
+		 */
+	
+		for (Annotation annotation : annotations) {
+			double pitch = annotation.getPitch(PitchUnit.ABSOLUTE_CENTS);
+			int start = (int) (pitch + - calculationAria);
+			int stop = (int) (pitch  + calculationAria);
+			int kernelIndex = 0;
+			for (int i = start; i < stop && i < pitchHistogramMaximum; i++) {
+				if(i > pitchHistogramMinimum){					
+					accumulator[i] += kernel[kernelIndex];
+				}
+				kernelIndex++;
+			}
+		}
+
+		PitchHistogram histo = new PitchHistogram();
+		for (int i = 0; i < accumulator.length; i++) {
+			histo.setCount(i + pitchHistogramMinimum, (long) accumulator[i]);
+		}
+		return histo;
+	}
+	
+	public static double[] createAccumulator(final List<Annotation> annotations,
+			final double width) {
+		int pitchHistogramMaximum = Configuration.getInt(ConfKey.pitch_histogram_stop);
+		int pitchHistogramMinimum = Configuration.getInt(ConfKey.pitch_histogram_start);
+		int octaves = (int) Math.ceil((pitchHistogramMaximum - pitchHistogramMinimum)/1200.0);
+		
+		// 1200 pitch classes should be enough for everybody!
+		double[] accumulator = new double[1200 * octaves];
+
+		double calculationAria = 5 * width;// hehe aria, not area
+		double halfWidth = width / 2.0;
+		
+		//Compute a kernel: a lookup table with e.g. a gaussian curve
+		double kernel[] = new double[(int)calculationAria*2+1];
+		double difference =  - calculationAria;
+		for(int i = 0 ; i < kernel.length; i++){
+			double power = Math.pow(difference / halfWidth, 2.0);
+			kernel[i] = Math.pow(Math.E, -0.5 * power);
+			difference++;
+		}
+
+		/*
+		 * Add the kernel to an accumulator for each annotation.
+		 */
+	
+		for (Annotation annotation : annotations) {
+			double pitch = annotation.getPitch(PitchUnit.ABSOLUTE_CENTS);
+			int start = (int) (pitch + - calculationAria);
+			int stop = (int) (pitch  + calculationAria);
+			int kernelIndex = 0;
+			for (int i = start; i < stop && i < pitchHistogramMaximum; i++) {
+				if(i > pitchHistogramMinimum){					
+					accumulator[i] += kernel[kernelIndex];
+				}
+				kernelIndex++;
+			}
+		}
+
+		return accumulator;
 	}
 }
