@@ -89,12 +89,9 @@ public class TarsosSynth implements ConfigChangeListener {
 	private static final int PITCH_BEND_MIDI_CHANNEL = 0;
 	
 	/**
-	 * Initialze the receiver and listen to configuration changes.
-	 * 
-	 * @throws MidiUnavailableException If the midi device is not available.
+	 * Listen to configuration changes.
 	 */
-	private TarsosSynth() throws MidiUnavailableException{
-		setReceiver();
+	private TarsosSynth(){
 		Configuration.addListener(this);
 	}
 
@@ -296,6 +293,15 @@ public class TarsosSynth implements ConfigChangeListener {
 		LOG.info(String.format("Configured %s as MIDI OUT.", synthInfo.toString()));
 	}
 	
+	private void setFallbackReceiver(){
+		try {
+			synthDevice = MidiSystem.getSynthesizer();
+			LOG.warning("Using not the configured synth but: " + synthDevice.toString());
+		} catch (MidiUnavailableException e) {
+			LOG.severe("Could not initialize a synth");
+		}		
+	}
+	
 	
 	private void connectMidiInputDevice() throws MidiUnavailableException{
 		final int midiDeviceIndex = Configuration.getInt(ConfKey.midi_input_device);
@@ -359,8 +365,10 @@ public class TarsosSynth implements ConfigChangeListener {
 		if(tarsosSynth==null){
 			try {
 				tarsosSynth = new TarsosSynth();
+				tarsosSynth.setReceiver();
 			} catch (MidiUnavailableException e) {
-				LOG.warning("The configured Synth is not available:" + e.getMessage());
+				LOG.severe("The configured Synth is not available:" + e.getMessage());
+				tarsosSynth.setFallbackReceiver();
 			}
 		}
 		return tarsosSynth;

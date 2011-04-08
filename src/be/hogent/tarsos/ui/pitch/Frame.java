@@ -32,9 +32,11 @@ import javax.sound.sampled.TargetDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
@@ -330,8 +332,9 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 			} catch (LineUnavailableException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (IllegalArgumentException e){
+				JOptionPane.showMessageDialog(this,"Please choos another microphone input: \n " +e.getMessage(),"Microphone not supported",JOptionPane.ERROR_MESSAGE);
 			}
-
 		}
 	}
 
