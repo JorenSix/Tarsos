@@ -138,7 +138,7 @@ public final class Rank extends AbstractTarsosApp {
 				final List<Annotation> samples = pitchDetector.getAnnotations();
 				final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
 				final List<Peak> peakList = PeakDetector.detect(pitchHistogram.pitchClassHistogram()
-						.gaussianSmooth(0.8), 15);
+						.gaussianSmooth(0.8), 15,15);
 				final double[] peaks = new double[peakList.size()];
 				for (int i = 0; i < peaks.length; i++) {
 					peaks[i] = peakList.get(i).getPosition();

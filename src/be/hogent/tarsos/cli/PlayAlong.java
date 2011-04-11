@@ -84,7 +84,7 @@ public final class PlayAlong {
 			// String toneScalefileName = baseName + '/' + baseName + "_" +
 			// detector.getName() + "_octave.txt";
 			final Histogram octaveHistogram = Annotation.pitchHistogram(samples).pitchClassHistogram();
-			final List<Peak> peaks = PeakDetector.detect(octaveHistogram, 15);
+			final List<Peak> peaks = PeakDetector.detect(octaveHistogram, 15,15);
 
 			Tarsos.println(peaks.size() + " peaks found in: " + FileUtils.basename(fileName));
 			Tarsos.println("");

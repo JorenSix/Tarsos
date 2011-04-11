@@ -63,7 +63,7 @@ public final class ToneScaleMatcher {
 			final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
 			final PitchClassHistogram pitchClassHistogram = pitchHistogram.pitchClassHistogram();
 			pitchClassHistogram.gaussianSmooth(1.0);
-			final List<Peak> detectedPeaks = PeakDetector.detect(pitchClassHistogram, 10);
+			final List<Peak> detectedPeaks = PeakDetector.detect(pitchClassHistogram, 10,15);
 			peaks = new double[detectedPeaks.size()];
 			for (int i = 0; i < detectedPeaks.size(); i++) {
 				peaks[i] = detectedPeaks.get(i).getPosition();

@@ -5,7 +5,7 @@ package be.hogent.tarsos.util.histogram.peaks;
  * 
  * @author Joren Six
  */
-public final class Peak {
+public final class Peak implements Comparable<Peak> {
 	/**
 	 * The position in cents
 	 */
@@ -60,6 +60,11 @@ public final class Peak {
 	 */
 	public void setHeight(final double newHeight) {
 		this.height = newHeight;
+	}
+
+	@Override
+	public int compareTo(Peak o) {
+		return Double.valueOf(height).compareTo(o.height);
 	}
 
 }

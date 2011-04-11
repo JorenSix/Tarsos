@@ -73,7 +73,7 @@ public final class PitchClassHistogram extends Histogram {
 	 * program.</bufferCount>
 	 */
 	public void exportToScalaScaleFileFormat(final String fileName, final String toneScaleName) {
-		final List<Peak> peaks = PeakDetector.detect(this, 15);
+		final List<Peak> peaks = PeakDetector.detect(this, 15,15);
 		exportPeaksToScalaFileFormat(fileName, toneScaleName, peaks);
 	}
 
@@ -289,7 +289,7 @@ public final class PitchClassHistogram extends Histogram {
 				.gaussianSmooth(1.0);
 
 		// 1b detect peaks
-		final List<Peak> peaks = PeakDetector.detect(smoothed, 20);
+		final List<Peak> peaks = PeakDetector.detect(smoothed, 20,15);
 		final Histogram fittingHistogram = PeakDetector.newPeakDetection(peaks);
 		// 2 calculate difference between original histogram and fitting
 		// histogram

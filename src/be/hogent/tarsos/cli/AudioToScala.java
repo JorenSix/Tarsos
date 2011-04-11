@@ -83,7 +83,7 @@ public final class AudioToScala extends AbstractTarsosApp {
 			scaleHistogram.plot(FileUtils.basename(scalaFile.getAbsolutePath()) + "png",
 					FileUtils.basename(scalaFile.getAbsolutePath()));
 			scaleHistogram.gaussianSmooth(1.0);
-			final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 15);
+			final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 15,15);
 			PitchClassHistogram.exportPeaksToScalaFileFormat(scalaFile.getAbsolutePath(),
 					FileUtils.basename(inputFile.getAbsolutePath()), peaks);
 		} catch (EncoderException e) {

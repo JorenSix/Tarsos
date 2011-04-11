@@ -137,7 +137,22 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 		audioFile = newAudioFile;
 	}
 
-	JComponent ui;
+	private JComponent ui;
+	private int windowSizePeakDetection = 5;
+	private int thresholdPeakDetection = 15;
+	
+	private void doPeakDetection(boolean detectorIsAdjusting){
+		if (histo.getMaxBinCount() != 0) {
+			final List<Peak> peaks = PeakDetector.detect(histo, windowSizePeakDetection,thresholdPeakDetection);
+			final double[] peaksInCents = new double[peaks.size()];
+			int i = 0;
+			for (final Peak peak : peaks) {
+				peaksInCents[i++] = peak.getPosition();
+			}
+			Arrays.sort(peaksInCents);
+			scaleChangedPublisher.scaleChanged(peaksInCents, detectorIsAdjusting, false);
+		}
+	}
 
 	public Component ui() {
 		if (ui == null) {
@@ -155,26 +170,25 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 				}
 			});
 
-			JSlider peakSlider = new JSlider(5, 105);
-			peakSlider.setValue(5);
+			JSlider peakSlider = new JSlider(0, 100);
+			peakSlider.setValue(windowSizePeakDetection);
 			peakSlider.setMajorTickSpacing(20);
 			peakSlider.addChangeListener(new ChangeListener() {
-
 				public void stateChanged(final ChangeEvent e) {
 					final JSlider source = (JSlider) e.getSource();
-					//
-					final double value = source.getValue();
-
-					if (histo.getMaxBinCount() != 0) {
-						final List<Peak> peaks = PeakDetector.detect(histo, (int) value);
-						final double[] peaksInCents = new double[peaks.size()];
-						int i = 0;
-						for (final Peak peak : peaks) {
-							peaksInCents[i++] = peak.getPosition();
-						}
-						Arrays.sort(peaksInCents);
-						scaleChangedPublisher.scaleChanged(peaksInCents, source.getValueIsAdjusting(), false);
-					}
+					windowSizePeakDetection = source.getValue();
+					doPeakDetection(source.getValueIsAdjusting());
+				}
+			});
+			
+			JSlider thresholdSlider = new JSlider(0, 100);
+			thresholdSlider.setValue(thresholdPeakDetection);
+			thresholdSlider.setMajorTickSpacing(20);
+			thresholdSlider.addChangeListener(new ChangeListener() {
+				public void stateChanged(final ChangeEvent e) {
+					final JSlider source = (JSlider) e.getSource();
+					thresholdPeakDetection = source.getValue();
+					doPeakDetection(source.getValueIsAdjusting());
 				}
 			});
 
@@ -207,7 +221,8 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 			DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 			builder.setDefaultDialogBorder();
 			builder.setRowGroupingEnabled(true);
-			builder.append("Peakpicking:", peakSlider, true);
+			builder.append("Peakpicking window:", peakSlider, true);
+			builder.append("Peakpicking threshold:", thresholdSlider, true);
 			builder.append("Quality:", probabilitySlider, true);
 			builder.append("Smooth:", smoothButton, true);
 			builder.append("Reset:", resetButton, true);

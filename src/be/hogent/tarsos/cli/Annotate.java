@@ -75,7 +75,7 @@ public final class Annotate extends AbstractTarsosApp {
 		toneScaleHisto.plot(toneScalePNG, "Tone scale " + baseName + " " + pitchDetector.getName());
 
 		toneScaleHisto.gaussianSmooth(1.0);
-		final List<Peak> peaks = PeakDetector.detect(toneScaleHisto, 15);
+		final List<Peak> peaks = PeakDetector.detect(toneScaleHisto, 15,15);
 		final Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
 		final String peaksTitle = prefix + "_peaks_" + 1.0 + "_" + 15 + "_" + 0.8;
 		final SimplePlot plot = new SimplePlot(peaksTitle);

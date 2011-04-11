@@ -625,6 +625,23 @@ public class Histogram implements Cloneable {
 		}
 		return StatUtils.mean(binCounts);
 	}
+	
+	/**
+	 * Calculates the mean count of each bin. It iterates over each bin, stores
+	 * the bin count temporarily and returns the mean bin count. It does not
+	 * cache the result.
+	 * 
+	 * @return the mean bin count.
+	 */
+	public double getMedian() {
+		final double[] binCounts = new double[this.getNumberOfClasses() + 1];
+		int i = 0;
+		for (final double key : this.keySet()) {
+			binCounts[i] = this.getCount(key);
+			i++;
+		}
+		return StatUtils.percentile(binCounts, 50);
+	}
 
 	/**
 	 * Return a string representation of this histogram.
