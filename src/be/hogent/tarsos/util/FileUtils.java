@@ -16,6 +16,8 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -124,6 +126,62 @@ public final class FileUtils {
 		}
 		return file.getPath();
 	}
+	
+	private static byte[] createChecksum(String filename,final int numberOfBytes)
+			throws NoSuchAlgorithmException, IOException {
+		InputStream fis = new FileInputStream(filename);
+		if(numberOfBytes%1024 != 0)
+			throw new IllegalArgumentException("Number of bytes should be dividable by 1024.");
+		byte[] buffer = new byte[1024];
+		MessageDigest complete = MessageDigest.getInstance("MD5");
+		int numRead;
+		//Alternative way to check correctness: head -c 262144 long.ogg | md5sum
+		int maxNumberOfBuffers = numberOfBytes/1024; 
+		int currentNumberOfBuffers = 0;
+		do {
+			numRead = fis.read(buffer);
+			if (numRead > 0) {
+				complete.update(buffer, 0, numRead);
+			}
+			currentNumberOfBuffers++;
+		} while (numRead != -1 && currentNumberOfBuffers < maxNumberOfBuffers);
+		fis.close();
+		return complete.digest();
+	}
+
+	/**
+	 * Calculate an MD5 checksum of <b>the first 256kB</b> of a file. The idea
+	 * is to get a unique hash for a file, quickly. A hash of the first 256kB is
+	 * 'unique enough' and much faster than calculating an md5 for a complete
+	 * file. On Unix this method can be checked using:
+	 * 
+	 * <pre>
+	 * head -c 262144 file_to_calculate_md5_for | md5sum
+	 * 
+	 * <pre/>
+	 * 
+	 * @param filename 
+	 * 		The absolute file name of a file used to calculate an md5 checksum of <b>the first 256kB</b> off.
+	 * @return An MD5 checksum of <b>the first 256kB</b> of a file.
+	 */
+	public static String getMD5Checksum(String filename) {
+		String result = "";
+		try {
+			byte[] b;
+			b = createChecksum(filename,262144);
+			for (int i = 0; i < b.length; i++) {
+				result += Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
+			}
+		} catch (NoSuchAlgorithmException e) {
+			String message = "MD5 Algorithm not known, runtime outdated?";
+			LOG.severe(message);
+			throw new Error(message,e);
+		} catch (IOException e) {
+			String message = "Exception while computing file md5 " + filename;
+			LOG.severe(message);
+		}
+		return result;
+	}	
 
 	/**
 	 * @return The path where the program is executed.
