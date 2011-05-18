@@ -62,7 +62,7 @@ public final class AudioFile {
 	public String transcodedPath() {
 		// 01. qsdflj.mp3 => 01._qsdfj
 		final String baseName = FileUtils.basename(StringUtils.sanitize(originalPath));
-		// 01._qsdfj => 01._qsdfj.wav
+		// 01._qsdfj => 01._qsdfj_transcoded.wav
 		final String fileName = baseName + "_transcoded."
 				+ AudioTranscoder.TARGET_ENCODING.getAttributes().getFormat();
 		// return the name where the transcoded file should go
@@ -78,9 +78,14 @@ public final class AudioFile {
 		// /home/user/music/01. qsdflj.mp3 => MD5 hash
 		// The MD5 hash is to prevent name clashes: track 01.mp3 and track
 		// 01.mp3 in different folders have other hashes. Only half of the hash
-		// is used because a MD5 hash of half the length is also really
+		// is used because a MD5 hash name clash of half the length is also really
 		// improbable and you get shorter path names.
-		final String md5 = StringUtils.messageDigestFive(originalPath).substring(16);
+		String md5;
+		try{
+			md5 = FileUtils.getMD5Checksum(originalPath).substring(16);
+		}catch(final StringIndexOutOfBoundsException e){
+			md5 = StringUtils.messageDigestFive(originalPath).substring(16);
+		}
 		// Configured data directory
 		final String dataFolder = Configuration.get(ConfKey.data_directory);
 		// Sub folder of data directory where annotations are stored =>

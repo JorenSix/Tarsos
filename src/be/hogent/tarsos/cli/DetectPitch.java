@@ -57,8 +57,6 @@ public final class DetectPitch extends AbstractTarsosApp {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		}
 	}
-
 }
