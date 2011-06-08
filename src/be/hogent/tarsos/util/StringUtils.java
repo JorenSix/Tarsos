@@ -80,7 +80,7 @@ public final class StringUtils {
 	 * @param separator
 	 * @return A joined list, joined by the separator.
 	 */
-	public static String join(final List<String> data,String separator) {
+	public static String join(final List<?> data,String separator) {
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0 ; i < data.size();i++){
 			sb.append(data.get(i));

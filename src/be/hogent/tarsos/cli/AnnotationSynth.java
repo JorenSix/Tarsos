@@ -105,7 +105,7 @@ public final class AnnotationSynth extends AbstractTarsosApp {
 				builder.playAnnotations(filterSize);
 			} else {
 				try {
-					builder.writeFile(outputFile.getAbsolutePath(), filterSize);
+					builder.writeFile(outputFile.getAbsolutePath(), filterSize,null);
 				} catch (final Exception e) {
 					LOG.log(Level.SEVERE, "Could not write: " + outputFile + "\n", e);
 				}

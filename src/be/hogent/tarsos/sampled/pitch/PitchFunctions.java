@@ -170,12 +170,12 @@ public final class PitchFunctions {
 	 * </pre>
 	 * 
 	 * @param listToFilter
-	 *            the list to filter
+	 *            The list to filter.
 	 * @param n
-	 *            an odd number. The order n of the one-dimensional median
-	 *            filter
+	 *            An odd number. The order n of the one-dimensional median
+	 *            filter. An IllegalArgumentException is thrown when n is even.
 	 * @return An order n one-dimensional median filtered list. The original
-	 *         list remains untouched. A new list is created
+	 *         list remains untouched. A new list is created.
 	 */
 	public static List<Double> medianFilter(final List<Double> listToFilter, final int n) {
 

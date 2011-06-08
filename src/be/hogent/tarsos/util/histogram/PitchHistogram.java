@@ -157,6 +157,8 @@ public final class PitchHistogram extends Histogram {
 		if (splitOctaves) {
 			final Plot h = new Plot();
 			h.setXRange(0, 1200);
+			h.setYLabel("Number of Annotations (#)");
+			h.setXLabel("Pitch Class (cent)");
 			for (int dataset = 0; dataset < toneScaleHistogramPerOctave.size(); dataset++) {
 				final PitchClassHistogram currentToneScaleHistogram = toneScaleHistogramPerOctave.get(dataset);
 				for (final double key : currentToneScaleHistogram.keySet()) {
@@ -185,6 +187,8 @@ public final class PitchHistogram extends Histogram {
 		} else {
 			final SimplePlot plot = new SimplePlot();
 			plot.addData(0, summedToneScaleHistogram);
+			plot.setXLabel("Pitch (cent)");
+			plot.setYLabel("Number of Annotations (#)");
 			plot.save(fileName);
 		}
 	}

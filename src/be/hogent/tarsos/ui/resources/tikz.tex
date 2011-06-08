@@ -1,0 +1,43 @@
+\begin{tikzpicture}[x=0.008cm,y=0.008cm,scale=0.7]
+
+  \def\xmin{0}
+  \def\xmax{1200}
+  \def\ymin{0}
+  \def\ymax{650}
+  \def\ticksize{12}
+    
+  % plot the data from the file data.dat
+  % smooth the curve and mark the data point with a dot
+  \draw[color=blue] plot[mark=*,mark size=0.5pt] file
+  {%dat.file.dat%};  
+
+  % xticks
+ \foreach \x in {%comma_separated_pitch_classes%}
+     \draw[style=solid] (\x,\ymin+\ticksize) -- (\x,\ymin-\ticksize);
+     
+ % xticks labels
+  \foreach \x in {%comma_separated_pitch_classes%}
+    \node at (\x, \ymin) [below] {$\x$};
+ 
+  % Scale as a reference (dashed light gray)
+  \foreach \x in {%comma_separated_pitch_classes%}
+    \draw[style=dashed,color=gray] (\x,\ymin) -- (\x,\ymax);
+   
+  % y ticks (every 100 annotations)
+  \foreach \y in {100,200,...,600}
+    \draw[style=solid] (\xmin+\ticksize,\y) -- (\xmin-\ticksize,\y);
+    
+  %yticks labels
+  \foreach \y in {100,200,...,600}
+    \node at (\xmin,\y) [left] {$\y$};
+  
+  % axes
+  \draw[-|] (\xmin,\ymin) -- (\xmax,\ymin); 
+  \draw[->] (\xmin,\ymin) -- (\xmin,\ymax+50);
+  
+  % axes labels
+  \node at (625,-60) [below] {$Pitch\ (cent)$};
+  \node at (-200,325) [below,rotate=90] {$Number\ of\ annotations$};
+ 
+
+\end{tikzpicture}

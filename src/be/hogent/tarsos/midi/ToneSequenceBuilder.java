@@ -91,7 +91,7 @@ public final class ToneSequenceBuilder {
 
 	public void playAnnotations(final int smootFilterWindowSize) {
 		try {
-			writeFile(null, smootFilterWindowSize);
+			writeFile(null, smootFilterWindowSize,null);
 		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -126,7 +126,7 @@ public final class ToneSequenceBuilder {
 	 * @throws InterruptedException
 	 * @throws BufferNotAvailableException
 	 */
-	public void writeFile(final String fileName, final int smootFilterWindowSize) throws IOException,
+	public void writeFile(final String fileName, final int smootFilterWindowSize,String sourceFile) throws IOException,
 			UnsupportedAudioFileException, LineUnavailableException {
 		// invariant: at any time the lists are equal in length
 		assert frequencies.size() == realTimes.size();
@@ -135,69 +135,80 @@ public final class ToneSequenceBuilder {
 			frequencies = PitchFunctions.medianFilter(frequencies, smootFilterWindowSize);
 			powers = PitchFunctions.medianFilter(powers, smootFilterWindowSize);
 		}
+		
+		//PitchFunctions.gaussianFilter(frequencies);
 
 		final double sampleRate = 44100.0;
 		final double lenghtInSeconds = realTimes.get(realTimes.size() - 1);
 
 		final int numberOfSamples = (int) (lenghtInSeconds * sampleRate);
-		final byte[] byteBuffer = new byte[numberOfSamples * 2];
+		//2 bytes per sample, stereo (2 channels)
+		final byte[] byteBuffer = new byte[numberOfSamples * 2 * 2]; 
 		final float[] floatBuffer = new float[numberOfSamples];
 
 		double previousTime = 0;
+		double phase = 0;
+		double phaseFirst = 0;
+		double phaseSecond = 0;
+		
 		for (int i = 0; i < frequencies.size(); i++) {
 			final double frequency = frequencies.get(i);
 			final double currentTime = realTimes.get(i);
-			final double amplitude = powers.get(i);
-
 			final double twoPiF = 2 * Math.PI * frequency;
-
 			final int startSample = (int) (previousTime * sampleRate);
-			final int stopSample = (int) (currentTime * sampleRate);
+			final int stopSample = (int) (currentTime * sampleRate);		
 
-			final int overlappingsamples = 3000;
-
-			// signal
-			for (int sample = startSample; sample < floatBuffer.length; sample++) {
-				final double time = sample / sampleRate;
-				double fadingAmplitude = amplitude;
-				// fade in
-				if (startSample + overlappingsamples > sample) {
-					fadingAmplitude = fadingAmplitude * (sample - startSample) / overlappingsamples;
-				}
-				final double fundamental = fadingAmplitude * Math.sin(twoPiF * time);
-				// adding some harmonics makes the sound somewhat nicer
-				final double firstHarmonic = fadingAmplitude / 8 * Math.sin(twoPiF * 2 * time);
-				final double secondHarmonic = fadingAmplitude / 16 * Math.sin(twoPiF * 4 * time);
-				floatBuffer[sample] = floatBuffer[sample]
-						+ (float) (fundamental + firstHarmonic + secondHarmonic);
-
+			for (int sample = startSample; sample < stopSample; sample++) {
+				final double time = (sample - startSample) / sampleRate;
+				
+				final double fundamental = 0.65 * Math.sin(twoPiF * time + phase);
+				final double firstHarmonic = 0.08 * Math.sin(twoPiF * 4 * time + phaseFirst);
+				final double secondHarmonic = 0.03 * Math.sin(twoPiF * 6 * time + phaseSecond);
+				floatBuffer[sample] += (float) fundamental + firstHarmonic + secondHarmonic;
 			}
-			// fade out
-			for (int sample = stopSample; sample < stopSample + overlappingsamples
-					&& sample < numberOfSamples; sample++) {
-				final double time = sample / sampleRate;
-				double fadingAmplitude = amplitude * (overlappingsamples - (sample - stopSample))
-						/ overlappingsamples;
-				final double fundamental = fadingAmplitude * Math.sin(twoPiF * time);
-				// adding some harmonics makes the sound somewhat nicer
-				final double firstHarmonic = fadingAmplitude / 8 * Math.sin(twoPiF * 2 * time);
-				final double secondHarmonic = fadingAmplitude / 16 * Math.sin(twoPiF * 4 * time);
-				floatBuffer[sample] = (float) (fundamental + firstHarmonic + secondHarmonic);
-			}
+			
 			previousTime = currentTime;
+			phase = 2 * Math.PI * frequency * (stopSample - startSample) / sampleRate + phase;
+			phaseFirst = 4 * 2 * Math.PI * frequency * (stopSample - startSample) / sampleRate + phaseFirst;
+			phaseSecond = 6 * 2 * Math.PI * frequency * (stopSample - startSample) / sampleRate + phaseSecond;
 		}
+		
 
 		/*
-		 * convert manually to PCM 16bits Little Endian, (still 44.1kHz) => 2
-		 * bytes per sample.
+		 * Convert manually to PCM 16bits Little Endian, (still 44.1kHz) => 2
+		 * bytes per sample, 2 channels.
 		 */
 		for (int sample = 0; sample < numberOfSamples; sample++) {
 			final int quantizedValue = (int) (floatBuffer[sample] * 32767);
-			byteBuffer[sample * 2] = (byte) quantizedValue;
-			byteBuffer[sample * 2 + 1] = (byte) (quantizedValue >>> 8);
+			byteBuffer[sample * 4 + 0] = (byte) quantizedValue;
+			byteBuffer[sample * 4 + 1] = (byte) (quantizedValue >>> 8);
+			byteBuffer[sample * 4 + 2] = byteBuffer[sample * 4 + 0];
+			byteBuffer[sample * 4 + 3] = byteBuffer[sample * 4 + 1];
+		}
+		
+		/*
+		 * Read the source file data
+		 */
+		if(sourceFile != null){
+			AudioInputStream stream = AudioSystem.getAudioInputStream(new File(sourceFile));
+			//AudioFormat format = stream.getFormat(); 
+			//realTimes.get(0)
+			//format.getSampleRate();
+			long bytesToSkip = 0;
+			stream.skip(bytesToSkip);
+			
+			byte[] sampleAsByteArray = new byte[2]; 
+			for (int sample = 0; sample < numberOfSamples; sample++) {
+				stream.read(sampleAsByteArray);
+				byteBuffer[sample * 4 + 2] = sampleAsByteArray[0];
+				byteBuffer[sample * 4 + 3] = sampleAsByteArray[1];
+			}
 		}
 
-		final AudioFormat audioFormat = new AudioFormat((float) sampleRate, 16, 1, true, false);
+		/*
+		 * Write the data to a file.
+		 */
+		final AudioFormat audioFormat = new AudioFormat((float) sampleRate, 16, 2, true, false);
 		final ByteArrayInputStream bais = new ByteArrayInputStream(byteBuffer);
 		final AudioInputStream audioInputStream = new AudioInputStream(bais, audioFormat, numberOfSamples);
 		if (fileName == null) {
@@ -233,7 +244,7 @@ public final class ToneSequenceBuilder {
 				handler.handleRow(builder, row);
 			}
 			builder.writeFile("data/generated_audio/" + FileUtils.basename(correctedFileName) + ".wav",
-					smootFilterWindowSize);
+					smootFilterWindowSize,null);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}

@@ -1296,7 +1296,7 @@ public class Histogram implements Cloneable {
 	 */
 	public final void export(final String fileName) {
 		final StringBuilder sb = new StringBuilder();
-		sb.append("key;value\n");
+		sb.append("Bin (cents); Number of Annotations (#)\n");
 		for (final double key : keySet()) {
 			sb.append(key).append(";").append(getCount(key)).append("\n");
 		}

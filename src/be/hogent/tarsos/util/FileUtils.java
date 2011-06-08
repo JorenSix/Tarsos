@@ -81,7 +81,7 @@ public final class FileUtils {
 
 	public static void writePitchAnnotations(final String fileName, final List<Annotation> samples) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Start(s),Pitch(Hz),Pitch(Cents with ref frequency "+ Configuration.get(ConfKey.absolute_cents_reference_frequency) +") Probability[0-1.0],Source\n");
+		sb.append("Start(s),Pitch(Hz),Probability[0-1.0],Source\n");
 		for (Annotation s : samples) {
 			sb.append(s.toString()).append("\n");
 		}

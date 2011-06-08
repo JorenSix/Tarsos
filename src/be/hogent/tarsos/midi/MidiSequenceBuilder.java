@@ -5,12 +5,15 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sound.midi.Instrument;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaEventListener;
 import javax.sound.midi.MetaMessage;
+import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Patch;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
@@ -20,6 +23,8 @@ import javax.sound.midi.Track;
 import javax.sound.midi.Transmitter;
 
 import be.hogent.tarsos.sampled.pitch.PitchConverter;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
 
 /**
  * Utility class to generate a sequence of MIDI events.
@@ -33,6 +38,8 @@ public final class MidiSequenceBuilder {
     private static final Logger LOG = Logger.getLogger(MidiSequenceBuilder.class.getName());
 
     private static final int VELOCITY = 64;
+    private static final int RESOLUTION = 50;
+    private static final int DEFAULT_BMP = 120;
 
     private final Sequence sequence;
     private final Track track;
@@ -41,7 +48,7 @@ public final class MidiSequenceBuilder {
 
 
     public MidiSequenceBuilder() throws InvalidMidiDataException {
-        sequence = new Sequence(Sequence.PPQ, 1);
+        sequence = new Sequence(Sequence.PPQ, RESOLUTION);
         track = sequence.createTrack();
         currentTicks = 0;
     }
@@ -90,6 +97,11 @@ public final class MidiSequenceBuilder {
         return createPitchBendEvent(bendFactorInMidi, channel, (long) startTick);
     }
 
+    /**
+     * Write a midi file
+     * @param fileName
+     * @throws IOException
+     */
     public void export(final String fileName) throws IOException {
         MidiSystem.write(sequence, 0, new File(fileName));
     }
@@ -123,6 +135,15 @@ public final class MidiSequenceBuilder {
          */
         synthesizer = MidiSystem.getSynthesizer();
         synthesizer.open();
+        
+    	Instrument[] available = synthesizer.getAvailableInstruments();
+		Instrument configuredInstrument = available[Configuration.getInt(ConfKey.midi_instrument_index)];
+		// synth.loadInstrument(configuredInstrument);
+		MidiChannel channel = synthesizer.getChannels()[0];
+		Patch patch = configuredInstrument.getPatch();
+		channel.programChange(patch.getBank(), patch.getProgram());
+		
+        
         final Receiver synthReceiver = synthesizer.getReceiver();
         final Transmitter seqTransmitter = sequencer.getTransmitter();
         seqTransmitter.setReceiver(synthReceiver);
@@ -212,4 +233,8 @@ public final class MidiSequenceBuilder {
         }
         return new MidiEvent(message, lTick);
     }
+
+	public double getTicksPerSecond() {
+		return RESOLUTION * DEFAULT_BMP / 60.0;		
+	}
 }

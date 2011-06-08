@@ -102,23 +102,27 @@ public final class SimplePlot {
 		}
 	}
 
-	public void toneScaleify(final double reference) {
+	/**
+	 * Sets the x range from 0 to 1200, names the axes.
+	 */
+	public void pitchClassHistogramify() {
 		plot.setXRange(0, 1200);
-		plot.setXLabel("cents");
-		plot.setYLabel("frequency of ocurrence");
-		/*
-		 * plot.setImpulses(true);
-		 * 
-		 * plot.addPoint(1, reference - 600, 300, false); plot.addPoint(1,
-		 * reference + 600, 300, false);
-		 * 
-		 * plot.addPoint(2, reference + 300, 300, false); plot.addPoint(2,
-		 * reference - 200, 300, false);
-		 * 
-		 * plot.addLegend(0, "Tone scale"); plot.addLegend(1, "Fifth");
-		 * plot.addLegend(2, "Tritonus");
-		 */
-
+		plot.setXLabel("Pitch Class (cent)");
+		plot.setYLabel("Number of Annotations (#)");
+		plot.setWrap(true);
+	}
+	
+	
+	public void addXTick(final String label, final double position){
+		plot.addXTick(label, position);
+	}
+	
+	public void addYTick(final String label, final double position){
+		plot.addYTick(label, position);
+	}
+	
+	public void setTitle(final String title){
+		plot.setTitle(title);
 	}
 
 	public void addLegend(final int set, final String name) {
@@ -131,5 +135,21 @@ public final class SimplePlot {
 
 	public void setYRange(final double d, final double e) {
 		plot.setYRange(d, e);
+	}
+
+	/**
+	 * Sets the label for the x axis.
+	 * @param label The label to use.
+	 */
+	public void setXLabel(final String label) {
+		plot.setXLabel(label);
+	}
+
+	/**
+	 * Sets the label for the y axis.
+	 * @param label The label to use.
+	 */
+	public void setYLabel(final String label) {
+		plot.setYLabel(label);
 	}
 }
