@@ -5,7 +5,10 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -37,8 +40,8 @@ import be.hogent.tarsos.util.Configuration.ConfigChangeListener;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.MenuScroller;
 import be.hogent.tarsos.util.ScalaFile;
-import be.hogent.tarsos.util.SignalPowerExtractor;
 import be.hogent.tarsos.util.SimplePlot;
+import be.hogent.tarsos.util.StringUtils;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 import be.hogent.tarsos.util.histogram.PitchHistogram;
 
@@ -82,55 +85,85 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 
 		JMenu exportMenu = new JMenu("Export");
 		menu.add(exportMenu);
+		
+		
+		/* Annotations sub menu */
+		JMenu annotationsMenu = new JMenu("Annotations");
+		exportMenu.add(annotationsMenu);
+		
+		item = new JMenuItem("Annotations CSV-file...");
+		item.setToolTipText("Export a CVS file with annotations (in cent) over time (in seconds).");
+		item.addActionListener(exportAnnotations);
+		annotationsMenu.add(item);
+		
+		item = new JMenuItem("Synthesized annotations...");
+		item.setToolTipText("Export an audio file synthesized using the annotations.");
+		item.addActionListener(exportSynthesizedAnnotations);
+		annotationsMenu.add(item);		
+		
+		/*Pitch Histogram sub menu*/
+		
+		JMenu pitchHistogram = new JMenu("Pitch Histogram");
+		exportMenu.add(pitchHistogram);
+		
+		item = new JMenuItem("Pitch Histogram CSV-file...");
+		item.setToolTipText("Export a CVS file with a pitch histogram.");
+		item.addActionListener(exportPitchHistogram);
+		pitchHistogram.add(item);
+		
+		item = new JMenuItem("Pitch Histogram PNG...");
+		item.setToolTipText("Export a PNG file with a pitch histogram.");
+		item.addActionListener(exportPitchHistogramImage);
+		pitchHistogram.add(item);
+		
+		item = new JMenuItem("Pitch Histogram EPS...");
+		item.setToolTipText("Export a EPS file with a pitch histogram.");
+		item.addActionListener(exportPitchHistogramImage);
+		pitchHistogram.add(item);
+		
+		/* Pitch Class Histogram sub menu */
+		
+		JMenu pitchClassHistogram = new JMenu("Pitch Class Histogram");
+		exportMenu.add(pitchClassHistogram);
+		
+		item = new JMenuItem("Pitch Class Histogram CSV-file...");
+		item.setToolTipText("Export a CVS file with a pitch class histogram.");
+		item.addActionListener(exportPitchClassHistogram);
+		pitchClassHistogram.add(item);	
+
+		item = new JMenuItem("Pitch Class Histogram PNG-file...");
+		item.setToolTipText("Export a PNG file with a pitch class histogram.");
+		item.addActionListener(exportPitchClassHistogramImage);
+		pitchClassHistogram.add(item);
+		
+		item = new JMenuItem("Pitch Class Histogram EPS-file...");
+		item.setToolTipText("Export a EPS file with a pitch class histogram.");
+		item.addActionListener(exportPitchClassHistogramImage);
+		pitchClassHistogram.add(item);
+		
+		item = new JMenuItem("Pitch Class Histogram with octaves divided PNG-file...");
+		item.setToolTipText("Pitch Class Histogram with octaves divided PNG-file");
+		item.addActionListener(exportPitchClassHistogramImageWithOctaveDivision);
+		pitchClassHistogram.add(item);
+		
+		item = new JMenuItem("Pitch Class Histogram Latex-file...");
+		item.setToolTipText("Pitch Class Histogram TIKZ Latex-file");
+		item.addActionListener(exportPitchClassHistogramLatex);
+		pitchClassHistogram.add(item);
+		
+		/* Pitch Class Data sub menu */
+		
+		JMenu pitchClassDataMenu = new JMenu("Pitch Class Data");
+		exportMenu.add(pitchClassDataMenu);
 
 		item = new JMenuItem("Scala file...");
 		item.setToolTipText("Export the current peaks as a scala file.");
 		item.addActionListener(exportScalaAction);
-		exportMenu.add(item);
-
-		exportMenu.addSeparator();
-
-		item = new JMenuItem("Annotations CSV-file...");
-		item.setToolTipText("Export a CVS file with annotations (in cent) over time (in seconds).");
-		item.addActionListener(exportAnnotations);
-		exportMenu.add(item);
-
-		item = new JMenuItem("Pitch Histogram CSV-file...");
-		item.setToolTipText("Export a CVS file with a pitch histogram.");
-		item.addActionListener(exportPitchHistogram);
-		exportMenu.add(item);
+		pitchClassDataMenu.add(item);
 		
-
-		item = new JMenuItem("Pitch Class Histogram CSV-file...");
-		item.setToolTipText("Export a CVS file with a pitch class histogram.");
-		item.addActionListener(exportPitchClassHistogram);
-		exportMenu.add(item);
-
-		exportMenu.addSeparator();
-		
-		item = new JMenuItem("Pitch Histogram PNG or EPS-file...");
-		item.setToolTipText("Export a PNG or EPS file with a pitch histogram.");
-		item.addActionListener(exportPitchHistogramImage);
-		exportMenu.add(item);
-
-		item = new JMenuItem("Pitch Class Histogram PNG or EPS-file...");
-		item.setToolTipText("Export a PNG or EPS file with a pitch class histogram.");
-		item.addActionListener(exportPitchClassHistogramImage);
-		exportMenu.add(item);
-		
-		item = new JMenuItem("Pitch Class Histogram with octaves divided PNG or EPS-file...");
-		item.setToolTipText("Pitch Class Histogram with octaves divided PNG or EPS-file");
-		item.addActionListener(exportPitchClassHistogramImageWithOctaveDivision);
-		exportMenu.add(item);
-		
-		exportMenu.addSeparator();
-		
-
-		item = new JMenuItem("Synthesized annotations...");
-		item.setToolTipText("Export an audio file synthesized using the annotations.");
-		
-		item.addActionListener(exportSynthesizedAnnotations);
-		exportMenu.add(item);
+		item = new JMenuItem("Interval Table...");
+		item.setToolTipText("Export the current peaks as an interval table.");
+		pitchClassDataMenu.add(item);		
 		
 		final List<String> files = Configuration.getList(ConfKey.file_recent);
 		if(!files.isEmpty()){
@@ -160,13 +193,16 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		if (!files.isEmpty()) {
 			int index = 1;
 			for (final String recentFile : files) {
-				item = new JMenuItem(index + " "
-						+ FileUtils.basename(recentFile));
-				item.setActionCommand(recentFile);
-				item.addActionListener(openRecentFileAction);
-				menu.add(item);
-				recentFilesMenuItems.add(item);
-				index++;
+				// keep only existing files
+				if (FileUtils.exists(recentFile)) {
+					item = new JMenuItem(index + " "
+							+ FileUtils.basename(recentFile));
+					item.setActionCommand(recentFile);
+					item.addActionListener(openRecentFileAction);
+					menu.add(item);
+					recentFilesMenuItems.add(item);
+					index++;
+				}
 			}
 		}
 		
@@ -445,7 +481,8 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Import Audio or Scala File";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_AND_DIRECTORIES,true, new ChosenFileHandler() {				
+			String defaultFileName = null;
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_AND_DIRECTORIES,true,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
 					Frame.getInstance().setNewFile(chosenFile);
@@ -462,58 +499,53 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		}
 	};
 
-	private ActionListener exportScalaAction = new ActionListener() {
-		@Override
-		public void actionPerformed(final ActionEvent e) {
-			String dialogTitle = "Export Scala File (.scl)";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false, new ChosenFileHandler() {				
-				@Override
-				public void handleFile(final File chosenFile) {
-					String title = "Tarsos export";
-					if(audioFile != null){
-						title = title + " " + audioFile.basename();
-					}
-					ScalaFile scalaFile = new ScalaFile(title, scale);
-					scalaFile.write(chosenFile.getAbsolutePath());
-				}
-			});
-		}
-	};
+
+	
+	/*
+	 * 
+	 * ANNOTATIONS export functions
+	 *  
+	 */
 	
 	private ActionListener exportAnnotations = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Annotations (.csv)";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false, new ChosenFileHandler() {				
+			String defaultFileName = audioFile.basename() + "_annotations.csv";
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				@Override
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
+					//sort by time
+					Collections.sort(annotations);
 					String fileName = chosenFile.getAbsolutePath();
 					FileUtils.writePitchAnnotations(fileName, annotations);
 				}
 			});
 		}
-	};
-	
+	};	
 	private ActionListener exportSynthesizedAnnotations =  new ActionListener() {
 		@Override
 		public void actionPerformed(final ActionEvent e) {
 			String dialogTitle = "Export synthesized annotations (.wav)";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false, new ChosenFileHandler() {				
+			String defaultFileName = audioFile.basename() + "_resynth.wav";
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
 					ToneSequenceBuilder builder = new ToneSequenceBuilder();
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
-					final SignalPowerExtractor extr = new SignalPowerExtractor(audioFile);
+					Collections.sort(annotations);
+					
 					for(final Annotation annotation:annotations){
 						double frequency = annotation.getPitch(PitchUnit.HERTZ);
 						double realTime = annotation.getStart();
-						builder.addTone(frequency, realTime, extr.powerAt(realTime, true));
+						double toneTime = realTime; //-startTime
+						builder.addTone(frequency, toneTime);
 					}
 					try {
-						builder.writeFile(chosenFile.getAbsolutePath(), 5);
+						builder.writeFile(chosenFile.getAbsolutePath(), 5,audioFile.transcodedPath());
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -524,16 +556,24 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				
 				}
 			});		
 		}
 	};
 	
+	/*
+	 * 
+	 * PITCH HISTOGRAM export functions
+	 *  
+	 */
+	
 	private ActionListener exportPitchHistogram = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Pitch Histogram (.csv)";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false, new ChosenFileHandler() {				
+			String defaultFileName = audioFile.basename() + "_pitch_histogram.csv";
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
@@ -549,8 +589,16 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	private ActionListener exportPitchHistogramImage = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			String dialogTitle = "Export Pitch Histogram (.png)";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false, new ChosenFileHandler() {				
+			final String extension;
+			if(((JMenuItem) e.getSource()).getText().toLowerCase().contains("png")) {
+				extension = "png";
+			} else {
+				extension = "eps";
+			}
+			String dialogTitle = "Export Pitch Histogram (." + extension + ")";
+			
+			String defaultFileName = audioFile.basename() + "_pitch_histogram." + extension;
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
@@ -558,18 +606,34 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					PitchHistogram pitchHistogram = Annotation.pitchHistogram(annotations);
 					String fileName = chosenFile.getAbsolutePath();
 					SimplePlot plot = new SimplePlot();
+					
+					plot.setYLabel("Number of Annotations (#)");
+					plot.setXLabel("Pitch (cent)");
+					
+					plot.setTitle("Pitch Histogram for " + audioFile.basename());
+					
 					plot.addData(0, pitchHistogram);
+					
+					//plot.setXRange(Configuration.getInt(ConfKey.pitch_histogram_start) + 2400, Configuration.getInt(ConfKey.pitch_histogram_start) - 1200);
+					
 					plot.save(fileName);
 				}
 			});
 		}
 	};
 	
+	/*
+	 * 
+	 * PITCH CLASS HISTOGRAM export functions
+	 *  
+	 */
+	
 	private ActionListener exportPitchClassHistogramImage = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Pitch Class Histogram (.png)";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false, new ChosenFileHandler() {				
+			String defaultFileName = audioFile.basename() + "_pitch_class_histogram.png";
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
@@ -578,17 +642,31 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					String fileName = chosenFile.getAbsolutePath();
 					SimplePlot plot = new SimplePlot();
 					plot.addData(0, pitchClassHistogram);
+					plot.pitchClassHistogramify();
+				
+					for(double pitchClass : scale){
+						plot.addXTick(String.valueOf((int)pitchClass), pitchClass);
+					}
+					plot.addXTick("0", 0.0);
+					plot.addXTick("1200", 1200);
+					plot.setTitle("Pitch Class Histogram for " + audioFile.basename());
 					plot.save(fileName);
 				}
 			});
 		}
-	};
-	
+	};	
 	private ActionListener exportPitchClassHistogramImageWithOctaveDivision = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			String dialogTitle = "Export Pitch Class Histogram (.png)";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false, new ChosenFileHandler() {				
+			final String extension;
+			if(((JMenuItem) e.getSource()).getText().toLowerCase().contains("png")) {
+				extension = "png";
+			} else {
+				extension = "eps";
+			}
+			String dialogTitle = "Export Pitch Class Histogram (." + extension + ")";
+			String defaultFileName = audioFile.basename() + "_pitch_class_histogram_with_octaves." + extension;
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
@@ -599,13 +677,13 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				}
 			});
 		}
-	};
-	
+	};	
 	private ActionListener exportPitchClassHistogram = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Pitch Class Histogram (.csv)";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false, new ChosenFileHandler() {				
+			String defaultFileName = audioFile.basename() + "_pitch_class_histogram.csv";
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
@@ -616,6 +694,85 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				}
 			});
 		}
+	};	
+	private ActionListener exportPitchClassHistogramLatex = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			String dialogTitle = "Export tikz image for Latex  (.tex)";
+			String defaultFileName = audioFile.basename() + "_pitch_class_histogram.tex";
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
+				@Override
+				public void handleFile(final File chosenFile) {
+					String temporaryTarget = new File(FileUtils.temporaryDirectory() , "tikz.tex").getAbsolutePath();
+					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/tikz.tex" , temporaryTarget);
+					String contents = FileUtils.readFile(temporaryTarget); 
+					
+					String datFileName = audioFile.basename() + ".dat";
+					String datFileTarget = FileUtils.combine(chosenFile.getParent(),datFileName);
+					
+					HashMap<String,String> map = new HashMap<String,String>();
+					map.put("%dat.file.dat%",datFileName);
+					List<Double> scaleAsList = new ArrayList<Double>();
+					for(double pitchClass : scale){
+						scaleAsList.add(pitchClass);
+					}
+					map.put("%comma_separated_pitch_classes%",StringUtils.join(scaleAsList,","));
+					
+					for(Entry<String,String> entry : map.entrySet()){
+						contents = contents.replace(entry.getKey(), entry.getValue());
+					}
+					
+					AnnotationPublisher ap = AnnotationPublisher.getInstance();
+					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
+					PitchClassHistogram pitchClassHistogram = PitchClassHistogram.createToneScaleHistogram(annotations);
+					
+					//This makes sure the highest peak is at 600, which is what is expected
+					//by the tex file.
+					pitchClassHistogram.multiply(600.0/Double.valueOf(pitchClassHistogram.getMaxBinCount()));
+					
+					StringBuilder sb = new StringBuilder();
+					sb.append("# Pitch class Histogram Data for ");
+					sb.append(audioFile.basename());
+					sb.append("\n");
+					
+					ArrayList<Double> keys = new ArrayList<Double>(pitchClassHistogram.keySet());
+					Collections.sort(keys);
+					for(Double key : keys){
+						long count = pitchClassHistogram.getCount(key);
+						sb.append(key).append(" ").append(count).append("\n");
+					}
+					
+					FileUtils.writeFile(sb.toString(),datFileTarget);
+					FileUtils.writeFile(contents, chosenFile.getAbsolutePath());
+				}
+			});
+		}
+	};
+	
+	
+	/*
+	 * 
+	 * PITCH CLASS DATA export functions
+	 *  
+	 */
+	
+	private ActionListener exportScalaAction = new ActionListener() {
+		@Override
+		public void actionPerformed(final ActionEvent e) {
+			String dialogTitle = "Export Scala File (.scl)";
+			String defaultFileName = audioFile.basename() + ".scl";
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
+				@Override
+				public void handleFile(final File chosenFile) {
+					String title = "Tarsos export";
+					if(audioFile != null){
+						title = title + " " + audioFile.basename();
+					}
+					ScalaFile scalaFile = new ScalaFile(title, scale);
+					scalaFile.write(chosenFile.getAbsolutePath());
+				}
+			});
+		}
 	};
 	
 	/**
@@ -623,20 +780,33 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	 * @param dialogTitle The title of the dialog window.
 	 * @param importFile True if a file needs to be opened, false otherwise.
 	 * @param handler The handler that handles the chosen file.
+	 * @param defaultFileName The name thet is used automatically to save a file.
 	 */
-	private void showFileChooserDialog(String dialogTitle,int mode,boolean importFile,ChosenFileHandler handler){
+	private void showFileChooserDialog(String dialogTitle,int mode,boolean importFile,String defaultFileName,ChosenFileHandler handler){
 		final JFileChooser fc = new JFileChooser();		
+		
 		fc.setFileSelectionMode(mode);
 		final ConfKey key;
 		final int returnVal;
 		fc.setDialogTitle(dialogTitle);
 		if(importFile){
 			key = ConfKey.file_import_dir;
+			//if the import directory does not exist, change 
+			//to home dir
+			if(!FileUtils.exists(Configuration.get(key))){
+				Configuration.set(key, System.getProperty("user.home"));				
+			}
 			fc.setCurrentDirectory(Configuration.getFile(key));
 			returnVal = fc.showOpenDialog(Frame.getInstance());
 		}else{
 			key = ConfKey.file_export_dir;
+			//if the export directory does not exist, change 
+			//to home dir
+			if(!FileUtils.exists(Configuration.get(key))){
+				Configuration.set(key, System.getProperty("user.home"));				
+			}
 			fc.setCurrentDirectory(Configuration.getFile(key));
+			fc.setSelectedFile(new File(defaultFileName));
 			returnVal = fc.showSaveDialog(Frame.getInstance());
 		}		
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
