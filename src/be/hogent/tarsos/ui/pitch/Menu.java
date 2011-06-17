@@ -161,9 +161,10 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		item.addActionListener(exportScalaAction);
 		pitchClassDataMenu.add(item);
 		
-		item = new JMenuItem("Interval Table...");
-		item.setToolTipText("Export the current peaks as an interval table.");
-		pitchClassDataMenu.add(item);		
+		item = new JMenuItem("Interval matrix Latex...");
+		item.setToolTipText("Export the current peaks as an matrix.");
+		item.addActionListener(exportIntervalMatrixLatexAction);
+		pitchClassDataMenu.add(item);
 		
 		final List<String> files = Configuration.getList(ConfKey.file_recent);
 		if(!files.isEmpty()){
@@ -704,7 +705,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				@Override
 				public void handleFile(final File chosenFile) {
 					String temporaryTarget = new File(FileUtils.temporaryDirectory() , "tikz.tex").getAbsolutePath();
-					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/tikz.tex" , temporaryTarget);
+					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/tikz.te" , temporaryTarget);
 					String contents = FileUtils.readFile(temporaryTarget); 
 					
 					String datFileName = audioFile.basename() + ".dat";
@@ -712,9 +713,9 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					
 					HashMap<String,String> map = new HashMap<String,String>();
 					map.put("%dat.file.dat%",datFileName);
-					List<Double> scaleAsList = new ArrayList<Double>();
+					List<Integer> scaleAsList = new ArrayList<Integer>();
 					for(double pitchClass : scale){
-						scaleAsList.add(pitchClass);
+						scaleAsList.add((int) Math.round(pitchClass));
 					}
 					map.put("%comma_separated_pitch_classes%",StringUtils.join(scaleAsList,","));
 					
@@ -774,6 +775,54 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			});
 		}
 	};
+	
+	private ActionListener exportIntervalMatrixLatexAction = new ActionListener() {
+		@Override
+		public void actionPerformed(final ActionEvent e) {
+			String dialogTitle = "Export Interval Matrix (.tex)";
+			String defaultFileName = audioFile.basename() + "_interval_matrix.tex";
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
+				@Override
+				public void handleFile(final File chosenFile) {
+					String temporaryTarget = new File(FileUtils.temporaryDirectory() , "interval_matrix.tex").getAbsolutePath();
+					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/interval_matrix.te" , temporaryTarget);
+					String contents = FileUtils.readFile(temporaryTarget); 
+					
+					List<Integer> scaleAsList = new ArrayList<Integer>();
+					List<String> rows = new ArrayList<String>();
+					String cees = "";
+					for(double pitchClass : scale){
+						scaleAsList.add((int) Math.round(pitchClass));
+						cees = cees + " c ";
+					}
+					
+					for(int i = 0; i < scale.length ; i++){
+						List<Integer> values = new ArrayList<Integer>();
+						values.add((int) Math.round(scale[i]));
+						for(int j = 0; j < scale.length ; j++){
+							final int value; 
+							if ( j >= i ){
+								value = (int) Math.round(scale[j] - scale[i]);
+							}else{
+								value = (int) Math.round(1200 - scale[i] + scale[j]);
+							}
+							values.add(value);
+						}
+						rows.add(StringUtils.join(values, " & "));
+					}
+					
+					contents = contents.replace("%cees%", cees);
+					contents = contents.replace("%pitch_classes%",StringUtils.join(scaleAsList, " & "));
+					contents = contents.replace("%data%",StringUtils.join(rows, "\\\\\n"));
+								
+					
+					FileUtils.writeFile(contents, chosenFile.getAbsolutePath());
+				}
+			});
+		}
+	};
+	
+	
 	
 	/**
 	 * Show a file chooser dialog (either a save or open dialog) and handle the chosen file with the handler.
