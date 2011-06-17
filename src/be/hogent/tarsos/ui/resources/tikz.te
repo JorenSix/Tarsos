@@ -1,7 +1,3 @@
-%
-% Some packages are neede to draw this chart (see below)
-%
-%
 %\documentclass{article}
 %\usepackage{scalefnt} %Mandatory: used to scale font in the pitch class histo
 %\usepackage{tikz} %Mandatory: used to draw the pitch class histo
