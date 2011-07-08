@@ -103,10 +103,10 @@ public class Histogram implements Cloneable {
 	 *            <code>]start - classWidht / 2, stop + classWidth / 2 [</code>
 	 *            are mapped to values inside the range using a modulo
 	 *            calculation.
-	 * @ignoreValuesOutsideRange if <code>true</code> values outside the valid
-	 *                           range are ignored. Otherwise if a value outside
-	 *                           the valid range is added an
-	 *                           IllegalArgumentException is thrown.
+	 * @param ignoreOutsideRange
+	 *            if <code>true</code> values outside the valid range are
+	 *            ignored. Otherwise if a value outside the valid range is added
+	 *            an IllegalArgumentException is thrown.
 	 */
 	public Histogram(final double startVal, final double stopVal, final int totalClasses,
 			final boolean wrapping, final boolean ignoreOutsideRange) {
@@ -210,7 +210,7 @@ public class Histogram implements Cloneable {
 	/**
 	 * Returns the key for class with index bufferCount.
 	 * 
-	 * @param bufferCount
+	 * @param i
 	 *            a class index. If bufferCount lays outside the interval
 	 *            <code>[0,getNumberOfClasses()[</code> it is mapped to a value
 	 *            inside the interval using a modulo calculation.
@@ -231,8 +231,8 @@ public class Histogram implements Cloneable {
 	/**
 	 * Returns the number of items in class with index bufferCount.
 	 * 
-	 * @param bufferCount
-	 *            a class index. If bufferCount lays outside the interval
+	 * @param i
+	 *            A class index. If bufferCount lays outside the interval
 	 *            <code>[0,getNumberOfClasses()[</code> it is mapped to a value
 	 *            inside the interval using a modulo calculation.
 	 * @return the number of items in bin with index bufferCount
@@ -256,6 +256,7 @@ public class Histogram implements Cloneable {
 	 * 
 	 * @param value
 	 *            The value to add.
+	 * @return This histogram with the added value.
 	 * @throws IllegalArgumentException
 	 *             when the value is not in the range of the histogram.
 	 */
@@ -806,11 +807,44 @@ public class Histogram implements Cloneable {
 		return this;
 	}
 	
+	/**
+	 * Calculates the sum of two histograms. The value for each bin of other is
+	 * added to the corresponding bin of this histogram. The other histogram
+	 * must have the same start, stop and binWidth otherwise adding histograms
+	 * makes no sense!
+	 * <p>
+	 * Changes the current histogram and returns it so it is possible to chain
+	 * modifications. E.g.<code>histo.normalize().addToEachBin(10)</code>
+	 * </p>
+	 * 
+	 * @param other
+	 *            The other histogram
+	 * @param offset 
+	 * 				The offset.
+	 * @return the changed histogram with more (or the same) number of items in
+	 *         the bins.
+	 */
+	public Histogram add(final Histogram other,final int offset) {
+		assert freqTable.keySet().size() == other.keySet().size();
+		assert start == other.start;
+		assert stop == other.stop;
+		final int size = keySet().size();
+		Double[] keys = this.keySet().toArray(new Double[size]);
+		for(int i = 0 ; i < other.keySet().size() ; i++){			
+			this.setCount(keys[i], this.getCount(keys[i]) + other.getCount(keys[(size+i+offset)%size]));
+		}
+		return this;
+	}
+	
 	
 	/**
-	 * Takes the maximum of the bin value in each histogram and keeps it. 
+	 * Takes the maximum of the bin value in each histogram and changes the
+	 * current histogram to this maximum value.
+	 * 
 	 * @param other
-	 * @return
+	 *            Another histogram with the same number of bins.
+	 * @return A histogram with the maximum values. It is the changed current
+	 *         histogram, not a new one.
 	 */
 	public Histogram max(final Histogram other){
 		assert freqTable.keySet().size() == other.keySet().size();
@@ -834,7 +868,7 @@ public class Histogram implements Cloneable {
 	 * 
 	 * @param other
 	 *            The other histogram
-	 * @return the changed histogram with less (or the same) number of items in
+	 * @return The changed histogram with less (or the same) number of items in
 	 *         the bins.
 	 */
 	public Histogram subtract(final Histogram other) {
@@ -850,7 +884,7 @@ public class Histogram implements Cloneable {
 	 * modifications. E.g.<code>histo.normalize().addToEachBin(10)</code>
 	 * </p>
 	 * 
-	 * @return the changed histogram with each bin multiplied with.
+	 * @return The changed histogram with each bin multiplied with -1.
 	 */
 	public Histogram invert() {
 		this.multiply(-1.0);

@@ -12,6 +12,7 @@ import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
+import be.hogent.tarsos.util.histogram.HistogramFactory;
 import be.hogent.tarsos.util.histogram.PitchHistogram;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
@@ -78,7 +79,7 @@ public final class AudioToScala extends AbstractTarsosApp {
 			final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
 			pitchDetector.executePitchDetection();
 			final List<Annotation> samples = pitchDetector.getAnnotations();
-			final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
+			final PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(samples);
 			final PitchClassHistogram scaleHistogram = pitchHistogram.pitchClassHistogram();
 			scaleHistogram.plot(FileUtils.basename(scalaFile.getAbsolutePath()) + "png",
 					FileUtils.basename(scalaFile.getAbsolutePath()));

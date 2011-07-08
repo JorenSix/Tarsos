@@ -42,6 +42,7 @@ import be.hogent.tarsos.util.MenuScroller;
 import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.SimplePlot;
 import be.hogent.tarsos.util.StringUtils;
+import be.hogent.tarsos.util.histogram.HistogramFactory;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 import be.hogent.tarsos.util.histogram.PitchHistogram;
 
@@ -579,7 +580,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
-					PitchHistogram pitchHistogram = Annotation.pitchHistogram(annotations);
+					PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(annotations);
 					String fileName = chosenFile.getAbsolutePath();
 					pitchHistogram.export(fileName);
 				}
@@ -604,7 +605,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
-					PitchHistogram pitchHistogram = Annotation.pitchHistogram(annotations);
+					PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(annotations);
 					String fileName = chosenFile.getAbsolutePath();
 					SimplePlot plot = new SimplePlot();
 					
@@ -614,8 +615,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					plot.setTitle("Pitch Histogram for " + audioFile.basename());
 					
 					plot.addData(0, pitchHistogram);
-					
-					//plot.setXRange(Configuration.getInt(ConfKey.pitch_histogram_start) + 2400, Configuration.getInt(ConfKey.pitch_histogram_start) - 1200);
 					
 					plot.save(fileName);
 				}
@@ -639,7 +638,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
-					PitchClassHistogram pitchClassHistogram = PitchClassHistogram.createToneScaleHistogram(annotations);
+					PitchClassHistogram pitchClassHistogram = HistogramFactory.createPitchClassHistogram(annotations);
 					String fileName = chosenFile.getAbsolutePath();
 					SimplePlot plot = new SimplePlot();
 					plot.addData(0, pitchClassHistogram);
@@ -672,7 +671,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
-					PitchHistogram pitchHistogram = Annotation.pitchHistogram(annotations);
+					PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(annotations);
 					String fileName = chosenFile.getAbsolutePath();
 					pitchHistogram.plotToneScaleHistogram(fileName, true);
 				}
@@ -690,7 +689,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
 					String fileName = chosenFile.getAbsolutePath();
-					PitchClassHistogram pitchClassHistogram = PitchClassHistogram.createToneScaleHistogram(annotations);
+					PitchClassHistogram pitchClassHistogram = HistogramFactory.createPitchClassHistogram(annotations);
 					pitchClassHistogram.export(fileName);
 				}
 			});
@@ -725,7 +724,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
-					PitchClassHistogram pitchClassHistogram = PitchClassHistogram.createToneScaleHistogram(annotations);
+					PitchClassHistogram pitchClassHistogram = HistogramFactory.createPitchClassHistogram(annotations);
 					
 					//This makes sure the highest peak is at 600, which is what is expected
 					//by the tex file.

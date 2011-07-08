@@ -87,6 +87,8 @@ public final class TarsosPitchDetection implements PitchDetector {
 	 *            the file to annotate.
 	 * @param detectedPitchHandler
 	 *            handles the pitch information.
+	 * @param detectionMode
+	 * 			Defines the detection mode used.
 	 * @throws UnsupportedAudioFileException
 	 *             Currently only WAVE files with one channel (MONO) are
 	 *             supported.
@@ -109,10 +111,12 @@ public final class TarsosPitchDetection implements PitchDetector {
 	/**
 	 * Annotate an audio stream: useful for real-time pitch tracking.
 	 * 
-	 * @param afis
-	 *            The audio stream.
+	 * @param ais
+	 *            The audio input stream.
 	 * @param detectedPitchHandler
 	 *            Handles the pitch information.
+	 * @param detectionMode
+	 * 			Defines the detection mode used.
 	 * @throws UnsupportedAudioFileException
 	 *             Currently only WAVE streams with one channel (MONO) are
 	 *             supported.

@@ -61,7 +61,7 @@ public final class FileUtils {
 	 * 
 	 * @param fileName
 	 *            The Tartini pitch file.
-	 * @return
+	 * @return A list of annotations, recovered from the pitch file.
 	 */
 	public static List<Annotation> parseTartiniPitchFile(final String fileName) {
 		final List<Annotation> samples = new ArrayList<Annotation>();

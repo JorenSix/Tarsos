@@ -37,9 +37,8 @@ public final class MidiSequenceBuilder {
      */
     private static final Logger LOG = Logger.getLogger(MidiSequenceBuilder.class.getName());
 
-    private static final int VELOCITY = 64;
-    private static final int RESOLUTION = 50;
-    private static final int DEFAULT_BMP = 120;
+    private static final int VELOCITY = 96;
+    private static final int RESOLUTION = 40;
 
     private final Sequence sequence;
     private final Track track;
@@ -48,15 +47,30 @@ public final class MidiSequenceBuilder {
 
 
     public MidiSequenceBuilder() throws InvalidMidiDataException {
-        sequence = new Sequence(Sequence.PPQ, RESOLUTION);
+        sequence = new Sequence(Sequence.SMPTE_25, RESOLUTION);
         track = sequence.createTrack();
         currentTicks = 0;
+    }
+    
+    public int getCurrentTicks(){
+    	return currentTicks;
+    }
+    
+    public double getCurrentTime(){
+    	return currentTicks / 100000.0;
     }
 
     public void addNote(final int midiKey, final int numberOfTicks) {
         track.add(createNoteEvent(ShortMessage.NOTE_ON, midiKey, VELOCITY, currentTicks));
         currentTicks = numberOfTicks + currentTicks;
         track.add(createNoteEvent(ShortMessage.NOTE_OFF, midiKey, 0, currentTicks));
+    }
+    
+    public void addSilence(final int numberOfTicks) {
+    	//I do not know how to add silence => velocity zero note events
+        track.add(createNoteEvent(ShortMessage.NOTE_ON, 69, 0, currentTicks));
+        currentTicks = numberOfTicks + currentTicks;
+        track.add(createNoteEvent(ShortMessage.NOTE_OFF, 69, 0, currentTicks));
     }
 
     public void addNoteByFrequency(final double frequency, final int numberOfTicks) {
@@ -233,8 +247,4 @@ public final class MidiSequenceBuilder {
         }
         return new MidiEvent(message, lTick);
     }
-
-	public double getTicksPerSecond() {
-		return RESOLUTION * DEFAULT_BMP / 60.0;		
-	}
 }

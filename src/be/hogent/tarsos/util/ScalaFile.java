@@ -134,16 +134,6 @@ public final class ScalaFile {
 	}
 
 	/**
-	 * Builds a tone scale histogram using the pitches defined in this scala
-	 * file.
-	 * 
-	 * @return A PitchClassHistogram using the correct pitches.
-	 */
-	public PitchClassHistogram buildHistogram() {
-		return PitchClassHistogram.createToneScale(pitches.clone());
-	}
-
-	/**
 	 * Parses a row from a scala file and returns a double value representing
 	 * cents.These lines are all valid pitch lines:
 	 * 
@@ -227,7 +217,7 @@ public final class ScalaFile {
 	}
 
 	/**
-	 * @return The list of pitches.
+	 * @return The list of pitches. It returns a clone so please cache appropriately.
 	 */
 	public double[] getPitches() {
 		return pitches.clone();

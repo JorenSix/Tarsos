@@ -11,11 +11,6 @@ import java.util.Locale;
 public final class StopWatch {
 
 	/**
-	 * Conversion factor between ns and ms.
-	 */
-	private static final int NS_TO_MS = 1000000;
-
-	/**
 	 * Number of ticks between start and stop in ns (10^-9 s).
 	 */
 	private transient long ticks;
@@ -32,7 +27,7 @@ public final class StopWatch {
 	 *         <code>ticksPassed</code>. In milliseconds or 10^-3 seconds.
 	 */
 	public long ticksPassed() {
-		return Math.abs((System.nanoTime() - ticks) / NS_TO_MS);
+		return (long) timePassed(TimeUnit.MILLISECONDS);
 	}
 
 	/**
@@ -42,9 +37,18 @@ public final class StopWatch {
 	public long nanoTicksPassed() {
 		return Math.abs(System.nanoTime() - ticks);
 	}
+	
+	/**
+	 * Calculates and returns the time passed in the requested unit.
+	 * @param unit The requested time unit.
+	 * @return The time passed in the requested unit.
+	 */
+	public double timePassed(TimeUnit unit){
+		return unit.convert(nanoTicksPassed(), TimeUnit.NANOSECONDS);
+	}
 
 	/**
-	 * Starts or restarts the stop watch.
+	 * Starts or restarts the watch.
 	 */
 	public void start() {
 		ticks = System.nanoTime();
@@ -67,7 +71,7 @@ public final class StopWatch {
 			formatString = "%.2f ms";
 			value = ticksPassed;
 		} else if (nanoTicksPassed >= 1000) {
-			formatString = "%.2f µs";
+			formatString = "%.2f Âµs";
 			value = nanoTicksPassed / 1000.0;
 		} else {
 			formatString = "%.2f ns";

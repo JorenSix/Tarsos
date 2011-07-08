@@ -8,6 +8,7 @@ package be.hogent.tarsos.sampled.pitch;
 public interface AnnotationHandler {
 	/**
 	 * Use this method to react to annotations.
+	 * @param annotation The annotation to handle.
 	 */
 	void handleAnnotation(Annotation annotation);
 }

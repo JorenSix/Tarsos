@@ -34,6 +34,7 @@ import be.hogent.tarsos.ui.virtualkeyboard.VirtualKeyboard;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.histogram.Histogram;
+import be.hogent.tarsos.util.histogram.HistogramFactory;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
 import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
@@ -83,7 +84,7 @@ public final class PlayAlong {
 
 			// String toneScalefileName = baseName + '/' + baseName + "_" +
 			// detector.getName() + "_octave.txt";
-			final Histogram octaveHistogram = Annotation.pitchHistogram(samples).pitchClassHistogram();
+			final Histogram octaveHistogram = HistogramFactory.createPitchHistogram(samples).pitchClassHistogram();
 			final List<Peak> peaks = PeakDetector.detect(octaveHistogram, 15,15);
 
 			Tarsos.println(peaks.size() + " peaks found in: " + FileUtils.basename(fileName));

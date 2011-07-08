@@ -7,6 +7,7 @@ import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.histogram.HistogramFactory;
 import be.hogent.tarsos.util.histogram.PitchHistogram;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 
@@ -30,7 +31,7 @@ public final class PolyOrMonophonicPitchTracker {
             final PitchDetector detector = new TarsosPitchDetection(file, PitchDetectionMode.TARSOS_YIN);
             detector.executePitchDetection();
             final List<Annotation> samples = detector.getAnnotations();
-            final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
+            final PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(samples);
             final PitchClassHistogram pitchClassHistogram = pitchHistogram.pitchClassHistogram();
             final String title = detector.getName() + "_" + file.basename();
             pitchClassHistogram.plot("data/tests/" + title + ".png", file.basename());

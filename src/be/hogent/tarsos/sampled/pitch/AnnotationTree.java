@@ -26,12 +26,13 @@ public final class AnnotationTree {
 	private final PitchUnit unit;
 
 	/**
-	 * Create a new annotation tree.
-	 * @param unit
+	 * Create a new annotation tree. 
+	 * @param pitchUnit
 	 *            The pitch unit. The pitch unit needs to be defined here to be
 	 *            able to do range selection in a certain unit.
 	 * @param annotations
 	 *            A list of annotations.
+	 *            
 	 */
 	public AnnotationTree(final PitchUnit pitchUnit) {
 		// Three dimensional tree
@@ -49,6 +50,7 @@ public final class AnnotationTree {
 
 	/**
 	 * Select a subset of all annotations within a pitch - time range.
+	 * @param selection A selection defines a pitch-time range.
 	 * 
 	 * @return A range selection of annotations.
 	 */

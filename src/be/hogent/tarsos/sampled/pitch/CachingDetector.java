@@ -44,7 +44,7 @@ public final class CachingDetector implements PitchDetector {
 		annotationsFileName = FileUtils.combine(directory, annotationsFileName);
 		if (FileUtils.exists(annotationsFileName)) {
 			annotations = FileUtils.readPitchAnnotations(annotationsFileName);
-			LOG.info(String.format("Read cached annotations for %s from %s", detector.getName(),
+			LOG.info(String.format("Read " + annotations.size() +  " cached annotations for %s from %s", detector.getName(),
 					annotationsFileName));
 		} else {
 			detector.executePitchDetection();

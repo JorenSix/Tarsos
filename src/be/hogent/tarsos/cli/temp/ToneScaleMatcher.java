@@ -15,6 +15,7 @@ import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.ScalaFile;
+import be.hogent.tarsos.util.histogram.HistogramFactory;
 import be.hogent.tarsos.util.histogram.PitchHistogram;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
@@ -60,7 +61,7 @@ public final class ToneScaleMatcher {
 			}
 			pitchDetector.executePitchDetection();
 			final List<Annotation> samples = pitchDetector.getAnnotations();
-			final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
+			final PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(samples);
 			final PitchClassHistogram pitchClassHistogram = pitchHistogram.pitchClassHistogram();
 			pitchClassHistogram.gaussianSmooth(1.0);
 			final List<Peak> detectedPeaks = PeakDetector.detect(pitchClassHistogram, 10,15);

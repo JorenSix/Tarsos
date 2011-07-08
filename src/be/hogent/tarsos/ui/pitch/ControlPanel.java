@@ -22,6 +22,7 @@ import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.util.TimeUnit;
 
 import com.jgoodies.forms.builder.ButtonBarBuilder2;
 
@@ -43,7 +44,8 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 	 * Play the selection or start from end mark?
 	 */
 	private final JCheckBox loopSelectionCheckBox;
-
+	
+	
 	private AudioFile audioFile;
 	private final WaveForm waveForm;
 
@@ -60,17 +62,26 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 					((JButton) e.getSource()).setText("|>");
 				} else {
 					((JButton) e.getSource()).setText("||");
-					startPlayback(waveForm.getMarker(false));
+					startPlayback(waveForm.getMarker(false),audioFile.getLengthIn(TimeUnit.SECONDS));
 				}
 			}
 		});
-
-		loopSelectionCheckBox = new JCheckBox("Play selection?");
+		
+		loopSelectionCheckBox = new JCheckBox("Replay selection?");
 		loopSelectionCheckBox.setToolTipText("Or play starting from the end marker.");
+		loopSelectionCheckBox.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				stopPlayback();
+				playerThread = new AudioPlayingThread(audioFile, waveForm.getMarker(true),waveForm.getMarker(false));
+				playerThread.start();
+			}
+		});
 
 		this.waveForm = waveFormComponent;
 
 		builder.addButton(playButton);
+		builder.addButton(loopSelectionCheckBox);
 
 		this.add(builder.getPanel(), BorderLayout.EAST);
 		this.add(waveFormComponent, BorderLayout.CENTER);
@@ -82,13 +93,15 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 		private final AudioFile file;
 		private boolean running;
 		private final double offsetInSeconds;
+		private final double stopAtSeconds;
 		private final AnnotationPublisher publisher;
 
-		AudioPlayingThread(final AudioFile audioFile, final double startAtSeconds) {
+		AudioPlayingThread(final AudioFile audioFile, final double startAtSeconds,final double stopAtSeconds) {
 			super("Audio playing thread.");
 			file = audioFile;
 			running = false;
 			offsetInSeconds = startAtSeconds;
+			this.stopAtSeconds = stopAtSeconds;
 			publisher = AnnotationPublisher.getInstance();
 		}
 
@@ -110,14 +123,17 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 			long byteCount = bytesToSkip;
 
 			publisher.clear();
+			publisher.alterSelection(waveForm.getMarker(true), offsetInSeconds);
 			publisher.delegateAddAnnotations(waveForm.getMarker(true), offsetInSeconds);
-
+			
+			
 			try {
 				AudioInputStream stream = AudioSystem.getAudioInputStream(new File(file.transcodedPath()));
 				// skip to offset in seconds:
 				stream.skip(bytesToSkip);
 
 				int bufferSize = 2048;
+				double bufferSizeInSeconds = bufferSize / frameSize / frameRate;
 				byte[] buffer = new byte[bufferSize];
 				float[] fakeBuffer = new float[0];
 				BlockingAudioPlayer player = new BlockingAudioPlayer(format.getFormat(), bufferSize
@@ -128,8 +144,13 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 					player.processOverlapping(fakeBuffer, buffer);
 					double currentTime = byteCount / frameSize / frameRate;
 					if (currentTime - previousTime > 0.03) {
+						publisher.alterSelection(publisher.getCurrentSelection().getStartTime(),currentTime);
 						publisher.delegateAddAnnotations(previousTime, currentTime);
 						previousTime = currentTime;
+					}
+					//stop running at stop at seconds 
+					if(currentTime +  bufferSizeInSeconds > stopAtSeconds){
+						running = false;
 					}
 				}
 				if (running) {
@@ -150,10 +171,12 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 			}
 		}
 	}
+	
+	
 
-	public void startPlayback(double seconds) {
+	public void startPlayback(double startAtSeconds,double stopAtSeconds) {
 		stopPlayback();
-		playerThread = new AudioPlayingThread(audioFile, seconds);
+		playerThread = new AudioPlayingThread(audioFile, startAtSeconds,stopAtSeconds);
 		playerThread.start();
 		playButton.setText("||");
 	}
@@ -181,7 +204,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 		if (playerThread != null && playerThread.isAlive()) {
 			playerThread.stopPlaying();
 		}
-		startPlayback(0);
+		startPlayback(0,audioFile.getLengthIn(TimeUnit.SECONDS));
 		playButton.setEnabled(true);
 	}
 
@@ -208,7 +231,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 	public void annotationsAdded() {
 		AnnotationSelection selection = AnnotationPublisher.getInstance().getCurrentSelection();
 
-		if (!Configuration.getBoolean(ConfKey.tarsos_live)) {
+		if (!Configuration.getBoolean(ConfKey.tarsos_live) && audioFile != null) {
 
 			if (selection.getTimeSpan() > 1.0) {
 				final double startTime;

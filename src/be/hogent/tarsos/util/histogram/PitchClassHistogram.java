@@ -71,6 +71,8 @@ public final class PitchClassHistogram extends Histogram {
 	 * becoming a standard for exchange of scales, owing to the size of the
 	 * scale archive of over 3700+ scales and the popularity of the Scala
 	 * program.</bufferCount>
+	 * @param fileName The scala file name.
+	 * @param toneScaleName The name of the tone scale.
 	 */
 	public void exportToScalaScaleFileFormat(final String fileName, final String toneScaleName) {
 		final List<Peak> peaks = PeakDetector.detect(this, 15,15);
@@ -187,93 +189,7 @@ public final class PitchClassHistogram extends Histogram {
 		return pitchClassHistogram;
 	}
 
-	/**
-	 * Create a tone scale histogram using a kernel instead of an ordinary
-	 * count. This construction uses a paradigm described here:
-	 * http://en.wikipedia.org/wiki/Kernel_density_estimation
-	 * 
-	 * It uses Gaussian kernels of a defined width. The width should be around
-	 * the just noticeable threshold of about 7 cents.
-	 * 
-	 * @param annotations
-	 *            A list of annotations.s
-	 * @return A histogram build with Gaussian kernels.
-	 */
-	public static PitchClassHistogram createPitchClassHistogram(final List<Annotation> annotations,
-			final double width) {
-		// 1200 pitch classes should be enough for everybody!
-		double[] accumulator = new double[1200];
-
-		double calculationAria = 5 * width;// hehe aria, not area
-		double halfWidth = width / 2.0;
-		
-		//Compute a kernel: a lookup table with e.g. a gaussian curve
-		double kernel[] = new double[(int)calculationAria*2+1];
-		double difference =  - calculationAria;
-		for(int i = 0 ; i < kernel.length; i++){
-			double power = Math.pow(difference / halfWidth, 2.0);
-			kernel[i] = Math.pow(Math.E, -0.5 * power);
-			difference++;
-		}
-
-		/*
-		 * Add the kernel to an accumulator for each annotation.
-		 * 
-		 * When a kernel with a width of 7 is added at 1 cents it has influence
-		 * on the bins from 1200 - 7 * 10 + 1 to 1 + 7 * 10 so from 1131 to 71.
-		 * To make the modulo calculation easy 1200 is added to each value: -69
-		 * % 1200 is -69, (-69 + 1200) % 1200 is the expected 1131. If you know
-		 * what I mean. This algorithm is O(2 * 10 * width * n) with n the
-		 * number of annotations => not so efficient.
-		 */
 	
-		for (Annotation annotation : annotations) {
-			double pitch = annotation.getPitch(PitchUnit.RELATIVE_CENTS);
-			int start = (int) (pitch + 1200 - calculationAria);
-			int stop = (int) (pitch + 1200 + calculationAria);
-			int kernelIndex = 0;
-			for (int i = start; i < stop; i++) {
-				accumulator[i % 1200] += kernel[kernelIndex];
-				kernelIndex++;
-			}
-		}
-
-		PitchClassHistogram toneScale = new PitchClassHistogram();
-		for (int i = 0; i < 1200; i++) {
-			toneScale.setCount(i, (long) accumulator[i]);
-		}
-		return toneScale;
-	}
-
-	/**
-	 * Without kernel.
-	 * @param annotations
-	 * @return
-	 */
-	public static PitchClassHistogram createToneScaleHistogram(final List<Annotation> annotations) {
-		final PitchClassHistogram histogram = new PitchClassHistogram();
-		for (Annotation annotation : annotations) {
-			histogram.add(annotation.getPitch(PitchUnit.RELATIVE_CENTS));
-		}
-		return histogram;
-	}
-
-	public static void addAnnotationTo(final double[] values, final Annotation annotation,
-			final double kernelWidth, final PitchUnit unit) {
-
-		double calculationArea = 5 * kernelWidth;
-		double halfKernelWidth = kernelWidth / 2.0;
-
-		double pitch = annotation.getPitch(unit);
-		int start = (int) (pitch + values.length - calculationArea);
-		int stop = (int) (pitch + values.length + calculationArea);
-		double difference = start - (pitch + values.length);
-		for (int i = start; i < stop; i++) {
-			double power = Math.pow(difference / halfKernelWidth, 2.0);
-			values[i % values.length] += Math.pow(Math.E, -0.5 * power);
-			difference++;
-		}
-	}
 
 	/**
 	 * Checks if the tone scale is "melodic": it has one or more clearly defined

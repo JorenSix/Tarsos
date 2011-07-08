@@ -46,6 +46,13 @@ public enum ConfKey {
 	 * defined in DefaultAttributes.
 	 */
 	transcoded_audio_to,
+	
+	
+	/**
+	 * Checks if the transcoded audio is in the configured format, this can be
+	 * skipped for performance reasons.
+	 */
+	transcode_check_format,
 
 	/**
 	 * The pitch tracker currently in use.

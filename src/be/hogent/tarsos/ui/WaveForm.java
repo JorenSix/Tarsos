@@ -34,6 +34,7 @@ import be.hogent.tarsos.ui.pitch.ControlPanel;
 import be.hogent.tarsos.ui.pitch.Frame;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.StopWatch;
+import be.hogent.tarsos.util.TimeUnit;
 
 public final class WaveForm extends JPanel implements AudioFileChangedListener {
 
@@ -74,15 +75,15 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 				if (event.getButton() == MouseEvent.BUTTON1) {
 					setMarkerInPixels(event.getX(), false);
 					if (controlPanel != null && controlPanel.shouldPlay()) {
-
-						controlPanel.startPlayback(maxMarkerPosition);
+						controlPanel.startPlayback(maxMarkerPosition,audioFile.getLengthIn(TimeUnit.SECONDS));
 					}
 				} else {
 					setMarkerInPixels(event.getX(), true);
 				}
 				AnnotationPublisher.getInstance().clear();
-				AnnotationPublisher.getInstance()
-						.delegateAddAnnotations(minMarkerPosition, maxMarkerPosition);
+				AnnotationPublisher.getInstance().alterSelection(minMarkerPosition, maxMarkerPosition);
+				AnnotationPublisher.getInstance().delegateAddAnnotations(minMarkerPosition, maxMarkerPosition);
+				
 
 			}
 		});
@@ -112,6 +113,8 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 	 * 
 	 * @param newPosition
 	 *            The new position of the marker in seconds.
+	 * @param minMarker 
+	 * 			   True if the marker to place is the marker at the left, the minimum. False otherwise.
 	 */
 	public void setMarker(final double newPosition, final boolean minMarker) {
 		if (minMarker && newPosition < maxMarkerPosition) {

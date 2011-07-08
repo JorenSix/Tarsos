@@ -58,7 +58,7 @@ public enum PitchUnit {
 	/**
 	 * Converts a pitch in hertz to the current unit.
 	 * 
-	 * @param pitchInHertz
+	 * @param hertzValue
 	 *            The pitch in hertz.
 	 * @return A converted pitch value;
 	 */

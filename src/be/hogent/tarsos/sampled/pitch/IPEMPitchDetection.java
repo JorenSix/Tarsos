@@ -53,8 +53,10 @@ public final class IPEMPitchDetection implements PitchDetector {
 	private final List<Annotation> annotations;
 
 	/**
-	 * @param file
-	 *            the file to detect pitch for
+	 * @param audioFile
+	 *            The file to detect pitch for
+	 * @param detectionMode
+	 * 			Defines the detection mode used.
 	 */
 	public IPEMPitchDetection(final AudioFile audioFile, final PitchDetectionMode detectionMode) {
 		this.file = audioFile;

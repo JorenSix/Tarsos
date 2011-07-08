@@ -140,6 +140,27 @@ public final class PitchHistogram extends Histogram {
 		}
 		plot.save(fileName);
 	}
+	
+	public PitchClassHistogram mostEnergyRitchOctave(){
+		PitchClassHistogram pch = new PitchClassHistogram();
+		int currentCount = 0;
+		int maxCount = 0;
+		Double startKey = 0.0;
+		for(Double key : this.keySet()){
+			if(key >= 1200)
+				currentCount -= this.getCount(key-1200);
+			currentCount += this.getCount(key);
+			if(currentCount>maxCount){
+				startKey = key;
+				maxCount = currentCount;
+			}		
+		}
+		double stopKey = startKey + 1200;
+		for(;startKey < stopKey ; startKey += Configuration.getDouble(ConfKey.histogram_bin_width) )
+			pch.setCount(startKey % 1200, this.getCount(startKey));
+		
+		return pch;
+	}
 
 	/**
 	 * Saves a tone scale histogram plot with each octave separately or just the

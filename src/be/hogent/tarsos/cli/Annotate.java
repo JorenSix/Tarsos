@@ -1,6 +1,7 @@
 package be.hogent.tarsos.cli;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +21,7 @@ import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SignalPowerExtractor;
 import be.hogent.tarsos.util.SimplePlot;
+import be.hogent.tarsos.util.histogram.HistogramFactory;
 import be.hogent.tarsos.util.histogram.PitchHistogram;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
@@ -61,7 +63,7 @@ public final class Annotate extends AbstractTarsosApp {
 		final String prefix = baseName + "_" + pitchDetector.getName();
 
 		final List<Annotation> samples = pitchDetector.getAnnotations();
-		final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
+		final PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(samples);
 		final String ambitusTXT = FileUtils.combine(directory, prefix + "_ambitus.txt");
 		final String ambitusPNG = FileUtils.combine(directory, prefix + "_ambitus.png");
 		final String toneScaleColor = prefix + "_tone_scale_colored.png";
@@ -111,12 +113,17 @@ public final class Annotate extends AbstractTarsosApp {
 		} else {
 			final String audioPattern = Configuration.get(ConfKey.audio_file_name_pattern);
 			final List<String> inputFiles = new ArrayList<String>();
+			
 			for (final String inputFile : options.nonOptionArguments()) {
 				if (FileUtils.isDirectory(inputFile)) {
 					final List<String> globbedFiles = FileUtils.glob(inputFile, audioPattern, false);
 					inputFiles.addAll(globbedFiles);
 				} else if (inputFile.matches(audioPattern)) {
 					inputFiles.add(inputFile);
+				}
+				Collections.reverse(inputFiles);
+				for(int i = 0; i < 1000; i++){
+					inputFiles.remove(0);
 				}
 				for (final String file : inputFiles) {
 					try {

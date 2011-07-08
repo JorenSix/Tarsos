@@ -71,6 +71,13 @@ public final class SimplePlot {
 	public void addData(final int set, final Histogram histogram) {
 		addData(set, histogram, 0);
 	}
+	
+	public void addData(final int set, final KernelDensityEstimate kde) {
+		plot.setXRange(0, kde.size());
+		for(int i = 0 ; i < kde.size(); i ++){
+			addData(set,i, kde.getValue(i));
+		}
+	}
 
 	public void addData(final double x, final double y) {
 		addData(0, x, y);

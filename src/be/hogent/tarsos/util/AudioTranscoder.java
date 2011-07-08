@@ -58,13 +58,11 @@ public final class AudioTranscoder {
 	 *            The path of the source file.
 	 * @param target
 	 *            The path of the target file.
-	 * @param channels
-	 *            The number of channels target should have. A stereo stream can
-	 *            be down mixed to a mono stream. Converting a mono stream to a
-	 *            stereo stream results in a file with two channels with the
-	 *            same data.
-	 * @param samplingRate
-	 *            The sampling rate the target file should have;
+	 * @param attributes
+	 * 			  Defines the attributes of the audio e.g. The sampling rate the 
+	 *            target file should have; The number of channels target should
+	 *            have. A stereo stream can be down mixed to a mono stream.
+	 * @throws EncoderException When the transcoder yields an error.
 	 */
 	public static void transcode(final String source, final String target, final Attributes attributes)
 			throws EncoderException {
@@ -81,6 +79,18 @@ public final class AudioTranscoder {
 	}
 
 	public static boolean transcodingRequired(final String transcodedPath) {
-		return Transcoder.transcodingRequired(transcodedPath, TARGET_ENCODING.getAttributes());
+		final boolean required;
+		if (FileUtils.exists(transcodedPath)) {
+			if (Configuration.getBoolean(ConfKey.transcode_check_format)) {
+				required = Transcoder.transcodingRequired(transcodedPath,
+						TARGET_ENCODING.getAttributes());
+			} else {
+				required = false;
+			}
+		} else {
+			required = true;
+		}
+
+		return required;
 	}
 }

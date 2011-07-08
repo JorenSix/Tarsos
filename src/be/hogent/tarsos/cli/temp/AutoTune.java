@@ -33,6 +33,7 @@ public final class AutoTune {
 
 	/**
 	 * Choose a Mixer device using CLI.
+	 * @return An integer representing the device index.
 	 */
 	public static int chooseDevice() {
 		int deviceIndex = -1;

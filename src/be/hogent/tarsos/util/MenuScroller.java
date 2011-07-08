@@ -1,5 +1,5 @@
 /**
- * @(#)MenuScroller.java	1.4.0 14/09/10
+ * MenuScroller.java	1.4.0 14/09/10
  */
 
 package be.hogent.tarsos.util;

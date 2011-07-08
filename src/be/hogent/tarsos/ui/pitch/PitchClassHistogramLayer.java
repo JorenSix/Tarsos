@@ -63,7 +63,6 @@ public final class PitchClassHistogramLayer extends JPanel implements AudioFileC
 		scalaLayer = new ScalaLayer(this, ScalaFile.westernTuning().getPitches(), histogram.getStop()
 				- histogram.getStart(), scaleChangedPublisher);
 		layers.add(scalaLayer);
-
 		layerUserInterfeces = new JTabbedPane();
 	}
 
@@ -146,21 +145,14 @@ public final class PitchClassHistogramLayer extends JPanel implements AudioFileC
 				histos.put(annotation.getSource(), histo);
 				Color color = Tarsos.COLORS[annotation.getSource().ordinal() % Tarsos.COLORS.length];
 				HistogramLayer layer = new HistogramLayer(this, histo, scaleChangedPublisher, color);
-				// KDELayer kdeLayer = new KDELayer(this, delta);
-				// histoValues = kdeLayer.getValues();
 				layer.audioFileChanged(audioFile);
 				layers.add(layer);
-				// layers.add(kdeLayer);
 				layerUserInterfeces.addTab(annotation.getSource().name(), layer.ui());
 			} else {
 				histo = histos.get(annotation.getSource());
 			}
 
 			histo.add(pitchInAbsCents);
-
-			// PitchClassHistogram.addAnnotationTo(histoValues, annotation, 5,
-			// stop > 1200 ? PitchUnit.ABSOLUTE_CENTS :
-			// PitchUnit.RELATIVE_CENTS);
 		}
 	}
 

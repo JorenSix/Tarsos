@@ -166,7 +166,9 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 					final JSlider source = (JSlider) e.getSource();
 					final double newMinProbability = source.getValue() / 100.0;
 					AnnotationPublisher.getInstance().clear();
+					AnnotationPublisher.getInstance().alterSelection(newMinProbability);
 					AnnotationPublisher.getInstance().delegateAddAnnotations(newMinProbability);
+					
 				}
 			});
 
@@ -180,6 +182,35 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 					doPeakDetection(source.getValueIsAdjusting());
 				}
 			});
+			
+			JSlider quantizeToScaleSlider = new JSlider(0, 150);
+			quantizeToScaleSlider.setValue(15);
+			quantizeToScaleSlider.setMajorTickSpacing(20);
+			quantizeToScaleSlider.addChangeListener(new ChangeListener() {
+				public void stateChanged(final ChangeEvent e) {
+					final JSlider source = (JSlider) e.getSource();
+					final double cents = source.getValue(); //cents
+					AnnotationPublisher.getInstance().applyPitchClassFilter(scale, cents);
+				}
+			});
+				
+			
+			final JSlider centsSlider = new JSlider(0, 1200);
+			centsSlider.setValue(thresholdPeakDetection);
+			centsSlider.setMajorTickSpacing(20);			
+			final JSlider timingSlider = new JSlider(0, 500);
+			timingSlider.setValue(100);
+			timingSlider.setMajorTickSpacing(20);								
+			ChangeListener steadyStateChangeListener = new ChangeListener() {
+				public void stateChanged(final ChangeEvent e) {
+					final double cents = centsSlider.getValue(); //cents
+					final double time = timingSlider.getValue() / 1000.0; //seconds
+					AnnotationPublisher.getInstance().applySteadyStateFilter(cents,time);
+				}
+			};
+			centsSlider.addChangeListener(steadyStateChangeListener);	
+			timingSlider.addChangeListener(steadyStateChangeListener);
+			
 			
 			JSlider thresholdSlider = new JSlider(0, 100);
 			thresholdSlider.setValue(thresholdPeakDetection);
@@ -200,14 +231,6 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 				}
 			});
 
-			JButton ambitusButton = new JButton("Ambitus");
-			ambitusButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					histo.clear();
-					parent.repaint();
-				}
-			});
-
 			JButton resetButton = new JButton("Reset");
 			resetButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -223,9 +246,13 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 			builder.setRowGroupingEnabled(true);
 			builder.append("Peakpicking window:", peakSlider, true);
 			builder.append("Peakpicking threshold:", thresholdSlider, true);
+			builder.append("Time:", timingSlider, true);
+			builder.append("Cents:", centsSlider, true);
 			builder.append("Quality:", probabilitySlider, true);
 			builder.append("Smooth:", smoothButton, true);
 			builder.append("Reset:", resetButton, true);
+			builder.append("Quantize:", quantizeToScaleSlider, true);
+			
 
 			ui = builder.getPanel();
 			ui.setInheritsPopupMenu(true);

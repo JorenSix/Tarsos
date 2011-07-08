@@ -20,6 +20,7 @@ public final class AnnotationPublisher{
 	private AnnotationTree tree;
 	private final List<AnnotationListener> listeners;
 	private final AnnotationSelection selection;
+	private final List<Annotation> originalAnnotationList;
 	private final PitchUnit unit;
 
 	/**
@@ -33,6 +34,7 @@ public final class AnnotationPublisher{
 	private AnnotationPublisher() {
 		listeners = new ArrayList<AnnotationListener>();
 		selection = new AnnotationSelection();
+		originalAnnotationList = new ArrayList<Annotation>();
 		unit = PitchUnit.valueOf(Configuration.get(ConfKey.pitch_contour_unit));
 		tree = new AnnotationTree(unit);
 	}
@@ -47,17 +49,74 @@ public final class AnnotationPublisher{
 		listeners.add(listener);
 	}
 
+	/**
+	 * @param annotations
+	 */
 	public void addAnnotations(final List<Annotation> annotations) {
 		int beforeSize = tree.size();
 		tree.add(annotations);
-		
+		originalAnnotationList.addAll(annotations);
 		assert tree.size() == beforeSize+annotations.size();
+	}
+	
+	
+	public void applySteadyStateFilter(final double maxCentsDifference, final double minDuration){
+		rebuildTree(new SteadyStateFilter(maxCentsDifference, minDuration));
+	}
+	
+	public void applyPitchClassFilter(final double pitchClasses[],final double maxCentsDifference){
+		rebuildTree(new PitchClassFilter(pitchClasses, maxCentsDifference));
+	}
+	
+	
+	
+	
+	/**
+	 * Filter annotations to include only annotations close to the pitch classes
+	 * defined in scale.
+	 * 
+	 * @param annotations
+	 *            The annotations;
+	 * @param scale
+	 *            The list of pitch classes.
+	 * @param maxCentsDifference
+	 *            The number of cents.
+	 */
+
+	
+	/**
+	 * Rebuilds the tree with the filtered annotations.
+	 * @param filter The filter to apply on the original list of annotations to filter.
+	 */
+	private void rebuildTree(AnnotationFilter filter){
+		tree = new AnnotationTree(unit);
+		List<Annotation> listToFilter = new ArrayList<Annotation>(originalAnnotationList);
+		filter.filter(listToFilter);
+		tree.add(listToFilter);
+		//clear the current state
+		clear();
+		//add annotations
+		delegateAddAnnotations(selection.getMinProbability());
+	}
+	
+	/**
+	 * Steady state filter: only keep annotations that are repeated for x seconds within y cents.
+	 * @param annotations The list of annotations to filter.
+	 * @param maxCentsDifference The number of cents the next annotation may differ.
+	 * @param minDuration The minimum duration of the 'note'.
+	 */
+	public void steadyStateAnnotationFilter(final List<Annotation> annotations,final double maxCentsDifference,final double minDuration){
+		
 	}
 
 	public AnnotationTree getAnnotationTree() {
 		return tree;
 	}
 	
+	
+	/**
+	 * Remove all annotations from the listeners.
+	 */
 	public void clear(){
 		for (AnnotationListener listener : listeners) {
 			listener.clearAnnotations();
@@ -66,6 +125,7 @@ public final class AnnotationPublisher{
 	
 	public void clearTree(){
 		tree = new AnnotationTree(unit);
+		originalAnnotationList.clear();
 	}
 
 	/**
@@ -85,10 +145,10 @@ public final class AnnotationPublisher{
 					LOG.fine(String.format("Adding %s annotations to %s took %s.", annotations.size(),
 							listener.getClass().toString(), watch.formattedToString()));
 				}
-			}
-			for (AnnotationListener listener : listeners) {
-				listener.annotationsAdded();
-			}
+			}			
+		}
+		for (AnnotationListener listener : listeners) {
+			listener.annotationsAdded();
 		}
 	}
 
@@ -102,14 +162,16 @@ public final class AnnotationPublisher{
 	 *            The stop time.
 	 */
 	public void delegateAddAnnotations(final double startTime, final double stopTime) {
-		selection.setTimeSelection(startTime, stopTime);
-		List<Annotation> annotations = tree.select(selection);
+		//create a new selection based on the current one:
+		AnnotationSelection newSelection = new AnnotationSelection(selection);
+		newSelection.setTimeSelection(startTime, stopTime);
+		List<Annotation> annotations = tree.select(newSelection);
 		delegateAddAnnotations(annotations);
 	}
 
 	/**
 	 * Adds annotations to listeners. The annotations are defined by a search on
-	 * time.
+	 * time and pitch.
 	 * 
 	 * @param startTime
 	 *            The start time.
@@ -122,16 +184,36 @@ public final class AnnotationPublisher{
 	 */
 	public void delegateAddAnnotations(final double startTime, final double stopTime,
 			final double startPitch, final double stopPitch) {
-		selection.setSelection(startTime, stopTime, startPitch, stopPitch);
-		List<Annotation> annotations = tree.select(selection);
+		AnnotationSelection newSelection = new AnnotationSelection(selection);
+		newSelection.setTimeSelection(startTime, stopTime);
+		newSelection.setPitchSelection(startPitch, stopPitch);
+		List<Annotation> annotations = tree.select(newSelection);
 		delegateAddAnnotations(annotations);
 		
 	}
 
 	public void delegateAddAnnotations(final double newMinProbability) {
-		selection.setMinProbability(newMinProbability);
-		List<Annotation> annotations = tree.select(selection);
+		AnnotationSelection newSelection = new AnnotationSelection(selection);
+		newSelection.setMinProbability(newMinProbability);
+		List<Annotation> annotations = tree.select(newSelection);
 		delegateAddAnnotations(annotations);
+	}
+	
+	public void alterSelection(final double startTime, final double stopTime,
+			final double startPitch, final double stopPitch){
+		selection.setTimeSelection(startTime, stopTime);
+		selection.setPitchSelection(startPitch, stopPitch);
+		LOG.fine("New selection: " + selection.toString());
+	}
+	
+	public void alterSelection(final double startTime, final double stopTime){
+		selection.setTimeSelection(startTime, stopTime);
+		LOG.fine("New selection: " + selection.toString());
+	}
+	
+	public void alterSelection(final double newMinProbability){
+		selection.setMinProbability(newMinProbability);
+		LOG.fine("New selection: " + selection.toString());
 	}
 
 	public void extractionFinished(){
@@ -149,6 +231,10 @@ public final class AnnotationPublisher{
 	public AnnotationSelection getCurrentSelection() {
 		return selection;
 	}
+	
+	public List<Annotation> getCurrentlySelectedAnnotations() {
+		return tree.select(getCurrentSelection());
+	}
 
 	/**
 	 * The single annotation publisher in the program: is a singleton.
@@ -161,5 +247,100 @@ public final class AnnotationPublisher{
 	 */
 	public static AnnotationPublisher getInstance() {
 		return INSTANCE;
+	}
+	
+	
+	
+	/************FILTERS***************/
+	
+	public interface AnnotationFilter{
+		void filter(List<Annotation> listToFilter);
+	}
+	
+	
+	public class PitchClassFilter implements AnnotationFilter {
+		private final double[] pitchClasses;
+		private final double maxCentsDifference;
+
+		public PitchClassFilter(final double[] pitchClasses,
+				final double maxCentsDifference) {
+			this.pitchClasses = pitchClasses;
+			this.maxCentsDifference = maxCentsDifference;
+		}
+
+		@Override
+		public void filter(final List<Annotation> listToFilter) {
+			for (int i = 0; i < listToFilter.size(); i++) {
+				double annotationPitchClass = listToFilter.get(i).getPitch(
+						PitchUnit.RELATIVE_CENTS);
+				// delete all annotations (except those that are close to a
+				// pitch class)
+				boolean delete = true;
+				for (double scalePitchClass : pitchClasses) {
+					// Calculate the difference e.g. between 3 and 1193 there is
+					// 1190 cents
+					double normalDiff = Math.abs(scalePitchClass
+							- annotationPitchClass);
+					// Distance between 3 and 1193 cents is also 10 cents,
+					// calculate it:
+					double wrappedDiff = Math.min(
+							Math.abs(scalePitchClass - annotationPitchClass
+									+ 1200),
+							Math.abs(scalePitchClass - annotationPitchClass
+									- 1200));
+					// Do not delete an annotation if it is close to a pitch
+					// class
+					if (normalDiff < maxCentsDifference
+							|| wrappedDiff < maxCentsDifference) {
+						delete = false;
+					}
+				}
+				// delete marked annotations
+				if (delete) {
+					listToFilter.remove(i);
+					// do not forget to evaluate the new annotation
+					// on the current place
+					i--;
+				}
+			}
+		}
+	}
+	
+	public class SteadyStateFilter implements AnnotationFilter{
+		final double maxCentsDifference;
+		final double minDuration;
+		
+		public SteadyStateFilter(final double maxCentsDifference,final double minDuration){
+			this.maxCentsDifference = maxCentsDifference;
+			this.minDuration = minDuration;
+		}
+
+		@Override
+		public void filter(final List<Annotation> listToFilter) {
+			for(int i = 0 ; i < listToFilter.size(); i++){
+				double iCentsValue = listToFilter.get(i).getPitch(PitchUnit.ABSOLUTE_CENTS);
+				double iStart = listToFilter.get(i).getStart();
+				boolean stable = false;
+				int j = i+1;
+				for( ; j  < listToFilter.size() ; j++){
+					double jCentsValue = listToFilter.get(j).getPitch(PitchUnit.ABSOLUTE_CENTS);
+					double jStart = listToFilter.get(j).getStart();
+					double centsDifference = Math.abs(iCentsValue - jCentsValue);
+					double timeDifference = jStart-iStart;
+					if(centsDifference > maxCentsDifference)
+						break;
+					if(timeDifference > minDuration){
+						stable = true;
+					}
+				}
+				if(stable){
+					i = j;
+				}else{
+					listToFilter.remove(i);
+					i--;
+				}
+			}
+		}
+		
 	}
 }

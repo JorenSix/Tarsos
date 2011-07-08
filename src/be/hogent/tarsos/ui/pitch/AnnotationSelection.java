@@ -20,6 +20,10 @@ public final class AnnotationSelection {
 	public AnnotationSelection() {
 		setSelection(MINIMUM_TIME, MAXIMUM_TIME, MINIMUM_PITCH, MAXIMUM_PITCH, DEFAULT_MIN_PROBABILITY);
 	}
+	
+	public AnnotationSelection(AnnotationSelection selectionToCopy){
+		setSelection(selectionToCopy.getStartTime(), selectionToCopy.getStopTime(), selectionToCopy.getStartPitch(), selectionToCopy.getStopPitch(), selectionToCopy.getMinProbability());
+	}
 
 	public void setSelection(final double newStartTime, final double newStopTime, final double newStartPitch,
 			final double newStopPitch, final double newMinProbability) {
@@ -33,7 +37,7 @@ public final class AnnotationSelection {
 
 		assert minProbability <= MAX_PROBABILITY : String.format(
 				"%s should be smaller than max probability %s .", minProbability, MAX_PROBABILITY);
-
+		
 		minProbability = newMinProbability;
 		startTime = newStartTime;
 		stopTime = newStopTime;
@@ -80,6 +84,13 @@ public final class AnnotationSelection {
 
 	public double getTimeSpan() {
 		return stopTime - startTime;
+	}
+	
+	public String toString() {
+		return String
+				.format("Selection in time %ss-%ss, in pitch %s-%s, in probability %s-1",
+						startTime, stopTime, startPitch, stopPitch,
+						minProbability);
 	}
 
 }

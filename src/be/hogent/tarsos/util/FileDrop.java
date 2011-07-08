@@ -552,6 +552,7 @@ public final class FileDrop {
 	 * 
 	 * @param c
 	 *            The component to unregister as a drop target
+	 * @return True or false.
 	 * @since 1.0
 	 */
 	public static boolean remove(final java.awt.Component c) {
@@ -570,6 +571,7 @@ public final class FileDrop {
 	 *            The component to unregister
 	 * @param recursive
 	 *            Recursively unregister components within a container
+	 * @return True or false.
 	 * @since 1.0
 	 */
 	public static boolean remove(final java.io.PrintStream out, final java.awt.Component c,
@@ -652,7 +654,7 @@ public final class FileDrop {
 		 * 
 		 * @param files
 		 *            The array of files that were dropped
-		 * @source The event source
+		 * @param source The event source
 		 * @since 1.1
 		 */
 		public Event(final java.io.File[] files, final Object source) {

@@ -21,11 +21,6 @@ public final class FFTBinHistogram {
 	private FFTBinHistogram() {
 	}
 
-	/**
-	 * @param args
-	 * @throws IOException
-	 * @throws UnsupportedAudioFileException
-	 */
 	public static void main(final String[] args) throws EncoderException {
 		final AudioFile audioFile = new AudioFile(FileUtils.combine("src", "be", "hogent", "tarsos", "test",
 				"data", "power_test.wav"));

@@ -317,9 +317,8 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 			}
 			if (!Configuration.getBoolean(ConfKey.tarsos_live)) {
 				AnnotationPublisher.getInstance().clear();
-
-				AnnotationPublisher.getInstance()
-						.delegateAddAnnotations(minTime, maxTime, minPitch, maxPitch);
+				AnnotationPublisher.getInstance().alterSelection(minTime, maxTime, minPitch, maxPitch);
+				AnnotationPublisher.getInstance().delegateAddAnnotations(minTime, maxTime, minPitch, maxPitch);
 			}
 		}
 	}

@@ -315,6 +315,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 							tree.add(annotation);
 							if (i % 5 == 0) {
 								double currentTime = annotation.getStart();
+								publisher.alterSelection(publisher.getCurrentSelection().getStartTime(),currentTime);
 								publisher.delegateAddAnnotations(prevTime, currentTime);
 								prevTime = currentTime;
 							}

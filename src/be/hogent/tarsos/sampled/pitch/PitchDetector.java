@@ -11,6 +11,7 @@ public interface PitchDetector {
 
 	/**
 	 * Execute the pitch detection process.
+	 * @return Returns a list of detected pitches, encapsulated in an annotation object.
 	 */
 	List<Annotation> executePitchDetection();
 	

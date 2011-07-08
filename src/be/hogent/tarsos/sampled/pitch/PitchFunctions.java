@@ -30,9 +30,11 @@ public final class PitchFunctions {
 	/**
 	 * Converts pitches in Hertz to the requested unit.
 	 * 
-	 * @param pitchValuesInHertz
-	 *            the pitch values in Hertz
-	 * @return the values converted to the requested unit. The original list
+	 * @param unit
+	 *            The unit to convert from.
+	 * @param pitchValuesInHertz 
+	 * 		 The list of values to convert.
+	 * @return The values converted to the requested unit. The original list
 	 *         remains unchanged.
 	 */
 	public static List<Double> convertHertzTo(final PitchUnit unit, final List<Double> pitchValuesInHertz) {
@@ -218,7 +220,7 @@ public final class PitchFunctions {
 	 * @param standardDeviation
 	 *            the standard deviation, 0 means return the original list,
 	 *            below zero is invalid.
-	 * @return
+	 * @return a list of Gaussian smoothed values.
 	 */
 	public static List<Double> getGaussianSmoothed(final List<Double> listToSmooth,
 			final double standardDeviation) {
@@ -457,20 +459,6 @@ public final class PitchFunctions {
 			for (int j = 0; j <= 1200; j += 100) {
 				h.addXTick(j + "", j);
 			}
-			/*
-			 * h.addXTick("Fifth", reference - 700); h.addXTick("Fifth",
-			 * reference + 700); h.addXTick("Tritonus", reference - 600);
-			 * h.addXTick("Tritonus", reference + 600);
-			 * h.addXTick("Kleine terts",reference + 300);
-			 * h.addXTick("Kleine terts",reference - 300);
-			 * h.addXTick("Grote terts",reference + 400);
-			 * h.addXTick("Grote terts",reference - 400); h.setWrap(true);
-			 */
-
-			// h.addYTick("Gem", histogram.getSumFreq() / (float)
-			// histogram.getNumberOfClasses());
-			// h.addYTick("Med", StatUtils.percentile(values, 0.5));
-			// h.setXRange(43, 1147);
 		}
 
 		h.setSize(1024, 786);
@@ -499,7 +487,7 @@ public final class PitchFunctions {
 	 * value is on the first row, the highest on the last!
 	 * 
 	 * @param fileName
-	 * @return a frequencytable
+	 * @return a histogram.
 	 */
 	public static Histogram readFrequencyTable(final String fileName) {
 		final List<String[]> data = FileUtils.readCSVFile(fileName, ";", -1);

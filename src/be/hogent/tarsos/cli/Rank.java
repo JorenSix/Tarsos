@@ -18,6 +18,7 @@ import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.ScalaFile;
+import be.hogent.tarsos.util.histogram.HistogramFactory;
 import be.hogent.tarsos.util.histogram.PitchHistogram;
 import be.hogent.tarsos.util.histogram.CorrelationMeasure;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
@@ -128,7 +129,7 @@ public final class Rank extends AbstractTarsosApp {
 		final String path = file.getAbsolutePath();
 		final String extension = FileUtils.extension(path);
 		if (extension.equalsIgnoreCase("scl")) {
-			histo = new ScalaFile(path).buildHistogram();
+			histo = HistogramFactory.createPitchClassHistogram(new ScalaFile(path));
 		} else if (path.matches(Configuration.get(ConfKey.audio_file_name_pattern))) {
 			AudioFile audioFile;
 			try {
@@ -136,7 +137,7 @@ public final class Rank extends AbstractTarsosApp {
 				final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
 				pitchDetector.executePitchDetection();
 				final List<Annotation> samples = pitchDetector.getAnnotations();
-				final PitchHistogram pitchHistogram = Annotation.pitchHistogram(samples);
+				final PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(samples);
 				final List<Peak> peakList = PeakDetector.detect(pitchHistogram.pitchClassHistogram()
 						.gaussianSmooth(0.8), 15,15);
 				final double[] peaks = new double[peakList.size()];

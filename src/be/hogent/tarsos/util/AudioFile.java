@@ -37,7 +37,9 @@ public final class AudioFile {
 	private static final Logger LOG = Logger.getLogger(AudioFile.class.getName());
 
 	private final String originalPath;
-	private final long lengthInMicroSeconds;
+	private final long lengthInMilliSeconds;
+	private String md5;
+
 
 	/**
 	 * Create and transcode an audio file.
@@ -50,10 +52,15 @@ public final class AudioFile {
 	 */
 	public AudioFile(final String filePath) throws EncoderException {
 		this.originalPath = new File(filePath).getAbsolutePath();
+		try{
+			md5 = FileUtils.getMD5Checksum(originalPath).substring(16);
+		}catch(final StringIndexOutOfBoundsException e){
+			md5 = StringUtils.messageDigestFive(originalPath).substring(16);
+		}
 		if (AudioTranscoder.transcodingRequired(transcodedPath())) {
 			AudioTranscoder.transcode(filePath, transcodedPath());
 		}
-		lengthInMicroSeconds = calculateLengthInMilliSeconds();
+		lengthInMilliSeconds = calculateLengthInMilliSeconds();
 	}
 
 	/**
@@ -80,12 +87,7 @@ public final class AudioFile {
 		// 01.mp3 in different folders have other hashes. Only half of the hash
 		// is used because a MD5 hash name clash of half the length is also really
 		// improbable and you get shorter path names.
-		String md5;
-		try{
-			md5 = FileUtils.getMD5Checksum(originalPath).substring(16);
-		}catch(final StringIndexOutOfBoundsException e){
-			md5 = StringUtils.messageDigestFive(originalPath).substring(16);
-		}
+		
 		// Configured data directory
 		final String dataFolder = Configuration.get(ConfKey.data_directory);
 		// Sub folder of data directory where annotations are stored =>
@@ -149,7 +151,11 @@ public final class AudioFile {
 	 *         be determined -1 is returned.
 	 */
 	public long getLengthInMilliSeconds() {
-		return lengthInMicroSeconds;
+		return lengthInMilliSeconds;
+	}
+	
+	public double getLengthIn(TimeUnit unit) {
+		return unit.convert(lengthInMilliSeconds, TimeUnit.MILLISECONDS);
 	}
 
 	private long calculateLengthInMilliSeconds() {
@@ -160,7 +166,7 @@ public final class AudioFile {
 			int frames = fileFormat.getFrameLength();
 			float frameRate = fileFormat.getFormat().getFrameRate();
 			length = (long) (frames / frameRate * 1000);
-			LOG.finest(String.format("Determined the lenght of %s: %s s", basename(), lengthInMicroSeconds));
+			LOG.finest(String.format("Determined the lenght of %s: %s s", basename(), lengthInMilliSeconds));
 		} catch (UnsupportedAudioFileException e) {
 			LOG.log(Level.WARNING, "Could not determine audio file length.", e);
 		} catch (IOException e) {
