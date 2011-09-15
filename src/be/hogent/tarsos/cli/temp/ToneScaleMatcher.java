@@ -78,7 +78,7 @@ public final class ToneScaleMatcher {
 					displacementForOptimalCorrelation, hayStackHistogram);
 
 			toneScaleCorrelations.put(correlation, hayStackHistogram);
-			fileNameCorrelations.put(correlation, audioFile.basename());
+			fileNameCorrelations.put(correlation, audioFile.originalBasename());
 		}
 
 		// print all correlations in descending order

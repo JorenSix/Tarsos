@@ -42,7 +42,7 @@ public final class AudioFileBrowserPanel extends JPanel implements Scrollable, A
 	}
 
 	public void audioFileChanged(final AudioFile newAudioFile) {
-		add(new AudioFileItem(newAudioFile.basename()));
+		add(new AudioFileItem(newAudioFile.originalBasename()));
 	}
 
 }

@@ -57,8 +57,8 @@ public final class PowerExtractor extends AbstractTarsosApp {
 			SignalPowerExtractor spex;
 			for (final AudioFile file : audioFiles) {
 				spex = new SignalPowerExtractor(file);
-				spex.savePowerPlot("power_" + file.basename() + ".png", SILENCELEVEL);
-				spex.saveTextFile("power_" + file.basename() + ".txt", true);
+				spex.savePowerPlot("power_" + file.originalBasename() + ".png", SILENCELEVEL);
+				spex.saveTextFile("power_" + file.originalBasename() + ".txt", true);
 				// spex.saveWaveFormPlot("waveform_" + file.basename() +
 				// ".png");
 			}

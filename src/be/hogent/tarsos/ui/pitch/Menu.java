@@ -513,7 +513,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Annotations (.csv)";
-			String defaultFileName = audioFile.basename() + "_annotations.csv";
+			String defaultFileName = audioFile.originalBasename() + "_annotations.csv";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				@Override
 				public void handleFile(final File chosenFile) {
@@ -531,7 +531,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		@Override
 		public void actionPerformed(final ActionEvent e) {
 			String dialogTitle = "Export synthesized annotations (.wav)";
-			String defaultFileName = audioFile.basename() + "_resynth.wav";
+			String defaultFileName = audioFile.originalBasename() + "_resynth.wav";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
@@ -574,7 +574,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Pitch Histogram (.csv)";
-			String defaultFileName = audioFile.basename() + "_pitch_histogram.csv";
+			String defaultFileName = audioFile.originalBasename() + "_pitch_histogram.csv";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
@@ -599,7 +599,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			}
 			String dialogTitle = "Export Pitch Histogram (." + extension + ")";
 			
-			String defaultFileName = audioFile.basename() + "_pitch_histogram." + extension;
+			String defaultFileName = audioFile.originalBasename() + "_pitch_histogram." + extension;
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
@@ -612,7 +612,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					plot.setYLabel("Number of Annotations (#)");
 					plot.setXLabel("Pitch (cent)");
 					
-					plot.setTitle("Pitch Histogram for " + audioFile.basename());
+					plot.setTitle("Pitch Histogram for " + audioFile.originalBasename());
 					
 					plot.addData(0, pitchHistogram);
 					
@@ -632,7 +632,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Pitch Class Histogram (.png)";
-			String defaultFileName = audioFile.basename() + "_pitch_class_histogram.png";
+			String defaultFileName = audioFile.originalBasename() + "_pitch_class_histogram.png";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
@@ -649,7 +649,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					}
 					plot.addXTick("0", 0.0);
 					plot.addXTick("1200", 1200);
-					plot.setTitle("Pitch Class Histogram for " + audioFile.basename());
+					plot.setTitle("Pitch Class Histogram for " + audioFile.originalBasename());
 					plot.save(fileName);
 				}
 			});
@@ -665,7 +665,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				extension = "eps";
 			}
 			String dialogTitle = "Export Pitch Class Histogram (." + extension + ")";
-			String defaultFileName = audioFile.basename() + "_pitch_class_histogram_with_octaves." + extension;
+			String defaultFileName = audioFile.originalBasename() + "_pitch_class_histogram_with_octaves." + extension;
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
@@ -682,7 +682,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Pitch Class Histogram (.csv)";
-			String defaultFileName = audioFile.basename() + "_pitch_class_histogram.csv";
+			String defaultFileName = audioFile.originalBasename() + "_pitch_class_histogram.csv";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
@@ -699,7 +699,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export tikz image for Latex  (.tex)";
-			String defaultFileName = audioFile.basename() + "_pitch_class_histogram.tex";
+			String defaultFileName = audioFile.originalBasename() + "_pitch_class_histogram.tex";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
@@ -707,7 +707,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/tikz.te" , temporaryTarget);
 					String contents = FileUtils.readFile(temporaryTarget); 
 					
-					String datFileName = audioFile.basename() + ".dat";
+					String datFileName = audioFile.originalBasename() + ".dat";
 					String datFileTarget = FileUtils.combine(chosenFile.getParent(),datFileName);
 					
 					HashMap<String,String> map = new HashMap<String,String>();
@@ -732,7 +732,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					
 					StringBuilder sb = new StringBuilder();
 					sb.append("# Pitch class Histogram Data for ");
-					sb.append(audioFile.basename());
+					sb.append(audioFile.originalBasename());
 					sb.append("\n");
 					
 					ArrayList<Double> keys = new ArrayList<Double>(pitchClassHistogram.keySet());
@@ -760,13 +760,13 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		@Override
 		public void actionPerformed(final ActionEvent e) {
 			String dialogTitle = "Export Scala File (.scl)";
-			String defaultFileName = audioFile.basename() + ".scl";
+			String defaultFileName = audioFile.originalBasename() + ".scl";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {
 					String title = "Tarsos export";
 					if(audioFile != null){
-						title = title + " " + audioFile.basename();
+						title = title + " " + audioFile.originalBasename();
 					}
 					ScalaFile scalaFile = new ScalaFile(title, scale);
 					scalaFile.write(chosenFile.getAbsolutePath());
@@ -779,7 +779,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		@Override
 		public void actionPerformed(final ActionEvent e) {
 			String dialogTitle = "Export Interval Matrix (.tex)";
-			String defaultFileName = audioFile.basename() + "_interval_matrix.tex";
+			String defaultFileName = audioFile.originalBasename() + "_interval_matrix.tex";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
 				@Override
 				public void handleFile(final File chosenFile) {

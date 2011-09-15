@@ -58,10 +58,10 @@ public final class TarsosPitchDetection implements PitchDetector {
 				}
 			});
 		} catch (final UnsupportedAudioFileException e) {
-			LOG.log(Level.SEVERE, "Unsupported audio file: " + file.basename() + " " + e.getMessage(), e);
+			LOG.log(Level.SEVERE, "Unsupported audio file: " + file.originalBasename() + " " + e.getMessage(), e);
 		} catch (final IOException e) {
 			LOG.log(Level.SEVERE,
-					"Exception while reading audio file: " + file.basename() + " " + e.getMessage(), e);
+					"Exception while reading audio file: " + file.originalBasename() + " " + e.getMessage(), e);
 		}
 		return annotations;
 	}

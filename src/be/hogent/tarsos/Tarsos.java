@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import be.hogent.tarsos.cli.AbstractTarsosApp;
@@ -98,9 +99,14 @@ public final class Tarsos {
 				}
 				// Check if the directory is writable
 				if (!new File(directory).canWrite()) {
-					log.severe("Required directory  " + directory + "is not writable!");
+					String message = "Required directory " + directory + " is not writable!\n Please configure another directory for '" + confKey + "'.";
+					log.severe(message);
+					JOptionPane.showMessageDialog(null, message, "Directory error", JOptionPane.ERROR_MESSAGE);
+					//System.exit(-1);
 				}
-				log.fine(String.format("%s files in %s", new File(directory).list().length, directory));
+				if(FileUtils.exists(directory)){
+					log.fine(String.format("%s files in %s", new File(directory).list().length, directory));
+				}
 			}
 		}
 	}

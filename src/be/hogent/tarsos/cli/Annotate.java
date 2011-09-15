@@ -56,7 +56,7 @@ public final class Annotate extends AbstractTarsosApp {
 		final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
 
 		pitchDetector.executePitchDetection();
-		final String baseName = audioFile.basename();
+		final String baseName = audioFile.originalBasename();
 		final String directory = FileUtils.combine("annotations", baseName);
 		FileUtils.mkdirs(directory);
 

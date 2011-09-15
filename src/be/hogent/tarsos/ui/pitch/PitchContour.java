@@ -134,7 +134,7 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		} else {
 			// not in live mode
 			setXRange(0, newAudioFile.getLengthInMilliSeconds() / 1000.0);
-			shortTitle = newAudioFile.basename();
+			shortTitle = newAudioFile.originalBasename();
 		}
 		title = String.format("%s - pitch in %s", shortTitle, pitchUnit.getHumanName());
 

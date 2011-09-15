@@ -425,7 +425,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 	
 	private void notifyAudioFileChange(){
 		// set a title
-		this.setTitle("Tarsos " + audioFile.basename());
+		this.setTitle("Tarsos " + audioFile.originalBasename());
 		notifyAudioFileChangedListeners();
 	}
 	
@@ -645,7 +645,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 	private void notifyAudioFileChangedListeners() {
 		LOG.log(Level.FINE,
-				String.format("Notify listeners of audio file change: %s .", getAudioFile().basename()));
+				String.format("Notify listeners of audio file change: %s .", getAudioFile().originalBasename()));
 		for (AudioFileChangedListener listener : audioFileChangedListeners) {
 			listener.audioFileChanged(getAudioFile());
 		}

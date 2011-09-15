@@ -91,8 +91,27 @@ public class TarsosSynth implements ConfigChangeListener {
 	/**
 	 * Listen to configuration changes.
 	 */
-	private TarsosSynth(){
+	public TarsosSynth(){
 		Configuration.addListener(this);
+	}
+	
+	public void setDefaultReceiver(){
+				
+		try {
+			final MoreMidiInfo synthInfo = MidiCommon.listDevices(false,true).get(0);
+			synthDevice = MidiSystem.getMidiDevice(synthInfo.getInfo());
+			synthDevice.open();
+			receiver = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
+			// configure the instrument as well
+			setConfiguredInstrument();
+			//configure midi input device.
+			connectMidiInputDevice();
+			LOG.info(String.format("Configured %s as MIDI OUT.", synthInfo.toString()));
+		} catch (MidiUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	

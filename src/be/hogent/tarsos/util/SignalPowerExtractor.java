@@ -237,7 +237,7 @@ public final class SignalPowerExtractor {
 			extractPower();
 		}
 
-		final SimplePlot plot = new SimplePlot("Powerplot for " + audioFile.basename());
+		final SimplePlot plot = new SimplePlot("Powerplot for " + audioFile.originalBasename());
 		for (int index = 0; index < linearPowerArray.length; index++) {
 			// prevents negative infinity
 			final double power = linearToDecibel(linearPowerArray[index] == 0.0 ? 0.00000000000001

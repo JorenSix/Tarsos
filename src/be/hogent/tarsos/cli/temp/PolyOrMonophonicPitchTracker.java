@@ -33,8 +33,8 @@ public final class PolyOrMonophonicPitchTracker {
             final List<Annotation> samples = detector.getAnnotations();
             final PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(samples);
             final PitchClassHistogram pitchClassHistogram = pitchHistogram.pitchClassHistogram();
-            final String title = detector.getName() + "_" + file.basename();
-            pitchClassHistogram.plot("data/tests/" + title + ".png", file.basename());
+            final String title = detector.getName() + "_" + file.originalBasename();
+            pitchClassHistogram.plot("data/tests/" + title + ".png", file.originalBasename());
         }
     }
 

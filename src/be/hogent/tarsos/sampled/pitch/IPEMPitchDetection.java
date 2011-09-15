@@ -144,7 +144,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 			LOG.fine(String.format("Failed to deleted intermediate CSV file %s", csvFileName));
 		}
 
-		LOG.fine(String.format("%s pitch detection finished for %s.", mode.name(), file.basename()));
+		LOG.fine(String.format("%s pitch detection finished for %s.", mode.name(), file.originalBasename()));
 
 		return annotations;
 	}
