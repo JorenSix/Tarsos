@@ -59,9 +59,12 @@ public class HeaderPanel extends JPanel {
 
 		message = new JLabel(this.icon);
 		message.setBorder(new EmptyBorder(0, 0, 0, 12));
-
-		add(BorderLayout.WEST, titlesPanel);
-		add(BorderLayout.EAST, message);
+		
+		JPanel subPanel = new JPanel(new BorderLayout());
+		
+		subPanel.add(BorderLayout.WEST, titlesPanel);
+		subPanel.add(BorderLayout.EAST, message);
+		add(BorderLayout.NORTH,subPanel);
 		add(BorderLayout.SOUTH, new JSeparator(JSeparator.HORIZONTAL));
 
 		setPreferredSize(new Dimension(640, this.icon.getIconHeight() + 12));
