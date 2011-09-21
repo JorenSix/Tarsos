@@ -19,7 +19,7 @@ public final class PitchTable extends AbstractTarsosApp {
 
     /*
      * (non-Javadoc)
-     * @see be.hogent.tarsos.cli.AbstractTarsosApp#run(java.lang.String[])
+     * @see be.hogent.tarsos.exp.cli.AbstractTarsosApp#run(java.lang.String[])
      */
     
     public void run(final String... args) {
@@ -53,7 +53,7 @@ public final class PitchTable extends AbstractTarsosApp {
 
     /*
      * (non-Javadoc)
-     * @see be.hogent.tarsos.cli.AbstractTarsosApp#description()
+     * @see be.hogent.tarsos.exp.cli.AbstractTarsosApp#description()
      */
     
     public String description() {
@@ -62,7 +62,7 @@ public final class PitchTable extends AbstractTarsosApp {
 
     /*
      * (non-Javadoc)
-     * @see be.hogent.tarsos.cli.AbstractTarsosApp#name()
+     * @see be.hogent.tarsos.exp.cli.AbstractTarsosApp#name()
      */
     
     public String name() {

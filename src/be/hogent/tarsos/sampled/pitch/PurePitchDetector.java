@@ -10,6 +10,7 @@ package be.hogent.tarsos.sampled.pitch;
  * @author Joren Six
  */
 public interface PurePitchDetector {
+	
 	/**
 	 * Analyzes a buffer with audio information and estimates a pitch in Hz.
 	 * 
@@ -32,5 +33,6 @@ public interface PurePitchDetector {
 	 * @return A probability
 	 */
 	float getProbability();
+	
 	// TODO Implement a cleaner way to return the probability!
 }

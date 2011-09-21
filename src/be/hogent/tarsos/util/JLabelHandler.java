@@ -39,8 +39,8 @@ public final class JLabelHandler extends Handler {
 
 	/**
 	 * 
-	 * @param logJTextArea
-	 *            setup logging for a JTextarea
+	 * @param jLabel
+	 *            Setup logging for this jLabel.
 	 */
 	public static void setupLoggerHandler(final JLabel jLabel) {
 		// This code attaches the handler to the text area

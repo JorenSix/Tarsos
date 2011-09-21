@@ -22,6 +22,12 @@ public final class SampledAudioUtilities {
 	private static final Logger LOG = Logger
 			.getLogger(SampledAudioUtilities.class.getName());
 
+	/**
+	 * Creates a list of Mixer.Info objects. 
+	 * @param supportsPlayback Should the mixer support audio play back?
+	 * @param supportsRecording Should the mixer support audio recording?
+	 * @return A list of mixers that fulfill the given conditions. 
+	 */
 	public static Vector<Mixer.Info> getMixerInfo(
 			final boolean supportsPlayback, final boolean supportsRecording) {
 		final Vector<Mixer.Info> infos = new Vector<Mixer.Info>();

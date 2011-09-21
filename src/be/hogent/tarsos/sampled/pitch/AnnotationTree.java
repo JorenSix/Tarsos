@@ -12,8 +12,8 @@ import edu.wlu.cs.levy.CG.KeySizeException;
 /**
  * Annotation tree can be used for range selection on a list of annotations. To
  * make the range search efficient it backed by a KD-tree. One dimension is
- * time, the other dimension pitch. The unit of pitch is defined during the
- * construction phase.
+ * time, the second dimension pitch and the third dimension is salience. 
+ * The unit of pitch is defined during the construction phase.
  */
 public final class AnnotationTree {
 
@@ -40,6 +40,11 @@ public final class AnnotationTree {
 		unit = pitchUnit;
 	}
 	
+	/**
+	 * Add a list of annotations to the KD-tree.
+	 * @param annotations
+	 *            The annotations to add to the tree.
+	 */
 	public void add(final List<Annotation> annotations){
 		StopWatch watch = new StopWatch();
 		for (Annotation annotation : annotations) {
@@ -83,6 +88,11 @@ public final class AnnotationTree {
 	
 	
 
+	/**
+	 * Add one annotation to the tree.
+	 * @param annotation
+	 *            The annotation to add.
+	 */
 	public void add(final Annotation annotation) {
 		double[] key = { annotation.getStart(), annotation.getPitch(unit), annotation.getProbability() };
 		try {
@@ -90,8 +100,7 @@ public final class AnnotationTree {
 		} catch (KeySizeException e) {
 			new IllegalStateException("The dimenstion of the tree is 3," + " the dimension of the key also.");
 		} catch (KeyDuplicateException e) {
-			new IllegalStateException(
-					"No two annotations with the same timestamp and starttime should be present!");
+			new IllegalStateException("No two annotations with the same timestamp and starttime should be present!");
 		}
 
 	}

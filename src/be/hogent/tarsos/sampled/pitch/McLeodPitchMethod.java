@@ -370,6 +370,9 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see be.hogent.tarsos.sampled.pitch.PurePitchDetector#getProbability()
+	 */
 	public float getProbability() {
 		if (probability > 1.0) {
 			probability = 1;

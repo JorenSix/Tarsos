@@ -34,6 +34,7 @@ public final class Annotation implements Comparable<Annotation> {
 	private final PitchDetectionMode source;
 
 	/**
+	 * Create a new annotation with the given data.
 	 * @param timeStamp
 	 *            The starting time (in seconds).
 	 * @param pitchInHz
@@ -76,6 +77,15 @@ public final class Annotation implements Comparable<Annotation> {
 
 	}
 
+	/**
+	 * Create a new annotation with the given data. The default salience of 1.0 is used.
+	 * @param timeStamp
+	 *            The starting time (in seconds).
+	 * @param pitchInHz
+	 *            The pitch in Hz.
+	 * @param annotationSource
+	 *            The source of the annotation.
+	 */
 	public Annotation(final double timeStamp, final double pitchInHz,
 			final PitchDetectionMode annotationSource) {
 		this(timeStamp, pitchInHz, annotationSource, 1.0);
@@ -176,7 +186,7 @@ public final class Annotation implements Comparable<Annotation> {
 	 * 
 	 * @param line
 	 *            The line to parse.
-	 * @return A
+	 * @return A new annotation.
 	 */
 	public static Annotation parse(final String line) {
 		final String[] data = line.split(",");

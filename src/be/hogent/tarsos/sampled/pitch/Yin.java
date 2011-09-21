@@ -169,7 +169,7 @@ public final class Yin implements PurePitchDetector {
 				// From the YIN paper: The threshold determines the list of
 				// candidates admitted to the set, and can be interpreted as the
 				// proportion of aperiodic power tolerated
-				// within a ‘‘periodic’’ signal.
+				// within a periodic signal.
 				//
 				// Since we want the periodicity and and not aperiodicity:
 				// periodicity = 1 - aperiodicity

@@ -48,12 +48,6 @@ public final class PlayAlong {
 	private PlayAlong() {
 	}
 
-	/**
-	 * Log messages.
-	 */
-	// private static final Logger LOG =
-	// Logger.getLogger(PlayAlong.class.getName());
-
 	public static void main(final String[] args) throws MidiUnavailableException, InterruptedException,
 			IOException {
 		

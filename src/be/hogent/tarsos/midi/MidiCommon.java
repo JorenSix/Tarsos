@@ -235,8 +235,10 @@ public final class MidiCommon {
 		return device;
 	}
 
+
 	/**
 	 * Choose a Mixer device using CLI.
+	 * @return A chosen mixer object.
 	 */
 	public static Mixer chooseMixerDevice() {
 		Mixer mixer = null;
@@ -266,8 +268,9 @@ public final class MidiCommon {
 	}
 
 	/**
-	 * @param peaks
-	 * @return
+	 * Create a MIDI tuning from a tone scale (defined by peaks).
+	 * @param peaks The peaks (from e.g. a Scala file or histogram).
+	 * @return  An array with 128 double values that can be used in a MIDI tuning dump.
 	 */
 	public static double[] tuningFromPeaks(final double[] peaks) {
 		// c4 = midi key 60, the most explosive key in the known universe.

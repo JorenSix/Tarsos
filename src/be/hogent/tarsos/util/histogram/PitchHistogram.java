@@ -240,8 +240,7 @@ public final class PitchHistogram extends Histogram {
 		}
 		plot.save(fileName);
 	}
-	
-	
+
 	/**
 	 * Create a tone scale histogram using a kernel instead of an ordinary
 	 * count. This construction uses a paradigm described here:
@@ -252,6 +251,8 @@ public final class PitchHistogram extends Histogram {
 	 * 
 	 * @param annotations
 	 *            A list of annotations.s
+	 * @param width
+	 *            The width of each kernel.
 	 * @return A histogram build with Gaussian kernels.
 	 */
 	public static PitchHistogram createPitchHistogram(final List<Annotation> annotations,
@@ -264,13 +265,13 @@ public final class PitchHistogram extends Histogram {
 		double[] accumulator = new double[1200 * octaves];
 
 		double calculationAria = 5 * width;// hehe aria, not area
-		double halfWidth = width / 2.0;
+		double halfwit = width / 2.0; //hehe halfwit, not halfwidth, hehe
 		
 		//Compute a kernel: a lookup table with e.g. a gaussian curve
 		double kernel[] = new double[(int)calculationAria*2+1];
 		double difference =  - calculationAria;
 		for(int i = 0 ; i < kernel.length; i++){
-			double power = Math.pow(difference / halfWidth, 2.0);
+			double power = Math.pow(difference / halfwit, 2.0);
 			kernel[i] = Math.pow(Math.E, -0.5 * power);
 			difference++;
 		}

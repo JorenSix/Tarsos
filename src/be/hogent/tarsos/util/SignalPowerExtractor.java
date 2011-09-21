@@ -48,7 +48,7 @@ public final class SignalPowerExtractor {
 	/**
 	 * Create a new power extractor.
 	 * 
-	 * @param audioFile
+	 * @param file
 	 *            The audio file to extract power from.
 	 */
 	public SignalPowerExtractor(final AudioFile file) {
@@ -83,7 +83,8 @@ public final class SignalPowerExtractor {
 	 * Returns the relative power [0.0;1.0] at the given time.
 	 * 
 	 * @param seconds
-	 *            the time to get the relative power for.
+	 *            The time to get the relative power for.
+	 * @param relative 
 	 * @return A number between 0 and 1 inclusive that shows the relative power
 	 *         at the given time
 	 * @exception IndexOutOfBoundsException
@@ -153,8 +154,8 @@ public final class SignalPowerExtractor {
 	 * Creates a wave from plot.
 	 * 
 	 * 
-	 * @param waveFormPlot
-	 *            The file to save to.
+	 * @param aggregator
+	 *            The aggregator to save to.
 	 */
 	public void waveFormPlot(WaveFormDataAggregator aggregator) {
 		FileInputStream file = null;
@@ -212,7 +213,9 @@ public final class SignalPowerExtractor {
 	 * Creates a text file with relative power values for each sample.
 	 * 
 	 * @param textFileName
-	 *            where to save the text file?
+	 *            Where to save the text file?
+	 * @param relative
+	 * 			Compare the current power with the max extracted power, or not? 
 	 */
 	public void saveTextFile(final String textFileName, final boolean relative) {
 		if (linearPowerArray == null) {
@@ -230,9 +233,12 @@ public final class SignalPowerExtractor {
 	 * Creates a 'power plot' of the signal.
 	 * 
 	 * @param powerPlotFileName
-	 *            where to save the plot.
+	 *            Where to save the plot.
+	 * @param silenceThreshold
+	 *            Draw a line at this threshold. Can be used to show where the
+	 *            signal is 'silent'.
 	 */
-	public void savePowerPlot(final String powerPlotFileName, final double silenceTreshold) {
+	public void savePowerPlot(final String powerPlotFileName, final double silenceThreshold) {
 		if (linearPowerArray == null) {
 			extractPower();
 		}
@@ -244,7 +250,7 @@ public final class SignalPowerExtractor {
 					: linearPowerArray[index]);
 			final double timeInSeconds = index * readWindow;
 			plot.addData(0, timeInSeconds, power);
-			plot.addData(1, timeInSeconds, silenceTreshold);
+			plot.addData(1, timeInSeconds, silenceThreshold);
 		}
 		plot.save(powerPlotFileName);
 	}

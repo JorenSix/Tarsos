@@ -252,7 +252,6 @@ public final class HistogramLayer implements Layer, ScaleChangedListener, AudioF
 			builder.append("Smooth:", smoothButton, true);
 			builder.append("Reset:", resetButton, true);
 			builder.append("Quantize:", quantizeToScaleSlider, true);
-			
 
 			ui = builder.getPanel();
 			ui.setInheritsPopupMenu(true);

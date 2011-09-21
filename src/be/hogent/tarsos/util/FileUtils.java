@@ -318,6 +318,8 @@ public final class FileUtils {
 	 * 
 	 * @param source
 	 *            The path to read e.g. /package/name/here/help.html
+	 * @param target
+	 *            The target to save the file to.
 	 */
 	public static void copyFileFromJar(final String source, final String target) {
 		try {
@@ -473,9 +475,12 @@ public final class FileUtils {
 	 * </p>
 	 * 
 	 * @param directory
-	 *            a readable directory.
+	 *            A readable directory.
 	 * @param pattern
-	 *            a valid regular expression.
+	 *            A valid regular expression.
+	 * @param recursive
+	 *            A boolean defining if directories should be traversed
+	 *            recursively.
 	 * @return a list of filenames matching the pattern for directory.
 	 * @exception Error
 	 *                an error is thrown if the directory is not ... a

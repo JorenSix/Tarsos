@@ -20,17 +20,21 @@ public interface HistogramCorrelation {
      */
     double correlation(Histogram thisHistogram, int displacement, Histogram otherHistogram);
 
-    /**
-     * Plots two histograms and the intersection between the two.
-     * 
-     * @param thisHistogram
-     *            the first histogram
-     * @param displacement
-     *            the value to displace the otherHistogram (e.g. for optimal
-     *            correlation between the two)
-     * @param otherHistogram
-     *            the second (not displaced) histogram
-     */
+	/**
+	 * Plots two histograms and the intersection between the two.
+	 * 
+	 * @param thisHistogram
+	 *            the first histogram
+	 * @param displacement
+	 *            the value to displace the otherHistogram (e.g. for optimal
+	 *            correlation between the two)
+	 * @param otherHistogram
+	 *            the second (not displaced) histogram
+	 * @param fileName
+	 *            Where to save the plot.
+	 * @param title
+	 *            The title of the plot.
+	 */
     void plotCorrelation(Histogram thisHistogram, int displacement, Histogram otherHistogram,
             String fileName, String title);
 }

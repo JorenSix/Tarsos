@@ -147,7 +147,6 @@ public final class Tarsos {
 			new Color(0xcc02de), // purple
 			new Color(0x6e4272), // dark purple
 			new Color(0x552209), // brown
-			
 	};
 
 	/**
@@ -200,7 +199,6 @@ public final class Tarsos {
 		String os = System.getProperty("os.name").toLowerCase();
 		//Mac
 	    return (os.indexOf( "mac" ) >= 0); 
- 
 	}
 
 	/**

@@ -105,19 +105,22 @@ public final class ToneSequenceBuilder {
 	}
 
 	/**
-	 * Write a WAV-file (sample rate 44.1 kHz) containing the tones and their
-	 * respective durations (start times). If the fileName the file played.
+	 * Write a stereo WAV-file (sample rate 44.1 kHz) with frequencies and their
+	 * respective durations (start times). If the fileName is null the file played.
+	 * If sourceFile is given the source file is written on the left ch
 	 * 
 	 * @param fileName
 	 *            The name of the file to render. e.g. "out.wav".
 	 * @param smootFilterWindowSize
-	 *            to prevent (very) sudden changes in the frequency of tones a
+	 *            To prevent (very) sudden changes in the frequency of tones a
 	 *            smoothing function can be applied. The window size of the
 	 *            smoothing function defines what an unexpected value is and if
 	 *            it is smoothed. When no smoothing is required <strong>set it
 	 *            to zero</strong>. Otherwise a value between 5 and 50 is
 	 *            normal. ( 50 x 10 ms = 500 ms = 0.5 seconds). A
 	 *            <em>median filter</em> is used.
+	 * @param sourceFile 
+	 *            The source file used 
 	 * @throws IOException
 	 *             When something goes awry.
 	 * @throws UnsupportedAudioFileException
@@ -187,15 +190,10 @@ public final class ToneSequenceBuilder {
 		}
 		
 		/*
-		 * Read the source file data
+		 * Read the source file data in the right channel
 		 */
 		if(sourceFile != null){
 			AudioInputStream stream = AudioSystem.getAudioInputStream(new File(sourceFile));
-			//AudioFormat format = stream.getFormat(); 
-			//realTimes.get(0)
-			//format.getSampleRate();
-			long bytesToSkip = 0;
-			stream.skip(bytesToSkip);
 			
 			byte[] sampleAsByteArray = new byte[2]; 
 			for (int sample = 0; sample < numberOfSamples; sample++) {

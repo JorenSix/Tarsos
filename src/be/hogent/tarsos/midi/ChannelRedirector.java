@@ -6,11 +6,23 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
 
+/**
+ * Redirects NOTE ON and OFF messages to a target channel.
+ * @author Joren Six
+ */
 public class ChannelRedirector implements Receiver, Transmitter {
 	
 	private final int targetChannel;
 	private final Receiver targetReceiver;
 	private final Transmitter sourceTransmitter;
+	
+	
+	/**
+	 * Create a new channel redirector for a certain source and target.
+	 * @param targetChannel The channel the MIDI messages should arrive on.
+	 * @param target The target receiver.
+	 * @param source The transmitter source.
+	 */
 	public ChannelRedirector(int targetChannel,final Receiver target,final Transmitter source){
 		this.targetChannel= targetChannel;
 		targetReceiver = target;
@@ -49,6 +61,7 @@ public class ChannelRedirector implements Receiver, Transmitter {
 							sm.getData1(), sm.getData2());
 				} catch (InvalidMidiDataException e) {
 					//should not happen.
+					assert false : "Invalid MIDI data should is not possible here.";
 				}
 			} else {
 				newMessage = sm;

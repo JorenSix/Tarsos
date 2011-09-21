@@ -20,9 +20,10 @@ public final class ReceiverSink implements Receiver {
 	private final List<Receiver> receivers;
 	private final boolean ignoreTiming;
 
+	
 	/**
-	 * @param receiverList
-	 *            The list of <code>Receiver</code>s to send messages to
+	 * @param ignoreTimingData A boolean that defines if timing messages should be ignored.
+	 * @param receiverList The list of <code>Receiver</code>s to send messages to.
 	 */
 	public ReceiverSink(final boolean ignoreTimingData, final Receiver... receiverList) {
 		this.receivers = new ArrayList<Receiver>(Arrays.asList(receiverList));

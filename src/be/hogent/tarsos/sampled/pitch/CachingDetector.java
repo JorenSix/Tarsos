@@ -38,6 +38,9 @@ public final class CachingDetector implements PitchDetector {
 		annotations = new ArrayList<Annotation>();
 	}
 
+	/* (non-Javadoc)
+	 * @see be.hogent.tarsos.sampled.pitch.PitchDetector#executePitchDetection()
+	 */
 	public List<Annotation> executePitchDetection() {
 		String directory = file.transcodedDirectory();
 		String annotationsFileName = detector.getName() + "_" + file.transcodedBasename() + ".txt";

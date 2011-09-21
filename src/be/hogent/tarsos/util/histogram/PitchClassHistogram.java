@@ -3,8 +3,6 @@ package be.hogent.tarsos.util.histogram;
 import java.util.List;
 import java.util.logging.Logger;
 
-import be.hogent.tarsos.sampled.pitch.Annotation;
-import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.ScalaFile;

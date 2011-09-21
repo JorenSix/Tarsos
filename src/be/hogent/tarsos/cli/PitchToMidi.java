@@ -80,7 +80,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see be.hogent.tarsos.cli.AbstractTarsosApp#description()
+	 * @see be.hogent.tarsos.exp.cli.AbstractTarsosApp#description()
 	 */
 
 	@Override
@@ -186,7 +186,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see be.hogent.tarsos.cli.AbstractTarsosApp#name()
+	 * @see be.hogent.tarsos.exp.cli.AbstractTarsosApp#name()
 	 */
 
 	@Override
@@ -197,7 +197,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see be.hogent.tarsos.cli.AbstractTarsosApp#run(java.lang.String[])
+	 * @see be.hogent.tarsos.exp.cli.AbstractTarsosApp#run(java.lang.String[])
 	 */
 
 	@Override

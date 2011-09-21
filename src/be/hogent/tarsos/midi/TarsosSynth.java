@@ -183,22 +183,26 @@ public class TarsosSynth implements ConfigChangeListener {
 	
 	
 	/**
-	 * Send a Note ON message to a midi key with a velocity.
+	 * Send a Note ON message to a MIDI key with a velocity.
 	 * 
 	 * @param midiKey
-	 *            The midi key number.
+	 *            The MIDI key number.
 	 * @param velocity
 	 *            The velocity of the note on message.
+	 * @param channel
+	 *            The MIDI channel (0-16).
 	 */
 	public void noteOn(final int midiKey, final int velocity,final int channel) {
 		sendNoteMessage(midiKey, velocity, channel, true);
 	}
 
 	/**
-	 * Send a note off message to the midi key.
+	 * Send a note off message to the MIDI key.
 	 * 
 	 * @param midiKey
-	 *            The midi key to send the note off message to.
+	 *            The MIDI key to send the note off message to.
+	 * @param channel
+	 *            The MIDI channel (0-16).
 	 */
 	public void noteOff(final int midiKey,final int channel) {
 		sendNoteMessage(midiKey, 0, channel, false);

@@ -130,13 +130,12 @@ public final class MidiToWavRenderer {
 	}
 
 	/**
-	 * Creates a WAV file based on the Pattern, using the default soundbank.
-	 * 
-	 * @param pattern
-	 * @param outputFile
-	 * @throws MidiUnavailableException
-	 * @throws InvalidMidiDataException
-	 * @throws IOException
+	 * Creates a WAV file based on a MIDI file, using the default sound bank.
+	 * @param midiFile The MIDI file.
+	 * @param outputFile An output file.
+	 * @throws MidiUnavailableException When the synthesizer is not available.
+	 * @throws InvalidMidiDataException When the MIDI data is invalid.
+	 * @throws IOException If the WAV file can not be written.
 	 */
 	public void createWavFile(final File midiFile, final File outputFile) throws MidiUnavailableException,
 			InvalidMidiDataException, IOException {
