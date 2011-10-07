@@ -43,7 +43,7 @@ public final class CachingDetector implements PitchDetector {
 	 */
 	public List<Annotation> executePitchDetection() {
 		String directory = file.transcodedDirectory();
-		String annotationsFileName = detector.getName() + "_" + file.transcodedBasename() + ".txt";
+		String annotationsFileName = detector.getName() + "_" + file.originalBasename() + ".txt";
 		annotationsFileName = FileUtils.combine(directory, annotationsFileName);
 		if (FileUtils.exists(annotationsFileName)) {
 			annotations = FileUtils.readPitchAnnotations(annotationsFileName);

@@ -68,21 +68,21 @@ public final class PitchFunctions {
 	private static void convertHertzToAbsoluteCent(final List<Double> convertedValues) {
 		for (int i = 0; i < convertedValues.size(); i++) {
 			final Double valueInHertz = convertedValues.get(i);
-			convertedValues.set(i, PitchConverter.hertzToAbsoluteCent(valueInHertz));
+			convertedValues.set(i, PitchUnit.hertzToAbsoluteCent(valueInHertz));
 		}
 	}
 
 	private static void convertHertzToMidiCent(final List<Double> convertedValues) {
 		for (int i = 0; i < convertedValues.size(); i++) {
 			final Double valueInHertz = convertedValues.get(i);
-			convertedValues.set(i, PitchConverter.hertzToMidiCent(valueInHertz));
+			convertedValues.set(i, PitchUnit.hertzToMidiCent(valueInHertz));
 		}
 	}
 
 	private static void convertHertzToMidiKey(final List<Double> convertedValues) {
 		for (int i = 0; i < convertedValues.size(); i++) {
 			final Double valueInHertz = convertedValues.get(i);
-			convertedValues.set(i, (double) PitchConverter.hertzToMidiKey(valueInHertz));
+			convertedValues.set(i, (double) PitchUnit.hertzToMidiKey(valueInHertz));
 		}
 	}
 
@@ -96,7 +96,7 @@ public final class PitchFunctions {
 	private static void convertHertzToRelativeCent(final List<Double> convertedValues) {
 		for (int i = 0; i < convertedValues.size(); i++) {
 			final Double hertzValue = convertedValues.get(i);
-			final Double pitchValueInCentFoldedToOneOctave = PitchConverter.hertzToRelativeCent(hertzValue);
+			final Double pitchValueInCentFoldedToOneOctave = PitchUnit.hertzToRelativeCent(hertzValue);
 			convertedValues.set(i, pitchValueInCentFoldedToOneOctave);
 		}
 	}

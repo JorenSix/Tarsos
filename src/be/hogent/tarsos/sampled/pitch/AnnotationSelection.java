@@ -1,4 +1,4 @@
-package be.hogent.tarsos.ui.pitch;
+package be.hogent.tarsos.sampled.pitch;
 
 /**
  * Represents the current selection of annotations.

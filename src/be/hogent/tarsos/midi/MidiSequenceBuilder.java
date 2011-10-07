@@ -22,7 +22,7 @@ import javax.sound.midi.Synthesizer;
 import javax.sound.midi.Track;
 import javax.sound.midi.Transmitter;
 
-import be.hogent.tarsos.sampled.pitch.PitchConverter;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 
@@ -85,7 +85,7 @@ public final class MidiSequenceBuilder {
     }
 
     public void addNoteByAbsoluteCents(final double absoluteCents, final int numberOfTicks) {
-        final double frequency = PitchConverter.absoluteCentToHertz(absoluteCents);
+        final double frequency = PitchUnit.absoluteCentToHertz(absoluteCents);
         this.addNoteByFrequency(frequency, numberOfTicks);
     }
 

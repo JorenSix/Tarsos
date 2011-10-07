@@ -1,6 +1,5 @@
-package be.hogent.tarsos.ui.pitch;
+package be.hogent.tarsos.sampled.pitch;
 
-import be.hogent.tarsos.sampled.pitch.Annotation;
 
 /**
  * Elements interested in representing annotations should implement this

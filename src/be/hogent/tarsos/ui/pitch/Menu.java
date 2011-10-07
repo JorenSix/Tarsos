@@ -30,6 +30,7 @@ import be.hogent.tarsos.midi.TarsosSynth;
 import be.hogent.tarsos.midi.ToneSequenceBuilder;
 import be.hogent.tarsos.sampled.SampledAudioUtilities;
 import be.hogent.tarsos.sampled.pitch.Annotation;
+import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.util.AudioFile;

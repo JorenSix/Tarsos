@@ -5,6 +5,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -49,12 +50,23 @@ public abstract class BackgroundTask extends SwingWorker<Void, Void>   implement
 	}
 	
 	public void done(){
-		progressBar.setIndeterminate(false);
-		progressBar.setValue(100);
-		progressBar.setString("Done");
-		for(TaskHandler handler : handlers){
-			handler.taskDone(this);
+		try {
+			get();
+			progressBar.setIndeterminate(false);
+			progressBar.setValue(100);
+			progressBar.setString("Done");
+			
+			for(TaskHandler handler : handlers){
+				handler.taskDone(this);
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
 	}
 	
 	/**
@@ -86,7 +98,7 @@ public abstract class BackgroundTask extends SwingWorker<Void, Void>   implement
 	public void interrupt(BackgroundTask backgroundTask,Exception e){
 		progressBar.setIndeterminate(false);
 		progressBar.setValue(100);
-		progressBar.setString("Failed");
+		progressBar.setString("Canceled");
 		for(TaskHandler handler : handlers){
 			handler.taskInterrupted(this,e);
 		}

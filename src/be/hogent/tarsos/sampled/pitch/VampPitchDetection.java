@@ -182,7 +182,7 @@ public final class VampPitchDetection implements PitchDetector {
 		int lengthInMS = (int) file.getLengthInMilliSeconds();
 		for(int i = 0; i < pitchHistogram.length ; i++){
 			double pitchInMidiCents = i * 12 / (float) binsPerOctave  + 36;
-			double pitchInHz = PitchConverter.midiCentToHertz(pitchInMidiCents);
+			double pitchInHz = PitchUnit.midiCentToHertz(pitchInMidiCents);
 			for(int j = 0 ; j < pitchHistogram[i] * 100 ; j++){
 				annotations.add(new Annotation(rnd.nextInt(lengthInMS)/1000.0,pitchInHz,mode));
 			}
@@ -192,7 +192,7 @@ public final class VampPitchDetection implements PitchDetector {
 		annotations.clear();
 		int pitchHistogramMinimum = Configuration.getInt(ConfKey.pitch_histogram_start);		
 		for(int i = 0 ; i < accumulator.length ; i ++){
-			double pitchInHz = PitchConverter.absoluteCentToHertz(i + pitchHistogramMinimum);
+			double pitchInHz = PitchUnit.absoluteCentToHertz(i + pitchHistogramMinimum);
 			for(int j = 0 ; j < accumulator[i]/300 ; j++){
 				annotations.add(new Annotation(rnd.nextInt(lengthInMS)/1000.0,pitchInHz,mode));
 			}

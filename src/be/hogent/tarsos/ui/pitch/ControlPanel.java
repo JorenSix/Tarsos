@@ -18,6 +18,9 @@ import javax.swing.JPanel;
 
 import be.hogent.tarsos.sampled.BlockingAudioPlayer;
 import be.hogent.tarsos.sampled.pitch.Annotation;
+import be.hogent.tarsos.sampled.pitch.AnnotationListener;
+import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
+import be.hogent.tarsos.sampled.pitch.AnnotationSelection;
 import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;

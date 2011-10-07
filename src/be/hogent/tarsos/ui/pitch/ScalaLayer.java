@@ -60,6 +60,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 			editor = new ScaleEditor(mouseDrag, this, parent);
 			component.addMouseListener(editor);
 			component.addMouseMotionListener(editor);
+			component.addKeyListener(editor);
 		}
 
 	}
@@ -83,10 +84,14 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		public void mouseDragged(MouseEvent arg0) {
 
 		}
+		
+
 
 		public void mouseMoved(MouseEvent e) {
 
 			if (e.isAltDown() || e.isAltGraphDown()) {
+				//request focus for the key listener to work...
+				parent.requestFocus();
 				// add new element
 				if (movingElement != -1.0) {
 					int index = -1;
@@ -115,6 +120,8 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 				parent.repaint();
 				layer.scaleChangedPublisher.scaleChanged(layer.scale, true, false);
 			} else if (e.isControlDown()) {
+				//request focus for the key listener to work...
+				parent.requestFocus();
 				// move the closest element
 				if (movingElement == -1.0) {
 					int index = closestIndex(mouseDrag.getCents(e, 1200.0));
@@ -174,7 +181,23 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		}
 
 		public void keyTyped(KeyEvent arg0) {
-			LOG.info(arg0.getKeyChar() + "");
+			boolean elementSelected = movingElement != -1.0;
+			boolean deleteKeyPressed = (arg0.getKeyChar() == 'd' || arg0.getKeyCode() == KeyEvent.VK_DELETE || arg0.getKeyChar() == 127 );
+			if( elementSelected && deleteKeyPressed){
+				double[] newScale = new double[layer.scale.length-1];
+				
+				int j = 0;
+				for (int i = 0; i < layer.scale.length;i++) {
+					if (layer.scale[i] != movingElement) {
+						newScale[j] = layer.scale[i];  
+						j++;
+					}
+				}
+				Arrays.sort(newScale);
+				layer.scale = newScale;				
+				layer.scaleChangedPublisher.scaleChanged(layer.scale, false, false);
+				movingElement = -1.0;
+			}
 		}
 	}
 
@@ -230,9 +253,5 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 	public void setXOffset(final double xOffset) {
 		this.mouseDrag.setXOffset(xOffset);
 		parent.repaint();
-	}
-
-	public Component ui() {
-		throw new NullPointerException("No ui for scala layer");
 	}
 }

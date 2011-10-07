@@ -27,8 +27,8 @@ import javax.swing.SwingUtilities;
 
 import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.AudioProcessor;
+import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
-import be.hogent.tarsos.ui.pitch.AnnotationPublisher;
 import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
 import be.hogent.tarsos.ui.pitch.ControlPanel;
 import be.hogent.tarsos.ui.pitch.Frame;

@@ -34,16 +34,16 @@ public final class Pitch {
 		double value = 0.0;
 		switch (unit) {
 		case ABSOLUTE_CENTS:
-			value = PitchConverter.hertzToAbsoluteCent(pitchInHertz);
+			value = PitchUnit.hertzToAbsoluteCent(pitchInHertz);
 			break;
 		case RELATIVE_CENTS:
-			value = PitchConverter.hertzToRelativeCent(pitchInHertz);
+			value = PitchUnit.hertzToRelativeCent(pitchInHertz);
 			break;
 		case MIDI_KEY:
-			value = PitchConverter.hertzToMidiKey(pitchInHertz);
+			value = PitchUnit.hertzToMidiKey(pitchInHertz);
 			break;
 		case MIDI_CENT:
-			value = PitchConverter.hertzToMidiCent(pitchInHertz);
+			value = PitchUnit.hertzToMidiCent(pitchInHertz);
 			break;
 		case HERTZ:
 			value = pitchInHertz;
@@ -81,7 +81,7 @@ public final class Pitch {
 		// The x is replaced by the octave index
 		final String[] noteNames = { "Cx", "C#x/Dbx", "Dx", "D#x/Ebx", "Ex", "Fx", "F#x/Gbx", "Gx",
 				"G#x/Abx", "Ax", "A#x/Bbx", "Bx", };
-		final int midiKey = PitchConverter.hertzToMidiKey(pitchInHertz);
+		final int midiKey = PitchUnit.hertzToMidiKey(pitchInHertz);
 		final int noteIndex = midiKey % 12;
 		final int octaveIndex = octaveIndex();
 		name = noteNames[noteIndex].replace("x", Integer.toString(octaveIndex));
@@ -122,16 +122,16 @@ public final class Pitch {
 		double hertzValue = Double.MAX_VALUE;
 		switch (unit) {
 		case ABSOLUTE_CENTS:
-			hertzValue = PitchConverter.absoluteCentToHertz(value);
+			hertzValue = PitchUnit.absoluteCentToHertz(value);
 			break;
 		case RELATIVE_CENTS:
 			throw new IllegalArgumentException("Cannot convert relative cent value to absolute "
 					+ "frequency. Pitch object creation failed.");
 		case MIDI_KEY:
-			hertzValue = PitchConverter.midiKeyToHertz((int) value);
+			hertzValue = PitchUnit.midiKeyToHertz((int) value);
 			break;
 		case MIDI_CENT:
-			hertzValue = PitchConverter.midiCentToHertz(value);
+			hertzValue = PitchUnit.midiCentToHertz(value);
 			break;
 		case HERTZ:
 			hertzValue = value;

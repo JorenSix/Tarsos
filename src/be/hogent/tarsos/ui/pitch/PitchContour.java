@@ -20,8 +20,10 @@ import ptolemy.plot.Plot;
 import ptolemy.plot.PlotPoint;
 import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.sampled.pitch.Annotation;
+import be.hogent.tarsos.sampled.pitch.AnnotationListener;
+import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
+import be.hogent.tarsos.sampled.pitch.AnnotationSelection;
 import be.hogent.tarsos.sampled.pitch.Pitch;
-import be.hogent.tarsos.sampled.pitch.PitchConverter;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.util.AudioFile;
@@ -62,8 +64,8 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 			for (int octave = 0; octave < octaves; octave++) {
 				for (double pitchClass : scale) {
 					final double tickValue = Math.round(pitchClass + 1200 * octave);
-					final double hertzValue = PitchConverter.absoluteCentToHertz(tickValue);
-					final double axisValue = Math.round(pitchUnit.convertFromHertz(hertzValue));
+					final double hertzValue = PitchUnit.absoluteCentToHertz(tickValue);
+					final double axisValue = Math.round(pitchUnit.convert(hertzValue,PitchUnit.HERTZ));
 					final double tickPosition;
 					// if the y axis is logarithmic then
 					// set the marker at the correct position

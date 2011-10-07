@@ -14,7 +14,7 @@ public final class Yin implements PurePitchDetector {
 	 * The default YIN threshold value. Should be around 0.10~0.15. See YIN
 	 * paper for more information.
 	 */
-	private static final double DEFAULT_THRESHOLD = 0.20;
+	private static final double DEFAULT_THRESHOLD = 0.10;
 
 	/**
 	 * The default size of an audio buffer (in samples).

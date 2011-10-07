@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import be.hogent.tarsos.sampled.pitch.PitchConverter;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 
 /**
@@ -164,8 +164,8 @@ public final class ScalaFile {
 			} else {
 				quotient = 1;
 			}
-			final double absCentDenom = PitchConverter.hertzToAbsoluteCent(denominator);
-			final double absCentQuotient = PitchConverter.hertzToAbsoluteCent(quotient);
+			final double absCentDenom = PitchUnit.hertzToAbsoluteCent(denominator);
+			final double absCentQuotient = PitchUnit.hertzToAbsoluteCent(quotient);
 			parsedPitch = Math.abs(absCentDenom - absCentQuotient);
 		} else {
 			parsedPitch = Double.parseDouble(row);

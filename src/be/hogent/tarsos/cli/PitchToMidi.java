@@ -33,7 +33,6 @@ import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.sampled.AudioDispatcher;
 import be.hogent.tarsos.sampled.AudioProcessor;
 import be.hogent.tarsos.sampled.pitch.Pitch;
-import be.hogent.tarsos.sampled.pitch.PitchConverter;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.sampled.pitch.PurePitchDetector;
 import be.hogent.tarsos.sampled.pitch.Yin;
@@ -438,13 +437,13 @@ public class PitchToMidi extends AbstractTarsosApp {
 
 		public void processOverlapping(final float[] audioBuffer, final byte[] audioByteBuffer) {
 			final float pitch = pure.getPitch(audioBuffer);
-			final double midiCentValue = PitchConverter.hertzToMidiCent(pitch);
+			final double midiCentValue = PitchUnit.hertzToMidiCent(pitch);
 			final int midiKey = (int) midiCentValue;
 			// 'musical' pitch detected ?
 			if (Math.abs(midiCentValue - midiKey) < 0.3 && midiCentValue < 128 && midiCentValue >= 0) {
 				final String lastDetectedNote = "Name: "
 						+ Pitch.getInstance(PitchUnit.HERTZ, pitch).noteName() + "\t Frequency: "
-						+ (int) pitch + "Hz \t" + " MIDI note:" + PitchConverter.hertzToMidiCent(pitch);
+						+ (int) pitch + "Hz \t" + " MIDI note:" + PitchUnit.hertzToMidiCent(pitch);
 				Tarsos.println(lastDetectedNote);
 				// SPL is defined in db: 0 db = max => 128-SPL gives a MIDI
 				// velocity

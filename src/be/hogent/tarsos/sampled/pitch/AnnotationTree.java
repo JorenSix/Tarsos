@@ -3,7 +3,6 @@ package be.hogent.tarsos.sampled.pitch;
 import java.util.List;
 import java.util.logging.Logger;
 
-import be.hogent.tarsos.ui.pitch.AnnotationSelection;
 import be.hogent.tarsos.util.StopWatch;
 import edu.wlu.cs.levy.CG.KDTree;
 import edu.wlu.cs.levy.CG.KeyDuplicateException;

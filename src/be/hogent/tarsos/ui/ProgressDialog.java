@@ -5,6 +5,8 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -26,8 +28,9 @@ public class ProgressDialog extends JDialog {
 	private final List<BackgroundTask> runningTasks;
 	
 
-	public ProgressDialog(final Frame parent,String title,BackgroundTask transcodingTask,List<BackgroundTask> detectorQueue) {
+	public ProgressDialog(final Frame parent,String title,BackgroundTask transcodingTask,final List<BackgroundTask> detectorQueue) {
 		super(parent, title, true);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setMinimumSize(new Dimension(400,120));
 		taskQueue = detectorQueue;
 		runningTasks = new ArrayList<BackgroundTask>();
@@ -56,6 +59,17 @@ public class ProgressDialog extends JDialog {
 			getContentPane().add(detectorTask.ui());
 		}
 		transcodingTask.execute();
+		
+		this.addWindowListener(new WindowAdapter() {
+			
+			@Override
+			public void windowClosing(WindowEvent e) {
+				System.out.println("close");
+				for(BackgroundTask detectorTask : detectorQueue){
+					detectorTask.cancel(true);
+				}
+			}
+		});
 	}
 	
 	private BackgroundTask.TaskHandler handler = new BackgroundTask.TaskHandler() {
@@ -86,6 +100,7 @@ public class ProgressDialog extends JDialog {
 		backgroundTask.execute();
 		runningTasks.add(backgroundTask);
 	}
+	
 	private synchronized void stopTask(BackgroundTask backgroundTask) {
 		runningTasks.remove(backgroundTask);
 		if(runningTasks.size()==0){
@@ -116,7 +131,7 @@ public class ProgressDialog extends JDialog {
 					int progress = 0;
 					// Initialize progress property.
 					setProgress(0);
-					while (progress < 100) {
+					while (progress < 100 && !this.isCancelled()) {
 						// Sleep for up to one second.
 						try {
 							Thread.sleep(random.nextInt(500));
@@ -126,6 +141,7 @@ public class ProgressDialog extends JDialog {
 						progress += random.nextInt(10);
 						setProgress(Math.min(progress, 100));
 					}
+					
 					return null;
 				}
 			};

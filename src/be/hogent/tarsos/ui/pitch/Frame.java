@@ -40,6 +40,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
+import org.noos.xing.mydoggy.AggregationPosition;
 import org.noos.xing.mydoggy.Content;
 import org.noos.xing.mydoggy.ContentManager;
 import org.noos.xing.mydoggy.MultiSplitConstraint;
@@ -55,6 +56,8 @@ import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
 import be.hogent.tarsos.sampled.SampledAudioUtilities;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationHandler;
+import be.hogent.tarsos.sampled.pitch.AnnotationListener;
+import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.sampled.pitch.AnnotationTree;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
@@ -98,6 +101,12 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 	private static final Logger LOG = Logger.getLogger(Frame.class.getName());
 
 	private static Frame instance;
+	
+	private final ToolWindowManager toolWindowManager;
+
+	private AudioFile audioFile;
+
+	private double[] scale;
 
 	public static Frame getInstance() {
 		if (instance == null) {
@@ -106,11 +115,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		return instance;
 	}
 
-	private final ToolWindowManager toolWindowManager;
 
-	private AudioFile audioFile;
-
-	private double[] scale;
 
 	/**
 	 * Is there processing going on?
@@ -131,7 +136,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 		setSize(INITIAL_WIDTH, INITIAL_HEIGHT);
-		// setMinimumSize(new Dimension( , INITIAL_HEIGHT));
+		//setMinimumSize(new Dimension(INITIAL_WIDTH , INITIAL_HEIGHT));
 		// center
 		setLocationRelativeTo(null);
 		setProgramIcon();
@@ -153,7 +158,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		JComponent statusBar = makeStatusBar();
 
 		final PitchClassHistogramPanel pitchClassHistogramPanel = new PitchClassHistogramPanel(new PitchClassHistogram(), this);
-		final PitchClassHistogramLayer ambitusPanel = new PitchClassHistogramLayer(new PitchHistogram(), this);
+		final PitchClassHistogramPanel ambitusPanel = new PitchClassHistogramPanel(new PitchHistogram(), this);
 		final PitchContour pitchContourPanel = new PitchContour();
 		final PitchContour regression = new PitchContour();
 		final IntervalTable intervalTable = new IntervalTable();
@@ -161,12 +166,16 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		final ControlPanel controlPanel = new ControlPanel(waveForm);
 		final KeyboardPanel keyboardPanel = new KeyboardPanel();
 		final Menu menu = new Menu();
+		final CommandPanel commandPanel = new CommandPanel();
 
 		// The annotation publisher is not a ui element.
 		final AnnotationPublisher annotationPublisher = AnnotationPublisher.getInstance();
 
 		AudioFileBrowserPanel browser = new AudioFileBrowserPanel(new GridLayout(0, 2));
 		browser.setBackground(Color.WHITE);
+		
+		HistogramData.getPitchClassHistogramInstance().setComponentToRepaint(pitchClassHistogramPanel);
+		HistogramData.getPitchHistogramInstance().setComponentToRepaint(ambitusPanel);
 
 		// patch the scale changed listeners
 		addScaleChangedListener(pitchClassHistogramPanel);
@@ -176,8 +185,12 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		addScaleChangedListener(intervalTable);
 		addScaleChangedListener(keyboardPanel);
 		addScaleChangedListener(menu);
+		addScaleChangedListener(commandPanel);
 
 		// Patch the audio file changed listeners.
+		addAudioFileChangedListener(HistogramData.getPitchClassHistogramInstance());
+		addAudioFileChangedListener(HistogramData.getPitchHistogramInstance());
+		
 		addAudioFileChangedListener(pitchClassHistogramPanel);
 		addAudioFileChangedListener(ambitusPanel);
 		addAudioFileChangedListener(pitchContourPanel);
@@ -186,12 +199,17 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		addAudioFileChangedListener(controlPanel);
 		addAudioFileChangedListener(browser);
 		addAudioFileChangedListener(menu);
+		addAudioFileChangedListener(commandPanel);
 
 		// Patch the annotation listeners
+		annotationPublisher.addListener(HistogramData.getPitchClassHistogramInstance());
+		annotationPublisher.addListener(HistogramData.getPitchHistogramInstance());
+		
 		annotationPublisher.addListener(pitchClassHistogramPanel);
 		annotationPublisher.addListener(ambitusPanel);
 		annotationPublisher.addListener(pitchContourPanel);
 		annotationPublisher.addListener(controlPanel);
+		annotationPublisher.addListener(commandPanel);
 		annotationPublisher.addListener(this);
 
 		// Initizalize pitch contour if in Tarsos Live Mode
@@ -222,11 +240,10 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		content.setMinimized(false);
 
 		MultiSplitConstraint constraint = new MultiSplitConstraint(content, 1);
-		content = contentManager.addContent("Configuration", "Configuration", null, configurationPanel, null,
-				constraint);
+		content = contentManager.addContent("Configuration", "Configuration", null, configurationPanel, null, constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
-
+		
 		constraint = new MultiSplitConstraint(content, 2);
 		content = contentManager.addContent("Pitch Histogram", "Pitch Histogram", null, ambitusPanel, null, constraint);
 		setDefaultTabbedContentOptions(content);
@@ -237,7 +254,12 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 		
-		content = contentManager.addContent("Controls", "Controls", null, controlPanel);
+		constraint = new MultiSplitConstraint(AggregationPosition.RIGHT);
+		content = contentManager.addContent("Commands", "Commands", null, commandPanel, null,constraint);
+		setDefaultTabbedContentOptions(content);
+		content.setMinimized(false);
+		
+		content = contentManager.addContent("Waveform", "Waveform", null, controlPanel);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(false);
 		
@@ -250,10 +272,10 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		content = contentManager.addContent("Keyboard", "Keyboard", null, keyboardPanel, null);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
-
-		toolWindowManager.registerToolWindow("Help", "Help", null, helpPanel, ToolWindowAnchor.RIGHT);
+		
 		//Disable the browser for now.
 		//toolWindowManager.registerToolWindow("Browser", "Browser", null, browser, ToolWindowAnchor.RIGHT);
+		toolWindowManager.registerToolWindow("Help", "Help", null, helpPanel, ToolWindowAnchor.BOTTOM);
 		toolWindowManager.registerToolWindow("Logging", "Logging", null, logPanel, ToolWindowAnchor.BOTTOM);
 
 		// Make all tools available
@@ -266,7 +288,37 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		setJMenuBar(menu);
 		
 		setupChangeInPitchDetectors();
+		
+		
+		
+		//set initial scale:
+		scaleChanged(ScalaFile.westernTuning().getPitches(), false, false);
+		
+		//restoreWorkspace();
 	}
+	
+	/*
+	private void storeWorkspace(){
+		try {
+		    FileOutputStream output = new FileOutputStream("workspace.xml");
+		    toolWindowManager.getPersistenceDelegate().save(output);
+		    output.close();
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+	}
+	
+	private void restoreWorkspace(){
+		PersistenceDelegate pstDelegate = toolWindowManager.getPersistenceDelegate();
+		try {
+		    FileInputStream inputStream = new FileInputStream("workspace.xml");
+		    pstDelegate.apply(inputStream);
+		    inputStream.close();
+		} catch (Exception e1) {
+		    e1.printStackTrace();
+		}
+	}
+	*/
 
 	private void setupChangeInPitchDetectors() {
 		//react to change in pitch detectors
@@ -280,6 +332,8 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		});
 		
 	}
+	
+	
 
 	private void checkTarsosLiveMode() {
 		if (Configuration.getBoolean(ConfKey.tarsos_live)) {
@@ -610,7 +664,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 			
 			setProgress(0);
 			// So progress can be updated in this thread, every 30ms.
-			while (t.isAlive()) {
+			while (t.isAlive() && !isCancelled()) {
 				try {
 					if(lengthIsDetermined()){
 						setProgress((int) (pitchDetector.progress() * 100));
@@ -621,7 +675,11 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 				} catch (InterruptedException e) {
 				}
 			}
-			setProgress(100);
+			if(isCancelled()){
+				t.interrupt();
+			} else {
+				setProgress(100);
+			}
 			return null;
 		}
 

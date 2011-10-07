@@ -15,11 +15,11 @@
     vamp:block_size "2048"^^xsd:int ; 
     vamp:parameter_binding [
         vamp:parameter [ vamp:identifier "maxfreq" ] ;
-        vamp:value "8000.00"^^xsd:float ;
+        vamp:value "10000.00"^^xsd:float ;
     ] ;
     vamp:parameter_binding [
         vamp:parameter [ vamp:identifier "minfreq" ] ;
-        vamp:value "40.00"^^xsd:float ;
+        vamp:value "30.00"^^xsd:float ;
     ] ;
     vamp:parameter_binding [
         vamp:parameter [ vamp:identifier "pitchtype" ] ;

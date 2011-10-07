@@ -3,7 +3,6 @@
 package be.hogent.tarsos.ui.pitch;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -22,6 +21,9 @@ public final class KDELayer implements Layer, ScaleChangedListener, AudioFileCha
 	private final MouseDragListener mouseDrag;
 	private final double[] values;
 	private final float delta;
+	
+	private double[] scale;
+	private AudioFile audioFile;
 
 	/**
 	 * Log messages.
@@ -84,9 +86,6 @@ public final class KDELayer implements Layer, ScaleChangedListener, AudioFileCha
 		return mouseDrag.calculateXOffset();
 	}
 
-	double[] scale;
-	AudioFile audioFile;
-
 	public void scaleChanged(final double[] newScale, final boolean isChanging, boolean shiftHisto) {
 		if (!isChanging) {
 			scale = newScale;
@@ -96,14 +95,8 @@ public final class KDELayer implements Layer, ScaleChangedListener, AudioFileCha
 	public void audioFileChanged(final AudioFile newAudioFile) {
 		audioFile = newAudioFile;
 	}
-
-	public Component ui() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	
 	public double[] getValues() {
 		return values;
 	}
-
 }

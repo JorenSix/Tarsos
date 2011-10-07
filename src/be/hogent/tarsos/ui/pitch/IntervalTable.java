@@ -15,7 +15,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import be.hogent.tarsos.midi.TarsosSynth;
-import be.hogent.tarsos.sampled.pitch.PitchConverter;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.util.ScalaFile;
 
 public final class IntervalTable extends JTable implements ScaleChangedListener {
@@ -47,7 +47,7 @@ public final class IntervalTable extends JTable implements ScaleChangedListener 
 		int realColumnIndex = convertColumnIndexToModel(colIndex);
 
 		if (getValueAt(rowIndex, realColumnIndex) != null) {
-			tip = PitchConverter.closestRatio((Long) getValueAt(rowIndex, realColumnIndex));
+			tip = PitchUnit.closestRatio((Long) getValueAt(rowIndex, realColumnIndex));
 		}
 		return tip;
 	}

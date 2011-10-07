@@ -24,7 +24,7 @@ import javax.swing.JPanel;
 
 import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.midi.MidiCommon;
-import be.hogent.tarsos.sampled.pitch.PitchConverter;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.util.FFT;
 
 import com.sun.media.sound.AudioFloatInputStream;
@@ -124,9 +124,9 @@ public final class Spectrogram extends JComponent {
         if (frequency != 0 && frequency > minFrequency && frequency < maxFrequency) {
             double binEstimate = 0;
             if (logaritmic) {
-                final double minCent = PitchConverter.hertzToAbsoluteCent(minFrequency);
-                final double maxCent = PitchConverter.hertzToAbsoluteCent(maxFrequency);
-                final double absCent = PitchConverter.hertzToAbsoluteCent(frequency * 2);
+                final double minCent = PitchUnit.hertzToAbsoluteCent(minFrequency);
+                final double maxCent = PitchUnit.hertzToAbsoluteCent(maxFrequency);
+                final double absCent = PitchUnit.hertzToAbsoluteCent(frequency * 2);
                 binEstimate = (absCent - minCent) / maxCent * H;
             } else {
                 binEstimate = (frequency - minFrequency) / maxFrequency * H;
@@ -147,9 +147,8 @@ public final class Spectrogram extends JComponent {
         double maxAmplitude = 0.0;
         int pitchIndex = -1;
 
-        final boolean bufferRead = false; // Yin.slideBuffer(afis,
-        // audioDataBuffer,
-        // audioDataBuffer.length - 1024);
+        final boolean bufferRead = false; 
+        // Yin.slideBuffer(afis,audioDataBuffer,audioDataBuffer.length - 1024);
         if (bufferRead) {
 
             final float pitch = 0.0f;
@@ -211,8 +210,8 @@ public final class Spectrogram extends JComponent {
         frame.getContentPane().add(panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setUndecorated(true);
-        // frame.pack();
+        //frame.setUndecorated(true);
+        frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }

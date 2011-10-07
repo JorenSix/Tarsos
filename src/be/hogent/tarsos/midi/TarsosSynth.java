@@ -20,7 +20,7 @@ import javax.sound.midi.Synthesizer;
 
 import ptolemy.kernel.util.InvalidStateException;
 import be.hogent.tarsos.midi.MidiCommon.MoreMidiInfo;
-import be.hogent.tarsos.sampled.pitch.PitchConverter;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.Configuration.ConfigChangeListener;
@@ -142,8 +142,8 @@ public class TarsosSynth implements ConfigChangeListener {
 	 *            The velocity of the note on message.
 	 */
 	public void playAbsoluteCents(final double absoluteCent, final int velocity) {
-			final double pitchInHertz = PitchConverter.absoluteCentToHertz(absoluteCent);
-			final double pitchInMidiCent = PitchConverter.hertzToMidiCent(pitchInHertz);
+			final double pitchInHertz = PitchUnit.absoluteCentToHertz(absoluteCent);
+			final double pitchInMidiCent = PitchUnit.hertzToMidiCent(pitchInHertz);
 			final int pitchInMidiKey = (int) Math.round(pitchInMidiCent);
 			final double deviationInCents = 100 * (pitchInMidiCent - pitchInMidiKey);
 						
