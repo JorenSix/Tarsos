@@ -24,14 +24,14 @@ public class HistogramData  implements AudioFileChangedListener, AnnotationListe
 	private static final int AMBITUS_START = Configuration.getInt(ConfKey.pitch_histogram_start);
 	
 	
-	public static HistogramData getPitchHistogramInstance(){
+	public static synchronized HistogramData getPitchHistogramInstance(){
 		if(pitchHistogramInstance == null){
 			pitchHistogramInstance = new HistogramData(false);
 		}
 		return pitchHistogramInstance;
 	}
 	
-	public static HistogramData getPitchClassHistogramInstance(){
+	public static synchronized HistogramData getPitchClassHistogramInstance(){
 		if(pitchClassHistogramInstance == null){
 			pitchClassHistogramInstance = new HistogramData(true);
 		}
@@ -133,10 +133,5 @@ public class HistogramData  implements AudioFileChangedListener, AnnotationListe
 		// TODO Auto-generated method stub
 		
 	}
-
-	
-
-
-	
 	
 }

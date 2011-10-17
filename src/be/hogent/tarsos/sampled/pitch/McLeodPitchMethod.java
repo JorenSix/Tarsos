@@ -45,13 +45,13 @@ public final class McLeodPitchMethod implements PurePitchDetector {
 	 * The expected size of an audio buffer (in samples).
 	 * This makes the minimum detectable frequency 2 * 44100 Hz / 3072  =  29 Hz
 	 */
-	public static final int DEFAULT_BUFFER_SIZE = 3072;
+	public static final int DEFAULT_BUFFER_SIZE = 1024;
 
 	/**
 	 * Overlap defines how much two audio buffers following each other should
 	 * overlap (in samples). 75% overlap is advised in the MPM article.
 	 */
-	public static final int DEFAULT_OVERLAP = 2304;
+	public static final int DEFAULT_OVERLAP = 512;
 
 	/**
 	 * Defines the relative size the chosen peak (pitch) has. 0.93 means: choose
