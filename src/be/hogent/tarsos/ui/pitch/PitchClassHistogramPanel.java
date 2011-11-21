@@ -67,6 +67,8 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 				((HistogramLayer) layer).audioFileChanged(newAudioFile);
 			}
 		}
+		//reset the list of which histograms are drawn.
+		drawnModes.clear();
 	}
 
 	@Override
