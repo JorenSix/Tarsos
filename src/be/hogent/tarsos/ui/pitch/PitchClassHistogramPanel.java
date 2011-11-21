@@ -6,7 +6,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +23,6 @@ import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
-import be.hogent.tarsos.util.histogram.PitchHistogram;
 
 public final class PitchClassHistogramPanel extends JPanel implements ScaleChangedListener, AudioFileChangedListener,
 		AnnotationListener {

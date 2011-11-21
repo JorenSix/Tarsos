@@ -67,6 +67,11 @@ public enum PitchDetectionMode {
 	 * The pure java YIN implementation of Tarsos.
 	 */
 	TARSOS_YIN("tarsos_yin"),
+	
+	/**
+	 * The pure java YIN implementation of Tarsos, with parameters set for speed (less accurate).
+	 */
+	TARSOS_FAST_YIN("tarsos_fast_yin"),
 
 	/**
 	 * The pure java MPM (Tartini pitch tracker) implementation of Tarsos.
@@ -113,6 +118,9 @@ public enum PitchDetectionMode {
 			detector = new IPEMPitchDetection(audioFile, this);
 			break;
 		case TARSOS_YIN:
+			detector = new TarsosPitchDetection(audioFile, this);
+			break;
+		case TARSOS_FAST_YIN:
 			detector = new TarsosPitchDetection(audioFile, this);
 			break;
 		case TARSOS_MPM:

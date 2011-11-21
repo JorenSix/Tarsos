@@ -67,13 +67,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 	}
 
 	public String getName() {
-		final String name;
-		if (PitchDetectionMode.TARSOS_MPM == detectionMode) {
-			name = "tarsos_mpm";
-		} else {
-			name = "tarsos_yin";
-		}
-		return name;
+		return detectionMode.getParametername();
 	}
 
 	public List<Annotation> getAnnotations() {
@@ -141,6 +135,10 @@ public final class TarsosPitchDetection implements PitchDetector {
 			pureDetector = new McLeodPitchMethod(sampleRate);
 			bufferSize = McLeodPitchMethod.DEFAULT_BUFFER_SIZE;
 			overlapSize = McLeodPitchMethod.DEFAULT_OVERLAP;
+		} else if (PitchDetectionMode.TARSOS_FAST_YIN == detectionMode) {
+				pureDetector = new Yin(sampleRate, 256,0.75);
+				bufferSize =  256;
+				overlapSize = 0;
 		} else {
 			pureDetector = new Yin(sampleRate, Yin.DEFAULT_BUFFER_SIZE);
 			bufferSize = Yin.DEFAULT_BUFFER_SIZE;

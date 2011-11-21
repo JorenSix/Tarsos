@@ -224,7 +224,23 @@ public final class Configuration {
 	public static void set(final ConfKey key, final String value) {
 		if (value == null) {
 			return;
-		}			
+		}
+		if( userPreferences == null){
+			synchronized (Configuration.class) {
+				if (userPreferences == null) {
+					userPreferences = Preferences.userNodeForPackage(Configuration.class);
+					for (final ConfKey configKey : ConfKey.values()) {
+						// If there is no configuration for this user, write the
+						// default
+						// configuration
+						if (userPreferences.get(configKey.name(), null) == null) {
+							final String defaultConfigVal = defaultConfProps.getProperty(configKey.name());
+							set(configKey, defaultConfigVal);
+						}
+					}
+				}
+			}
+		}
 		try {
 			final String actualValue = sanitizeConfiguredValue(key.name(), value);
 			userPreferences.put(key.name(), actualValue);
