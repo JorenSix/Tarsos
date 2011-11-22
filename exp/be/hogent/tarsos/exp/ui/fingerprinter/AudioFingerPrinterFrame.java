@@ -236,9 +236,14 @@ public class AudioFingerPrinterFrame extends JFrame implements  ActionListener {
 	
 	
 	public void filesDropped(File[] files,boolean isNeedle){
+		Set<File> fileSet = isNeedle ? needleFileSet : hayStackFileSet;
 		for (File file : files) {
+			if(file.isDirectory()){
+				for(String fileInDir : FileUtils.glob(file.getAbsolutePath(), Configuration.get(ConfKey.audio_file_name_pattern), true)){
+					fileSet.add(new File(fileInDir));
+				}
+			}
 			if(FileUtils.isAudioFile(file)){
-				Set<File> fileSet = isNeedle ? needleFileSet : hayStackFileSet;
 				fileSet.add(file);
 			}	
 		}
