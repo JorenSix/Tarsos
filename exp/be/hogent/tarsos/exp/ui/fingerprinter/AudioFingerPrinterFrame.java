@@ -15,12 +15,9 @@ import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
@@ -37,7 +34,6 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.exp.ui.fingerprinter.AudioFingerprinter.AudioFingerprintMatch;
 import be.hogent.tarsos.ui.pitch.Frame;
 import be.hogent.tarsos.util.ConfKey;
@@ -135,23 +131,23 @@ public class AudioFingerPrinterFrame extends JFrame implements  ActionListener {
 	}
 	
 	private Listener neeldeFileDropListener = new Listener(){
-		@Override
+		
 		public void filesDropped(File[] files) {
 			AudioFingerPrinterFrame.this.filesDropped(files,true);
 		}
 	};
 	
 	private Listener hayStackFileDropListener = new Listener(){
-		@Override
+		
 		public void filesDropped(File[] files) {
 			AudioFingerPrinterFrame.this.filesDropped(files,false);
 		}
 	};
 	
-	@Override
+	
 	public void actionPerformed(ActionEvent arg0) {
 		Runnable worker = new Runnable(){
-			@Override
+			
 			public void run() {
 				Iterator<File> iterator = needleFileSet.iterator();
 				int numberOfMatches = needleFileSet.size() * hayStackFileSet.size();
@@ -173,7 +169,7 @@ public class AudioFingerPrinterFrame extends JFrame implements  ActionListener {
 					}
 				}
 				SwingUtilities.invokeLater(new Runnable() {
-					@Override
+					
 					public void run() {
 						setWaitState(false);
 					}
@@ -224,7 +220,6 @@ public class AudioFingerPrinterFrame extends JFrame implements  ActionListener {
 	
 	private void appendProgress(final String message){
 		SwingUtilities.invokeLater(new Runnable(){
-			@Override
 			public void run() {
 				String currentText = progressLabel.getText();
 				String newText = currentText.replace("</html>",message + "<br></html>");
@@ -264,35 +259,7 @@ public class AudioFingerPrinterFrame extends JFrame implements  ActionListener {
 		searchButton.setEnabled(hayStackFileSet.size() > 0 && needleFileSet.size() > 0);
 	}
 
-	/**
-	 * Properties file that defines the logging behavior.
-	 */
-	private static final String LOG_PROPS = "/be/hogent/tarsos/util/logging.properties";
-	public static void main(final String[] args) {
-		
-		Logger.getLogger(AudioFingerprinter.class.getName());
-		try {
-			final InputStream stream = Tarsos.class.getResourceAsStream(LOG_PROPS);
-			LogManager.getLogManager().readConfiguration(stream);
-			// a configured logger
-			Logger.getLogger(Tarsos.class.getName());
-		} catch (final SecurityException e) {
-			//ignore
-		} catch (final IOException e) {
-			//ignore
-		}
-		
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {					
-					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				} catch (Exception e) {
-					//ignore
-				}
-				new AudioFingerPrinterFrame();
-			}
-		});		
-	}
+	
 	
 	/**
 	 * A panel with a fancy header: Fancy!!
@@ -332,7 +299,7 @@ public class AudioFingerPrinterFrame extends JFrame implements  ActionListener {
 				 */
 				private static final long serialVersionUID = 1L;
 
-				@Override
+				
 				public void paintComponent(Graphics g) {
 					super.paintComponent(g);
 					if (!isOpaque()) {

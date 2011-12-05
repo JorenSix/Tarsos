@@ -1,18 +1,28 @@
 package be.hogent.tarsos.exp.ui.fingerprinter;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import javax.swing.UIManager;
+
+import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.KernelDensityEstimate;
 import be.hogent.tarsos.util.histogram.HistogramFactory;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
@@ -110,9 +120,104 @@ public class AudioFingerprinter {
 			return value > 0.98;
 		}
 
-		@Override
 		public int compareTo(AudioFingerprintMatch o) {
 			return Double.valueOf(value).compareTo(Double.valueOf(o.value));
+		}
+	}
+	
+
+	public static void main(final String[] args) {
+		if(args.length == 0){
+			startUI();
+		}else if (args.length==1){
+			printHelp("");
+		}else{
+			startCLI(args);
+		}
+	}
+
+	/**
+	 * Properties file that defines the logging behavior.
+	 */
+	private static final String LOG_PROPS = "/be/hogent/tarsos/util/logging.properties";
+	private static void startUI(){
+		Logger.getLogger(AudioFingerprinter.class.getName());
+		try {
+			final InputStream stream = Tarsos.class.getResourceAsStream(LOG_PROPS);
+			LogManager.getLogManager().readConfiguration(stream);
+			// a configured logger
+			Logger.getLogger(Tarsos.class.getName());
+		} catch (final SecurityException e) {
+			//ignore
+		} catch (final IOException e) {
+			//ignore
+		}
+		
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				try {					
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				} catch (Exception e) {
+					//ignore
+				}
+				new AudioFingerPrinterFrame();
+			}
+		});	
+	}
+	
+	private static void printHelp(String prefix) {
+		String message = "USAGE-----------------------------------------------------\n\n" +
+				"java -jar AudioFingerPrinter.jar needle haystack [haystack] [haystack] ... \n\n " +
+				"To use the audio fingerprinter provide one audio file (the needle)\n" +
+				"and one or more audiofiles or directories (with audio files in them) as haystack.\n\n" +
+				"Beware the haystack directories are traversed recursively.";
+	    if(prefix != null && !prefix.isEmpty()){
+	    	message = prefix + "\n\n" + message;
+	    }
+		System.err.println(message);
+		System.exit(-1);
+	}
+	
+	private static void startCLI(String... args) {
+	
+		if(!FileUtils.exists(args[0]) && FileUtils.isAudioFile(new File(args[0]))){
+			printHelp("The needle (" + args[0] + ") was not found or is not recognized audio file. Please provide an existing audio file.");
+		}
+		
+		File needle = new File(args[0]);
+		for(int i = 1 ; i < args.length ; i++){
+			if(!FileUtils.exists(args[i]) || (!FileUtils.isDirectory(args[i]) && !FileUtils.isAudioFile(new File(args[i])))){
+				printHelp("Each haystack should be a valid directory or audio file. "+ args[i] + " is not. Please provide a valid directory or audio file.");
+			}
+		}
+		
+		Set<File> haystack = new HashSet<File>();
+		for(int i = 1 ; i < args.length ; i++){
+			File file = new File(args[i]);
+			//Recursively traverse directory
+			if(file.isDirectory()){
+				for(String fileInDir : FileUtils.glob(file.getAbsolutePath(), Configuration.get(ConfKey.audio_file_name_pattern), true)){
+					haystack.add(new File(fileInDir));
+				}
+			// or else add the file	
+			} else if(FileUtils.isAudioFile(file)){
+				haystack.add(file);
+			}
+		}
+		doMatch(haystack,needle);
+	}
+	
+	private static void doMatch( final Set<File> haystack,  final File needle){
+		AudioFingerprinter afp = new AudioFingerprinter(haystack, needle);
+		AudioFingerprintMatch afpm = afp.match();
+		if (afpm.isMatch()) {
+			System.out.println(afpm.getMatch().getName()
+					+ " matches (" + Math.round(afpm.getValue() * 100) + "%) with "
+					+ afpm.getOriginal().getName());
+		} else {
+			System.out.println(afpm.getMatch().getName()
+					+ " closest match (" + Math.round(afpm.getValue() * 100) + "%) to "
+					+ afpm.getOriginal().getName());
 		}
 	}
 }
