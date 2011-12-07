@@ -110,7 +110,7 @@ public abstract class VirtualKeyboard extends JComponent implements Receiver {
 
 		addMouseListener(new MouseAdapter() {
 
-			@Override
+			
 			public void mousePressed(final MouseEvent e) {
 				grabFocus();
 				final Point p = e.getPoint();
@@ -118,7 +118,7 @@ public abstract class VirtualKeyboard extends JComponent implements Receiver {
 				sendNoteMessage(currentlyPressedMidiNote, true);
 			}
 
-			@Override
+			
 			public void mouseReleased(final MouseEvent e) {
 				sendNoteMessage(currentlyPressedMidiNote, false);
 				currentlyPressedMidiNote = -1;
@@ -312,7 +312,7 @@ public abstract class VirtualKeyboard extends JComponent implements Receiver {
 		return numberOfKeys / (float) numberOfKeysPerOctave;
 	}
 	
-	@Override
+	
 	public void close() {
 	}
 

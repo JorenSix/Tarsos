@@ -265,7 +265,7 @@ public final class AnnotationPublisher{
 			this.maxCentsDifference = maxCentsDifference;
 		}
 
-		@Override
+		
 		public void filter(final List<Annotation> listToFilter) {
 			for (int i = 0; i < listToFilter.size(); i++) {
 				double annotationPitchClass = listToFilter.get(i).getPitch(
@@ -312,7 +312,7 @@ public final class AnnotationPublisher{
 			this.minDuration = minDuration;
 		}
 
-		@Override
+		
 		public void filter(final List<Annotation> listToFilter) {
 			for(int i = 0 ; i < listToFilter.size(); i++){
 				double iCentsValue = listToFilter.get(i).getPitch(PitchUnit.ABSOLUTE_CENTS);

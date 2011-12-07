@@ -41,11 +41,9 @@ public class ProgressDialog extends JDialog {
 		setLocationRelativeTo(parent);		
 		
 		transcodingTask.addHandler(new BackgroundTask.TaskHandler() {
-			@Override
 			public void taskDone(BackgroundTask backgroundTask) {				
 				startOtherTasks();
 			}
-			@Override
 			public void taskInterrupted(BackgroundTask backgroundTask,Exception e) {
 				//transcoding failed => interrupt the queue
 				setVisible(false);
@@ -73,13 +71,11 @@ public class ProgressDialog extends JDialog {
 	}
 	
 	private BackgroundTask.TaskHandler handler = new BackgroundTask.TaskHandler() {
-		@Override
 		public void taskDone(BackgroundTask backgroundTask) {
 			stopTask(backgroundTask);
 			startNextInQueue();
 		}
 
-		@Override
 		public void taskInterrupted(BackgroundTask backgroundTask,Exception e) {
 			
 		}
@@ -149,7 +145,6 @@ public class ProgressDialog extends JDialog {
 		}
 		
 		button.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				ProgressDialog dialog = new ProgressDialog(frame,"Progress",new BackgroundTask("Transcoding",false){
 					public Void doInBackground()

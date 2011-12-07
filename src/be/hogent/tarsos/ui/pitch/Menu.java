@@ -177,7 +177,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		//remove and add recent file menu if a file is opened
 		//or imported (by drag and drop).
 		Configuration.addListener(new ConfigChangeListener(){
-			@Override
 			public void configurationChanged(ConfKey key) {
 				if(key == ConfKey.file_recent){
 					for(JMenuItem menuItem : recentFilesMenuItems){
@@ -247,7 +246,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		((JCheckBoxMenuItem) item).setSelected(Configuration
 				.getBoolean(ConfKey.tarsos_live));
 		item.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				JCheckBoxMenuItem checkbox = (JCheckBoxMenuItem) arg0
 						.getSource();
@@ -263,7 +261,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		((JCheckBoxMenuItem) item).setSelected(Configuration
 				.getBoolean(ConfKey.reset_on_import));
 		item.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				JCheckBoxMenuItem checkbox = (JCheckBoxMenuItem) arg0
 						.getSource();
@@ -401,14 +398,12 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	}
 	
 	private ActionListener openWebsiteAction = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			BareBonesBrowserLaunch.openURL("http://tarsos.0110.be");				
 		}
 	};
 	
 	private ActionListener saveSelectedDetectorsAction = new ActionListener(){
-		@Override
 		public void actionPerformed(final ActionEvent e) {
 			JCheckBoxMenuItem checkbox = (JCheckBoxMenuItem) e.getSource();
 			boolean selected = checkbox.isSelected();
@@ -426,7 +421,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	};
 
 	private ActionListener showAboutDialogAction = new ActionListener(){
-		@Override
 		public void actionPerformed(final ActionEvent e) {
 			JFrame parent = Frame.getInstance();
 			JOptionPane.showMessageDialog(parent, "Tarsos \n\nDeveloped at University College Ghent – Faculty of Music ");
@@ -434,7 +428,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	};
 	
 	private ActionListener midiInputDeviceChange = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			Configuration.set(ConfKey.midi_input_device,
 					Integer.valueOf(arg0.getActionCommand()));
@@ -442,7 +435,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	};
 	
 	private ActionListener midiInstrumentChange = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			Configuration.set(ConfKey.midi_instrument_index,
 					Integer.valueOf(arg0.getActionCommand()));
@@ -450,7 +442,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	};
 
 	private ActionListener midiOutputDeviceChange = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			Configuration.set(ConfKey.midi_output_device,
 					Integer.valueOf(arg0.getActionCommand()));
@@ -458,7 +449,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	};
 
 	private ActionListener mixerInputDeviceChange = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			Configuration.set(ConfKey.mixer_input_device,
 					Integer.valueOf(arg0.getActionCommand()));
@@ -466,7 +456,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	};
 
 	private ActionListener mixerOutputDeviceChange = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			Configuration.set(ConfKey.mixer_output_device,
 					Integer.valueOf(arg0.getActionCommand()));
@@ -474,19 +463,17 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	};
 
 	private ActionListener exitAction = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			System.exit(0);
 		}
 	};
 	
 	private ActionListener importFileAction = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Import Audio or Scala File";
 			String defaultFileName = null;
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_AND_DIRECTORIES,true,defaultFileName, new ChosenFileHandler() {				
-				@Override
+				
 				public void handleFile(final File chosenFile) {
 					Frame.getInstance().setNewFile(chosenFile);
 				}
@@ -495,7 +482,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	};
 	
 	private ActionListener openRecentFileAction = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			File recentFile = new File(e.getActionCommand());
 			Frame.getInstance().setNewFile(recentFile);
@@ -511,12 +497,10 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	 */
 	
 	private ActionListener exportAnnotations = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Annotations (.csv)";
 			String defaultFileName = audioFile.originalBasename() + "_annotations.csv";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
-				@Override
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
@@ -529,12 +513,10 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		}
 	};	
 	private ActionListener exportSynthesizedAnnotations =  new ActionListener() {
-		@Override
 		public void actionPerformed(final ActionEvent e) {
 			String dialogTitle = "Export synthesized annotations (.wav)";
 			String defaultFileName = audioFile.originalBasename() + "_resynth.wav";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
-				@Override
 				public void handleFile(final File chosenFile) {
 					ToneSequenceBuilder builder = new ToneSequenceBuilder();
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
@@ -572,12 +554,10 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	 */
 	
 	private ActionListener exportPitchHistogram = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Pitch Histogram (.csv)";
 			String defaultFileName = audioFile.originalBasename() + "_pitch_histogram.csv";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
-				@Override
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
@@ -590,7 +570,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	};
 	
 	private ActionListener exportPitchHistogramImage = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			final String extension;
 			if(((JMenuItem) e.getSource()).getText().toLowerCase().contains("png")) {
@@ -601,8 +580,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			String dialogTitle = "Export Pitch Histogram (." + extension + ")";
 			
 			String defaultFileName = audioFile.originalBasename() + "_pitch_histogram." + extension;
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
-				@Override
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
@@ -630,12 +608,10 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	 */
 	
 	private ActionListener exportPitchClassHistogramImage = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Pitch Class Histogram (.png)";
 			String defaultFileName = audioFile.originalBasename() + "_pitch_class_histogram.png";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
-				@Override
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
@@ -657,7 +633,6 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		}
 	};	
 	private ActionListener exportPitchClassHistogramImageWithOctaveDivision = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			final String extension;
 			if(((JMenuItem) e.getSource()).getText().toLowerCase().contains("png")) {
@@ -667,8 +642,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			}
 			String dialogTitle = "Export Pitch Class Histogram (." + extension + ")";
 			String defaultFileName = audioFile.originalBasename() + "_pitch_class_histogram_with_octaves." + extension;
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
-				@Override
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {	
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
@@ -680,12 +654,10 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		}
 	};	
 	private ActionListener exportPitchClassHistogram = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Pitch Class Histogram (.csv)";
 			String defaultFileName = audioFile.originalBasename() + "_pitch_class_histogram.csv";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
-				@Override
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				public void handleFile(final File chosenFile) {
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
@@ -697,12 +669,10 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		}
 	};	
 	private ActionListener exportPitchClassHistogramLatex = new ActionListener() {
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export tikz image for Latex  (.tex)";
 			String defaultFileName = audioFile.originalBasename() + "_pitch_class_histogram.tex";
-			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
-				@Override
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				public void handleFile(final File chosenFile) {
 					String temporaryTarget = new File(FileUtils.temporaryDirectory() , "tikz.tex").getAbsolutePath();
 					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/tikz.te" , temporaryTarget);
@@ -758,12 +728,12 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	 */
 	
 	private ActionListener exportScalaAction = new ActionListener() {
-		@Override
+		
 		public void actionPerformed(final ActionEvent e) {
 			String dialogTitle = "Export Scala File (.scl)";
 			String defaultFileName = audioFile.originalBasename() + ".scl";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
-				@Override
+				
 				public void handleFile(final File chosenFile) {
 					String title = "Tarsos export";
 					if(audioFile != null){
@@ -777,12 +747,12 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	};
 	
 	private ActionListener exportIntervalMatrixLatexAction = new ActionListener() {
-		@Override
+		
 		public void actionPerformed(final ActionEvent e) {
 			String dialogTitle = "Export Interval Matrix (.tex)";
 			String defaultFileName = audioFile.originalBasename() + "_interval_matrix.tex";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {				
-				@Override
+				
 				public void handleFile(final File chosenFile) {
 					String temporaryTarget = new File(FileUtils.temporaryDirectory() , "interval_matrix.tex").getAbsolutePath();
 					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/interval_matrix.te" , temporaryTarget);
@@ -875,14 +845,14 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	}
 	
 	
-	@Override
+	
 	public void scaleChanged(double[] newScale, boolean isChanging, boolean shiftHisto) {
 		if(!isChanging){
 			scale = newScale;
 		}
 	}
 
-	@Override
+	
 	public void audioFileChanged(AudioFile newAudioFile) {
 		audioFile = newAudioFile;		
 	}

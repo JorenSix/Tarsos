@@ -71,7 +71,7 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 		drawnModes.clear();
 	}
 
-	@Override
+	
 	public void paint(final Graphics g) {
 		final Graphics2D graphics = (Graphics2D) g;
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -143,12 +143,12 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 		repaint();
 	}
 
-	@Override
+	
 	public void extractionStarted() {
 		// TODO Auto-generated method stub
 	}
 
-	@Override
+	
 	public void extractionFinished() {
 		// TODO Auto-generated method stub
 		

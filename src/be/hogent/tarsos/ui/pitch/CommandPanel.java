@@ -191,7 +191,6 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		}
 	}
 
-	@Override
 	public void audioFileChanged(AudioFile newAudioFile) {
 		pitchDetectors.clear();
 		rebuildPitchDetectorSelection();
@@ -224,13 +223,13 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		
 	}
 
-	@Override
+
 	public void scaleChanged(double[] newScale, boolean isChanging,
 			boolean shiftHisto) {
 		scale = newScale;		
 	}
 
-	@Override
+
 	public void addAnnotation(Annotation annotation) {
 		PitchDetectionMode key = annotation.getSource();
 		if(!pitchDetectors.contains(key)){
@@ -239,25 +238,25 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		}
 	}
 
-	@Override
+
 	public void clearAnnotations() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
+
 	public void annotationsAdded() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
+
 	public void extractionStarted() {
 		setEnabledForAll(false);
 		
 	}
 
-	@Override
+
 	public void extractionFinished() {
 		
 	}

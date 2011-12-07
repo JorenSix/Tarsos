@@ -85,7 +85,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		final String[] names = { "ipem_pitch_detection.sh", "libsndfile.dll",
 				mode.getParametername() + ".exe" };
 		final String[] paths = new String[names.length];
-		final String dataDirectory = Configuration.get(ConfKey.data_directory);
+		final String dataDirectory = FileUtils.temporaryDirectory();
 		int i = 0;
 		for (final String ipemFile : names) {
 			paths[i++] = FileUtils.combine(dataDirectory, ipemFile);
@@ -105,7 +105,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		String command = null;
 
 		String audioDirectory = file.transcodedDirectory() + "/";
-		String executableDirectory = Configuration.get(ConfKey.data_directory);
+		String executableDirectory = FileUtils.temporaryDirectory();
 
 		if (System.getProperty("os.name").contains("indows")) {
 			audioDirectory = audioDirectory.replace("/", "\\").replace(":\\", "://");
@@ -119,11 +119,18 @@ public final class IPEMPitchDetection implements PitchDetector {
 			}
 			Execute.command(command, null);
 		} else { // on linux use wine's Z-directory
-			audioDirectory = makeWinePath(audioDirectory);
-			outputDirectory = makeWinePath(outputDirectory);
-			String lijstFile = makeWinePath(FileUtils.combine(FileUtils.runtimeDirectory(),"lijst.txt"));
-			String executable = makeWinePath(FileUtils.combine(executableDirectory, name + ".exe"));						
-			command = "wine " + executable  + " " + lijstFile + " " + audioDirectory + " " + outputDirectory + " ";
+			String executable = makeWinePath(FileUtils.combine(executableDirectory, name + ".exe"));		
+			if(mode==PitchDetectionMode.IPEM_ONE){
+				String audioFile = makeWinePath(audioDirectory + transcodedBaseName + ".wav");
+				String outputFile = makeWinePath(csvFileName);
+				command = "wine " + executable  + " " + audioFile + " " + outputFile + " ";
+			}else{
+				String lijstFile = makeWinePath(FileUtils.combine(FileUtils.runtimeDirectory(),"lijst.txt"));
+				audioDirectory = makeWinePath(audioDirectory);
+				outputDirectory = makeWinePath(outputDirectory);
+				command = "wine " + executable  + " " + lijstFile + " " + audioDirectory + " " + outputDirectory + " ";	
+			}
+			
 			String scriptFile = FileUtils.combine(FileUtils.runtimeDirectory(),"ipem.sh");
 			FileUtils.writeFile("#!/bin/bash\n"+command, scriptFile);
 			executeBashScript(new File(scriptFile));
@@ -255,7 +262,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		return this.annotations;
 	}
 
-	@Override
+	
 	public double progress() {
 		return -1;
 	}

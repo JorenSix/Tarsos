@@ -277,7 +277,7 @@ public final class VampPitchDetection implements PitchDetector {
 		return "vamp_" + mode.getParametername();
 	}
 
-	@Override
+	
 	public double progress() {
 		return -1;
 	}

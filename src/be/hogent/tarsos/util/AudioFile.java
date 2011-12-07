@@ -76,7 +76,7 @@ public final class AudioFile {
 		private void initializeCurrentFiles() {
 			String path = Configuration.get(ConfKey.data_directory);
 			File[] children = new File(path).listFiles(new FileFilter() {		
-				@Override
+				
 				public boolean accept(File pathname) {
 					return pathname.isDirectory() && pathname.getName().length() > 17;
 				}
@@ -88,7 +88,7 @@ public final class AudioFile {
 				currentFiles.put(md5, name);
 			}
 		}
-		@Override
+		
 		public void configurationChanged(ConfKey key) {
 			if(key == ConfKey.data_directory){
 				initializeCurrentFiles();
@@ -163,7 +163,15 @@ public final class AudioFile {
 		transcodedPath = FileUtils.combine(transcodedDirectory, fileName);
 		
 		if (AudioTranscoder.transcodingRequired(transcodedPath())) {
-			AudioTranscoder.transcode(filePath, transcodedPath());
+			try{
+				AudioTranscoder.transcode(filePath, transcodedPath());
+			}catch(EncoderException e){
+				//try to continue if the transcoded file exists
+				LOG.warning("Transcoding probably failed: " + e.getMessage());
+				if(!FileUtils.exists(transcodedPath())){
+					throw e;
+				}
+			}
 		}
 		if(!list.containsFile(md5)){
 			list.addFile(baseName, this);
@@ -192,7 +200,7 @@ public final class AudioFile {
 		return this.originalPath;
 	}
 
-	@Override
+	
 	public String toString() {
 		return FileUtils.basename(originalPath);
 	}

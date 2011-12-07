@@ -204,7 +204,7 @@ public final class TarsosPitchDetection implements PitchDetector {
 		this.progress = progress;
 	}
 
-	@Override
+	
 	public double progress() {
 		return progress;
 	}

@@ -34,7 +34,7 @@ public final class PeakDetector {
 	
 	public static final PeakDetectionStrategy LOCALHEIGHTSCORE = new PeakDetectionStrategy() {
 		
-		@Override
+		
 		public List<Peak> detect(Histogram histogram, int windowSize,
 				int thresholdFactor) {
 			// 1. CALCULATE SCORES
@@ -109,7 +109,7 @@ public final class PeakDetector {
 	
 	public static final PeakDetectionStrategy ABSOLUTEHEIGHT = new PeakDetectionStrategy() {
 		
-		@Override
+		
 		public List<Peak> detect(Histogram histogram, int windowSize,
 				int thresholdFactor) {
 			final double threshold = histogram.getMedian() * thresholdFactor / 10;

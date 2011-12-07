@@ -29,23 +29,21 @@ public class ChannelRedirector implements Receiver, Transmitter {
 		sourceTransmitter = source;
 	}
 
-	@Override
+	
 	public Receiver getReceiver() {
 		return targetReceiver;
 	}
 
-	@Override
+	
 	public void setReceiver(Receiver receiver) {
 		
 	}
 
-	@Override
 	public void close() {
 		targetReceiver.close();
 		sourceTransmitter.close();
 	}
 
-	@Override
 	public void send(MidiMessage message, long timeStamp) {
 		final MidiMessage newMessage;
 		if (message instanceof ShortMessage) {

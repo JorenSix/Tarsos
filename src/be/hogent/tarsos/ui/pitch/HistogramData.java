@@ -66,7 +66,7 @@ public class HistogramData  implements AudioFileChangedListener, AnnotationListe
 		componentToRepaint = component;
 	}
 
-	@Override
+
 	public void audioFileChanged(AudioFile newAudioFile) {
 		if (Configuration.getBoolean(ConfKey.reset_on_import)) {
 			clearHistograms();
@@ -83,7 +83,7 @@ public class HistogramData  implements AudioFileChangedListener, AnnotationListe
 		return histos.get(mode);
 	}
 
-	@Override
+
 	public void addAnnotation(Annotation annotation) {
 		double pitchInAbsCents = annotation.getPitch(PitchUnit.ABSOLUTE_CENTS);
 		if (pitchInAbsCents > AMBITUS_START && pitchInAbsCents <= AMBITUS_STOP) {
@@ -110,25 +110,25 @@ public class HistogramData  implements AudioFileChangedListener, AnnotationListe
 		return histos.containsKey(source);
 	}
 
-	@Override
+
 	public void clearAnnotations() {
 		clearHistograms();
 		
 	}
 
-	@Override
+
 	public void annotationsAdded() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
+
 	public void extractionStarted() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
+
 	public void extractionFinished() {
 		// TODO Auto-generated method stub
 		

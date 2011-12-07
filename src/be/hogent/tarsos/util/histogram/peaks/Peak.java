@@ -62,7 +62,7 @@ public final class Peak implements Comparable<Peak> {
 		this.height = newHeight;
 	}
 
-	@Override
+	
 	public int compareTo(Peak o) {
 		return Double.valueOf(height).compareTo(o.height);
 	}

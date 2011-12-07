@@ -118,10 +118,8 @@ public class MidiToWav extends JFrame implements Listener, ActionListener {
 		setVisible(true);
 	}
 	
-	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		Runnable worker = new Runnable(){
-			@Override
 			public void run() {
 				Iterator<File> midiFileIterator = midiFileSet.iterator();
 				while (midiFileIterator.hasNext()) {
@@ -132,7 +130,6 @@ public class MidiToWav extends JFrame implements Listener, ActionListener {
 					}
 				}
 				SwingUtilities.invokeLater(new Runnable() {
-					@Override
 					public void run() {
 						setWaitState(false);
 					}
@@ -185,7 +182,6 @@ public class MidiToWav extends JFrame implements Listener, ActionListener {
 	
 	private void appendProgress(final String message){
 		SwingUtilities.invokeLater(new Runnable(){
-			@Override
 			public void run() {
 				String currentText = progressLabel.getText();
 				String newText = currentText.replace("</html>",message + "<br></html>");
@@ -194,7 +190,6 @@ public class MidiToWav extends JFrame implements Listener, ActionListener {
         });
 	}
 	
-	@Override
 	public void filesDropped(File[] files) {
 		for (File file : files) {
 			if (file.getName().toLowerCase().endsWith("mid")) {

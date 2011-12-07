@@ -73,7 +73,6 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 		loopSelectionCheckBox = new JCheckBox("Replay selection?");
 		loopSelectionCheckBox.setToolTipText("Or play starting from the end marker.");
 		loopSelectionCheckBox.addActionListener(new ActionListener(){
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				stopPlayback();
 				playerThread = new AudioPlayingThread(audioFile, waveForm.getMarker(true),waveForm.getMarker(false));

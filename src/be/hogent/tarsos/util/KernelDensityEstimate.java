@@ -264,12 +264,12 @@ public class KernelDensityEstimate {
 			}
 		}
 
-		@Override
+		
 		public double value(int index) {
 			return kernel[index];
 		}
 
-		@Override
+		
 		public int size() {
 			return kernel.length;
 		}
@@ -290,12 +290,12 @@ public class KernelDensityEstimate {
 			}
 		}
 
-		@Override
+		
 		public double value(int index) {
 			return kernel[index];
 		}
 
-		@Override
+		
 		public int size() {
 			return kernel.length;
 		}

@@ -431,7 +431,7 @@ public class MenuScroller {
    * @exception  Throwable if an error occurs.
    * @see MenuScroller#dispose()
    */
-  @Override
+  
   public void finalize() throws Throwable {
     dispose();
   }
@@ -473,17 +473,17 @@ public class MenuScroller {
 
   private class MenuScrollListener implements PopupMenuListener {
 
-    @Override
+    
     public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
       setMenuItems();
     }
 
-    @Override
+    
     public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
       restoreMenuItems();
     }
 
-    @Override
+    
     public void popupMenuCanceled(PopupMenuEvent e) {
       restoreMenuItems();
     }
@@ -520,7 +520,7 @@ public class MenuScroller {
 	public MenuScrollTimer(final int increment, int interval) {
       super(interval, new ActionListener() {
 
-        @Override
+        
         public void actionPerformed(ActionEvent e) {
           firstIndex += increment;
           refreshMenu();
@@ -549,7 +549,7 @@ public class MenuScroller {
       timer.setDelay(interval);
     }
 
-    @Override
+    
     public void stateChanged(ChangeEvent e) {
       if (isArmed() && !timer.isRunning()) {
         timer.start();
@@ -571,7 +571,7 @@ public class MenuScroller {
       this.yPoints = yPoints;
     }
 
-    @Override
+    
     public void paintIcon(Component c, Graphics g, int x, int y) {
       Dimension size = c.getSize();
       Graphics g2 = g.create(size.width / 2 - 5, size.height / 2 - 5, 10, 10);
@@ -584,12 +584,12 @@ public class MenuScroller {
       g2.dispose();
     }
 
-    @Override
+    
     public int getIconWidth() {
       return 0;
     }
 
-    @Override
+    
     public int getIconHeight() {
       return 10;
     }

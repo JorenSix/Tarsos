@@ -323,7 +323,6 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 	private void setupChangeInPitchDetectors() {
 		//react to change in pitch detectors
 		Configuration.addListener(new ConfigChangeListener() {
-			@Override
 			public void configurationChanged(ConfKey key) {
 				if(key==ConfKey.pitch_tracker_list && audioFile != null){
 					setNewAudioFile(new File(audioFile.originalPath()));
@@ -550,12 +549,12 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		TranscodingTask transcodingTask = new TranscodingTask(newFile);
 		List<BackgroundTask> detectorTasks = createTasks(newFile,transcodingTask);
 		transcodingTask.addHandler(new TaskHandler() {
-			@Override
+
 			public void taskInterrupted(BackgroundTask backgroundTask, Exception e) {
 				
 			}
 			
-			@Override
+
 			public void taskDone(BackgroundTask backgroundTask) {
 				if(backgroundTask instanceof TranscodingTask){
 					setAudioFile(((TranscodingTask) backgroundTask).getAudioFile());
@@ -568,7 +567,6 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		AnnotationPublisher.getInstance().extractionStarted();
 		final ProgressDialog dialog = new ProgressDialog(this,title,transcodingTask,detectorTasks);
 		dialog.addPropertyChangeListener(new PropertyChangeListener() {
-			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				if(evt.getPropertyName().equals("allTasksFinished")){
 					notifyAudioFileChange();
@@ -607,7 +605,6 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		@Override
 		public Void doInBackground() {
 			Runnable runTranscoder = new Runnable(){
-				@Override
 				public void run() {
 					try {
 						transcodedAudioFile = new AudioFile(newFile.getAbsolutePath());
@@ -650,7 +647,6 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 			final PitchDetector pitchDetector = mode
 					.getPitchDetector(file);
 			Runnable r = new Runnable() {
-				@Override
 				public void run() {
 					//Do pitch extraction
 					AnnotationPublisher publisher = AnnotationPublisher.getInstance();
@@ -683,14 +679,12 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 			return null;
 		}
 
-		@Override
 		public void taskDone(BackgroundTask backgroundTask) {
 			if(backgroundTask instanceof TranscodingTask){
 				file = ((TranscodingTask) backgroundTask).getAudioFile();
 			}
 		}
 
-		@Override
 		public void taskInterrupted(BackgroundTask backgroundTask, Exception e) {
 			//transcoding interrupted!
 		}
