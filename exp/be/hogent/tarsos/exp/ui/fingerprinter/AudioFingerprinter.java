@@ -213,14 +213,14 @@ public class AudioFingerprinter {
 	private static void doMatch( final Set<File> haystack,  final File needle){
 		AudioFingerprinter afp = new AudioFingerprinter(haystack, needle);
 		List<AudioFingerprintMatch> matches = afp.match();
-		System.out.println("Best "+ Math.min(15, matches.size()) + " matches for " + matches.get(0).getOriginal().getName() + ":");
+		System.out.println("Best "+ Math.min(15, matches.size()) + " matches for " + matches.get(0).getMatch().getName() + ":");
 		for(int i = 0; i < Math.min(15, matches.size()) ; i++){
 			AudioFingerprintMatch afpm = matches.get(i);
 			System.out.print("\t" + (i+1)+ " ");
 			if (afpm.isMatch()) {
-				System.out.println("Match       (" + Math.round(afpm.getValue() * 100) + "% with:\t" + afpm.getMatch().getName());
+				System.out.println("Match       (" + Math.round(afpm.getValue() * 100) + "% with:\t" + afpm.getOriginal().getName());
 			} else {
-				System.out.println("Close match (" + Math.round(afpm.getValue() * 100) + "%) with:\t" + afpm.getMatch().getName());
+				System.out.println("Close match (" + Math.round(afpm.getValue() * 100) + "%) with:\t" + afpm.getOriginal().getName());
 			}
 		}
 	}
