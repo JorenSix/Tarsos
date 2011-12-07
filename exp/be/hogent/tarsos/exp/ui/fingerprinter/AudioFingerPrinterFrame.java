@@ -17,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -157,19 +158,21 @@ public class AudioFingerPrinterFrame extends JFrame implements  ActionListener {
 					File needle = iterator.next();
 					AudioFingerprinter afp = new AudioFingerprinter(
 							hayStackFileSet, needle);
-					AudioFingerprintMatch afpm = afp.match();
-					if (afpm.isMatch()) {
-						appendProgress(afpm.getMatch().getName()
-								+ " matches (" + Math.round(afpm.getValue() * 100) + "%) with "
-								+ afpm.getOriginal().getName());
-					} else {
-						appendProgress(afpm.getMatch().getName()
-								+ " closest match (" + Math.round(afpm.getValue() * 100) + "%) to "
-								+ afpm.getOriginal().getName());
+					
+					List<AudioFingerprintMatch> matches = afp.match();
+					appendProgress("Best " + Math.min(15, matches.size()) + " matches for " + matches.get(0).getMatch().getName() + ":");
+					for(int i = 0; i < Math.min(15, matches.size()) ; i++){
+						AudioFingerprintMatch afpm = matches.get(i);
+						if (afpm.isMatch()) {
+							appendProgress("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + (i+1) + ". " + "Match       (" + Math.round(afpm.getValue() * 100) + "%) with:\t" + afpm.getOriginal().getName());
+						} else {
+							appendProgress("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + (i+1) + ". " + "Close match (" + Math.round(afpm.getValue() * 100) + "%) with:\t" + afpm.getOriginal().getName());
+						}
 					}
+					
+	
 				}
 				SwingUtilities.invokeLater(new Runnable() {
-					
 					public void run() {
 						setWaitState(false);
 					}

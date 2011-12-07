@@ -40,7 +40,10 @@ public class AudioFingerprinter {
 		hayStack = theHayStack;
 	}
 	
-	public AudioFingerprintMatch match(){
+	/**
+	 * @return An ordered list of AudioFingerprintMatches. The first match is the best.
+	 */
+	public List<AudioFingerprintMatch> match(){
 		Iterator<File> iterator = hayStack.iterator();
 		List<AudioFingerprintMatch> list = new ArrayList<AudioFingerprintMatch>();
 		while(iterator.hasNext()){
@@ -52,7 +55,7 @@ public class AudioFingerprinter {
 			list.add(match);
 		}
 		Collections.sort(list);
-		return list.get(list.size()-1);
+		return list;
 	}
 	
 	public static class AudioFingerprintMatch implements Comparable<AudioFingerprintMatch>{
@@ -121,7 +124,7 @@ public class AudioFingerprinter {
 		}
 
 		public int compareTo(AudioFingerprintMatch o) {
-			return Double.valueOf(value).compareTo(Double.valueOf(o.value));
+			return Double.valueOf(o.value).compareTo(Double.valueOf(value));
 		}
 	}
 	
@@ -209,15 +212,16 @@ public class AudioFingerprinter {
 	
 	private static void doMatch( final Set<File> haystack,  final File needle){
 		AudioFingerprinter afp = new AudioFingerprinter(haystack, needle);
-		AudioFingerprintMatch afpm = afp.match();
-		if (afpm.isMatch()) {
-			System.out.println(afpm.getMatch().getName()
-					+ " matches (" + Math.round(afpm.getValue() * 100) + "%) with "
-					+ afpm.getOriginal().getName());
-		} else {
-			System.out.println(afpm.getMatch().getName()
-					+ " closest match (" + Math.round(afpm.getValue() * 100) + "%) to "
-					+ afpm.getOriginal().getName());
+		List<AudioFingerprintMatch> matches = afp.match();
+		System.out.println("Best "+ Math.min(15, matches.size()) + " matches for " + matches.get(0).getOriginal().getName() + ":");
+		for(int i = 0; i < Math.min(15, matches.size()) ; i++){
+			AudioFingerprintMatch afpm = matches.get(i);
+			System.out.print("\t" + (i+1)+ " ");
+			if (afpm.isMatch()) {
+				System.out.println("Match       (" + Math.round(afpm.getValue() * 100) + "% with:\t" + afpm.getMatch().getName());
+			} else {
+				System.out.println("Close match (" + Math.round(afpm.getValue() * 100) + "%) with:\t" + afpm.getMatch().getName());
+			}
 		}
 	}
 }
