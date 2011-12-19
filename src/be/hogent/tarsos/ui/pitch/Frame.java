@@ -336,6 +336,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 	private void checkTarsosLiveMode() {
 		if (Configuration.getBoolean(ConfKey.tarsos_live)) {
+			checkInputDeviceIndex();
 			final int selected = Configuration.getInt(ConfKey.mixer_input_device);
 			Mixer.Info selectedMixer = SampledAudioUtilities.getMixerInfo(false, true).get(selected);
 			final Mixer mixer = AudioSystem.getMixer(selectedMixer);
@@ -390,6 +391,17 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 			}
 		}
 	}
+
+	private void checkInputDeviceIndex() {
+		final int inputDeviceIndex = Configuration.getInt(ConfKey.mixer_input_device);
+		final int defaultInputDeviceIndex = 0;
+		if(inputDeviceIndex  < 0  || inputDeviceIndex >= SampledAudioUtilities.getMixerInfo(false, true).size()){
+			Configuration.set(ConfKey.mixer_input_device,defaultInputDeviceIndex);
+			LOG.warning("Ignored configured mixer input device (" + inputDeviceIndex + ") reset to " +defaultInputDeviceIndex);			
+		}
+	}
+
+
 
 	private JComponent makeStatusBar() {
 		JLabel statusBarLabel = new JLabel();

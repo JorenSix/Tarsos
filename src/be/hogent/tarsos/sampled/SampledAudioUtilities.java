@@ -60,11 +60,10 @@ public final class SampledAudioUtilities {
 	 */
 	public static SourceDataLine getOpenLineFromConfiguredMixer(
 			final AudioFormat format) throws LineUnavailableException {
-		final DataLine.Info info = new DataLine.Info(SourceDataLine.class,
-				format);
-		final Mixer.Info mixer = SampledAudioUtilities
-				.getMixerInfo(true, false).get(
-						Configuration.getInt(ConfKey.mixer_output_device));
+		checkMixerOutputDeviceIndex();
+		final DataLine.Info info = new DataLine.Info(SourceDataLine.class,format);
+		final int outputDeviceIndex = Configuration.getInt(ConfKey.mixer_output_device);
+		final Mixer.Info mixer = SampledAudioUtilities.getMixerInfo(true, false).get(outputDeviceIndex);
 		SourceDataLine line = (SourceDataLine) AudioSystem.getMixer(mixer)
 				.getLine(info);
 		try {
@@ -79,5 +78,18 @@ public final class SampledAudioUtilities {
 			line.start();
 		}
 		return line;
+	}
+
+	/**
+	 * Checks the mixer output device index. If it is out of bounds it is reset to a default value.
+	 */
+	private static void checkMixerOutputDeviceIndex() {
+		int outputDeviceIndex = Configuration.getInt(ConfKey.mixer_output_device);
+		int defaultOutputDeviceIndex = 0;
+		Vector<Info> mixers = SampledAudioUtilities.getMixerInfo(true, false);
+		if(outputDeviceIndex < 0 || mixers.size() <= outputDeviceIndex){
+			Configuration.set(ConfKey.mixer_output_device,defaultOutputDeviceIndex);
+			LOG.warning("Ignored configured mixer output device index (" + outputDeviceIndex + "), reset to " + defaultOutputDeviceIndex);
+		}
 	}
 }

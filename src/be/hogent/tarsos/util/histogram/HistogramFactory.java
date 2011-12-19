@@ -143,7 +143,7 @@ public class HistogramFactory {
 			final double width) {
 		int start = Configuration.getInt(ConfKey.pitch_histogram_start); 
 		int stop = Configuration.getInt(ConfKey.pitch_histogram_stop);
-		int size = start - stop;
+		int size = stop - start;
 		KernelDensityEstimate kde = new KernelDensityEstimate(new GaussianKernel(width),size);
 		for (Annotation annotation : annotations) {
 			double pitch = annotation.getPitch(PitchUnit.ABSOLUTE_CENTS);

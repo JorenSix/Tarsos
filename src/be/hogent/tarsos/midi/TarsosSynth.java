@@ -3,6 +3,7 @@ package be.hogent.tarsos.midi;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -102,6 +103,7 @@ public class TarsosSynth implements ConfigChangeListener {
 			synthDevice = MidiSystem.getMidiDevice(synthInfo.getInfo());
 			synthDevice.open();
 			receiver = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
+			
 			// configure the instrument as well
 			setConfiguredInstrument();
 			//configure midi input device.
@@ -300,11 +302,13 @@ public class TarsosSynth implements ConfigChangeListener {
 	 *             If the configured device is not available.
 	 */
 	private void setReceiver() throws MidiUnavailableException {
+		checkMidiOutputDeviceIndex();		
 		final int midiDeviceIndex = Configuration.getInt(ConfKey.midi_output_device);
 		if (synthDevice != null) {
 			synthDevice.close();
 		}
-		final MoreMidiInfo synthInfo = MidiCommon.listDevices(false,true).get(midiDeviceIndex);		
+		final MoreMidiInfo synthInfo = MidiCommon.listDevices(false,true).get(midiDeviceIndex);
+		
 		LOG.info(String.format("Configuring %s as MIDI OUT.", synthInfo.toString()));
 		synthDevice = MidiSystem.getMidiDevice(synthInfo.getInfo());
 		synthDevice.open();
@@ -316,6 +320,19 @@ public class TarsosSynth implements ConfigChangeListener {
 		LOG.info(String.format("Configured %s as MIDI OUT.", synthInfo.toString()));
 	}
 	
+	/**
+	 * Checks the MIDI output device index and sets it to a default value if the device index is out of bounds.
+	 */
+	private void checkMidiOutputDeviceIndex() {
+		int deviceIndex = Configuration.getInt(ConfKey.midi_output_device);
+		int defaultDeviceIndex = 0;
+		Vector<MoreMidiInfo> devices = MidiCommon.listDevices(false,true);
+		if(deviceIndex < 0 || deviceIndex >= devices.size()){
+			Configuration.set(ConfKey.midi_output_device, defaultDeviceIndex);
+			LOG.warning("Ignored index out of bounds exception, reconfigured the midi device index, from " + deviceIndex + " to " + defaultDeviceIndex);
+		}
+	}
+
 	private void setFallbackReceiver(){
 		try {
 			synthDevice = MidiSystem.getSynthesizer();
@@ -358,8 +375,17 @@ public class TarsosSynth implements ConfigChangeListener {
 		if (synthDevice instanceof Synthesizer) {
 			Synthesizer synth = (Synthesizer) synthDevice;
 			Instrument[] available = synth.getAvailableInstruments();
-			Instrument configuredInstrument = available[Configuration.getInt(ConfKey.midi_instrument_index)];
-			// synth.loadInstrument(configuredInstrument);
+			int instrumentIndex = Configuration.getInt(ConfKey.midi_instrument_index);
+			
+			//check and reset instrument index
+			int defaultInstrumentIndex = 0;
+			if(instrumentIndex >= available.length){
+				LOG.warning("Ignored configured instrument index (" + instrumentIndex + ") reset to "  + defaultInstrumentIndex);
+				Configuration.set(ConfKey.midi_instrument_index, defaultInstrumentIndex);
+				instrumentIndex = Configuration.getInt(ConfKey.midi_instrument_index);
+			}
+			Instrument configuredInstrument = available[instrumentIndex];
+
 			MidiChannel channel = synth.getChannels()[PITCH_BEND_MIDI_CHANNEL];
 			Patch patch = configuredInstrument.getPatch();
 			channel.programChange(patch.getBank(), patch.getProgram());

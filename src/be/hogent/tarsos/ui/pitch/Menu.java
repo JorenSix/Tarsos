@@ -123,6 +123,12 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		item.addActionListener(exportPitchHistogramImage);
 		pitchHistogram.add(item);
 		
+		item = new JMenuItem("Pitch Histogram Latex...");
+		item.setToolTipText("Export a Tex file with a pitch histogram.");
+		
+		item.addActionListener(exportPitchHistogramLatex);
+		pitchHistogram.add(item);
+		
 		/* Pitch Class Histogram sub menu */
 		
 		JMenu pitchClassHistogram = new JMenu("Pitch Class Histogram");
@@ -668,6 +674,65 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			});
 		}
 	};	
+	
+	
+	private ActionListener exportPitchHistogramLatex = new ActionListener(){
+
+		public void actionPerformed(ActionEvent arg0) {
+			String dialogTitle = "Export tikz image for Latex  (.tex)";
+			String defaultFileName = audioFile.originalBasename() + "_pitch_histogram.tex";
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
+				public void handleFile(final File chosenFile) {
+					String temporaryTarget = new File(FileUtils.temporaryDirectory() , "tikz_ph.tex").getAbsolutePath();
+					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/tikz_ph.te" , temporaryTarget);
+					String contents = FileUtils.readFile(temporaryTarget); 
+					
+					String datFileName = audioFile.originalBasename() + ".ph.dat";
+					String datFileTarget = FileUtils.combine(chosenFile.getParent(),datFileName);
+					
+					HashMap<String,String> map = new HashMap<String,String>();
+					map.put("%dat.file.dat%",datFileName);
+					List<Integer> scaleAsList = new ArrayList<Integer>();
+					for(int i = 3600 ; i <= 8400 ; i+=1200){
+						for(double pitchClass : scale){
+							scaleAsList.add(i + (int) Math.round(pitchClass));
+						}
+					}
+					map.put("%comma_separated_pitch_classes%",StringUtils.join(scaleAsList,","));
+					
+					for(Entry<String,String> entry : map.entrySet()){
+						contents = contents.replace(entry.getKey(), entry.getValue());
+					}
+					
+					AnnotationPublisher ap = AnnotationPublisher.getInstance();
+					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
+					PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(annotations,10);
+					
+					//This makes sure the highest peak is at 600, which is what is expected
+					//by the tex file.
+					pitchHistogram.multiply(600.0/Double.valueOf(pitchHistogram.getMaxBinCount()));
+					
+					StringBuilder sb = new StringBuilder();
+					sb.append("# Pitch  Histogram Data for ");
+					sb.append(audioFile.originalBasename());
+					sb.append("\n");
+					
+					ArrayList<Double> keys = new ArrayList<Double>(pitchHistogram.keySet());
+					Collections.sort(keys);
+					for(Double key : keys){
+						long count = pitchHistogram.getCount(key);
+						sb.append(key).append(" ").append(count).append("\n");
+					}
+					
+					FileUtils.writeFile(sb.toString(),datFileTarget);
+					FileUtils.writeFile(contents, chosenFile.getAbsolutePath());
+				}
+			});
+			
+		}
+		
+	};
+	
 	private ActionListener exportPitchClassHistogramLatex = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export tikz image for Latex  (.tex)";
