@@ -58,9 +58,11 @@ PGF plots alternative:
 \begin{figure}
 \centering
   \begin{tikzpicture}
-    \begin{axis}[axis x line=bottom,
+    \begin{axis}[axis x line*=bottom,
       extra x ticks={%comma_separated_pitch_classes%},
       xtick={0},
+      xmin=0,
+      xmax=1200,
       extra x tick style={grid=major},
       axis y line=left,
       xlabel=$Pitch\ (cent)$,

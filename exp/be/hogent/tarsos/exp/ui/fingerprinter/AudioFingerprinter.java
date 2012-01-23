@@ -110,7 +110,7 @@ public class AudioFingerprinter {
 			if(!cache.containsKey(file)){
 				AudioFile audioFile;
 				audioFile = new AudioFile(file.getAbsolutePath());
-				PitchDetector detector = PitchDetectionMode.TARSOS_FAST_YIN.getPitchDetector(audioFile);	
+				PitchDetector detector = PitchDetectionMode.TARSOS_FAST_MPM.getPitchDetector(audioFile);	
 				detector.executePitchDetection();
 				KernelDensityEstimate kde = HistogramFactory.createPichClassKDE(detector.getAnnotations(), 7);
 				cache.put(file, HistogramFactory.createPitchClassHistogram(kde));
@@ -183,20 +183,34 @@ public class AudioFingerprinter {
 	
 	private static void startCLI(String... args) {
 	
-		if(!FileUtils.exists(args[0]) && FileUtils.isAudioFile(new File(args[0]))){
-			printHelp("The needle (" + args[0] + ") was not found or is not recognized audio file. Please provide an existing audio file.");
+		if(!FileUtils.exists(args[0]) || (!FileUtils.isDirectory(args[0]) && !FileUtils.isAudioFile(new File(args[0])))){
+			printHelp("The needle (" + args[0] + ") was not found or is not recognized audio file. Please provide an existing audio file or directory.");
+			System.exit(-1);
 		}
 		
 		File needle = new File(args[0]);
 		for(int i = 1 ; i < args.length ; i++){
 			if(!FileUtils.exists(args[i]) || (!FileUtils.isDirectory(args[i]) && !FileUtils.isAudioFile(new File(args[i])))){
 				printHelp("Each haystack should be a valid directory or audio file. "+ args[i] + " is not. Please provide a valid directory or audio file.");
+				System.exit(-1);
 			}
+		}
+		
+		Set<File> needles = new HashSet<File>();
+		File file = new File(args[0]);
+		//Recursively traverse directory
+		if(file.isDirectory()){
+			for(String fileInDir : FileUtils.glob(file.getAbsolutePath(), Configuration.get(ConfKey.audio_file_name_pattern), true)){
+				needles.add(new File(fileInDir));
+			}
+			// or else add the file	
+		} else if(FileUtils.isAudioFile(file)){
+			needles.add(file);			
 		}
 		
 		Set<File> haystack = new HashSet<File>();
 		for(int i = 1 ; i < args.length ; i++){
-			File file = new File(args[i]);
+			file = new File(args[i]);
 			//Recursively traverse directory
 			if(file.isDirectory()){
 				for(String fileInDir : FileUtils.glob(file.getAbsolutePath(), Configuration.get(ConfKey.audio_file_name_pattern), true)){
@@ -207,7 +221,12 @@ public class AudioFingerprinter {
 				haystack.add(file);
 			}
 		}
-		doMatch(haystack,needle);
+		System.out.println("Will inspect a haystack of " + haystack.size() + " files for " + needles.size() + "needles.");
+		
+		Iterator<File> it  = needles.iterator();
+		while(it.hasNext()){
+			doMatch(haystack,it.next());
+		}
 	}
 	
 	private static void doMatch( final Set<File> haystack,  final File needle){

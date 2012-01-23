@@ -41,6 +41,11 @@ public final class TarsosPitchDetection implements PitchDetector {
 	 * Which pitch detector to use.
 	 */
 	private final PitchDetectionMode detectionMode;
+	
+	/**
+	 * Minimum pitch that can be detected, pitches below this threshold are ignored;
+	 */
+	private static double minPitchThreshold = 0;
 
 
 	public TarsosPitchDetection(final AudioFile audioFile, final PitchDetectionMode pitchDetectionMode) {
@@ -135,15 +140,25 @@ public final class TarsosPitchDetection implements PitchDetector {
 			pureDetector = new McLeodPitchMethod(sampleRate);
 			bufferSize = McLeodPitchMethod.DEFAULT_BUFFER_SIZE;
 			overlapSize = McLeodPitchMethod.DEFAULT_OVERLAP;
+			minPitchThreshold = 44100/bufferSize + 4;
 		} else if (PitchDetectionMode.TARSOS_FAST_YIN == detectionMode) {
-				pureDetector = new Yin(sampleRate, 256,0.75);
-				bufferSize =  256;
+				pureDetector = new Yin(sampleRate, 512,0.75);
+				bufferSize =  512;
 				overlapSize = 0;
+				minPitchThreshold = 44100/bufferSize * 2 + 4;
+		} else if (PitchDetectionMode.TARSOS_FAST_MPM == detectionMode) {
+			pureDetector = new McLeodPitchMethod(sampleRate, 512,0.85);
+			bufferSize =  512;
+			overlapSize = 0;
+			minPitchThreshold = 44100/bufferSize + 6;
 		} else {
 			pureDetector = new Yin(sampleRate, Yin.DEFAULT_BUFFER_SIZE);
 			bufferSize = Yin.DEFAULT_BUFFER_SIZE;
 			overlapSize = Yin.DEFAULT_OVERLAP;
+			minPitchThreshold = 44100/bufferSize * 2 + 4;
 		}
+		
+		
 
 		final int bufferStepSize = bufferSize - overlapSize;
 
@@ -171,10 +186,13 @@ public final class TarsosPitchDetection implements PitchDetector {
 				boolean isSilence = SignalPowerExtractor.isSilence(audioFloatBuffer);
 				// Do not detect pitch on silence.
 				if (!isSilence) {
-					final float pitch = pureDetector.getPitch(audioFloatBuffer);
+					float pitch = pureDetector.getPitch(audioFloatBuffer);
 					// The pure pitch detectors return -1 when no pitch is
 					// detected. Creating an annotation without pitch is not
 					// useful.
+					if(pitch < minPitchThreshold){
+						pitch = -1;
+					}
 					boolean isPitched = pitch != -1;
 					// The pitch detectors should not return 0 Hz.
 					assert pitch != 0;

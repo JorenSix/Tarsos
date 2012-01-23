@@ -76,7 +76,9 @@ public enum PitchDetectionMode {
 	/**
 	 * The pure java MPM (Tartini pitch tracker) implementation of Tarsos.
 	 */
-	TARSOS_MPM("tarsos_mpm");
+	TARSOS_MPM("tarsos_mpm"),
+	
+	TARSOS_FAST_MPM("tarsos_fast_mpm");
 
 	/**
 	 * The name of the parameter.
@@ -124,6 +126,9 @@ public enum PitchDetectionMode {
 			detector = new TarsosPitchDetection(audioFile, this);
 			break;
 		case TARSOS_MPM:
+			detector = new TarsosPitchDetection(audioFile, this);
+			break;
+		case TARSOS_FAST_MPM:
 			detector = new TarsosPitchDetection(audioFile, this);
 			break;
 		default:

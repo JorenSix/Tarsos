@@ -138,7 +138,13 @@ public final class PeakDetector {
 				final int firstPeakIndex = (int) peaks.get(i).getPosition();
 				for (int j = i + 1; j < peaks.size(); j++) {
 					final int secondPeakIndex = (int) peaks.get(j).getPosition();
-					if (Math.abs(firstPeakIndex - secondPeakIndex) < windowSize) {
+					int diff = Math.abs(firstPeakIndex - secondPeakIndex);
+					//wrapping code:
+					int halfSize = histogram.getNumberOfClasses() / 2;
+					if (diff > halfSize )
+						diff = halfSize - (diff % halfSize);
+					
+					if (diff < windowSize) {
 						peaks.remove(j);
 						// Removed a peak, so shift index j;
 						j--;

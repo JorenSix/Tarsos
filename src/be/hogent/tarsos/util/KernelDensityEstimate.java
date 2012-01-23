@@ -1,11 +1,13 @@
 package be.hogent.tarsos.util;
 
 public class KernelDensityEstimate {
-	private final double[] accumulator;
-	private final Kernel kernel;
-
+	protected final double[] accumulator;
+	protected final Kernel kernel;
+	private double sum;
+	
 	public KernelDensityEstimate(final Kernel kernel, final int size) {
 		accumulator = new double[size];
+		sum = 0;
 		this.kernel = kernel;
 		if (kernel.size() > accumulator.length)
 			throw new IllegalArgumentException(
@@ -34,7 +36,9 @@ public class KernelDensityEstimate {
 			stop++;
 		int kernelIndex = 0;
 		for (int i = start; i < stop; i++) {
-			accumulator[i % accumulatorSize] += kernel.value(i - start);
+			double kernelValue = kernel.value(i - start);
+			accumulator[i % accumulatorSize] += kernelValue;
+			sum += kernelValue;
 			kernelIndex++;
 		}
 	}
@@ -52,7 +56,9 @@ public class KernelDensityEstimate {
 			stop++;
 		int kernelIndex = 0;
 		for (int i = start; i < stop; i++) {
-			accumulator[i % accumulatorSize] -= kernel.value(i - start);
+			double kernelValue = kernel.value(i - start);
+			accumulator[i % accumulatorSize] -= kernelValue;
+			sum -= kernelValue;
 			kernelIndex++;
 		}
 	}
@@ -105,11 +111,14 @@ public class KernelDensityEstimate {
 	 * @return The total sum of all estimates.
 	 */
 	public double getSumFreq() {
-		double sum = 0.0;
+		return sum;
+	}
+	
+	private void calculateSumFreq(){
+		sum = 0;
 		for (int i = 0; i < accumulator.length; i++) {
 			sum += accumulator[i];
 		}
-		return sum;
 	}
 
 	/**
@@ -126,6 +135,7 @@ public class KernelDensityEstimate {
 				accumulator[i] = accumulator[i] / maxElement;
 			}
 		}
+		calculateSumFreq();
 	}
 	
 	/**
@@ -137,6 +147,7 @@ public class KernelDensityEstimate {
 		for (int i = 0; i < accumulator.length; i++) {
 			accumulator[i] = Math.max(accumulator[i], other.accumulator[i]);
 		}
+		calculateSumFreq();
 	}
 	
 	/**
@@ -148,6 +159,7 @@ public class KernelDensityEstimate {
 		for (int i = 0; i < accumulator.length; i++) {
 			accumulator[i] += other.accumulator[i];
 		}
+		calculateSumFreq();
 	}
 
 	/**
@@ -208,8 +220,22 @@ public class KernelDensityEstimate {
 				optimalShift = shift;
 			}
 		}
-
 		return optimalShift;
+	}
+	
+	
+	/**
+	 * Calculates the optimal correlation between two Kernel Density Estimates
+	 * by shifting and searching for optimal correlation.
+	 * 
+	 * @param other
+	 *            The other KernelDensityEstimate.
+	 * @return A value between 0 and 1 representing how similar both estimates
+	 *         are. 1 means total correlation, 0 no correlation.
+	 */
+	public double optimalCorrelation(final KernelDensityEstimate other) {
+		int shift = shiftForOptimalCorrelation(other);
+		return correlation(other, shift);
 	}
 
 	/**
@@ -233,7 +259,7 @@ public class KernelDensityEstimate {
 		 * @return The size of the kernel.
 		 */
 		int size();
-	}
+	}	
 
 	/**
 	 * A Gaussian kernel function.
