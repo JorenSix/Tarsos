@@ -13,7 +13,6 @@
                 <attribute name="Class-Path" value="."/>
             	<attribute name="Built-Date" value="${TODAY}"/>     
             	<attribute name="Built-By" value="The Tarsos Dev Team"/>
-            	<attribute name="SplashScreen-Image" value="be/hogent/tarsos/ui/resources/tarsos_splash.gif"/>
             </manifest>
             <fileset dir="../bin"/>
             
