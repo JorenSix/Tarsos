@@ -9,6 +9,9 @@
 package be.hogent.tarsos.cli;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -19,6 +22,9 @@ import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.ConfKey;
+import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.util.FileUtils;
 
 /**
  * Detects pitch for an input file using a pitch detector. Outputs two columns,
@@ -30,41 +36,77 @@ public final class DetectPitch extends AbstractTarsosApp {
 
 	@Override
 	public String description() {
-		return "Detects pitch for an input file"
-				+ " using a pitch detector. Outputs two columns, one in ms and the oters in Hz.";
+		return "Detects pitch for one or more input audio files using a pitch detector. If a directory is given it traverses the directory _recursively_. "
+				+ "Writes csv data to standard out with five columns. The first is the start of the analyzed window (seconds), the second the estimated pitch, the third the saillence of the pitch"
+				+ "The name of the algorithm follows and then the original filename.";
 	}
-
+	
 	@Override
-	public String name() {
-		return "detect_pitch";
+	public String synopsis(){
+		return "[options] input_file"; 
 	}
 
 	@Override
 	public void run(final String... args) {
 		final OptionParser parser = new OptionParser();
-		final OptionSpec<File> fileSpec = parser.accepts("in", "The file to annotate").withRequiredArg()
-				.ofType(File.class).withValuesSeparatedBy(' ').defaultsTo(new File("in.wav"));
 		final OptionSpec<PitchDetectionMode> detectionModeSpec = createDetectionModeSpec(parser);
-
 		final OptionSet options = parse(args, parser, this);
-
-		if (isHelpOptionSet(options)) {
+		List<String> arguments = options.nonOptionArguments();
+		
+		
+		//check
+		String errorMessage = "";
+		for(String audioFile : arguments){
+			if(! FileUtils.exists(audioFile) ){
+				errorMessage = audioFile + " does not exist.\n";
+			}else if(! (FileUtils.isAudioFile(new File(audioFile)) || FileUtils.isDirectory(audioFile) ) ){
+				errorMessage = audioFile + " is not a directory or a recognized audio file (according to " + Configuration.get(ConfKey.audio_file_name_pattern) + ").\n";
+			}
+		}
+		
+		if (isHelpOptionSet(options) || arguments.size() == 0) {
 			printHelp(parser);
+		} else if(errorMessage !="") {
+			printError(parser, errorMessage);
 		} else {
-			final File inputFile = options.valueOf(fileSpec);
 			final PitchDetectionMode detectionMode = options.valueOf(detectionModeSpec);
+			executeApplication(arguments,detectionMode);
+		}
+	}
+	
+	public void executeApplication(List<String> arguments,final PitchDetectionMode detectionMode){
+		Set<File> files = getAudioFileListFromArguments(arguments);
+		Tarsos.println("Start(s),Frequency(Hz),Probability,Source,file");
+		for(File inputFile : files){
 			AudioFile audioFile;
 			try {
 				audioFile = new AudioFile(inputFile.getAbsolutePath());
 				final PitchDetector detector = detectionMode.getPitchDetector(audioFile);
 				detector.executePitchDetection();
 				for (final Annotation sample : detector.getAnnotations()) {
-					Tarsos.println(sample.toString());
+					Tarsos.println(sample.toString() + "," + inputFile.getAbsolutePath());
 				}
 			} catch (EncoderException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//log message
 			}
 		}
+		
+	}
+	
+	private Set<File> getAudioFileListFromArguments(List<String> arguments){
+		Set<File> files = new HashSet<File>();
+		for(int i = 0 ; i < arguments.size() ; i++){
+			File file = new File(arguments.get(i));
+			//Recursively traverse directory
+			if(file.isDirectory()){
+				for(String fileInDir : FileUtils.glob(file.getAbsolutePath(), Configuration.get(ConfKey.audio_file_name_pattern), true)){
+					files.add(new File(fileInDir));
+				}
+			// or else add the file	
+			} else if(FileUtils.isAudioFile(file)){
+				files.add(file);
+			}
+		}
+		return files;
 	}
 }

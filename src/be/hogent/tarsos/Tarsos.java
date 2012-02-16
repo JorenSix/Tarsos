@@ -9,6 +9,7 @@
 package be.hogent.tarsos;
 
 import java.awt.Color;
+import java.awt.SplashScreen;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,13 +72,19 @@ public final class Tarsos {
 	private Tarsos() {
 		// Configure logging.
 		configureLogging();
+		//Check configuration and write default values
+		Configuration.checkForConfigurationAndWriteDefaults();
 		// Configure directories.
-		configureDirectories();
+		Tarsos.configureDirectories(log);
 		// Initialize the CLI application list.
 		applications = new HashMap<String, AbstractTarsosApp>();
 	}
 
-	private void configureDirectories() {
+	/**
+	 * Checks the configured directories and creates them if they are not present.
+	 * @param log The logger to report to.
+	 */
+	public static void configureDirectories(Logger log) {
 		// replace java.io.tmpdir with actual temp dir.
 		for (final ConfKey confKey : ConfKey.values()) {
 			String directory = Configuration.get(confKey);

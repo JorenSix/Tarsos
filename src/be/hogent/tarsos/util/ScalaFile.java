@@ -265,7 +265,7 @@ public final class ScalaFile {
 	 */
 	public static ScalaFile westernTuning() {
 		final double[] notes = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, };
-		final String[] names = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+		final String[] names = { "C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab", "A", "A#/Bb", "B" };
 		return new ScalaFile("The western tone scale", notes, names);
 	}
 

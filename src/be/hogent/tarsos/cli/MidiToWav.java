@@ -44,15 +44,6 @@ public final class MidiToWav extends AbstractTarsosApp {
 
     /*
      * (non-Javadoc)
-     * @see be.hogent.tarsos.exp.cli.AbstractTarsosApp#name()
-     */
-    
-    public String name() {
-        return "midi_to_wav";
-    }
-
-    /*
-     * (non-Javadoc)
      * @see be.hogent.tarsos.exp.cli.AbstractTarsosApp#run(java.lang.String[])
      */
     

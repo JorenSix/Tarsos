@@ -186,37 +186,44 @@ public final class Configuration {
 	 * @return a configured or default value
 	 */
 	private static String get(final String key) {
-		synchronized (Configuration.class) {
-			if (defaultConfProps == null) {
-				defaultConfProps = new Properties();
-				final InputStream propertiesStream = Configuration.class
-						.getResourceAsStream("configuration.properties");
-				try {
-					defaultConfProps.load(propertiesStream);
-				} catch (final IOException e) {
-					LOG.severe("Could not find default configurations");
+		checkForConfigurationAndWriteDefaults();
+		final String defaultValue = defaultConfProps.getProperty(key);		
+		String configuredValue = userPreferences.get(key, defaultValue);
+		configuredValue = sanitizeConfiguredValue(key, configuredValue);
+		return configuredValue;
+	}
+	
+	/**
+	 * Checks if there is a configuration file there and, if not, writes the
+	 * default configuration parameters to the configuration file.
+	 */
+	public static void checkForConfigurationAndWriteDefaults() {
+		if( userPreferences == null || defaultConfProps == null){
+			synchronized (Configuration.class) {
+				if (defaultConfProps == null) {
+					defaultConfProps = new Properties();
+					final InputStream propertiesStream = Configuration.class
+							.getResourceAsStream("configuration.properties");
+					try {
+						defaultConfProps.load(propertiesStream);
+					} catch (final IOException e) {
+						LOG.severe("Could not find default configurations");
+					}
 				}
-			}
-		}
-		final String defaultValue = defaultConfProps.getProperty(key);
-
-		synchronized (Configuration.class) {
-			if (userPreferences == null) {
-				userPreferences = Preferences.userNodeForPackage(Configuration.class);
-				for (final ConfKey configKey : ConfKey.values()) {
-					// If there is no configuration for this user, write the
-					// default
-					// configuration
-					if (userPreferences.get(configKey.name(), null) == null) {
-						final String defaultConfigVal = defaultConfProps.getProperty(configKey.name());
-						set(configKey, defaultConfigVal);
+				if (userPreferences == null) {
+					userPreferences = Preferences.userNodeForPackage(Configuration.class);
+					for (final ConfKey configKey : ConfKey.values()) {
+						// If there is no configuration for this user, write the
+						// default
+						// configuration
+						if (userPreferences.get(configKey.name(), null) == null) {
+							final String defaultConfigVal = defaultConfProps.getProperty(configKey.name());
+							set(configKey, defaultConfigVal);
+						}
 					}
 				}
 			}
 		}
-		String configuredValue = userPreferences.get(key, defaultValue);
-		configuredValue = sanitizeConfiguredValue(key, configuredValue);
-		return configuredValue;
 	}
 
 	/**
@@ -233,22 +240,7 @@ public final class Configuration {
 		if (value == null) {
 			return;
 		}
-		if( userPreferences == null){
-			synchronized (Configuration.class) {
-				if (userPreferences == null) {
-					userPreferences = Preferences.userNodeForPackage(Configuration.class);
-					for (final ConfKey configKey : ConfKey.values()) {
-						// If there is no configuration for this user, write the
-						// default
-						// configuration
-						if (userPreferences.get(configKey.name(), null) == null) {
-							final String defaultConfigVal = defaultConfProps.getProperty(configKey.name());
-							set(configKey, defaultConfigVal);
-						}
-					}
-				}
-			}
-		}
+		checkForConfigurationAndWriteDefaults();
 		try {
 			final String actualValue = sanitizeConfiguredValue(key.name(), value);
 			userPreferences.put(key.name(), actualValue);

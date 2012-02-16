@@ -8,6 +8,8 @@
 **/
 package be.hogent.tarsos.util;
 
+
+
 public class KernelDensityEstimate {
 	protected final double[] accumulator;
 	protected final Kernel kernel;
@@ -147,6 +149,23 @@ public class KernelDensityEstimate {
 	}
 	
 	/**
+	 * Sets the area under the curve to 1.0. 
+	 * In essence every value is divided by getSumFreq(). 
+	 * As per definition of a probability density function.
+	 */
+	public void pdfify() {
+		double sumFreq = this.getSumFreq();
+		if(sumFreq != 0.0){
+			for (int i = 0; i < accumulator.length; i++) {
+				accumulator[i] = accumulator[i]/sumFreq;
+			}
+		}
+		//reset sum freq
+		calculateSumFreq();
+		assert getSumFreq() == 1.0;
+	}
+	
+	/**
 	 * Takes the maximum of the value in the accumulator for two kde's.
 	 * @param other The other kde of the same size.
 	 */
@@ -245,6 +264,8 @@ public class KernelDensityEstimate {
 		int shift = shiftForOptimalCorrelation(other);
 		return correlation(other, shift);
 	}
+	
+
 
 	/**
 	 * Defines a kernel. It has a size and cached values for each index.
@@ -332,6 +353,86 @@ public class KernelDensityEstimate {
 		
 		public int size() {
 			return kernel.length;
+		}
+	}
+	
+	
+	/**
+	 * Calculates the optimal correlation between two Kernel Density Estimates
+	 * by shifting and searching for optimal correlation.
+	 * @param correlationMeasure 
+	 * 
+	 * @param other
+	 *            The other KernelDensityEstimate.
+	 * @return A value between 0 and 1 representing how similar both estimates
+	 *         are. 1 means total correlation, 0 no correlation.
+	 */
+	public double optimalCorrelation(final KDECorrelation correlationMeasure, final KernelDensityEstimate other) {
+		int shift = shiftForOptimalCorrelation(correlationMeasure,other);
+		return correlationMeasure.correlation(this,other, shift);
+	}
+	
+	/**
+	 * Calculates how much the other KernelDensityEstimate needs to be shifted
+	 * for optimal correlation.
+	 * @param correlationMeasure 
+	 * 
+	 * @param other
+	 *            The other KernelDensityEstimate.
+	 * @return A number between 0 (inclusive) and the size of the
+	 *         KernelDensityEstimate (exclusive) which represents how much the
+	 *         other KernelDensityEstimate needs to be shifted for optimal
+	 *         correlation.
+	 */
+	public int shiftForOptimalCorrelation(final KDECorrelation correlationMeasure, final KernelDensityEstimate other) {
+		int optimalShift = 0; // displacement with best correlation
+		double maximumCorrelation = -1; // best found correlation
+
+		for (int shift = 0; shift < size(); shift++) {
+			final double currentCorrelation = correlationMeasure.correlation(this,other, shift);
+			if (maximumCorrelation < currentCorrelation) {
+				maximumCorrelation = currentCorrelation;
+				optimalShift = shift;
+			}
+		}
+		return optimalShift;
+	}
+	
+	public static interface KDECorrelation{
+		public double correlation(KernelDensityEstimate first,KernelDensityEstimate other, int shift);
+	} 
+	
+	public static class Overlap implements KDECorrelation{
+
+		public double correlation(KernelDensityEstimate first,KernelDensityEstimate other, int shift) {
+			double correlation;
+			int matchingArea = 0;
+			for (int i = 0; i < first.size(); i++) {
+				int otherIndex = (other.size() + i + shift) % other.size();
+				matchingArea += Math.min(first.getValue(i),other.getValue(otherIndex));
+			}
+			double biggestKDEArea = Math.max(first.getSumFreq(), other.getSumFreq());
+			correlation = matchingArea / biggestKDEArea;
+			return correlation;
+		}
+	}
+	
+	public static class Cosine implements KDECorrelation{
+		public double correlation(KernelDensityEstimate first,KernelDensityEstimate other, int shift) {
+			double correlation;
+			double innerProduct = 0;
+			double firstSquaredSum = 0;
+			double otherSquaredSum = 0;
+			for (int i = 0; i < first.size(); i++) {
+				int otherIndex = (other.size() + i + shift) % other.size();
+				double firstValue = first.getValue(i);
+				double otherValue = other.getValue(otherIndex);
+				innerProduct += firstValue * otherValue;
+				firstSquaredSum += firstValue * firstValue;
+				otherSquaredSum += otherValue * otherValue;
+			}
+			correlation = innerProduct / ( Math.pow(firstSquaredSum, 0.5) * Math.pow(otherSquaredSum, 0.5));
+			return correlation;
 		}
 	}
 

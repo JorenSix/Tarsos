@@ -155,10 +155,4 @@ public final class Annotate extends AbstractTarsosApp {
 				+ "It uses the defined files with the in "
 				+ "option or all the audiofiles in the audio directory.";
 	}
-
-	@Override
-	public String name() {
-		return "annotate";
-	}
-
 }

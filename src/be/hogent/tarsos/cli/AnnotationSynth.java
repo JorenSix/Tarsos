@@ -26,7 +26,7 @@ import be.hogent.tarsos.util.FileUtils;
 
 /**
  * Generates audio from a set of annotations. AnnotationSynth is used to
- * sonificate pitch annotation files. For the moment it uderstands the pitch
+ * sonificate pitch annotation files. For the moment it understands the pitch
  * files used by BOZKURT, AUBIO and IPEM_SIX. It reads the data from a file or
  * from STDIN.
  * 
@@ -46,27 +46,16 @@ public final class AnnotationSynth extends AbstractTarsosApp {
 	}
 
 	@Override
-	public String name() {
-		return "annotation_synth";
-	}
-
-	@Override
 	public void run(final String... args) {
 		final OptionParser parser = new OptionParser();
 
-		final OptionSpec<File> inputSpec = parser
-				.accepts("in", "Input annotations. If no file is given it reads standard input.")
-				.withRequiredArg().ofType(File.class);
-
 		final OptionSpec<File> outputSpec = parser.accepts("out", "Output WAV-file.").withRequiredArg()
-				.ofType(File.class).defaultsTo(new File("out.wav"));
+				.ofType(File.class);
 
 		final OptionSpec<AnnotationCVSFileHandlers> annoFormatSpec = parser
 				.accepts("format", "Annotation format of the input file: AUBIO|IPEM_SIX|BOZKURT")
 				.withRequiredArg().ofType(AnnotationCVSFileHandlers.class)
-				.defaultsTo(AnnotationCVSFileHandlers.AUBIO);
-
-		parser.accepts("listen", "Do not write a " + "wav file but listen to the generated tones.");
+				.defaultsTo(AnnotationCVSFileHandlers.TARSOS);
 
 		final OptionSpec<Integer> filterSpec = parser
 				.accepts(
@@ -81,35 +70,29 @@ public final class AnnotationSynth extends AbstractTarsosApp {
 		if (isHelpOptionSet(options)) {
 			printHelp(parser);
 		} else {
-			final CSVFileHandler handler = options.valueOf(annoFormatSpec).getCvsFileHandler();
-			final File outputFile = options.valueOf(outputSpec);
-			final File inputFile = options.valueOf(inputSpec);
+			
 			final int filterSize = options.valueOf(filterSpec);
 			final boolean listen = options.has("listen");
-
-			final ToneSequenceBuilder builder = new ToneSequenceBuilder();
-			final String separator = handler.getSeparator();
-			if (inputFile == null) {
-				final BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-				String line;
-				try {
-					line = stdIn.readLine();
-					while (line != null && line.length() != 0) {
-						final String[] row = line.split(separator);
-						handler.handleRow(builder, row);
-						line = stdIn.readLine();
-					}
-				} catch (final IOException e1) {
-					LOG.log(Level.SEVERE, "Could not read from standard input.", e1);
-				}
+				final ToneSequenceBuilder builder = new ToneSequenceBuilder();
+				
+			final CSVFileHandler handler = options.valueOf(annoFormatSpec).getCvsFileHandler();
+			final File outputFile = options.valueOf(outputSpec);
+			if(options.nonOptionArguments().isEmpty()){
+				readFromStandardInput(handler,builder);
 			} else {
-				final List<String[]> rows = FileUtils.readCSVFile(inputFile.getAbsolutePath(), separator, -1);
-				for (final String[] row : rows) {
-					handler.handleRow(builder, row);
+				for(String inputFile : options.nonOptionArguments()){
+					final List<String[]> rows = FileUtils.readCSVFile(inputFile, handler.getSeparator(), -1);
+					for (final String[] row : rows) {
+						try{
+							handler.handleRow(builder, row);
+						}catch(NumberFormatException e){
+							
+						}
+					}
 				}
 			}
 
-			if (listen) {
+			if (options.valueOf(outputSpec) == null) {
 				builder.playAnnotations(filterSize);
 			} else {
 				try {
@@ -118,6 +101,27 @@ public final class AnnotationSynth extends AbstractTarsosApp {
 					LOG.log(Level.SEVERE, "Could not write: " + outputFile + "\n", e);
 				}
 			}
+		}
+		
+		
+	}
+	
+	private void readFromStandardInput(CSVFileHandler handler, ToneSequenceBuilder builder){
+		final BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+		String line;
+		try {
+			line = stdIn.readLine();
+			while (line != null && line.length() != 0) {
+				final String[] row = line.split(handler.getSeparator());
+				try{
+					handler.handleRow(builder, row);
+				}catch(NumberFormatException e){
+					
+				}		
+				line = stdIn.readLine();
+			}
+		} catch (final IOException e1) {
+			LOG.log(Level.SEVERE, "Could not read from standard input.", e1);
 		}
 	}
 }

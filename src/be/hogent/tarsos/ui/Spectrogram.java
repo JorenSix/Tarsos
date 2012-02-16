@@ -142,10 +142,8 @@ public final class Spectrogram extends JComponent {
             if (binEstimate > 700) {
                 Tarsos.println(binEstimate + "");
             }
-
             bin = H - 1 - (int) binEstimate;
         }
-
         return bin;
     }
 

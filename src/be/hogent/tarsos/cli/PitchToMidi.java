@@ -193,17 +193,6 @@ public class PitchToMidi extends AbstractTarsosApp {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see be.hogent.tarsos.exp.cli.AbstractTarsosApp#name()
-	 */
-
-	@Override
-	public String name() {
-		return "pitch_to_midi";
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see be.hogent.tarsos.exp.cli.AbstractTarsosApp#run(java.lang.String[])
 	 */
 

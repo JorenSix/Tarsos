@@ -50,11 +50,6 @@ public final class Rank extends AbstractTarsosApp {
 	}
 
 	@Override
-	public String name() {
-		return "rank";
-	}
-
-	@Override
 	public void run(final String... args) {
 
 		final OptionParser parser = new OptionParser();

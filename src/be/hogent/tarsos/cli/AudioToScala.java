@@ -36,10 +36,6 @@ public final class AudioToScala extends AbstractTarsosApp {
 		return "Detects a tone scale from an audio file and exports it as a scala file.";
 	}
 
-	@Override
-	public String name() {
-		return "audio_to_scala";
-	}
 
 	@Override
 	public void run(final String... args) {
