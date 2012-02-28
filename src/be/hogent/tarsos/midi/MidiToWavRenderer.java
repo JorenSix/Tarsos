@@ -147,7 +147,7 @@ public final class MidiToWavRenderer {
 	 */
 	public void createWavFile(final File midiFile, final File outputFile) throws MidiUnavailableException,
 			InvalidMidiDataException, IOException {
-		// Create a Player with this Synthesizer, and get a Sequence
+		// Create a AdvancedAudioPlayer with this Synthesizer, and get a Sequence
 		final Sequence sequence = MidiSystem.getSequence(midiFile);
 		final Sequencer sequencer = MidiSystem.getSequencer(false);
 		sequencer.getTransmitter().setReceiver(synth.getReceiver());

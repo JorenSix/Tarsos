@@ -41,6 +41,10 @@ public final class MidiToWav extends AbstractTarsosApp {
         return "Creates a WAV file using a scala file and a MIDI file as input. "
         + "This is usefull to create WAV-files in a certain tone scale.";
     }
+    
+    public String synopsis(){
+		return "[option] ..."; 
+	}
 
     /*
      * (non-Javadoc)

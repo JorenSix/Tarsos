@@ -37,13 +37,13 @@ public final class DetectPitch extends AbstractTarsosApp {
 	@Override
 	public String description() {
 		return "Detects pitch for one or more input audio files using a pitch detector. If a directory is given it traverses the directory _recursively_. "
-				+ "Writes csv data to standard out with five columns. The first is the start of the analyzed window (seconds), the second the estimated pitch, the third the saillence of the pitch"
-				+ "The name of the algorithm follows and then the original filename.";
+				+ "Writes csv data to standard out with five columns. The first is the start of the analyzed window (seconds), the second the estimated pitch, the third the saillence of the pitch. "
+				+ "The name of the algorithm follows and the last column shows the original filename.";
 	}
 	
 	@Override
 	public String synopsis(){
-		return "[options] input_file"; 
+		return "[option] input_file..."; 
 	}
 
 	@Override
