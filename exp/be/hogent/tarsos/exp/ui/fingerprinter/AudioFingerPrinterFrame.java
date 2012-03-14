@@ -75,9 +75,7 @@ public class AudioFingerPrinterFrame extends JFrame implements  ActionListener {
 	
 	public AudioFingerPrinterFrame() {
 		super("Tarsos - Robust Audio Fingerprinting");
-		//make sure this is set to false;
-		Configuration.set(ConfKey.tarsos_live, "false");
-
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 

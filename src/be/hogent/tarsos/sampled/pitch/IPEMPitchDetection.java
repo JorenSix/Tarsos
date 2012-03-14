@@ -8,25 +8,18 @@
 **/
 package be.hogent.tarsos.sampled.pitch;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.PumpStreamHandler;
 
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.Command;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
-import be.hogent.tarsos.util.Execute;
 import be.hogent.tarsos.util.FileUtils;
 
 /**
@@ -110,24 +103,35 @@ public final class IPEMPitchDetection implements PitchDetector {
 		String outputDirectory = FileUtils.combine(file.transcodedDirectory()) + "/";
 
 		final String csvFileName = FileUtils.combine(outputDirectory, transcodedBaseName + ".txt");
-		String command = null;
-
+		
 		String audioDirectory = file.transcodedDirectory() + "/";
 		String executableDirectory = FileUtils.temporaryDirectory();
 
 		if (System.getProperty("os.name").contains("indows")) {
+			Command command = null;
 			audioDirectory = audioDirectory.replace("/", "\\").replace(":\\", "://");
 			outputDirectory = outputDirectory.replace("/", "\\").replace(":\\", "://");
 			if (mode == PitchDetectionMode.IPEM_ONE) {
-				command = FileUtils.combine(executableDirectory, name + ".exe  ") + audioDirectory
-						+ transcodedBaseName + ".wav " + outputDirectory + transcodedBaseName + ".txt";
+				String cmd = FileUtils.combine(executableDirectory, name + ".exe  ");
+				command = new Command(cmd);
+				command.addArgument(audioDirectory + transcodedBaseName + ".wav ");
+				command.addArgument(outputDirectory + transcodedBaseName + ".txt");
 			} else {
-				command = FileUtils.combine(executableDirectory, name + ".exe  ") + "lijst.txt "
-						+ audioDirectory + " " + outputDirectory;
+				String cmd = FileUtils.combine(executableDirectory, name + ".exe  ");
+				command = new Command(cmd);
+				command.addArgument("lijst.txt");
+				command.addArgument(audioDirectory);
+				command.addArgument(outputDirectory);
 			}
-			Execute.command(command, null);
+			try {
+				command.execute();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else { // on linux use wine's Z-directory
-			String executable = makeWinePath(FileUtils.combine(executableDirectory, name + ".exe"));		
+			String executable = makeWinePath(FileUtils.combine(executableDirectory, name + ".exe"));	
+			String command;
 			if(mode==PitchDetectionMode.IPEM_ONE){
 				String audioFile = makeWinePath(audioDirectory + transcodedBaseName + ".wav");
 				String outputFile = makeWinePath(csvFileName);
@@ -138,7 +142,6 @@ public final class IPEMPitchDetection implements PitchDetector {
 				outputDirectory = makeWinePath(outputDirectory);
 				command = "wine " + executable  + " " + lijstFile + " " + audioDirectory + " " + outputDirectory + " ";	
 			}
-			
 			String scriptFile = FileUtils.combine(FileUtils.runtimeDirectory(),"ipem.sh");
 			FileUtils.writeFile("#!/bin/bash\n"+command, scriptFile);
 			executeBashScript(new File(scriptFile));
@@ -165,28 +168,16 @@ public final class IPEMPitchDetection implements PitchDetector {
 	}
 	
 	private void executeBashScript(File bashScript){
-		CommandLine cmdLine = new CommandLine("bash");
-		Map<String,File> map = new HashMap<String,File>();
-		map.put("bashScript", bashScript);
-		cmdLine.addArgument("${bashScript}",false);
-		cmdLine.setSubstitutionMap(map);
-		LOG.info("execute: " + cmdLine);
-		DefaultExecutor executor = new DefaultExecutor();
-		//Wait 20 minutes max
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(60 * 1000 * 20);
-		executor.setWatchdog(watchdog);
-		final ByteArrayOutputStream out =  new ByteArrayOutputStream();
-		final PumpStreamHandler pump = new PumpStreamHandler(out);
-		executor.setStreamHandler(pump);
-		executor.setExitValue(0);
+		Command cmd = new Command("bash");
+		cmd.addFileArgument(bashScript.getPath());
 		try {
-			executor.execute(cmdLine);
+			String output = cmd.execute();
+			LOG.fine(output.toString());
 		} catch (ExecuteException e) {
 			LOG.warning("Failed to execute " + bashScript.getAbsolutePath() + ": " + e.getMessage());
 		} catch (IOException e) {
 			LOG.warning("Failed to execute " + bashScript.getAbsolutePath() + ": " + e.getMessage());
 		}
-		LOG.fine(out.toString());
 	}
 	
 	private String makeWinePath(String path){

@@ -24,15 +24,15 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
-import be.hogent.tarsos.sampled.BlockingAudioPlayer;
+import be.hogent.tarsos.dsp.AudioEvent;
+import be.hogent.tarsos.dsp.AudioPlayer;
+import be.hogent.tarsos.dsp.util.AudioFloatConverter;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.sampled.pitch.AnnotationSelection;
 import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
-import be.hogent.tarsos.util.ConfKey;
-import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.TimeUnit;
 
 import com.jgoodies.forms.builder.ButtonBarBuilder2;
@@ -145,13 +145,17 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 				int bufferSize = 2048;
 				double bufferSizeInSeconds = bufferSize / frameSize / frameRate;
 				byte[] buffer = new byte[bufferSize];
-				float[] fakeBuffer = new float[0];
-				BlockingAudioPlayer player = new BlockingAudioPlayer(format.getFormat(), bufferSize
-						/ frameSize, 0);
+				float[] floatBuffer = new float[bufferSize/frameSize];
+				AudioPlayer player = new AudioPlayer(format.getFormat());
+				AudioFloatConverter converter = AudioFloatConverter.getConverter(stream.getFormat());
+				
 				double previousTime = offsetInSeconds;
+				AudioEvent event = new AudioEvent(format.getFormat(),-1);
 				while (running && stream.read(buffer) != -1) {
 					byteCount += buffer.length;
-					player.processOverlapping(fakeBuffer, buffer);
+					converter.toFloatArray(buffer, floatBuffer);
+					event.setFloatBuffer(floatBuffer);
+					player.process(event);
 					double currentTime = byteCount / frameSize / frameRate;
 					if (currentTime - previousTime > 0.03) {
 						publisher.alterSelection(publisher.getCurrentSelection().getStartTime(),currentTime);
@@ -241,7 +245,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 	public void annotationsAdded() {
 		AnnotationSelection selection = AnnotationPublisher.getInstance().getCurrentSelection();
 
-		if (!Configuration.getBoolean(ConfKey.tarsos_live) && audioFile != null) {
+		if (audioFile != null) {
 
 			if (selection.getTimeSpan() > 1.0) {
 				final double startTime;

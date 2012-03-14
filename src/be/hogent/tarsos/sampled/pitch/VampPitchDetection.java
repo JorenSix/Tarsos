@@ -8,23 +8,15 @@
 **/
 package be.hogent.tarsos.sampled.pitch;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.PumpStreamHandler;
-
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.Command;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.FileUtils;
@@ -34,9 +26,6 @@ public final class VampPitchDetection implements PitchDetector {
 	private final List<Annotation> annotations;
 	private final AudioFile file;
 	private final PitchDetectionMode mode;
-	
-	private final ArrayList<String> args = new ArrayList<String>();
-	private final ArrayList<Boolean> argIsFile = new ArrayList<Boolean>();
 
 	private static final Logger LOG = Logger.getLogger(VampPitchDetection.class.getName());
 	
@@ -64,16 +53,13 @@ public final class VampPitchDetection implements PitchDetector {
 		final String csvFileDir = FileUtils.combine(file.transcodedDirectory(),mode.getParametername());
 		FileUtils.mkdirs(csvFileDir);
 		
-		addArgument("-t");
-		addFileArgument(settingsFile);
-		addFileArgument(file.transcodedPath());
-		addArgument("-w");
-		addArgument("csv");
-		addArgument("--csv-one-file");
-		addArgument("h");
-		addArgument("--csv-basedir");
-		addFileArgument(csvFileDir);
-		//addArgument("--csv-force");
+		Command cmd = new Command("sonic-annotator");
+		
+		cmd.addArgument("-t").addFileArgument(settingsFile);
+		cmd.addFileArgument(file.transcodedPath());
+		cmd.addArgument("-w").addArgument("csv");
+		cmd.addArgument("--csv-one-file").addArgument("h");
+		cmd.addArgument("--csv-basedir").addFileArgument(csvFileDir);
 		
 		try {
 			
@@ -87,7 +73,7 @@ public final class VampPitchDetection implements PitchDetector {
 			}
 			
 			if(!FileUtils.exists(csvFile)){
-				LOG.info(execute());
+				LOG.info(cmd.execute());
 			}
 			
 			// CSV file should exist
@@ -208,58 +194,7 @@ public final class VampPitchDetection implements PitchDetector {
 		Collections.sort(annotations);
 	}
 
-	/**
-	 * Adds an argument to the ffmpeg executable call.
-	 * 
-	 * @param arg
-	 *            The argument.
-	 */
-	public void addArgument(String arg) {
-		args.add(arg);
-		argIsFile.add(false);
-	}
-	
-	/**
-	 * Add a file to the ffmpeg executable call.
-	 * @param arg
-	 */
-	public void addFileArgument(String arg){
-		args.add(arg);
-		argIsFile.add(true);
-	}
-	
-	public String execute() throws IOException {
-		CommandLine cmdLine = new CommandLine("sonic-annotator");
-		
-		int fileNumber=0;
-		Map<String,File> map = new HashMap<String,File>();
-		for (int i = 0 ;i<args.size();i++) {
-			final String arg = args.get(i);
-			final Boolean isFile = argIsFile.get(i);
-			if(isFile){
-				String key = "file" + fileNumber;
-				map.put(key, new File(arg));
-				cmdLine.addArgument("${" + key + "}",false);
-				fileNumber++;
-			} else {
-				cmdLine.addArgument(arg);
-			}
-		}		
-		cmdLine.setSubstitutionMap(map);
-		
-		System.out.println("execute: " + cmdLine);
-		
-		DefaultExecutor executor = new DefaultExecutor();
-		//15 minutes wait
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(60 * 1000 * 15);
-		executor.setWatchdog(watchdog);
-		final ByteArrayOutputStream out =  new ByteArrayOutputStream();
-		final PumpStreamHandler pump = new PumpStreamHandler(out);
-		executor.setStreamHandler(pump);
-		executor.setExitValue(0);
-		executor.execute(cmdLine);
-		return out.toString();		
-	}
+
 
 	/**
 	 * Parse a CSV file and create sample objects.

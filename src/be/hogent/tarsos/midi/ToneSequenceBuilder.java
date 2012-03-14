@@ -22,8 +22,9 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import be.hogent.tarsos.sampled.AudioDispatcher;
-import be.hogent.tarsos.sampled.BlockingAudioPlayer;
+
+import be.hogent.tarsos.dsp.AudioDispatcher;
+import be.hogent.tarsos.dsp.AudioPlayer;
 import be.hogent.tarsos.sampled.pitch.PitchFunctions;
 import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.SignalPowerExtractor;
@@ -219,7 +220,7 @@ public final class ToneSequenceBuilder {
 		final AudioInputStream audioInputStream = new AudioInputStream(bais, audioFormat, numberOfSamples);
 		if (fileName == null) {
 			final AudioDispatcher dispatcher = new AudioDispatcher(audioInputStream, 1024, 0);
-			dispatcher.addAudioProcessor(new BlockingAudioPlayer(audioFormat, 1024, 0));
+			dispatcher.addAudioProcessor(new AudioPlayer(audioFormat));
 			dispatcher.run();
 		} else {
 			final File out = new File(fileName);

@@ -33,8 +33,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import be.hogent.tarsos.sampled.AudioDispatcher;
-import be.hogent.tarsos.sampled.AudioProcessor;
+import be.hogent.tarsos.dsp.AudioDispatcher;
+import be.hogent.tarsos.dsp.AudioEvent;
+import be.hogent.tarsos.dsp.AudioProcessor;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
@@ -384,8 +385,7 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 
 			final double secondsToX;
 			secondsToX = 1000 * waveFormWidth / (float) audioFile.getLengthInMilliSeconds();
-			AudioDispatcher adp = AudioDispatcher.fromFile(new File(audioFile.transcodedPath()),
-					framesPerPixel);
+			AudioDispatcher adp = AudioDispatcher.fromFile(new File(audioFile.transcodedPath()),framesPerPixel,0);
 			adp.addAudioProcessor(new AudioProcessor() {
 
 				private int frame = 0;
@@ -397,16 +397,14 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 					LOG.fine("Created wave form image in " + watch.formattedToString());
 				}
 
-				public void processOverlapping(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
+				public boolean process(AudioEvent audioEvent) {
+					float[] audioFloatBuffer = audioEvent.getFloatBuffer();
 					double seconds = frame / frameRate;
 					frame += audioFloatBuffer.length;
 					int x = (int) (secondsToX * seconds);
 					int y = (int) (audioFloatBuffer[0] * one);
 					waveFormGraphics.drawLine(x, 0, x, y);
-				}
-
-				public void processFull(final float[] audioFloatBuffer, final byte[] audioByteBuffer) {
-					processOverlapping(audioFloatBuffer, audioByteBuffer);
+					return true;
 				}
 			});
 

@@ -61,11 +61,6 @@ public enum ConfKey {
 	 * skipped for performance reasons.
 	 */
 	transcode_check_format,
-
-	/**
-	 * The pitch tracker currently in use.
-	 */
-	pitch_tracker_current,
 	
 	/**
 	 * The pitch trackers currently in use.
@@ -81,6 +76,11 @@ public enum ConfKey {
 	 * A MIDI device used as OUTPUT. Should support the MIDI tuning standard.
 	 */
 	midi_output_device,
+	
+	/**
+	 * A list of MIDI devices used as OUTPUT. Should support the MIDI tuning standard.
+	 */
+	midi_output_devices,
 	
 	/**
 	 * An index for a General MIDI instrument
@@ -141,12 +141,7 @@ public enum ConfKey {
 	 * Files recently analysed.
 	 */
 	file_recent,
-
-	/**
-	 * Start Tarsos in Tarsos Live(tm) mode: analyse microphone input in in
-	 * stead of static files.
-	 */
-	tarsos_live,
+	
 	/**
 	 * 	A scala file with pitch intervals used to compare detected intervals.
 	 */

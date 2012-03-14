@@ -86,7 +86,13 @@ public enum PitchDetectionMode {
 	 */
 	TARSOS_MPM("tarsos_mpm"),
 	
-	TARSOS_FAST_MPM("tarsos_fast_mpm");
+	TARSOS_FAST_MPM("tarsos_fast_mpm"),
+	
+	TARSOS_DYNAMIC_WAVELET("tarsos_fast_mpm"),
+	
+	SWIPE("swipe"),
+	
+	SWIPE_OCTAVE("swipe_octave");
 
 	/**
 	 * The name of the parameter.
@@ -138,6 +144,15 @@ public enum PitchDetectionMode {
 			break;
 		case TARSOS_FAST_MPM:
 			detector = new TarsosPitchDetection(audioFile, this);
+			break;
+		case TARSOS_DYNAMIC_WAVELET:
+			detector = new TarsosPitchDetection(audioFile, this);
+			break;
+		case SWIPE:
+			detector = new Swipe(audioFile, this);
+			break;
+		case SWIPE_OCTAVE:
+			detector = new SwipeOctave(audioFile, this);
 			break;
 		default:
 			detector = new VampPitchDetection(audioFile, this);

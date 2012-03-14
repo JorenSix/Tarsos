@@ -135,17 +135,11 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 
 		final String title;
 		final String shortTitle;
-		if (newAudioFile == null) {
-			// we should be in recording live mode
-			assert Configuration.getBoolean(ConfKey.tarsos_live);
-			shortTitle = "Live Recorded";
-			setXRange(0, 100); // 100 sec by default
-
-		} else {
+		
 			// not in live mode
 			setXRange(0, newAudioFile.getLengthInMilliSeconds() / 1000.0);
 			shortTitle = newAudioFile.originalBasename();
-		}
+		
 		title = String.format("%s - pitch in %s", shortTitle, pitchUnit.getHumanName());
 
 		setButtons(true);
@@ -325,11 +319,11 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 			if (minPitch < 0) {
 				minPitch = 0;
 			}
-			if (!Configuration.getBoolean(ConfKey.tarsos_live)) {
+			
 				AnnotationPublisher.getInstance().clear();
 				AnnotationPublisher.getInstance().alterSelection(minTime, maxTime, minPitch, maxPitch);
 				AnnotationPublisher.getInstance().delegateAddAnnotations(minTime, maxTime, minPitch, maxPitch);
-			}
+			
 		}
 	}
 

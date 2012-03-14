@@ -289,8 +289,7 @@ public enum PitchUnit {
 	 */
 	public static double relativeCentToHertz(double relativeCent) {
 		if (relativeCent < 0 || relativeCent >= 1200) {
-			LOG.warning("Relative cent values are values from 0 to 1199, inclusive "
-					+ relativeCent + " is invalid.");
+			LOG.warning("Relative cent values are values from 0 to 1199, inclusive " + relativeCent + " is invalid.");
 		}
 		return absoluteCentToHertz(relativeCent + DEFAULT_OCTAVE_OFFSET);
 	}

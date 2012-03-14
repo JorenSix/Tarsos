@@ -25,7 +25,9 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import be.hogent.tarsos.sampled.BlockingAudioPlayer;
+import be.hogent.tarsos.dsp.AudioEvent;
+import be.hogent.tarsos.dsp.AudioPlayer;
+import be.hogent.tarsos.dsp.util.AudioFloatConverter;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
@@ -356,7 +358,8 @@ public final class AudioFile {
 			final AudioInputStream stream = AudioSystem.getAudioInputStream(new File(transcodedPath()));
 			int frameSize = stream.getFormat().getFrameSize();
 			int bytesPerSecond = (int) (frameSize * stream.getFormat().getFrameRate());
-			BlockingAudioPlayer player = new BlockingAudioPlayer(stream.getFormat(), 512, 0);
+			AudioPlayer player = new AudioPlayer(stream.getFormat());
+			AudioFloatConverter converter = AudioFloatConverter.getConverter(stream.getFormat());
 
 			int previousStop = 0;
 			for (int i = 0; i < selections.length; i += 2) {
@@ -373,7 +376,11 @@ public final class AudioFile {
 				}
 				byte[] audioInfo = new byte[numberOfBytes];
 				stream.read(audioInfo, 0, numberOfBytes);
-				player.processFull(null, audioInfo);
+				AudioEvent event = new AudioEvent(stream.getFormat(),-1);
+				float[] floatBuffer = new float[numberOfBytes/frameSize];
+				converter.toFloatArray(audioInfo, floatBuffer);
+				event.setFloatBuffer(floatBuffer);
+				player.process(event);
 			}
 
 		} catch (UnsupportedAudioFileException e) {

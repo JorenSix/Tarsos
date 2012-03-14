@@ -83,7 +83,7 @@ public class TarsosSynth implements ConfigChangeListener {
 	/**
 	 * The synthesizer device used to render the MIDI, it is connected to the receiver.
 	 */
-	private MidiDevice synthDevice;
+	private final List<MidiDevice> synthDevices;
 
 	
 	/**
@@ -101,6 +101,7 @@ public class TarsosSynth implements ConfigChangeListener {
 	 * Listen to configuration changes.
 	 */
 	public TarsosSynth(){
+		synthDevices = new ArrayList<MidiDevice>();
 		Configuration.addListener(this);
 	}
 	
@@ -108,9 +109,11 @@ public class TarsosSynth implements ConfigChangeListener {
 				
 		try {
 			final MoreMidiInfo synthInfo = MidiCommon.listDevices(false,true).get(0);
-			synthDevice = MidiSystem.getMidiDevice(synthInfo.getInfo());
+			MidiDevice synthDevice = MidiSystem.getMidiDevice(synthInfo.getInfo());
 			synthDevice.open();
 			receiver = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
+			
+			synthDevices.add(synthDevice);
 			
 			// configure the instrument as well
 			setConfiguredInstrument();
@@ -287,7 +290,7 @@ public class TarsosSynth implements ConfigChangeListener {
 		// change the instrument
 		if (key == ConfKey.midi_instrument_index) {
 			setConfiguredInstrument();
-		} else if (key == ConfKey.midi_output_device) {
+		} else if (key == ConfKey.midi_output_devices) {
 			try {
 				setReceiver();
 			} catch (MidiUnavailableException e) {
@@ -310,41 +313,67 @@ public class TarsosSynth implements ConfigChangeListener {
 	 *             If the configured device is not available.
 	 */
 	private void setReceiver() throws MidiUnavailableException {
-		checkMidiOutputDeviceIndex();		
-		final int midiDeviceIndex = Configuration.getInt(ConfKey.midi_output_device);
-		if (synthDevice != null) {
-			synthDevice.close();
-		}
-		final MoreMidiInfo synthInfo = MidiCommon.listDevices(false,true).get(midiDeviceIndex);
+		checkMidiOutputDeviceIndex();
 		
-		LOG.info(String.format("Configuring %s as MIDI OUT.", synthInfo.toString()));
-		synthDevice = MidiSystem.getMidiDevice(synthInfo.getInfo());
-		synthDevice.open();
-		receiver = new ReceiverSink(true, synthDevice.getReceiver(), new LogReceiver());
+		for(MidiDevice synthDevice : synthDevices){
+			if (synthDevice != null) {
+				//synthDevice.close();
+			}
+		}
+		
+		final List<String> midiDeviceIndexes = Configuration.getList(ConfKey.midi_output_devices);
+		for(String midiDeviceIndex : midiDeviceIndexes){
+			final MoreMidiInfo synthInfo = MidiCommon.listDevices(false,true).get(Integer.valueOf(midiDeviceIndex));
+			MidiDevice synthDevice = MidiSystem.getMidiDevice(synthInfo.getInfo());
+			synthDevice.open();
+			synthDevices.add(synthDevice);
+			LOG.info(String.format("Configured %s as MIDI OUT.", synthInfo.toString()));
+		}
+		
+		Receiver[] receivers = new Receiver[synthDevices.size()+1];
+		for(int i = 0 ; i < synthDevices.size() ; i++){
+			receivers[i] = synthDevices.get(i).getReceiver();
+		}
+		receivers[synthDevices.size()] = new LogReceiver();
+		receiver = new ReceiverSink(true,receivers);
 		// configure the instrument as well
 		setConfiguredInstrument();
 		//configure midi input device.
 		connectMidiInputDevice();
-		LOG.info(String.format("Configured %s as MIDI OUT.", synthInfo.toString()));
+
 	}
 	
 	/**
 	 * Checks the MIDI output device index and sets it to a default value if the device index is out of bounds.
 	 */
 	private void checkMidiOutputDeviceIndex() {
-		int deviceIndex = Configuration.getInt(ConfKey.midi_output_device);
+		List<String> deviceIndexes = Configuration.getList(ConfKey.midi_output_devices);
 		int defaultDeviceIndex = 0;
+		
 		Vector<MoreMidiInfo> devices = MidiCommon.listDevices(false,true);
-		if(deviceIndex < 0 || deviceIndex >= devices.size()){
-			Configuration.set(ConfKey.midi_output_device, defaultDeviceIndex);
-			LOG.warning("Ignored index out of bounds exception, reconfigured the midi device index, from " + deviceIndex + " to " + defaultDeviceIndex);
+		if(deviceIndexes.size()== 1 && deviceIndexes.get(0).isEmpty()){
+			Configuration.set(ConfKey.midi_output_devices, defaultDeviceIndex);
+		} else {
+			for(String deviceIndexString : deviceIndexes){
+				int deviceIndex = Integer.valueOf(deviceIndexString);
+				if(deviceIndex < 0 || deviceIndex >= devices.size()){
+					Configuration.set(ConfKey.midi_output_devices, defaultDeviceIndex);
+					LOG.warning("Ignored index out of bounds exception, reconfigured the midi device index, from " + deviceIndex + " to " + defaultDeviceIndex);
+				}	
+			}	
 		}
 	}
 
 	private void setFallbackReceiver(){
 		try {
-			synthDevice = MidiSystem.getSynthesizer();
+			synthDevices.clear();
+			MidiDevice synthDevice = MidiSystem.getSynthesizer();
+			synthDevice.open();
+			receiver = new ReceiverSink(true);
+			receiver.addReceiver(new LogReceiver());
+			receiver.addReceiver(synthDevice.getReceiver());
 			LOG.warning("Using not the configured synth but: " + synthDevice.toString());
+			synthDevices.add(synthDevice);
 		} catch (MidiUnavailableException e) {
 			LOG.severe("Could not initialize a synth");
 		}		
@@ -371,15 +400,18 @@ public class TarsosSynth implements ConfigChangeListener {
 	
 	public List<String> availableInstruments(){
 		List<String> instruments = new ArrayList<String>();
-		if (synthDevice instanceof Synthesizer) {
-			for(Instrument instrument : ((Synthesizer) synthDevice).getAvailableInstruments()){
-				instruments.add(instrument.getName());
+		for(MidiDevice synthDevice : synthDevices){
+			if (synthDevice instanceof Synthesizer) {
+				for(Instrument instrument : ((Synthesizer) synthDevice).getAvailableInstruments()){
+					instruments.add(instrument.getName());
+				}
 			}
 		}
 		return instruments;
 	}
 	
 	private void setConfiguredInstrument() {
+		for(MidiDevice synthDevice : synthDevices){
 		if (synthDevice instanceof Synthesizer) {
 			Synthesizer synth = (Synthesizer) synthDevice;
 			Instrument[] available = synth.getAvailableInstruments();
@@ -404,12 +436,15 @@ public class TarsosSynth implements ConfigChangeListener {
 			
 			LOG.info(String.format("Configured synth with %s.", configuredInstrument.getName()));
 		}
+		}
 	}
 	
 	
 	public void close() {
-		if (synthDevice != null) {
-			synthDevice.close();
+		for(MidiDevice synthDevice : synthDevices){
+			if (synthDevice != null) {
+				synthDevice.close();
+			}
 		}
 		if(receiver != null){
 			receiver.close();

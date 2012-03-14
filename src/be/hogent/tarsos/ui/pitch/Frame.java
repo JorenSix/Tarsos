@@ -30,20 +30,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.Mixer;
-import javax.sound.sampled.TargetDataLine;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
@@ -61,15 +52,11 @@ import org.noos.xing.mydoggy.ToolWindowManager;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
 
-import be.hogent.tarsos.sampled.SampledAudioUtilities;
 import be.hogent.tarsos.sampled.pitch.Annotation;
-import be.hogent.tarsos.sampled.pitch.AnnotationHandler;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
-import be.hogent.tarsos.sampled.pitch.AnnotationTree;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchDetector;
-import be.hogent.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.BackgroundTask;
 import be.hogent.tarsos.ui.BackgroundTask.TaskHandler;
@@ -144,19 +131,18 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 		setSize(INITIAL_WIDTH, INITIAL_HEIGHT);
-		//setMinimumSize(new Dimension(INITIAL_WIDTH , INITIAL_HEIGHT));
+		
 		// center
 		setLocationRelativeTo(null);
-		setProgramIcon();
+		Frame.setTarsosProgramIcon(this);
 
 		// initialize listener lists
 		scaleChangedListeners = new ArrayList<ScaleChangedListener>();
 		audioFileChangedListeners = new ArrayList<AudioFileChangedListener>();
 
-		// react to drag and drop if not in Tarsos Live Mode
-		if (!Configuration.getBoolean(ConfKey.tarsos_live)) {
-			addFileDropListener();
-		}
+		// react to drag and drop 
+		addFileDropListener();
+		
 
 		// all the components to add to the frame
 		JComponent configurationPanel = makeConfigurationPanel();
@@ -173,7 +159,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		final WaveForm waveForm = new WaveForm();
 		final ControlPanel controlPanel = new ControlPanel(waveForm);
 		final KeyboardPanel keyboardPanel = new KeyboardPanel();
-		final Menu menu = new Menu();
+		final Menu menu = new Menu(false);
 		final CommandPanel commandPanel = new CommandPanel();
 
 		// The annotation publisher is not a ui element.
@@ -220,10 +206,6 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		annotationPublisher.addListener(commandPanel);
 		annotationPublisher.addListener(this);
 
-		// Initizalize pitch contour if in Tarsos Live Mode
-		if (Configuration.getBoolean(ConfKey.tarsos_live)) {
-			pitchContourPanel.audioFileChanged(null);
-		}
 
 		// initialize content and tool window manager of the 'mydoggy'
 		// framework.
@@ -290,15 +272,11 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		for (ToolWindow window : toolWindowManager.getToolWindows()) {
 			window.setAvailable(true);
 		}
-
-		checkTarsosLiveMode();
 		
 		setJMenuBar(menu);
 		
 		setupChangeInPitchDetectors();
-		
-		
-		
+			
 		//set initial scale:
 		scaleChanged(ScalaFile.westernTuning().getPitches(), false, false);
 		
@@ -337,79 +315,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 				}
 			}
 		});
-		
 	}
-	
-	
-
-	private void checkTarsosLiveMode() {
-		if (Configuration.getBoolean(ConfKey.tarsos_live)) {
-			checkInputDeviceIndex();
-			final int selected = Configuration.getInt(ConfKey.mixer_input_device);
-			Mixer.Info selectedMixer = SampledAudioUtilities.getMixerInfo(false, true).get(selected);
-			final Mixer mixer = AudioSystem.getMixer(selectedMixer);
-			final AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
-			final DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, format);
-			TargetDataLine line;
-			try {
-				line = (TargetDataLine) mixer.getLine(dataLineInfo);
-				final int numberOfSamples = (int) (0.1 * 44100);
-				line.open(format, numberOfSamples);
-				line.start();
-				final AudioInputStream stream = new AudioInputStream(line);
-				
-				//only use detectors that can provide live annotations
-				PitchDetectionMode mode = Configuration.getPitchDetectionMode(ConfKey.pitch_tracker_current);
-				if (mode!=PitchDetectionMode.TARSOS_MPM || mode != PitchDetectionMode.TARSOS_YIN ){
-					//default to YIN
-					mode = PitchDetectionMode.TARSOS_YIN;
-				}
-
-				final AnnotationPublisher publisher = AnnotationPublisher.getInstance();
-				final AnnotationTree tree = publisher.getAnnotationTree();
-				try {
-					TarsosPitchDetection.processStream(stream, new AnnotationHandler() {
-						private int i = 0;
-						private double prevTime = 0.0;
-
-						public void handleAnnotation(final Annotation annotation) {
-							i++;
-							tree.add(annotation);
-							if (i % 5 == 0) {
-								double currentTime = annotation.getStart();
-								publisher.alterSelection(publisher.getCurrentSelection().getStartTime(),currentTime);
-								publisher.delegateAddAnnotations(prevTime, currentTime);
-								prevTime = currentTime;
-							}
-						}
-					}, mode);
-				} catch (UnsupportedAudioFileException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			} catch (LineUnavailableException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalArgumentException e){
-				JOptionPane.showMessageDialog(this,"Please choos another microphone input: \n " +e.getMessage(),"Microphone not supported",JOptionPane.ERROR_MESSAGE);
-			}
-		}
-	}
-
-	private void checkInputDeviceIndex() {
-		final int inputDeviceIndex = Configuration.getInt(ConfKey.mixer_input_device);
-		final int defaultInputDeviceIndex = 0;
-		if(inputDeviceIndex  < 0  || inputDeviceIndex >= SampledAudioUtilities.getMixerInfo(false, true).size()){
-			Configuration.set(ConfKey.mixer_input_device,defaultInputDeviceIndex);
-			LOG.warning("Ignored configured mixer input device (" + inputDeviceIndex + ") reset to " +defaultInputDeviceIndex);			
-		}
-	}
-
-
 
 	private JComponent makeStatusBar() {
 		JLabel statusBarLabel = new JLabel();
@@ -423,15 +329,15 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		tabbedContent.setCloseable(false);
 		tabbedContent.setDetachable(true);
 		tabbedContent.setTransparentMode(false);
-		tabbedContent.setMinimizable(true);
+		tabbedContent.setMinimizable(true);		
 	}
 
-	private void setProgramIcon() {
+	public static void setTarsosProgramIcon(JFrame frame) {
 		try {
 			final BufferedImage image;
 			final String iconPath = "/be/hogent/tarsos/ui/resources/tarsos_logo_small.png";
-			image = ImageIO.read(this.getClass().getResource(iconPath));
-			setIconImage(image);
+			image = ImageIO.read(frame.getClass().getResource(iconPath));
+			frame.setIconImage(image);
 		} catch (IOException e) {
 			// fail silently, a lacking icon is not that bad
 			LOG.warning("Failed to set program icon");

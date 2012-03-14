@@ -64,8 +64,11 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	
 	private double[] scale = ScalaFile.westernTuning().getPitches();
 	private AudioFile audioFile;
+	
+	private final boolean live; 
 
-	public Menu() {
+	public Menu(boolean forTarsosLive) {
+		live = forTarsosLive;
 		addFileMenu();
 		addSettingsMenu();
 		addHelpMenu();
@@ -82,9 +85,11 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 
 		JMenuItem item;
 
-		item = new JMenuItem("Open...");
-		item.addActionListener(importFileAction);
-		menu.add(item);
+		if(!live){
+			item = new JMenuItem("Open...");
+			item.addActionListener(importFileAction);
+			menu.add(item);
+		}
 
 		JMenu importMenu = new JMenu("Import");
 		menu.add(importMenu);
@@ -182,23 +187,32 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		item.addActionListener(exportIntervalMatrixLatexAction);
 		pitchClassDataMenu.add(item);
 		
-		final List<String> files = Configuration.getList(ConfKey.file_recent);
-		if(!files.isEmpty()){
-			menu.addSeparator();	
-		}
-		addRecentFilesToMenu(menu);
-		
-		//remove and add recent file menu if a file is opened
-		//or imported (by drag and drop).
-		Configuration.addListener(new ConfigChangeListener(){
-			public void configurationChanged(ConfKey key) {
-				if(key == ConfKey.file_recent){
-					for(JMenuItem menuItem : recentFilesMenuItems){
-						menu.remove(menuItem);
+		if(!live){
+			final List<String> files = Configuration.getList(ConfKey.file_recent);
+			if(!files.isEmpty()){
+				menu.addSeparator();	
+			}
+	
+			addRecentFilesToMenu(menu);
+					
+			//remove and add recent file menu if a file is opened
+			//or imported (by drag and drop).
+			Configuration.addListener(new ConfigChangeListener(){
+				public void configurationChanged(ConfKey key) {
+					if(key == ConfKey.file_recent){
+						for(JMenuItem menuItem : recentFilesMenuItems){
+							menu.remove(menuItem);
+						}
+						addRecentFilesToMenu(menu);
 					}
-					addRecentFilesToMenu(menu);
-				}
-			}});	
+				}});
+		}
+		
+		//exit action
+		menu.addSeparator();
+		item = new JMenuItem("Exit");
+		item.addActionListener(exitAction);
+		menu.add(item);
 	}
 	
 	List<JMenuItem> recentFilesMenuItems;
@@ -221,69 +235,32 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				}
 			}
 		}
-		
-		menu.addSeparator();
-		item = new JMenuItem("Exit");
-		item.addActionListener(exitAction);
-		recentFilesMenuItems.add(item);
-		menu.add(item);		
 	}
 
 	private void addSettingsMenu() {
 		JMenu menu = new JMenu("Settings");
 		this.add(menu);
 
-		JMenuItem item;
-
 		addMixerMenu(menu);
 
 		addMidiMenu(menu);
 
-		menu.addSeparator();
-
-		JMenu detectorsMenu = new JMenu("Pitch Detectors");
-		menu.add(detectorsMenu);
-		
-		List<PitchDetectionMode> selectedModes =  PitchDetectionMode.selected();
-
-		for (PitchDetectionMode mode : PitchDetectionMode.values()) {
-			JCheckBoxMenuItem detectorItem = new JCheckBoxMenuItem(mode.name());
-			detectorItem.setSelected(selectedModes.contains(mode));
-			detectorItem.setActionCommand(mode.name());
-			detectorItem.addActionListener(saveSelectedDetectorsAction);
-			detectorsMenu.add(detectorItem);
+		if(!live){
+			menu.addSeparator();
+	
+			JMenu detectorsMenu = new JMenu("Pitch Detectors");
+			menu.add(detectorsMenu);
+			
+			List<PitchDetectionMode> selectedModes =  PitchDetectionMode.selected();
+	
+			for (PitchDetectionMode mode : PitchDetectionMode.values()) {
+				JCheckBoxMenuItem detectorItem = new JCheckBoxMenuItem(mode.name());
+				detectorItem.setSelected(selectedModes.contains(mode));
+				detectorItem.setActionCommand(mode.name());
+				detectorItem.addActionListener(saveSelectedDetectorsAction);
+				detectorsMenu.add(detectorItem);
+			}
 		}
-
-		menu.addSeparator();
-
-		item = new JCheckBoxMenuItem("Tarsos Live");
-		((JCheckBoxMenuItem) item).setSelected(Configuration
-				.getBoolean(ConfKey.tarsos_live));
-		item.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				JCheckBoxMenuItem checkbox = (JCheckBoxMenuItem) arg0
-						.getSource();
-				boolean selected = checkbox.isSelected();
-				Configuration.set(ConfKey.tarsos_live, selected);
-			}
-		});
-		menu.add(item);
-		
-		menu.addSeparator();
-		
-		item = new JCheckBoxMenuItem("Reset on import");
-		((JCheckBoxMenuItem) item).setSelected(Configuration
-				.getBoolean(ConfKey.reset_on_import));
-		item.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				JCheckBoxMenuItem checkbox = (JCheckBoxMenuItem) arg0
-						.getSource();
-				boolean selected = checkbox.isSelected();
-				Configuration.set(ConfKey.tarsos_live, selected);
-			}
-		});
-		menu.add(item);
-
 	}
 
 	private void addMidiMenu(JMenu menu) {
@@ -292,26 +269,22 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 
 		JMenu outputMidiDevices = new JMenu("Output");
 		midiDevicesMenu.add(outputMidiDevices);
-		addMidiDevicesMenu(outputMidiDevices, false, true,
-				midiOutputDeviceChange, ConfKey.midi_output_device);
+		addMidiOutputDevicesMenu(outputMidiDevices,midiOutputDeviceChange);
 
 		JMenu inputMidiDevices = new JMenu("Input");
 		midiDevicesMenu.add(inputMidiDevices);
-		addMidiDevicesMenu(inputMidiDevices, true, false,
-				midiInputDeviceChange, ConfKey.midi_input_device);
+		addMidiInputDevicesMenu(inputMidiDevices,midiInputDeviceChange);
 		
 		addInstrumentsMenu(midiDevicesMenu);
 	}
 
-	private void addMidiDevicesMenu(JMenu parent, boolean input,
-			boolean output, ActionListener listener, ConfKey key) {
+	private void addMidiInputDevicesMenu(JMenu parent,ActionListener listener) {
 		ButtonGroup buttonGroup = new ButtonGroup();
-		Vector<MoreMidiInfo> outputMidiInfo = MidiCommon.listDevices(input,
-				output);
+		Vector<MoreMidiInfo> outputMidiInfo = MidiCommon.listDevices(true,false);
 		int deviceIndex = 0;
-		int currentIndex = Configuration.getInt(key);
+		int currentIndex = Configuration.getInt(ConfKey.midi_input_device);
 		for (MoreMidiInfo info : outputMidiInfo) {
-			JRadioButtonMenuItem radioButton = new JRadioButtonMenuItem(info
+			JMenuItem radioButton = new JRadioButtonMenuItem(info
 					.getInfo().getName());
 			radioButton.setToolTipText(info.toString());
 			radioButton.setActionCommand(String.valueOf(deviceIndex));
@@ -321,6 +294,29 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			radioButton.addActionListener(listener);
 			parent.add(radioButton);
 			buttonGroup.add(radioButton);
+			deviceIndex++;
+		}
+		if(outputMidiInfo.size()>20){
+			MenuScroller.setScrollerFor(parent, 15);			
+		}
+	}
+	
+	private void addMidiOutputDevicesMenu(JMenu parent, ActionListener listener) {
+		Vector<MoreMidiInfo> outputMidiInfo = MidiCommon.listDevices(false,true);
+		int deviceIndex = 0;
+		List<String> currentIndexes = Configuration.getList(ConfKey.midi_output_devices);
+		for (MoreMidiInfo info : outputMidiInfo) {
+			JCheckBoxMenuItem checkBoxButton = new JCheckBoxMenuItem(info
+					.getInfo().getName());
+			checkBoxButton.setToolTipText(info.toString());
+			checkBoxButton.setActionCommand(String.valueOf(deviceIndex));
+			for(String currentIndex : currentIndexes) {
+				if (String.valueOf(deviceIndex).equals(currentIndex)) {
+					checkBoxButton.setSelected(true);
+				}
+				checkBoxButton.addActionListener(listener);
+				parent.add(checkBoxButton);
+			}
 			deviceIndex++;
 		}
 		if(outputMidiInfo.size()>20){
@@ -457,8 +453,18 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 
 	private ActionListener midiOutputDeviceChange = new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
-			Configuration.set(ConfKey.midi_output_device,
-					Integer.valueOf(arg0.getActionCommand()));
+			JCheckBoxMenuItem checkbox = (JCheckBoxMenuItem) arg0.getSource();
+			boolean selected = checkbox.isSelected();
+			String deviceIndex = arg0.getActionCommand();
+			ConfKey key = ConfKey.midi_output_devices;
+			List<String> currentList = Configuration.getList(key);
+			if(selected){
+				if(!currentList.contains(deviceIndex))
+					currentList.add(deviceIndex);
+			}else{
+				currentList.remove(deviceIndex);	
+			}
+			Configuration.set(key, currentList);
 		}
 	};
 

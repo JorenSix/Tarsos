@@ -118,7 +118,7 @@ public class AudioFingerprinter {
 			if(!cache.containsKey(file)){
 				AudioFile audioFile;
 				audioFile = new AudioFile(file.getAbsolutePath());
-				PitchDetector detector = PitchDetectionMode.TARSOS_FAST_MPM.getPitchDetector(audioFile);	
+				PitchDetector detector = PitchDetectionMode.TARSOS_MPM.getPitchDetector(audioFile);	
 				detector.executePitchDetection();
 				KernelDensityEstimate kde = HistogramFactory.createPichClassKDE(detector.getAnnotations(), 7);
 				cache.put(file, HistogramFactory.createPitchClassHistogram(kde));
@@ -138,6 +138,8 @@ public class AudioFingerprinter {
 	
 
 	public static void main(final String[] args) {
+		Configuration.checkForConfigurationAndWriteDefaults();
+		Tarsos.configureDirectories(Logger.getLogger(AudioFingerprinter.class.getName()));
 		if(args.length == 0){
 			startUI();
 		}else if (args.length==1){
@@ -196,7 +198,6 @@ public class AudioFingerprinter {
 			System.exit(-1);
 		}
 		
-		File needle = new File(args[0]);
 		for(int i = 1 ; i < args.length ; i++){
 			if(!FileUtils.exists(args[i]) || (!FileUtils.isDirectory(args[i]) && !FileUtils.isAudioFile(new File(args[i])))){
 				printHelp("Each haystack should be a valid directory or audio file. "+ args[i] + " is not. Please provide a valid directory or audio file.");
@@ -229,7 +230,7 @@ public class AudioFingerprinter {
 				haystack.add(file);
 			}
 		}
-		System.out.println("Will inspect a haystack of " + haystack.size() + " files for " + needles.size() + "needles.");
+		System.out.println("Will inspect a haystack of " + haystack.size() + " files for " + needles.size() + " needles.");
 		
 		Iterator<File> it  = needles.iterator();
 		while(it.hasNext()){
