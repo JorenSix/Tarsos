@@ -78,7 +78,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 			}
 		});
 		
-		loopSelectionCheckBox = new JCheckBox("Replay selection?");
+		loopSelectionCheckBox = new JCheckBox("Loop selection?");
 		loopSelectionCheckBox.setToolTipText("Or play starting from the end marker.");
 		loopSelectionCheckBox.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
@@ -96,7 +96,6 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 		this.add(builder.getPanel(), BorderLayout.EAST);
 		this.add(waveFormComponent, BorderLayout.CENTER);
 		waveFormComponent.setSize(getPreferredSize());
-		waveFormComponent.setControlPanel(this);
 	}
 
 	public final class AudioPlayingThread extends Thread {
@@ -204,7 +203,7 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 
 	public void audioFileChanged(AudioFile newAudioFile) {
 		audioFile = newAudioFile;
-		AnnotationPublisher.getInstance().getCurrentSelection().setTimeSelection(0, 0);
+		
 		waveForm.setMarker(0, true);
 		waveForm.setMarker(0, false);
 	}

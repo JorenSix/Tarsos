@@ -172,7 +172,7 @@ public final class Tarsos {
 	 * @param application
 	 *            The instance that represents the Tarsos application.
 	 */
-	public void registerApplication(final String name, final AbstractTarsosApp application) {
+	private void registerApplication(final String name, final AbstractTarsosApp application) {
 		applications.put(name, application);
 	}
 
@@ -180,7 +180,7 @@ public final class Tarsos {
 	 * @param arguments
 	 *            The arguments for the program.
 	 */
-	public void run(final String... arguments) {
+	private void run(final String... arguments) {
 		if (arguments.length == 0) {
 			startUserInterface();
 		} else {
@@ -198,7 +198,7 @@ public final class Tarsos {
 						//System.setProperty("apple.laf.useScreenMenuBar", "true");
 						//System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Tarsos");
 					}
-					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+					//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				} catch (Exception e) {
 					log.log(Level.WARNING, "Unable to set system L&F, continue with default L&F", e);
 				}
@@ -209,7 +209,7 @@ public final class Tarsos {
 
 	}
 	
-	public static boolean isMac(){		 
+	private static boolean isMac(){		 
 		String os = System.getProperty("os.name").toLowerCase();
 		//Mac
 	    return (os.indexOf( "mac" ) >= 0); 
@@ -275,7 +275,7 @@ public final class Tarsos {
 	 * 
 	 * @return The only instance of the Tarsos application.
 	 */
-	public static Tarsos getInstance() {
+	private static Tarsos getInstance() {
 		synchronized (Tarsos.class) {
 			if (tarsosInstance == null) {
 				tarsosInstance = new Tarsos();

@@ -10,6 +10,7 @@ package be.hogent.tarsos.ui.pitch;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,11 +32,13 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.KeyStroke;
 
 import be.hogent.tarsos.midi.MidiCommon;
 import be.hogent.tarsos.midi.MidiCommon.MoreMidiInfo;
 import be.hogent.tarsos.midi.TarsosSynth;
 import be.hogent.tarsos.midi.ToneSequenceBuilder;
+import be.hogent.tarsos.sampled.Player;
 import be.hogent.tarsos.sampled.SampledAudioUtilities;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
@@ -261,6 +264,29 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				detectorsMenu.add(detectorItem);
 			}
 		}
+		menu.addSeparator();
+		
+		JMenuItem increaseVolume = new JMenuItem("Increase Volume");
+		increaseVolume.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ActionEvent.CTRL_MASK));
+		increaseVolume.addActionListener(increaseVolumeAction);
+		menu.add(increaseVolume);
+		
+		JMenuItem decreaseVolume = new JMenuItem("Decrease Volume");		
+		decreaseVolume.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ActionEvent.CTRL_MASK));
+		decreaseVolume.addActionListener(decreaseVolumeAction);
+		menu.add(decreaseVolume);
+		
+		menu.addSeparator();
+		
+		JMenuItem increaseTempo = new JMenuItem("Increase Tempo");		
+		increaseTempo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ActionEvent.ALT_MASK));
+		increaseTempo.addActionListener(increaseTempoAction);
+		menu.add(increaseTempo);
+		
+		JMenuItem decreaseTempo = new JMenuItem("Decrease Tempo");		
+		decreaseTempo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ActionEvent.ALT_MASK));
+		decreaseTempo.addActionListener(decreaseTempoAction);
+		menu.add(decreaseTempo);
 	}
 
 	private void addMidiMenu(JMenu menu) {
@@ -485,6 +511,30 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	private ActionListener exitAction = new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
 			System.exit(0);
+		}
+	};
+	
+	private ActionListener increaseVolumeAction = new ActionListener() {
+		public void actionPerformed(ActionEvent arg0) {
+			Player.getInstance().increaseGain(0.05);
+		}
+	};
+	
+	private ActionListener decreaseVolumeAction = new ActionListener() {
+		public void actionPerformed(ActionEvent arg0) {
+			Player.getInstance().increaseGain(-0.05);
+		}
+	};
+	
+	private ActionListener increaseTempoAction = new ActionListener() {
+		public void actionPerformed(ActionEvent arg0) {
+			Player.getInstance().increaseTempo(0.05);
+		}
+	};
+	
+	private ActionListener decreaseTempoAction = new ActionListener() {
+		public void actionPerformed(ActionEvent arg0) {
+			Player.getInstance().increaseTempo(-0.05);
 		}
 	};
 	

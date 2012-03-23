@@ -39,11 +39,9 @@ import be.hogent.tarsos.dsp.AudioProcessor;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
-import be.hogent.tarsos.ui.pitch.ControlPanel;
 import be.hogent.tarsos.ui.pitch.Frame;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.StopWatch;
-import be.hogent.tarsos.util.TimeUnit;
 
 public final class WaveForm extends JPanel implements AudioFileChangedListener {
 
@@ -83,17 +81,12 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 			public void mouseClicked(final MouseEvent event) {
 				if (event.getButton() == MouseEvent.BUTTON1) {
 					setMarkerInPixels(event.getX(), false);
-					if (controlPanel != null && controlPanel.shouldPlay()) {
-						controlPanel.startPlayback(maxMarkerPosition,audioFile.getLengthIn(TimeUnit.SECONDS));
-					}
 				} else {
 					setMarkerInPixels(event.getX(), true);
 				}
 				AnnotationPublisher.getInstance().clear();
 				AnnotationPublisher.getInstance().alterSelection(minMarkerPosition, maxMarkerPosition);
 				AnnotationPublisher.getInstance().delegateAddAnnotations(minMarkerPosition, maxMarkerPosition);
-				
-
 			}
 		});
 		setMarker(0, true);
@@ -441,13 +434,6 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
-	}
-
-	private ControlPanel controlPanel;
-
-	public void setControlPanel(ControlPanel controlPanel) {
-		this.controlPanel = controlPanel;
 	}
 
 }

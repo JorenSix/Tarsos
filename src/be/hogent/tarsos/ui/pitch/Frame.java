@@ -17,6 +17,8 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -39,7 +41,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
-import org.noos.xing.mydoggy.AggregationPosition;
 import org.noos.xing.mydoggy.Content;
 import org.noos.xing.mydoggy.ContentManager;
 import org.noos.xing.mydoggy.MultiSplitConstraint;
@@ -52,6 +53,7 @@ import org.noos.xing.mydoggy.ToolWindowManager;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
 
+import be.hogent.tarsos.sampled.Player;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
@@ -110,8 +112,6 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		return instance;
 	}
 
-
-
 	/**
 	 * Is there processing going on?
 	 */
@@ -150,6 +150,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		JComponent helpPanel = makeHelpanel();
 		JComponent headerPanel = new HeaderPanel();
 		JComponent statusBar = makeStatusBar();
+		PlayerControlPanel player = new PlayerControlPanel();
 
 		final PitchClassHistogramPanel pitchClassHistogramPanel = new PitchClassHistogramPanel(new PitchClassHistogram(), this);
 		final PitchClassHistogramPanel ambitusPanel = new PitchClassHistogramPanel(new PitchHistogram(), this);
@@ -157,10 +158,9 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		final PitchContour regression = new PitchContour();
 		final IntervalTable intervalTable = new IntervalTable();
 		final WaveForm waveForm = new WaveForm();
-		final ControlPanel controlPanel = new ControlPanel(waveForm);
 		final KeyboardPanel keyboardPanel = new KeyboardPanel();
 		final Menu menu = new Menu(false);
-		final CommandPanel commandPanel = new CommandPanel();
+
 
 		// The annotation publisher is not a ui element.
 		final AnnotationPublisher annotationPublisher = AnnotationPublisher.getInstance();
@@ -179,7 +179,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		addScaleChangedListener(intervalTable);
 		addScaleChangedListener(keyboardPanel);
 		addScaleChangedListener(menu);
-		addScaleChangedListener(commandPanel);
+
 
 		// Patch the audio file changed listeners.
 		addAudioFileChangedListener(HistogramData.getPitchClassHistogramInstance());
@@ -190,20 +190,20 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		addAudioFileChangedListener(pitchContourPanel);
 		addAudioFileChangedListener(regression);
 		addAudioFileChangedListener(waveForm);
-		addAudioFileChangedListener(controlPanel);
 		addAudioFileChangedListener(browser);
 		addAudioFileChangedListener(menu);
-		addAudioFileChangedListener(commandPanel);
+		addAudioFileChangedListener(player);
+
 
 		// Patch the annotation listeners
 		annotationPublisher.addListener(HistogramData.getPitchClassHistogramInstance());
 		annotationPublisher.addListener(HistogramData.getPitchHistogramInstance());
-		
 		annotationPublisher.addListener(pitchClassHistogramPanel);
 		annotationPublisher.addListener(ambitusPanel);
 		annotationPublisher.addListener(pitchContourPanel);
-		annotationPublisher.addListener(controlPanel);
-		annotationPublisher.addListener(commandPanel);
+		annotationPublisher.addListener(player);
+		
+
 		annotationPublisher.addListener(this);
 
 
@@ -243,13 +243,9 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		content = contentManager.addContent("Interval table", "Interval table", null, intervalTable,null,constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
+
 		
-		constraint = new MultiSplitConstraint(AggregationPosition.RIGHT);
-		content = contentManager.addContent("Commands", "Commands", null, commandPanel, null,constraint);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(false);
-		
-		content = contentManager.addContent("Waveform", "Waveform", null, controlPanel);
+		content = contentManager.addContent("Waveform", "Waveform", null, waveForm);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(false);
 		
@@ -264,7 +260,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		content.setMinimized(true);
 		
 		//Disable the browser for now.
-		//toolWindowManager.registerToolWindow("Browser", "Browser", null, browser, ToolWindowAnchor.RIGHT);
+		toolWindowManager.registerToolWindow("Player", "Player", null, player, ToolWindowAnchor.BOTTOM);
 		toolWindowManager.registerToolWindow("Help", "Help", null, helpPanel, ToolWindowAnchor.BOTTOM);
 		toolWindowManager.registerToolWindow("Logging", "Logging", null, logPanel, ToolWindowAnchor.BOTTOM);
 
@@ -272,6 +268,8 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		for (ToolWindow window : toolWindowManager.getToolWindows()) {
 			window.setAvailable(true);
 		}
+		
+		toolWindowManager.getToolWindow(1).setVisible(true);
 		
 		setJMenuBar(menu);
 		
@@ -281,6 +279,16 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		scaleChanged(ScalaFile.westernTuning().getPitches(), false, false);
 		
 		//restoreWorkspace();
+		
+		addKeyListener(new KeyAdapter() {
+			public void keyTyped(KeyEvent arg0) {
+				if(arg0.isControlDown() && arg0.getKeyChar() == '+'){
+					Player.getInstance().increaseGain(0.05);
+				} else if(arg0.isControlDown() && arg0.getKeyChar() == '-'){
+					Player.getInstance().increaseGain(-0.05);
+				}
+			}
+		});
 	}
 	
 	/*
@@ -510,7 +518,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 				.getList(ConfKey.pitch_tracker_list)) {
 			final PitchDetectionMode mode = PitchDetectionMode
 					.valueOf(name);
-			final boolean determinatedLength = (mode == PitchDetectionMode.TARSOS_MPM || PitchDetectionMode.TARSOS_YIN == mode);
+			final boolean determinatedLength = (mode == PitchDetectionMode.TARSOS_MPM || PitchDetectionMode.TARSOS_YIN == mode || PitchDetectionMode.TARSOS_DYNAMIC_WAVELET == mode);
 			DetectorTask task = new DetectorTask(mode.getDetectionModeName() + " " + FileUtils.basename(audioFile.getAbsolutePath()), determinatedLength, mode);
 			transcodingTask.addHandler(task);
 			detectorTasks.add(task);

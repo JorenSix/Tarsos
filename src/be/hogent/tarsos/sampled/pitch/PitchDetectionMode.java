@@ -88,9 +88,12 @@ public enum PitchDetectionMode {
 	
 	TARSOS_FAST_MPM("tarsos_fast_mpm"),
 	
-	TARSOS_DYNAMIC_WAVELET("tarsos_fast_mpm"),
+	TARSOS_DYNAMIC_WAVELET("tarsos_dynamic_wavelet"),
 	
 	SWIPE("swipe"),
+	
+	POLYPHON("polyphon"),
+	
 	
 	SWIPE_OCTAVE("swipe_octave");
 
@@ -150,6 +153,9 @@ public enum PitchDetectionMode {
 			break;
 		case SWIPE:
 			detector = new Swipe(audioFile, this);
+			break;
+		case POLYPHON:
+			detector = new Polyphon(audioFile, this);
 			break;
 		case SWIPE_OCTAVE:
 			detector = new SwipeOctave(audioFile, this);

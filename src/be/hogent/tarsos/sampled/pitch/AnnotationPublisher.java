@@ -208,17 +208,17 @@ public final class AnnotationPublisher{
 			final double startPitch, final double stopPitch){
 		selection.setTimeSelection(startTime, stopTime);
 		selection.setPitchSelection(startPitch, stopPitch);
-		LOG.fine("New selection: " + selection.toString());
+		LOG.finer("New selection: " + selection.toString());
 	}
 	
 	public void alterSelection(final double startTime, final double stopTime){
 		selection.setTimeSelection(startTime, stopTime);
-		LOG.fine("New selection: " + selection.toString());
+		LOG.finer("New selection: " + selection.toString());
 	}
 	
 	public void alterSelection(final double newMinProbability){
 		selection.setMinProbability(newMinProbability);
-		LOG.fine("New selection: " + selection.toString());
+		LOG.finer("New selection: " + selection.toString());
 	}
 
 	public void extractionFinished(){
