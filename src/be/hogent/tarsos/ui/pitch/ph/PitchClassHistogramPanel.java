@@ -6,12 +6,13 @@
 *  Hoogpoort 64, 9000 Ghent - Belgium
 *
 **/
-package be.hogent.tarsos.ui.pitch;
+package be.hogent.tarsos.ui.pitch.ph;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,6 +26,9 @@ import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
+import be.hogent.tarsos.ui.pitch.Layer;
+import be.hogent.tarsos.ui.pitch.ScaleChangedListener;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -46,35 +50,26 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 	private static final int AMBITUS_START = Configuration.getInt(ConfKey.pitch_histogram_start);
 
 	
-	private final List<Layer> layers;
+
 	private final Set<PitchDetectionMode> drawnModes;
 	private final ScalaLayer scalaLayer;
 	private final ScaleChangedListener scaleChangedPublisher;
-	private final double stop;
 	private AudioFile audioFile;
 
 
-	public PitchClassHistogramPanel(final Histogram histogram, final ScaleChangedListener scaleChangedPublisher) {
+	public PitchClassHistogramPanel(final ScaleChangedListener scaleChangedPublisher) {
 		super(new BorderLayout());
 		//Focus should be enabled for the key listener (Scala layer editor)...
 		setFocusable(true);
-		stop = histogram.getStop();
 		this.scaleChangedPublisher = scaleChangedPublisher;
 		layers = new ArrayList<Layer>();
-		scalaLayer = new ScalaLayer(this, ScalaFile.westernTuning().getPitches(), histogram.getStop()
-				- histogram.getStart(), scaleChangedPublisher);
-		layers.add(scalaLayer);
+		scalaLayer = new ScalaLayer(this, ScalaFile.westernTuning().getPitches(), scaleChangedPublisher);
+
 		drawnModes = new HashSet<PitchDetectionMode>();
-	
 	}
 
 	public void audioFileChanged(final AudioFile newAudioFile) {
 		audioFile = newAudioFile;
-		for (Layer layer : layers) {
-			if (layer instanceof HistogramLayer) {
-				((HistogramLayer) layer).audioFileChanged(newAudioFile);
-			}
-		}
 		//reset the list of which histograms are drawn.
 		drawnModes.clear();
 	}
@@ -87,10 +82,9 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		graphics.setBackground(Color.WHITE);
 		graphics.clearRect(0, 0, getWidth(), getHeight());
-		for (final Layer layer : layers) {
-			layer.draw(graphics);
-		}
+		
 	}
+	
 
 	public List<Layer> getLayers() {
 		return layers;
@@ -99,15 +93,17 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 	public void scaleChanged(final double[] newScale, final boolean isChanging, boolean shiftHisto) {
 		this.scalaLayer.scaleChanged(newScale, isChanging, shiftHisto);
 		Histogram histo = null;
-		if(!HistogramData.getPitchClassHistogramInstance().isEmpty()){
-			histo =  HistogramData.getPitchClassHistogramInstance().getFirst();
+		if(!KDEData.getPitchClassHistogramInstance().isEmpty()){
+			histo =  KDEData.getPitchClassHistogramInstance().getFirst();
 		}
+		
+		//search best shift
 		boolean setScalaXOffset = shiftHisto && histo instanceof PitchClassHistogram; 
 		if( setScalaXOffset){
 			Histogram oneHistogram = PitchClassHistogram.createToneScale(newScale.clone());
 			int displacement = oneHistogram.normalize().displacementForOptimalCorrelation(histo.normalize());
 			double offsetInCents = displacement * Configuration.getDouble(ConfKey.histogram_bin_width);
-			double offsetInPositiveCents = (offsetInCents + 1200.0 )% 1200.0;
+			double offsetInPositiveCents = (offsetInCents + 1200.0 ) % 1200.0;
 			double offsetInPercent = offsetInPositiveCents/1200.0;
 			this.scalaLayer.setXOffset(offsetInPercent);
 		}
@@ -131,9 +127,9 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 				drawnModes.add(annotation.getSource());
 				final Histogram histo;
 				if (stop > 1200) {
-					histo = HistogramData.getPitchHistogramInstance().getHistogram(annotation.getSource());
+					histo = KDEData.getPitchHistogramInstance().getHistogram(annotation.getSource());
 				} else {
-					histo = HistogramData.getPitchClassHistogramInstance().getHistogram(annotation.getSource());;
+					histo = KDEData.getPitchClassHistogramInstance().getHistogram(annotation.getSource());;
 				}
 				Color color = Tarsos.COLORS[annotation.getSource().ordinal() % Tarsos.COLORS.length];
 				HistogramLayer layer = new HistogramLayer(this, histo, scaleChangedPublisher, color);

@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.Hashtable;
 import java.util.Locale;
 
 import javax.swing.GroupLayout;

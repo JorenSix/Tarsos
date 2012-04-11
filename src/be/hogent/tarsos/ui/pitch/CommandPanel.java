@@ -31,6 +31,7 @@ import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
+import be.hogent.tarsos.ui.pitch.ph.KDEData;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.peaks.Peak;
@@ -137,28 +138,16 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		listOfComponentsToDisableOrEnable.add(thresholdSlider);
 		
 
-		JButton smoothButton = new JButton("Gaussian");
-		smoothButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				PitchDetectionMode selectedHistogram = (PitchDetectionMode) pitchDetectorSelection.getSelectedItem();
-				Histogram histo = HistogramData.getPitchClassHistogramInstance().getHistogram(selectedHistogram);
-				histo.gaussianSmooth(0.8);
-				HistogramData.getPitchClassHistogramInstance().repaint();
-			}
-		});
-		listOfComponentsToDisableOrEnable.add(smoothButton);
 
 		JButton resetButton = new JButton("Reset");
 		resetButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				HistogramData.getPitchClassHistogramInstance().clearHistograms();
-				HistogramData.getPitchClassHistogramInstance().repaint();
+				KDEData.getPitchClassHistogramInstance().clearHistograms();
+				KDEData.getPitchClassHistogramInstance().repaint();
 			}
 		});
 		listOfComponentsToDisableOrEnable.add(resetButton);
-		
-	
-		
+
 
 		FormLayout layout = new FormLayout("right:min,2dlu,min:grow");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
@@ -216,7 +205,7 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 	
 	private void doPeakDetection(boolean detectorIsAdjusting){
 		PitchDetectionMode selectedHistogram = (PitchDetectionMode) pitchDetectorSelection.getSelectedItem();
-		Histogram histo = HistogramData.getPitchClassHistogramInstance().getHistogram(selectedHistogram);
+		Histogram histo = KDEData.getPitchClassHistogramInstance().getHistogram(selectedHistogram);
 		
 		if (histo.getMaxBinCount() != 0) {
 			final List<Peak> peaks = PeakDetector.detect(histo, windowSizePeakDetection,thresholdPeakDetection);

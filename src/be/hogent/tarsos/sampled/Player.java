@@ -33,6 +33,13 @@ import be.hogent.tarsos.dsp.GainProcessor;
 import be.hogent.tarsos.dsp.WaveformSimilarityBasedOverlapAdd;
 import be.hogent.tarsos.dsp.WaveformSimilarityBasedOverlapAdd.Parameters;
 
+/**
+ * Player plays audio. It allows adding AudioProcessor objects before the time
+ * stretching step and consumers can register for the changes on the state
+ * property.
+ * 
+ * @author Joren Six
+ */
 public class Player implements AudioProcessor {
 	
 	/**
@@ -170,7 +177,7 @@ public class Player implements AudioProcessor {
 		}
 		if(oldGain != newGain){
 			support.firePropertyChange("gain", oldGain, newGain);
-			LOG.fine("Changed gain for audio player to: " + gain);
+			LOG.fine(String.format("Changed gain for audio player to: %.2f", newGain));
 		}
 	}
 	
@@ -182,7 +189,7 @@ public class Player implements AudioProcessor {
 		}
 		if(oldTempo != newTempo){
 			support.firePropertyChange("tempo", oldTempo, newTempo);
-			LOG.fine("Changed tempo for audio player to: " + newTempo);
+			LOG.fine(String.format("Changed tempo for audio player to: %.2f", newTempo));
 		}
 	}
 	

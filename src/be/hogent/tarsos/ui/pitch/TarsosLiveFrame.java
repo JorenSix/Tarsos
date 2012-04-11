@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,7 +32,6 @@ import org.noos.xing.mydoggy.MultiSplitContentManagerUI;
 import org.noos.xing.mydoggy.TabbedContentManagerUI;
 import org.noos.xing.mydoggy.TabbedContentUI;
 import org.noos.xing.mydoggy.ToolWindow;
-import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
 
@@ -50,6 +48,8 @@ import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.sampled.pitch.AnnotationTree;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.ui.WaveForm;
+import be.hogent.tarsos.ui.pitch.ph.KDEData;
+import be.hogent.tarsos.ui.pitch.ph.PitchClassHistogramPanel;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
@@ -105,8 +105,8 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 		AudioFileBrowserPanel browser = new AudioFileBrowserPanel(new GridLayout(0, 2));
 		browser.setBackground(Color.WHITE);
 		
-		HistogramData.getPitchClassHistogramInstance().setComponentToRepaint(pitchClassHistogramPanel);
-		HistogramData.getPitchHistogramInstance().setComponentToRepaint(ambitusPanel);
+		KDEData.getPitchClassHistogramInstance().setComponentToRepaint(pitchClassHistogramPanel);
+		KDEData.getPitchHistogramInstance().setComponentToRepaint(ambitusPanel);
 
 		// patch the scale changed listeners
 		addScaleChangedListener(pitchClassHistogramPanel);
@@ -122,8 +122,8 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 
 
 		// Patch the annotation listeners
-		annotationPublisher.addListener(HistogramData.getPitchClassHistogramInstance());
-		annotationPublisher.addListener(HistogramData.getPitchHistogramInstance());
+		annotationPublisher.addListener(KDEData.getPitchClassHistogramInstance());
+		annotationPublisher.addListener(KDEData.getPitchHistogramInstance());
 		
 		annotationPublisher.addListener(pitchClassHistogramPanel);
 		annotationPublisher.addListener(ambitusPanel);

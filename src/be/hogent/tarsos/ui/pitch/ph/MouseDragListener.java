@@ -6,7 +6,7 @@
 *  Hoogpoort 64, 9000 Ghent - Belgium
 *
 **/
-package be.hogent.tarsos.ui.pitch;
+package be.hogent.tarsos.ui.pitch.ph;
 
 import java.awt.Point;
 import java.awt.event.MouseAdapter;

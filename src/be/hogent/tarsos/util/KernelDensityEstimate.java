@@ -96,6 +96,14 @@ public class KernelDensityEstimate {
 	public double[] getEstimate() {
 		return accumulator.clone();
 	}
+	
+	public KernelDensityEstimate map(int size){
+		KernelDensityEstimate newKDE = new KernelDensityEstimate(kernel,size);
+		for(int index = 0 ; index < size() ; index++){
+			newKDE.accumulator[index % size] = accumulator[index];
+		}
+		return newKDE;
+	}
 
 	/**
 	 * Return the value for the accumulator at a certain index.
@@ -165,6 +173,18 @@ public class KernelDensityEstimate {
 		assert getSumFreq() == 1.0;
 	}
 	
+	/**
+	 * Clears the data in the accumulator.
+	 */
+	public void clear(){
+		for (int i = 0; i < accumulator.length; i++) {
+			accumulator[i] = 0;
+		}
+		//reset sum freq
+		calculateSumFreq();
+		assert getSumFreq() == 1.0;
+	}
+		
 	/**
 	 * Takes the maximum of the value in the accumulator for two kde's.
 	 * @param other The other kde of the same size.

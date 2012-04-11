@@ -6,7 +6,7 @@
 *  Hoogpoort 64, 9000 Ghent - Belgium
 *
 **/
-package be.hogent.tarsos.ui.pitch;
+package be.hogent.tarsos.ui.pitch.ph;
 
 import java.util.HashMap;
 
@@ -16,42 +16,32 @@ import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.util.KernelDensityEstimate;
 import be.hogent.tarsos.util.histogram.Histogram;
 import be.hogent.tarsos.util.histogram.PitchClassHistogram;
 import be.hogent.tarsos.util.histogram.PitchHistogram;
 
-public class HistogramData  implements AudioFileChangedListener, AnnotationListener{
+public class KDEData  implements AudioFileChangedListener, AnnotationListener{
 
-	private static HistogramData pitchClassHistogramInstance;
-	private static HistogramData pitchHistogramInstance;
-	
 	private static final int AMBITUS_STOP = Configuration.getInt(ConfKey.pitch_histogram_stop);
 	private static final int AMBITUS_START = Configuration.getInt(ConfKey.pitch_histogram_start);
 	
 	
-	public static synchronized HistogramData getPitchHistogramInstance(){
-		if(pitchHistogramInstance == null){
-			pitchHistogramInstance = new HistogramData(false);
-		}
-		return pitchHistogramInstance;
+	public static synchronized KDEData getInstance(){
+		
 	}
 	
-	public static synchronized HistogramData getPitchClassHistogramInstance(){
-		if(pitchClassHistogramInstance == null){
-			pitchClassHistogramInstance = new HistogramData(true);
-		}
-		return pitchClassHistogramInstance;
-	}
-	
+		
 
-	private final HashMap<PitchDetectionMode, Histogram> histos;
+	private final HashMap<PitchDetectionMode, KernelDensityEstimate> histos;
 	private final boolean containsPitchClassHistogramData;
 	
-	private HistogramData(boolean containsPCH){
-		histos = new HashMap<PitchDetectionMode, Histogram>();
+	private KDEData(boolean containsPCH){
+		histos = new HashMap<PitchDetectionMode, KernelDensityEstimate>();
 		containsPitchClassHistogramData = containsPCH;
 	}
 	
@@ -83,7 +73,7 @@ public class HistogramData  implements AudioFileChangedListener, AnnotationListe
 		}
 	}
 	
-	void repaint(){
+	public void repaint(){
 		componentToRepaint.repaint();
 	}
 	
