@@ -25,6 +25,12 @@
 		<copy todir="../bin/be/hogent/tarsos/sampled/pitch/resources">
 			<fileset dir="../src/be/hogent/tarsos/sampled/pitch/resources" />
 		</copy>
+		
+		<copy todir="../bin/be/hogent/tarsos/util">
+			<fileset dir="../src/be/hogent/tarsos/util">
+				<include name="*.properties"/>
+			</fileset>
+		</copy>
 	</target>
 
 	<!--ANT 1.7 is required                                        -->
