@@ -37,7 +37,9 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
@@ -48,7 +50,6 @@ import org.noos.xing.mydoggy.MultiSplitContentManagerUI;
 import org.noos.xing.mydoggy.TabbedContentManagerUI;
 import org.noos.xing.mydoggy.TabbedContentUI;
 import org.noos.xing.mydoggy.ToolWindow;
-import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.ToolWindowManager;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
@@ -62,8 +63,6 @@ import be.hogent.tarsos.sampled.pitch.PitchDetector;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.BackgroundTask;
 import be.hogent.tarsos.ui.BackgroundTask.TaskHandler;
-import be.hogent.tarsos.ui.pitch.ph.KDEData;
-import be.hogent.tarsos.ui.pitch.ph.PitchClassHistogramPanel;
 import be.hogent.tarsos.ui.ProgressDialog;
 import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
@@ -75,8 +74,6 @@ import be.hogent.tarsos.util.FileUtils;
 import be.hogent.tarsos.util.JLabelHandler;
 import be.hogent.tarsos.util.ScalaFile;
 import be.hogent.tarsos.util.TextAreaHandler;
-import be.hogent.tarsos.util.histogram.PitchClassHistogram;
-import be.hogent.tarsos.util.histogram.PitchHistogram;
 
 /**
  * @author Joren Six
@@ -219,11 +216,17 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		contentManager.setContentManagerUI(contentManagerUI);
 		contentManagerUI.setShowAlwaysTab(true);
 		contentManagerUI.setTabPlacement(TabbedContentManagerUI.TabPlacement.TOP);
+		
+		JPanel lowerPanel = new JPanel(new BorderLayout());
+		lowerPanel.add(player,BorderLayout.NORTH);
+		lowerPanel.add(new JSeparator() ,BorderLayout.CENTER);
+		lowerPanel.add(statusBar,BorderLayout.SOUTH);
+		lowerPanel.setBorder(new EmptyBorder(3, 0, 0, 0));
 
 		// add the components to the frame
 		add(headerPanel, BorderLayout.NORTH);
 		add(windowManager, BorderLayout.CENTER);
-		add(statusBar, BorderLayout.SOUTH);
+		add(lowerPanel, BorderLayout.SOUTH);
 
 		// add components to the window manager.
 
@@ -267,17 +270,22 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 		
+		content = contentManager.addContent("Logging", "Logging", null, logPanel, null);
+		setDefaultTabbedContentOptions(content);
+		content.setMinimized(true);
+		
+		
 		//Disable the browser for now.
-		toolWindowManager.registerToolWindow("Player", "Player", null, player, ToolWindowAnchor.BOTTOM);
-		toolWindowManager.registerToolWindow("Help", "Help", null, helpPanel, ToolWindowAnchor.BOTTOM);
-		toolWindowManager.registerToolWindow("Logging", "Logging", null, logPanel, ToolWindowAnchor.BOTTOM);
+		//toolWindowManager.registerToolWindow("Player", "Player", null, player, ToolWindowAnchor.BOTTOM);
+		//toolWindowManager.registerToolWindow("Help", "Help", null, helpPanel, ToolWindowAnchor.BOTTOM);
+		;
 
 		// Make all tools available
 		for (ToolWindow window : toolWindowManager.getToolWindows()) {
 			window.setAvailable(true);
 		}
 		
-		toolWindowManager.getToolWindow(1).setVisible(true);
+		//toolWindowManager.getToolWindow(1).setVisible(true);
 		
 		setJMenuBar(menu);
 		
@@ -337,6 +345,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		JLabel statusBarLabel = new JLabel();
 		statusBarLabel.setForeground(Color.GRAY);
 		JLabelHandler.setupLoggerHandler(statusBarLabel);
+		statusBarLabel.setBorder(new EmptyBorder(3, 3, 0, 3));
 		return statusBarLabel;
 	}
 

@@ -85,8 +85,12 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 		}
 		
 		public void processingFinished() {
-			newPositionValue = (int) (player.getStartAt() / player.getDurationInSeconds() *1000); 
-			positionSlider.setValue(newPositionValue);
+			if(!positionSlider.getValueIsAdjusting()){
+				double timeStamp =  player.getStartAt() / player.getDurationInSeconds();
+				newPositionValue = (int) (timeStamp *1000); 
+				positionSlider.setValue(newPositionValue);
+				setProgressLabelText(timeStamp,player.getDurationInSeconds());
+			}
 		}
 	};
 	
@@ -210,12 +214,12 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 		positionSlider.setPaintLabels(false);
 		positionSlider.setPaintTicks(false);
 		positionSlider.setEnabled(false);
-		
+				
 		positionSlider.addChangeListener(new ChangeListener() {
-		
-			public void stateChanged(ChangeEvent arg0) {				
-				if (newPositionValue != positionSlider.getValue()) {
-					double promille = positionSlider.getValue() / 1000.0;
+			public void stateChanged(ChangeEvent arg0) {
+				int currentValue = positionSlider.getValue();
+				if (newPositionValue != currentValue) {
+					double promille = currentValue / 1000.0;
 					double currentPosition = player.getDurationInSeconds() * promille;
 					if (positionSlider.getValueIsAdjusting()) {
 						setProgressLabelText(currentPosition, player.getDurationInSeconds());
@@ -226,7 +230,8 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 						if(currentState == PlayerState.PLAYING){
 							player.play();							
 						}
-						
+						newPositionValue = currentValue;
+						positionSlider.setValue(currentValue);
 					}
 				}
 			}
@@ -255,9 +260,7 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 	}
 
 	public void addAnnotation(Annotation annotation) {
-		double duration = player.getDurationInSeconds();
-		int stop = (int) (AnnotationPublisher.getInstance().getCurrentSelection().getStopTime() / duration * 1000);
-		positionSlider.setValue(stop);
+
 	}
 
 	public void clearAnnotations() {

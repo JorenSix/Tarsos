@@ -36,6 +36,8 @@ import javax.swing.SwingUtilities;
 import be.hogent.tarsos.dsp.AudioDispatcher;
 import be.hogent.tarsos.dsp.AudioEvent;
 import be.hogent.tarsos.dsp.AudioProcessor;
+import be.hogent.tarsos.sampled.Player;
+import be.hogent.tarsos.sampled.PlayerState;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
@@ -87,10 +89,27 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 				AnnotationPublisher.getInstance().clear();
 				AnnotationPublisher.getInstance().alterSelection(minMarkerPosition, maxMarkerPosition);
 				AnnotationPublisher.getInstance().delegateAddAnnotations(minMarkerPosition, maxMarkerPosition);
+				
+				Player player = Player.getInstance();
+				PlayerState previousState = player.getState();
+				player.pauze(maxMarkerPosition);
+				if(previousState == PlayerState.PLAYING) {
+					player.play();
+				}
 			}
 		});
 		setMarker(0, true);
 		setMarker(0, false);
+		
+		Player player = Player.getInstance();
+		player.addProcessorBeforeTimeStrechting(new AudioProcessor() {
+			public boolean process(AudioEvent audioEvent) {
+				setMarker(audioEvent.getTimeStamp(), false);
+				return true;
+			}
+			public void processingFinished() {
+			}
+		});
 	}
 
 	/**
@@ -260,7 +279,7 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 					g2d.dispose();
 				}
 			}
-			LOG.fine("Rescaled wave form image in " + watch.formattedToString());
+			LOG.finer("Rescaled wave form image in " + watch.formattedToString());
 		}
 		return scaledWaveFormImage;
 	}
