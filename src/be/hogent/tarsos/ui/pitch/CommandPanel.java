@@ -142,8 +142,10 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		JButton resetButton = new JButton("Reset");
 		resetButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				/*
 				KDEData.getPitchClassHistogramInstance().clearHistograms();
 				KDEData.getPitchClassHistogramInstance().repaint();
+				*/
 			}
 		});
 		listOfComponentsToDisableOrEnable.add(resetButton);
@@ -173,7 +175,7 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		builder.append("Quantize:", quantizeToScaleSlider, true);
 		
 		builder.appendSeparator("Histogram commands");
-		builder.append("Smooth:", smoothButton, true);
+		//builder.append("Smooth:", smoothButton, true);
 		builder.append("Reset:", resetButton, true);
 		
 		
@@ -205,8 +207,8 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 	
 	private void doPeakDetection(boolean detectorIsAdjusting){
 		PitchDetectionMode selectedHistogram = (PitchDetectionMode) pitchDetectorSelection.getSelectedItem();
-		Histogram histo = KDEData.getPitchClassHistogramInstance().getHistogram(selectedHistogram);
-		
+		//Histogram histo = KDEData.getPitchClassHistogramInstance().getHistogram(selectedHistogram);
+		/*
 		if (histo.getMaxBinCount() != 0) {
 			final List<Peak> peaks = PeakDetector.detect(histo, windowSizePeakDetection,thresholdPeakDetection);
 			final double[] peaksInCents = new double[peaks.size()];
@@ -217,6 +219,7 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 			Arrays.sort(peaksInCents);
 			Frame.getInstance().scaleChanged(peaksInCents, detectorIsAdjusting, false);
 		}
+		*/
 		
 	}
 

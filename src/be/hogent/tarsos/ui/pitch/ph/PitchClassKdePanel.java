@@ -90,7 +90,7 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 		final int xOffsetPixels = (int) Math.round(xOffset * width);
 
 		g.setColor(Color.GRAY);
-
+		/*
 		for (final double reference : scale) {
 			final int x = (int) (reference / 1200 * width + xOffsetPixels) % width;
 			final String text = Integer.valueOf((int) reference).toString();
@@ -107,6 +107,7 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 				g.drawString(text, x - start, height - yLabelsOffset);
 			}
 		}
+		*/
 	}
 	
 	public void paintKDEs(final Graphics g){
@@ -116,6 +117,7 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 	private void paintKDE(final Graphics g){
 		double xOffset = kdeDrag.calculateXOffset();
 		int yOffset = 20;
+		/*
 		double maxCount = values[0];
 
 		for (int i = 1; i < values.length; i++) {
@@ -144,6 +146,7 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 			}
 			previousPoint = new Point(x, y);
 		}
+		*/
 	}
 
 

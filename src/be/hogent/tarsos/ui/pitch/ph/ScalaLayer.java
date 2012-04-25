@@ -54,12 +54,15 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 		component.addMouseListener(mouseDrag);
 		component.addMouseMotionListener(mouseDrag);
 		scaleChangedPublisher = scalePublisher;
-
+		editor = null;
+		delta = 0;
+		/*
 		try {
-			new ClickForPitchListener mouseDrag);
+			//new ClickForPitchListener mouseDrag);
 		} catch (MidiUnavailableException e1) {
 			LOG.log(Level.WARNING, "MIDI device not available, disabled the click for pitch function.", e1);
 		}
+		
 
 		if (isAmbitus()) {
 			editor = null;
@@ -69,6 +72,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 			component.addMouseMotionListener(editor);
 			component.addKeyListener(editor);
 		}
+		*/
 
 	}
 
@@ -81,6 +85,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 	public void draw(final Graphics2D graphics) {
 		
 		// draw octave borders
+		/*
 		if (delta > 1200) {
 			for (int i = 1200; i < delta; i += 1200) {
 				final int x = (int) (i / delta * width + xOffsetPixels) % width;
@@ -95,6 +100,7 @@ public final class ScalaLayer implements Layer, ScaleChangedListener {
 				graphics.drawLine(x, 0, x, height - yOffset);
 			}
 		}
+		*/
 	}
 
 	public void scaleChanged(double[] newScale, boolean isChanging, boolean shiftHisto) {

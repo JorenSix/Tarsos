@@ -32,7 +32,7 @@ public class KDEData  implements AudioFileChangedListener, AnnotationListener{
 	
 	
 	public static synchronized KDEData getInstance(){
-		
+		return null;
 	}
 	
 		
@@ -45,19 +45,12 @@ public class KDEData  implements AudioFileChangedListener, AnnotationListener{
 		containsPitchClassHistogramData = containsPCH;
 	}
 	
-	public void clearHistograms(){
-		for (Histogram histogram : histos.values()) {
-			histogram.clear();
-		}
-	}
+
 	
 	public boolean isEmpty(){
 		return histos.isEmpty();
 	}
-	
-	public Histogram getFirst() {
-		return histos.values().iterator().next();
-	}
+
 	
 	private JComponent componentToRepaint;
 	public void setComponentToRepaint(final JComponent component){
@@ -67,7 +60,6 @@ public class KDEData  implements AudioFileChangedListener, AnnotationListener{
 
 	public void audioFileChanged(AudioFile newAudioFile) {
 		if (Configuration.getBoolean(ConfKey.reset_on_import)) {
-			clearHistograms();
 			histos.clear();
 			repaint();
 		}
@@ -75,10 +67,6 @@ public class KDEData  implements AudioFileChangedListener, AnnotationListener{
 	
 	public void repaint(){
 		componentToRepaint.repaint();
-	}
-	
-	public Histogram getHistogram(PitchDetectionMode mode){
-		return histos.get(mode);
 	}
 
 
@@ -93,13 +81,13 @@ public class KDEData  implements AudioFileChangedListener, AnnotationListener{
 					histo = new PitchClassHistogram();
 				}
 				synchronized (this) {
-					histos.put(annotation.getSource(), histo);
+					
 			    }
 				
 			} else {
-				histo = histos.get(annotation.getSource());
+			
 			}
-			histo.add(pitchInAbsCents);
+
 			repaint();
 		}
 	}
@@ -110,26 +98,22 @@ public class KDEData  implements AudioFileChangedListener, AnnotationListener{
 
 
 	public void clearAnnotations() {
-		clearHistograms();
-		
+
 	}
 
 
 	public void annotationsAdded() {
 		// TODO Auto-generated method stub
-		
 	}
 
 
 	public void extractionStarted() {
 		// TODO Auto-generated method stub
-		
 	}
 
 
 	public void extractionFinished() {
 		// TODO Auto-generated method stub
-		
 	}
 	
 }

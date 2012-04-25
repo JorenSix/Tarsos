@@ -62,7 +62,7 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 		//Focus should be enabled for the key listener (Scala layer editor)...
 		setFocusable(true);
 		this.scaleChangedPublisher = scaleChangedPublisher;
-		layers = new ArrayList<Layer>();
+
 		scalaLayer = new ScalaLayer(this, ScalaFile.westernTuning().getPitches(), scaleChangedPublisher);
 
 		drawnModes = new HashSet<PitchDetectionMode>();
@@ -87,15 +87,13 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 	
 
 	public List<Layer> getLayers() {
-		return layers;
+		return null;
 	}
 
 	public void scaleChanged(final double[] newScale, final boolean isChanging, boolean shiftHisto) {
 		this.scalaLayer.scaleChanged(newScale, isChanging, shiftHisto);
 		Histogram histo = null;
-		if(!KDEData.getPitchClassHistogramInstance().isEmpty()){
-			histo =  KDEData.getPitchClassHistogramInstance().getFirst();
-		}
+		
 		
 		//search best shift
 		boolean setScalaXOffset = shiftHisto && histo instanceof PitchClassHistogram; 
@@ -108,6 +106,7 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 			this.scalaLayer.setXOffset(offsetInPercent);
 		}
 		
+		/*
 		for (Layer layer : layers) {
 			if (layer instanceof HistogramLayer) {
 				HistogramLayer histoLayer = (HistogramLayer) layer;
@@ -117,6 +116,7 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 				}
 			}
 		}
+		*/
 	}
 
 
@@ -126,6 +126,7 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 			if (!drawnModes.contains(annotation.getSource())) {
 				drawnModes.add(annotation.getSource());
 				final Histogram histo;
+				/*
 				if (stop > 1200) {
 					histo = KDEData.getPitchHistogramInstance().getHistogram(annotation.getSource());
 				} else {
@@ -135,6 +136,7 @@ public final class PitchClassHistogramPanel extends JPanel implements ScaleChang
 				HistogramLayer layer = new HistogramLayer(this, histo, scaleChangedPublisher, color);
 				layer.audioFileChanged(audioFile);
 				layers.add(layer);
+				*/
 			}
 		}
 	}

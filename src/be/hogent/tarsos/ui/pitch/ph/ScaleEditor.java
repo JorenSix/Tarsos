@@ -57,7 +57,7 @@ public class ScaleEditor extends MouseAdapter implements MouseMotionListener, Ke
 				scale = newScale;
 			}
 			parent.repaint();
-			layer.scaleChangedPublisher.scaleChanged(scale, true, false);
+			//layer.scaleChangedPublisher.scaleChanged(scale, true, false);
 		} else if (e.isControlDown()) {
 			//request focus for the key listener to work...
 			parent.requestFocus();
@@ -73,7 +73,7 @@ public class ScaleEditor extends MouseAdapter implements MouseMotionListener, Ke
 				}
 			}
 			parent.repaint();
-			layer.scaleChangedPublisher.scaleChanged(scale, true, false);
+			//layer.scaleChangedPublisher.scaleChanged(scale, true, false);
 		}
 	}
 
@@ -95,7 +95,7 @@ public class ScaleEditor extends MouseAdapter implements MouseMotionListener, Ke
 	public void mouseReleased(MouseEvent e) {
 		if (movingElement != -1.0) {
 			Arrays.sort(scale);
-			layer.scaleChangedPublisher.scaleChanged(scale, false, false);
+			//layer.scaleChangedPublisher.scaleChanged(scale, false, false);
 		}
 		movingElement = -1.0;
 	}
@@ -134,7 +134,7 @@ public class ScaleEditor extends MouseAdapter implements MouseMotionListener, Ke
 			}
 			Arrays.sort(newScale);
 			scale = newScale;				
-			scaleChangedPublisher.scaleChanged(scale, false, false);
+			//scaleChangedPublisher.scaleChanged(scale, false, false);
 			movingElement = -1.0;
 		}
 	}

@@ -154,8 +154,8 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		JComponent statusBar = makeStatusBar();
 		PlayerControlPanel player = new PlayerControlPanel();
 
-		final PitchClassHistogramPanel pitchClassHistogramPanel = new PitchClassHistogramPanel(new PitchClassHistogram(), this);
-		final PitchClassHistogramPanel ambitusPanel = new PitchClassHistogramPanel(new PitchHistogram(), this);
+		//final PitchClassHistogramPanel pitchClassHistogramPanel = new PitchClassHistogramPanel(new PitchClassHistogram(), this);
+		//final PitchClassHistogramPanel ambitusPanel = new PitchClassHistogramPanel(new PitchHistogram(), this);
 		final PitchContour pitchContourPanel = new PitchContour();
 		final PitchContour regression = new PitchContour();
 		final IntervalTable intervalTable = new IntervalTable();
@@ -170,12 +170,12 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		AudioFileBrowserPanel browser = new AudioFileBrowserPanel(new GridLayout(0, 2));
 		browser.setBackground(Color.WHITE);
 		
-		KDEData.getPitchClassHistogramInstance().setComponentToRepaint(pitchClassHistogramPanel);
-		KDEData.getPitchHistogramInstance().setComponentToRepaint(ambitusPanel);
+		//KDEData.getPitchClassHistogramInstance().setComponentToRepaint(pitchClassHistogramPanel);
+		//KDEData.getPitchHistogramInstance().setComponentToRepaint(ambitusPanel);
 
 		// patch the scale changed listeners
-		addScaleChangedListener(pitchClassHistogramPanel);
-		addScaleChangedListener(ambitusPanel);
+		//addScaleChangedListener(pitchClassHistogramPanel);
+		//addScaleChangedListener(ambitusPanel);
 		addScaleChangedListener(pitchContourPanel);
 		addScaleChangedListener(regression);
 		addScaleChangedListener(intervalTable);
@@ -184,11 +184,11 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 
 		// Patch the audio file changed listeners.
-		addAudioFileChangedListener(KDEData.getPitchClassHistogramInstance());
-		addAudioFileChangedListener(KDEData.getPitchHistogramInstance());
+		//addAudioFileChangedListener(KDEData.getPitchClassHistogramInstance());
+		//addAudioFileChangedListener(KDEData.getPitchHistogramInstance());
 		
-		addAudioFileChangedListener(pitchClassHistogramPanel);
-		addAudioFileChangedListener(ambitusPanel);
+		//addAudioFileChangedListener(pitchClassHistogramPanel);
+		//addAudioFileChangedListener(ambitusPanel);
 		addAudioFileChangedListener(pitchContourPanel);
 		addAudioFileChangedListener(regression);
 		addAudioFileChangedListener(waveForm);
@@ -198,10 +198,10 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 
 		// Patch the annotation listeners
-		annotationPublisher.addListener(KDEData.getPitchClassHistogramInstance());
-		annotationPublisher.addListener(KDEData.getPitchHistogramInstance());
-		annotationPublisher.addListener(pitchClassHistogramPanel);
-		annotationPublisher.addListener(ambitusPanel);
+		//annotationPublisher.addListener(KDEData.getPitchClassHistogramInstance());
+		//annotationPublisher.addListener(KDEData.getPitchHistogramInstance());
+		//annotationPublisher.addListener(pitchClassHistogramPanel);
+		//annotationPublisher.addListener(ambitusPanel);
 		annotationPublisher.addListener(pitchContourPanel);
 		annotationPublisher.addListener(player);
 		
@@ -227,19 +227,25 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 		// add components to the window manager.
 
-		Content content = contentManager.addContent("Pitch Class Histogram", "Pitch Class Histogram", null, pitchClassHistogramPanel);
+		Content content;
+		/*
+		 = contentManager.addContent("Pitch Class Histogram", "Pitch Class Histogram", null, pitchClassHistogramPanel);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(false);
+		*/
 
+		content = contentManager.addContent("Configuration", "Configuration", null, configurationPanel);
 		MultiSplitConstraint constraint = new MultiSplitConstraint(content, 1);
-		content = contentManager.addContent("Configuration", "Configuration", null, configurationPanel, null, constraint);
+		
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 		
+		/*
 		constraint = new MultiSplitConstraint(content, 2);
 		content = contentManager.addContent("Pitch Histogram", "Pitch Histogram", null, ambitusPanel, null, constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(false);
+		*/
 		
 		constraint = new MultiSplitConstraint(content, 3);
 		content = contentManager.addContent("Interval table", "Interval table", null, intervalTable,null,constraint);

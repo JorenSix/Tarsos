@@ -89,8 +89,8 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 
 		JComponent headerPanel = new HeaderPanel();
 		
-		final PitchClassHistogramPanel pitchClassHistogramPanel = new PitchClassHistogramPanel(new PitchClassHistogram(), this);
-		final PitchClassHistogramPanel ambitusPanel = new PitchClassHistogramPanel(new PitchHistogram(), this);
+		//final PitchClassHistogramPanel pitchClassHistogramPanel = new PitchClassHistogramPanel(new PitchClassHistogram(), this);
+		//final PitchClassHistogramPanel ambitusPanel = new PitchClassHistogramPanel(new PitchHistogram(), this);
 		final PitchContour pitchContourPanel = new PitchContour();
 		final PitchContour regression = new PitchContour();
 		final IntervalTable intervalTable = new IntervalTable();
@@ -105,12 +105,12 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 		AudioFileBrowserPanel browser = new AudioFileBrowserPanel(new GridLayout(0, 2));
 		browser.setBackground(Color.WHITE);
 		
-		KDEData.getPitchClassHistogramInstance().setComponentToRepaint(pitchClassHistogramPanel);
-		KDEData.getPitchHistogramInstance().setComponentToRepaint(ambitusPanel);
+		//KDEData.getPitchClassHistogramInstance().setComponentToRepaint(pitchClassHistogramPanel);
+		//KDEData.getPitchHistogramInstance().setComponentToRepaint(ambitusPanel);
 
 		// patch the scale changed listeners
-		addScaleChangedListener(pitchClassHistogramPanel);
-		addScaleChangedListener(ambitusPanel);
+		//addScaleChangedListener(pitchClassHistogramPanel);
+		//addScaleChangedListener(ambitusPanel);
 		addScaleChangedListener(pitchContourPanel);
 		addScaleChangedListener(regression);
 		addScaleChangedListener(intervalTable);
@@ -122,11 +122,11 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 
 
 		// Patch the annotation listeners
-		annotationPublisher.addListener(KDEData.getPitchClassHistogramInstance());
-		annotationPublisher.addListener(KDEData.getPitchHistogramInstance());
+		//annotationPublisher.addListener(KDEData.getPitchClassHistogramInstance());
+		//annotationPublisher.addListener(KDEData.getPitchHistogramInstance());
 		
-		annotationPublisher.addListener(pitchClassHistogramPanel);
-		annotationPublisher.addListener(ambitusPanel);
+		//annotationPublisher.addListener(pitchClassHistogramPanel);
+		//annotationPublisher.addListener(ambitusPanel);
 		annotationPublisher.addListener(pitchContourPanel);
 		annotationPublisher.addListener(controlPanel);
 		annotationPublisher.addListener(commandPanel);
@@ -146,17 +146,18 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 		
 		// add components to the window manager.
 
-		Content content = contentManager.addContent("Pitch Class Histogram", "Pitch Class Histogram", null, pitchClassHistogramPanel);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(false);
+		Content content = null; 
+		//= contentManager.addContent("Pitch Class Histogram", "Pitch Class Histogram", null, pitchClassHistogramPanel);
+		//setDefaultTabbedContentOptions(content);
+		//content.setMinimized(false);
 
-		MultiSplitConstraint constraint = new MultiSplitConstraint(content, 1);
+		MultiSplitConstraint constraint;// = new MultiSplitConstraint(content, 1);
 		
 		
-		constraint = new MultiSplitConstraint(content, 2);
-		content = contentManager.addContent("Pitch Histogram", "Pitch Histogram", null, ambitusPanel, null, constraint);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(false);
+		//constraint = new MultiSplitConstraint(content, 2);
+		//content = contentManager.addContent("Pitch Histogram", "Pitch Histogram", null, ambitusPanel, null, constraint);
+		//setDefaultTabbedContentOptions(content);
+		//content.setMinimized(false);
 		
 		constraint = new MultiSplitConstraint(content, 3);
 		content = contentManager.addContent("Interval table", "Interval table", null, intervalTable,null,constraint);
