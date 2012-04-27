@@ -4,6 +4,8 @@ import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -27,6 +29,7 @@ import be.hogent.tarsos.sampled.PlayerState;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
+import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
 
 public class PlayerControlPanel extends JPanel implements AudioFileChangedListener, AnnotationListener  {
@@ -48,6 +51,11 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 	private JLabel tempoLabel;
 	
 	private Player player;
+	
+	private final WaveForm waveForm;
+	
+	JCheckBox loopCheckBox;
+
 	
 	private PropertyChangeListener stateChanged = new PropertyChangeListener() {
 		public void propertyChange(PropertyChangeEvent evt) {
@@ -94,6 +102,24 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 		}
 	};
 	
+	final AudioProcessor loopAudioProcessor = new AudioProcessor() {
+		public boolean process(AudioEvent audioEvent) {
+			return true;
+		}
+		
+		public void processingFinished() {
+			if(loopCheckBox.isSelected() && player.getState() == PlayerState.STOPPED){
+				
+				double startAt = AnnotationPublisher.getInstance().getCurrentSelection().getStartTime();
+				AnnotationPublisher.getInstance().clear();
+				AnnotationPublisher.getInstance().alterSelection(startAt, startAt);
+				AnnotationPublisher.getInstance().delegateAddAnnotations(startAt, startAt);
+				player.pauze(startAt);
+				player.play();
+			}
+		}
+	};
+	
 	final AudioProcessor addAnnotationsProcessor = new AudioProcessor() {
 		
 		double previousTime = 0;
@@ -103,6 +129,7 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 			double currentTime = audioEvent.getTimeStamp();
 			if (currentTime - previousTime > 0.03) {
 				publisher.alterSelection(publisher.getCurrentSelection().getStartTime(),currentTime);
+				previousTime = previousTime == 0.0 ? currentTime : previousTime;
 				publisher.delegateAddAnnotations(previousTime, currentTime);
 				previousTime = currentTime;
 			}
@@ -114,7 +141,8 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 		}
 	};
 	
-	public PlayerControlPanel(){
+	public PlayerControlPanel(WaveForm waveForm){
+		this.waveForm = waveForm;
 		playButton = new JButton("Play");
 		playButton.setEnabled(false);
 		playButton.addActionListener(new ActionListener(){
@@ -129,12 +157,27 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 		p.add(playButton);
 		createSlider();
 		createProgressSlider();
+		loopCheckBox =  new JCheckBox();
+		loopCheckBox.setText("Loop selection");
+		loopCheckBox.addItemListener(new ItemListener() {
+			
+			public void itemStateChanged(ItemEvent arg0) {
+				if(loopCheckBox.isSelected()){
+					double stopAt = AnnotationPublisher.getInstance().getCurrentSelection().getStopTime();
+					player.setStopAt(stopAt);
+				}else{
+					player.setStopAt(Double.MAX_VALUE);
+				}
+			}
+		});
 		doGroupLayout();
 		player = Player.getInstance();
 		player.addProcessorBeforeTimeStrechting(reportProgressProcessor);
 		player.addProcessorBeforeTimeStrechting(addAnnotationsProcessor);
+		player.addProcessorBeforeTimeStrechting(loopAudioProcessor);
 		player.addPropertyChangeListener(stateChanged);
 	}
+	
 
 	private void doGroupLayout(){		
 		playButton.setMinimumSize(new Dimension(85,10));
@@ -156,10 +199,6 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 		
 		JSeparator thirdSeparator = new JSeparator(SwingConstants.VERTICAL);
 		thirdSeparator.setMaximumSize(new Dimension(5,300));
-		
-		JCheckBox loopCheckBox =  new JCheckBox();
-		loopCheckBox.setText("Loop selection");
-		
 		
 		layout.setHorizontalGroup(
 				   layout.createSequentialGroup()
@@ -223,10 +262,17 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 					double currentPosition = player.getDurationInSeconds() * promille;
 					if (positionSlider.getValueIsAdjusting()) {
 						setProgressLabelText(currentPosition, player.getDurationInSeconds());
+						if(player.getState() != PlayerState.PLAYING){
+							waveForm.setMarker(currentPosition, false);
+						}
 					} else {
 						double secondsToSkip = currentPosition;
 						PlayerState currentState = player.getState();
 						player.pauze(secondsToSkip);
+						AnnotationPublisher ap = AnnotationPublisher.getInstance();
+						ap.clear();
+						ap.alterSelection(waveForm.getMarker(true), currentPosition);
+						ap.delegateAddAnnotations(waveForm.getMarker(true), currentPosition);
 						if(currentState == PlayerState.PLAYING){
 							player.play();							
 						}

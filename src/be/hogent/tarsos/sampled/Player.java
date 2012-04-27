@@ -30,6 +30,7 @@ import be.hogent.tarsos.dsp.AudioEvent;
 import be.hogent.tarsos.dsp.AudioPlayer;
 import be.hogent.tarsos.dsp.AudioProcessor;
 import be.hogent.tarsos.dsp.GainProcessor;
+import be.hogent.tarsos.dsp.StopAudioProcessor;
 import be.hogent.tarsos.dsp.WaveformSimilarityBasedOverlapAdd;
 import be.hogent.tarsos.dsp.WaveformSimilarityBasedOverlapAdd.Parameters;
 
@@ -56,6 +57,7 @@ public class Player implements AudioProcessor {
 	private AudioPlayer audioPlayer;
 	private WaveformSimilarityBasedOverlapAdd wsola;
 	private AudioDispatcher dispatcher;
+	private StopAudioProcessor stopAudioProcessor;
 	
 	private final List<AudioProcessor> processorsBeforeTimeStretching;
 	
@@ -71,7 +73,12 @@ public class Player implements AudioProcessor {
 		gain = 1.0;
 		tempo = 1.0;
 		processorsBeforeTimeStretching = new ArrayList<AudioProcessor>();
+		stopAudioProcessor = new StopAudioProcessor(Double.MAX_VALUE);
 	}	
+	
+	public void setStopAt(double stopAt){
+		stopAudioProcessor = new StopAudioProcessor(stopAt);
+	}
 	
 	public void load(File file) {
 		if(state != PlayerState.NO_FILE_LOADED){
@@ -126,9 +133,11 @@ public class Player implements AudioProcessor {
 			dispatcher.skip(startTime);
 			
 			dispatcher.addAudioProcessor(this);
+			
 			for(AudioProcessor processor : processorsBeforeTimeStretching){
 				dispatcher.addAudioProcessor(processor);
 			}
+			dispatcher.addAudioProcessor(stopAudioProcessor);
 			dispatcher.addAudioProcessor(wsola);
 			dispatcher.addAudioProcessor(gainProcessor);
 			dispatcher.addAudioProcessor(audioPlayer);

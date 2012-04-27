@@ -37,8 +37,6 @@ public final class AnnotationTree {
 	 * @param pitchUnit
 	 *            The pitch unit. The pitch unit needs to be defined here to be
 	 *            able to do range selection in a certain unit.
-	 * @param annotations
-	 *            A list of annotations.
 	 *            
 	 */
 	public AnnotationTree(final PitchUnit pitchUnit) {

@@ -198,7 +198,7 @@ public final class Tarsos {
 						//System.setProperty("apple.laf.useScreenMenuBar", "true");
 						//System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Tarsos");
 					}
-					//UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				} catch (Exception e) {
 					log.log(Level.WARNING, "Unable to set system L&F, continue with default L&F", e);
 				}

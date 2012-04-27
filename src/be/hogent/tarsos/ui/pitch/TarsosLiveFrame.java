@@ -48,12 +48,8 @@ import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.sampled.pitch.AnnotationTree;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.ui.WaveForm;
-import be.hogent.tarsos.ui.pitch.ph.KDEData;
-import be.hogent.tarsos.ui.pitch.ph.PitchClassHistogramPanel;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
-import be.hogent.tarsos.util.histogram.PitchClassHistogram;
-import be.hogent.tarsos.util.histogram.PitchHistogram;
 
 public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, ScaleChangedListener, AnnotationListener {
 
@@ -91,10 +87,10 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 		
 		//final PitchClassHistogramPanel pitchClassHistogramPanel = new PitchClassHistogramPanel(new PitchClassHistogram(), this);
 		//final PitchClassHistogramPanel ambitusPanel = new PitchClassHistogramPanel(new PitchHistogram(), this);
-		final PitchContour pitchContourPanel = new PitchContour();
-		final PitchContour regression = new PitchContour();
+		
 		final IntervalTable intervalTable = new IntervalTable();
 		final WaveForm waveForm = new WaveForm();
+		final PitchContour pitchContourPanel = new PitchContour(waveForm);
 		final ControlPanel controlPanel = new ControlPanel(waveForm);
 		final KeyboardPanel keyboardPanel = new KeyboardPanel();
 		final CommandPanel commandPanel = new CommandPanel();
@@ -112,7 +108,6 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 		//addScaleChangedListener(pitchClassHistogramPanel);
 		//addScaleChangedListener(ambitusPanel);
 		addScaleChangedListener(pitchContourPanel);
-		addScaleChangedListener(regression);
 		addScaleChangedListener(intervalTable);
 		addScaleChangedListener(keyboardPanel);
 		addScaleChangedListener(menu);

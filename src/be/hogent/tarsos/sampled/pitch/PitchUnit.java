@@ -281,7 +281,7 @@ public enum PitchUnit {
 	
 	/**
 	 * Converts a relative cent value to an absolute Hertz value by using
-	 * {@link PitchUnit.REF_FREQ}.
+	 * PitchUnit.REF_FREQ.
 	 * 
 	 * @param relativeCent
 	 *            a value in relative cents.

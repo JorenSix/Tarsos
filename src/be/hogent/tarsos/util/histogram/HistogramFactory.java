@@ -209,10 +209,8 @@ public class HistogramFactory {
 	
 	/**
 	 * Creates a pitch class {@link KernelDensityEstimate} for a list of pitches
-	 * defined by a Scala file.
+	 * defined by the annotations.
 	 * 
-	 * @param scalaFile
-	 *            A Scala file, defining a list of pitches.
 	 * @param width
 	 *            The width of the Gaussian kernel.
 	 * @param annotations

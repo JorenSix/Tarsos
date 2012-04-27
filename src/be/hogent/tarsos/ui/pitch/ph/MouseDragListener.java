@@ -88,7 +88,6 @@ class MouseDragListener extends MouseAdapter implements MouseMotionListener {
 			referenceDragPoint.setLocation(e.getPoint());
 			parent.repaint();
 		}
-
 	}
 
 	/**

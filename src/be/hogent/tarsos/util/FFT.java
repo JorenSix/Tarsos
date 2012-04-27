@@ -59,7 +59,7 @@ public final class FFT {
 
 	/**
 	 * Returns the modulus of the element at index bufferCount. The modulus,
-	 * magnitude or absolute value is (a²+b²) ^ 0.5 with a being the real part
+	 * magnitude or absolute value is (aÂ²+bÂ²) ^ 0.5 with a being the real part
 	 * and b the imaginary part of a complex number.
 	 * 
 	 * @param data

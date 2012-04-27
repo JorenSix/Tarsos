@@ -11,8 +11,12 @@ package be.hogent.tarsos.ui.pitch;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,6 +48,7 @@ import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.BareBonesBrowserLaunch;
 import be.hogent.tarsos.util.ConfKey;
@@ -111,9 +116,14 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		
 		item = new JMenuItem("Annotations CSV-file...");
 		item.setToolTipText("Export a CVS file with annotations (in cent) over time (in seconds).");
-		item.addActionListener(exportAnnotations);
+		item.addActionListener(exportAnnotationsCSV);
 		annotationsMenu.add(item);
 		
+		item = new JMenuItem("Annotations EPS-file...");
+		item.setToolTipText("Export an EPS file file with annotations over time (in seconds).");
+		item.addActionListener(exportAnnotationsEPS);
+		annotationsMenu.add(item);
+				
 		item = new JMenuItem("Synthesized annotations...");
 		item.setToolTipText("Export an audio file synthesized using the annotations.");
 		item.addActionListener(exportSynthesizedAnnotations);
@@ -459,6 +469,17 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	private ActionListener showAboutDialogAction = new ActionListener(){
 		public void actionPerformed(final ActionEvent e) {
 			JFrame parent = Frame.getInstance();
+			
+			/*
+			String contents = FileUtils.readFileFromJar("/be/hogent/tarsos/ui/resources/help.html");
+			JEditorPane helpLabel = new JEditorPane();
+			helpLabel.setEditable(false);
+			helpLabel.setContentType("text/html");
+			helpLabel.setPreferredSize(new Dimension(500, 300));
+			helpLabel.setText(contents);
+			helpLabel.setCaretPosition(0);
+			*/
+			
 			JOptionPane.showMessageDialog(parent, "Tarsos \n\nDeveloped at University College Ghent – Faculty of Music ");
 		}
 	};
@@ -566,7 +587,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	 *  
 	 */
 	
-	private ActionListener exportAnnotations = new ActionListener() {
+	private ActionListener exportAnnotationsCSV = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			String dialogTitle = "Export Annotations (.csv)";
 			String defaultFileName = audioFile.originalBasename() + "_annotations.csv";
@@ -581,7 +602,42 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				}
 			});
 		}
-	};	
+	};
+	
+	private ActionListener exportAnnotationsEPS = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			String dialogTitle = "Export Annotations (.eps)";
+			String defaultFileName = audioFile.originalBasename() + "_annotations.eps";
+			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
+				public void handleFile(final File chosenFile) {
+					AnnotationPublisher ap = AnnotationPublisher.getInstance();
+										
+					String fileName = chosenFile.getAbsolutePath();
+					PitchContour pc = new PitchContour(new WaveForm());
+					pc.audioFileChanged(audioFile);
+					pc.scaleChanged(scale, false, false);
+					
+					//adds the annotations also
+					pc.setXRange(ap.getCurrentSelection().getStartTime(), ap.getCurrentSelection().getStopTime());
+					pc.setYRange(ap.getCurrentSelection().getStartPitch(), ap.getCurrentSelection().getStopPitch());
+					
+					// EPS
+					OutputStream out;
+					try {
+						out = new BufferedOutputStream(new FileOutputStream(new File(fileName + ".eps")));
+						pc.export(out);
+						out.close();
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		}
+	};
+	
+	
 	private ActionListener exportSynthesizedAnnotations =  new ActionListener() {
 		public void actionPerformed(final ActionEvent e) {
 			String dialogTitle = "Export synthesized annotations (.wav)";

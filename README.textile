@@ -4,7 +4,17 @@ In its current form Tarsos is a collection of  classes to create, compare and pr
 
 To see Tarsos in action you can check the "Tarsos screencast":http://www.youtube.com/watch?v=nzDdYvqgcOo. More detailed information, news and updates can be found on the "Tarsos website":http://tarsos.0110.be  
 
-To give Tarsos a try you can "start Tarsos using JAVA WebStart":http://tarsos.0110.be/attachment/tarsos.jnlp or download the "executable Tarsos JAR-file":http://tarsos.0110.be/attachment/tarsos.jar. A JAVA 5 runtime is required, JAVA 6 preferred. An "API reference for Tarsos":http://tarsos.0110.be/attachment/doc/ is also available. 
+To give Tarsos a try you can "start Tarsos using JAVA WebStart":http://tarsos.0110.be/releases/Tarsos-latest.jnlp or download the "executable Tarsos JAR-file":http://tarsos.0110.be/releases/Tarsos-latest.jar. A JAVA 5 runtime is required, JAVA 6 preferred. An "API reference for Tarsos":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest-Documentation/ is also available.
+
+h2. Develop Tarsos
+
+If you want to develop tarsos you are more than welcome to. Start by consulting the "API documentation":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest-Documentation/. If you, for some reason, want to build from source, you need "Apache Ant":http://ant.apache.org/ and "git":http://git-scm.com/ installed on your system. The following commands fetch the source and build tarsos: 
+<pre><code>git clone https://JorenSix@github.com/JorenSix/Tarsos.git
+cd Tarsos/build
+ant #Build Tarsos
+ant javadoc #Creates the documentation in Tarsos/doc
+</code></pre>
+When everything runs correctly you should be able to run Tarsos, also the Javadoc documentation for the API should be available in Tarsos/doc. Drop me a line if you use Tarsos. Always nice to hear how this software is used.
 
 h2. Credits
 

@@ -22,8 +22,8 @@ package be.hogent.tarsos.util;
  *
  * <p>A <tt>TimeUnit</tt> is mainly used to inform time-based methods
  * how a given timing parameter should be interpreted. For example,
- * the following code will timeout in 50 milliseconds if the {@link
- * java.util.concurrent.locks.Lock lock} is not available:
+ * the following code will timeout in 50 milliseconds if the 
+ * java.util.concurrent.locks.Lock  is not available:
  *
  * <pre>  Lock lock = ...;
  *  if ( lock.tryLock(50L, TimeUnit.MILLISECONDS) ) ...

@@ -94,7 +94,7 @@ public final class FileUtils {
 			sb.append(s.toString()).append("\n");
 		}
 		writeFile(sb.toString(), fileName);
-	}
+	}	
 
 	public static List<Annotation> readPitchAnnotations(final String fileName) {
 		final List<Annotation> annotations = new ArrayList<Annotation>();

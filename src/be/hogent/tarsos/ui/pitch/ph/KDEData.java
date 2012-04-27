@@ -9,8 +9,8 @@
 package be.hogent.tarsos.ui.pitch.ph;
 
 import java.util.HashMap;
-
-import javax.swing.JComponent;
+import java.util.List;
+import java.util.logging.Logger;
 
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
@@ -21,84 +21,74 @@ import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 import be.hogent.tarsos.util.KernelDensityEstimate;
-import be.hogent.tarsos.util.histogram.Histogram;
-import be.hogent.tarsos.util.histogram.PitchClassHistogram;
-import be.hogent.tarsos.util.histogram.PitchHistogram;
+import be.hogent.tarsos.util.KernelDensityEstimate.Kernel;
 
 public class KDEData  implements AudioFileChangedListener, AnnotationListener{
 
 	private static final int AMBITUS_STOP = Configuration.getInt(ConfKey.pitch_histogram_stop);
 	private static final int AMBITUS_START = Configuration.getInt(ConfKey.pitch_histogram_start);
+	/**
+	 * Logs messages.
+	 */
+	private static final Logger LOG = Logger.getLogger(KDEData.class.getName());
 	
+	private static KDEData instance; 
 	
 	public static synchronized KDEData getInstance(){
-		return null;
+		if(instance == null){
+			instance = new KDEData(true);
+		}
+		return instance;
 	}
 	
-		
+	private final HashMap<PitchDetectionMode, KernelDensityEstimate> kdes;
 
-	private final HashMap<PitchDetectionMode, KernelDensityEstimate> histos;
-	private final boolean containsPitchClassHistogramData;
+	/**
+	 * Defines the kernel used to build the KDE.
+	 */
+	private final Kernel kernel = new KernelDensityEstimate.GaussianKernel(6);
 	
 	private KDEData(boolean containsPCH){
-		histos = new HashMap<PitchDetectionMode, KernelDensityEstimate>();
-		containsPitchClassHistogramData = containsPCH;
+		kdes = new HashMap<PitchDetectionMode, KernelDensityEstimate>();
 	}
-	
 
-	
 	public boolean isEmpty(){
-		return histos.isEmpty();
+		return kdes.isEmpty();
 	}
-
-	
-	private JComponent componentToRepaint;
-	public void setComponentToRepaint(final JComponent component){
-		componentToRepaint = component;
-	}
-
 
 	public void audioFileChanged(AudioFile newAudioFile) {
-		if (Configuration.getBoolean(ConfKey.reset_on_import)) {
-			histos.clear();
-			repaint();
-		}
+		
 	}
-	
-	public void repaint(){
-		componentToRepaint.repaint();
-	}
-
 
 	public void addAnnotation(Annotation annotation) {
 		double pitchInAbsCents = annotation.getPitch(PitchUnit.ABSOLUTE_CENTS);
 		if (pitchInAbsCents > AMBITUS_START && pitchInAbsCents <= AMBITUS_STOP) {
-			final Histogram histo;
-			if (!histos.containsKey(annotation.getSource())) {
-				if (!containsPitchClassHistogramData) {
-					histo = new PitchHistogram();
-				} else {
-					histo = new PitchClassHistogram();
-				}
-				synchronized (this) {
-					
-			    }
-				
-			} else {
-			
-			}
-
-			repaint();
+			kdes.get(annotation.getSource()).add(pitchInAbsCents);
+		} else {
+			String message;
+			message = String.format("Ignored pitch annotation outside range: %s not in [%s,%s]",pitchInAbsCents,AMBITUS_START,AMBITUS_STOP);
+			LOG.finer(message);
 		}
 	}
 	
-	public boolean containsKey(PitchDetectionMode source) {
-		return histos.containsKey(source);
+	public HashMap<PitchDetectionMode, KernelDensityEstimate> getKDEs(){
+		return kdes;
 	}
 
 
 	public void clearAnnotations() {
-
+		clear();
+	}
+	
+	private void clear(){
+		kdes.clear();
+		List<String> trackers = Configuration.getList(ConfKey.pitch_tracker_list);
+		for(String tracker : trackers){
+			PitchDetectionMode mode = PitchDetectionMode.valueOf(tracker);
+			if(!kdes.containsKey(mode)){
+				kdes.put(mode, new KernelDensityEstimate(kernel,1200));
+			}
+		}
 	}
 
 
@@ -108,12 +98,11 @@ public class KDEData  implements AudioFileChangedListener, AnnotationListener{
 
 
 	public void extractionStarted() {
-		// TODO Auto-generated method stub
+		clear();
 	}
 
 
 	public void extractionFinished() {
 		// TODO Auto-generated method stub
 	}
-	
 }

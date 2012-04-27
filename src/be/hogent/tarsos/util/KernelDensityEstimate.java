@@ -19,9 +19,9 @@ public class KernelDensityEstimate {
 		accumulator = new double[size];
 		sum = 0;
 		this.kernel = kernel;
-		if (kernel.size() > accumulator.length)
-			throw new IllegalArgumentException(
-					"The kernel size should be smaller than the acummulator size.");
+		if (kernel.size() > accumulator.length) { 
+			throw new IllegalArgumentException("The kernel size should be smaller than the acummulator size.");
+		}
 	}
 
 	/**
@@ -97,11 +97,23 @@ public class KernelDensityEstimate {
 		return accumulator.clone();
 	}
 	
+	/**
+	 * Map the kernel density estimate to another size. E.g. a KDE with 4 values
+	 * mapped to two is done by iterating the 4 elements and adding them on
+	 * modulo 2 places. Here 1 + 4 = 5, 2 + 9 = 11
+	 * 
+	 * <pre>
+	 * (1 2 4 9).map(2) = (5 11) 
+	 * </pre>
+	 * @param size The new size for the KDE.
+	 * @return A new KDE with the contents of the original mapped to the new size.
+	 */
 	public KernelDensityEstimate map(int size){
 		KernelDensityEstimate newKDE = new KernelDensityEstimate(kernel,size);
 		for(int index = 0 ; index < size() ; index++){
-			newKDE.accumulator[index % size] = accumulator[index];
+			newKDE.accumulator[index % size] += accumulator[index];
 		}
+		newKDE.calculateSumFreq();
 		return newKDE;
 	}
 
@@ -132,6 +144,9 @@ public class KernelDensityEstimate {
 		return sum;
 	}
 	
+	/**
+	 * Calculates the sum of all estimates in the accummulator. Should be called after each update.
+	 */
 	private void calculateSumFreq(){
 		sum = 0;
 		for (int i = 0; i < accumulator.length; i++) {
@@ -143,17 +158,25 @@ public class KernelDensityEstimate {
 	 * Sets the maximum value in accumulator to 1.0
 	 */
 	public void normalize() {
-		double maxElement = 0.0;
-		for (int i = 0; i < size(); i++) {
-			maxElement = Math.max(accumulator[i], maxElement);
-		}
-
+		double maxElement = getMaxElement();
+		
 		if (maxElement > 0) {
 			for (int i = 0; i < size(); i++) {
 				accumulator[i] = accumulator[i] / maxElement;
 			}
 		}
 		calculateSumFreq();
+	}
+	
+	/**
+	 * @return the maximum element in the accumulator;
+	 */
+	public double getMaxElement() {
+		double maxElement = 0.0;
+		for (int i = 0; i < size(); i++) {
+			maxElement = Math.max(accumulator[i], maxElement);
+		}
+		return maxElement;
 	}
 	
 	/**
@@ -182,7 +205,7 @@ public class KernelDensityEstimate {
 		}
 		//reset sum freq
 		calculateSumFreq();
-		assert getSumFreq() == 1.0;
+		assert getSumFreq() == 0.0;
 	}
 		
 	/**
@@ -423,7 +446,6 @@ public class KernelDensityEstimate {
 	} 
 	
 	public static class Overlap implements KDECorrelation{
-
 		public double correlation(KernelDensityEstimate first,KernelDensityEstimate other, int shift) {
 			double correlation;
 			int matchingArea = 0;
@@ -455,6 +477,7 @@ public class KernelDensityEstimate {
 			return correlation;
 		}
 	}
+
 
 
 }

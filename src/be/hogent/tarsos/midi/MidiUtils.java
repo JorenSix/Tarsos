@@ -69,7 +69,7 @@ public final class MidiUtils {
 	}
 
 	/**
-	 * Sends a {@link MidiUtils.MidiTuningStandard.keyBasedTuningDump} MIDI
+	 * Sends a KeyBasedTuningDump MIDI
 	 * message to a receiver using the specified tuning in cents.
 	 * 
 	 * @param recv

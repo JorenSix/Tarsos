@@ -14,7 +14,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
@@ -34,7 +33,6 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -65,6 +63,8 @@ import be.hogent.tarsos.ui.BackgroundTask;
 import be.hogent.tarsos.ui.BackgroundTask.TaskHandler;
 import be.hogent.tarsos.ui.ProgressDialog;
 import be.hogent.tarsos.ui.WaveForm;
+import be.hogent.tarsos.ui.pitch.ph.KDEData;
+import be.hogent.tarsos.ui.pitch.ph.PitchClassKdePanel;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -146,17 +146,18 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		// all the components to add to the frame
 		JComponent configurationPanel = makeConfigurationPanel();
 		JComponent logPanel = makeLogPanel();
-		JComponent helpPanel = makeHelpanel();
+		
 		JComponent headerPanel = new HeaderPanel();
 		JComponent statusBar = makeStatusBar();
-		PlayerControlPanel player = new PlayerControlPanel();
+		
 
-		//final PitchClassHistogramPanel pitchClassHistogramPanel = new PitchClassHistogramPanel(new PitchClassHistogram(), this);
+		final PitchClassKdePanel pitchClassHistogramPanel = new PitchClassKdePanel();
 		//final PitchClassHistogramPanel ambitusPanel = new PitchClassHistogramPanel(new PitchHistogram(), this);
-		final PitchContour pitchContourPanel = new PitchContour();
-		final PitchContour regression = new PitchContour();
+		
 		final IntervalTable intervalTable = new IntervalTable();
 		final WaveForm waveForm = new WaveForm();
+		final PlayerControlPanel player = new PlayerControlPanel(waveForm);
+		final PitchContour pitchContourPanel = new PitchContour(waveForm);
 		final KeyboardPanel keyboardPanel = new KeyboardPanel();
 		final Menu menu = new Menu(false);
 
@@ -167,27 +168,25 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		AudioFileBrowserPanel browser = new AudioFileBrowserPanel(new GridLayout(0, 2));
 		browser.setBackground(Color.WHITE);
 		
-		//KDEData.getPitchClassHistogramInstance().setComponentToRepaint(pitchClassHistogramPanel);
-		//KDEData.getPitchHistogramInstance().setComponentToRepaint(ambitusPanel);
+		
 
 		// patch the scale changed listeners
-		//addScaleChangedListener(pitchClassHistogramPanel);
+		addScaleChangedListener(pitchClassHistogramPanel);
 		//addScaleChangedListener(ambitusPanel);
 		addScaleChangedListener(pitchContourPanel);
-		addScaleChangedListener(regression);
+
 		addScaleChangedListener(intervalTable);
 		addScaleChangedListener(keyboardPanel);
 		addScaleChangedListener(menu);
 
 
 		// Patch the audio file changed listeners.
-		//addAudioFileChangedListener(KDEData.getPitchClassHistogramInstance());
+		addAudioFileChangedListener(KDEData.getInstance());
 		//addAudioFileChangedListener(KDEData.getPitchHistogramInstance());
 		
-		//addAudioFileChangedListener(pitchClassHistogramPanel);
+		addAudioFileChangedListener(pitchClassHistogramPanel);
 		//addAudioFileChangedListener(ambitusPanel);
 		addAudioFileChangedListener(pitchContourPanel);
-		addAudioFileChangedListener(regression);
 		addAudioFileChangedListener(waveForm);
 		addAudioFileChangedListener(browser);
 		addAudioFileChangedListener(menu);
@@ -196,8 +195,8 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 		// Patch the annotation listeners
 		//annotationPublisher.addListener(KDEData.getPitchClassHistogramInstance());
-		//annotationPublisher.addListener(KDEData.getPitchHistogramInstance());
-		//annotationPublisher.addListener(pitchClassHistogramPanel);
+		annotationPublisher.addListener(KDEData.getInstance());
+		annotationPublisher.addListener(pitchClassHistogramPanel);
 		//annotationPublisher.addListener(ambitusPanel);
 		annotationPublisher.addListener(pitchContourPanel);
 		annotationPublisher.addListener(player);
@@ -231,11 +230,11 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		// add components to the window manager.
 
 		Content content;
-		/*
-		 = contentManager.addContent("Pitch Class Histogram", "Pitch Class Histogram", null, pitchClassHistogramPanel);
+	
+		content = contentManager.addContent("Pitch Class Histogram", "Pitch Class Histogram", null, pitchClassHistogramPanel);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(false);
-		*/
+		
 
 		content = contentManager.addContent("Configuration", "Configuration", null, configurationPanel);
 		MultiSplitConstraint constraint = new MultiSplitConstraint(content, 1);
@@ -366,6 +365,9 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		} catch (IOException e) {
 			// fail silently, a lacking icon is not that bad
 			LOG.warning("Failed to set program icon");
+		} catch (IllegalArgumentException e){
+			// fail silently, a lacking icon is not that bad
+			LOG.warning("Failed to set program icon");
 		}
 	}
 
@@ -380,17 +382,6 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		JScrollPane scrollPane = new JScrollPane(output);
 		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		return scrollPane;
-	}
-
-	private JComponent makeHelpanel() {
-		String contents = FileUtils.readFileFromJar("/be/hogent/tarsos/ui/resources/help.html");
-		JEditorPane helpLabel = new JEditorPane();
-		helpLabel.setEditable(false);
-		helpLabel.setContentType("text/html");
-		helpLabel.setPreferredSize(new Dimension(500, 300));
-		helpLabel.setText(contents);
-		helpLabel.setCaretPosition(0);
-		return new JScrollPane(helpLabel);
 	}
 
 	public static ImageIcon createImageIcon(String path) {
@@ -647,8 +638,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 	}
 
 	private void notifyAudioFileChangedListeners() {
-		LOG.log(Level.FINE,
-				String.format("Notify listeners of audio file change: %s .", getAudioFile().originalBasename()));
+		LOG.log(Level.FINE,String.format("Notify listeners of audio file change: %s .", getAudioFile().originalBasename()));
 		for (AudioFileChangedListener listener : audioFileChangedListeners) {
 			listener.audioFileChanged(getAudioFile());
 		}

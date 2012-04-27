@@ -9,12 +9,14 @@ import java.util.Arrays;
 
 import javax.swing.JComponent;
 
-public class ScaleEditor extends MouseAdapter implements MouseMotionListener, KeyListener {
+import be.hogent.tarsos.ui.pitch.Frame;
+import be.hogent.tarsos.ui.pitch.ScaleChangedListener;
+
+public class ScaleEditor extends MouseAdapter implements MouseMotionListener, KeyListener, ScaleChangedListener {
 	private final MouseDragListener mouseDrag;
 	private final JComponent parent;
 	private double movingElement = -1.0;
-	
-	double[] scale;
+	private double[] scale;
 
 	ScaleEditor(final MouseDragListener mouseDrag, final JComponent parent) {
 		this.mouseDrag = mouseDrag;
@@ -58,6 +60,7 @@ public class ScaleEditor extends MouseAdapter implements MouseMotionListener, Ke
 			}
 			parent.repaint();
 			//layer.scaleChangedPublisher.scaleChanged(scale, true, false);
+			Frame.getInstance().scaleChanged(scale, true, false);
 		} else if (e.isControlDown()) {
 			//request focus for the key listener to work...
 			parent.requestFocus();
@@ -73,7 +76,7 @@ public class ScaleEditor extends MouseAdapter implements MouseMotionListener, Ke
 				}
 			}
 			parent.repaint();
-			//layer.scaleChangedPublisher.scaleChanged(scale, true, false);
+			Frame.getInstance().scaleChanged(scale, true, false);
 		}
 	}
 
@@ -95,7 +98,7 @@ public class ScaleEditor extends MouseAdapter implements MouseMotionListener, Ke
 	public void mouseReleased(MouseEvent e) {
 		if (movingElement != -1.0) {
 			Arrays.sort(scale);
-			//layer.scaleChangedPublisher.scaleChanged(scale, false, false);
+			Frame.getInstance().scaleChanged(scale, false, false);
 		}
 		movingElement = -1.0;
 	}
@@ -134,8 +137,14 @@ public class ScaleEditor extends MouseAdapter implements MouseMotionListener, Ke
 			}
 			Arrays.sort(newScale);
 			scale = newScale;				
-			//scaleChangedPublisher.scaleChanged(scale, false, false);
+			Frame.getInstance().scaleChanged(scale, false, false);
 			movingElement = -1.0;
 		}
+	}
+
+	public void scaleChanged(double[] newScale, boolean isChanging,
+			boolean shiftHisto) {
+		this.scale = newScale;
+		
 	}
 }

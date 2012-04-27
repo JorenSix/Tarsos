@@ -133,7 +133,6 @@ public final class FileDrop {
 	 * 
 	 * @param out
 	 *            PrintStream to record debugging info or null for no debugging.
-	 * @param out
 	 * @param c
 	 *            Component on which files will be dropped.
 	 * @param listener
@@ -636,8 +635,8 @@ public final class FileDrop {
 
 	/**
 	 * This is the event that is passed to the
-	 * {@link FileDropListener#filesDropped filesDropped(...)} method in your
-	 * {@link FileDropListener} when files are dropped onto a registered drop
+	 * {@link Listener#filesDropped filesDropped(...)} method in your
+	 * {@link Listener} when files are dropped onto a registered drop
 	 * target.
 	 * 
 	 * <p>
@@ -828,9 +827,9 @@ public final class FileDrop {
 		/**
 		 * Returns a two- or three-element array containing first the custom
 		 * data flavor, if one was created in the constructors, second the
-		 * default {@link #DATA_FLAVOR} associated with
-		 * {@link TransferableObject}, and third the
-		 * {@link java.awt.datatransfer.DataFlavor.stringFlavor}.
+		 * default DATA_FLAVOR associated with
+		 * TransferableObject, and third the
+		 * java.awt.datatransfer.DataFlavor.stringFlavor.
 		 * 
 		 * @return An array of supported data flavors
 		 * @since 1.1
@@ -917,7 +916,6 @@ public final class FileDrop {
 		 * getObject()} method will be called.
 		 * 
 		 * @author Robert Harder
-		 * @copyright 2001
 		 * @version 1.1
 		 * @since 1.1
 		 */

@@ -45,7 +45,7 @@ import be.hogent.tarsos.ui.pitch.Frame;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.StopWatch;
 
-public final class WaveForm extends JPanel implements AudioFileChangedListener {
+public final class WaveForm extends JPanel implements AudioFileChangedListener  {
 
 	/**
 	 * 
@@ -83,19 +83,19 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 			public void mouseClicked(final MouseEvent event) {
 				if (event.getButton() == MouseEvent.BUTTON1) {
 					setMarkerInPixels(event.getX(), false);
+					Player player = Player.getInstance();
+					PlayerState previousState = player.getState();
+					player.pauze(maxMarkerPosition);
+					if(previousState == PlayerState.PLAYING) {
+						player.play();
+					}
 				} else {
 					setMarkerInPixels(event.getX(), true);
 				}
+
 				AnnotationPublisher.getInstance().clear();
 				AnnotationPublisher.getInstance().alterSelection(minMarkerPosition, maxMarkerPosition);
 				AnnotationPublisher.getInstance().delegateAddAnnotations(minMarkerPosition, maxMarkerPosition);
-				
-				Player player = Player.getInstance();
-				PlayerState previousState = player.getState();
-				player.pauze(maxMarkerPosition);
-				if(previousState == PlayerState.PLAYING) {
-					player.play();
-				}
 			}
 		});
 		setMarker(0, true);
@@ -138,10 +138,16 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener {
 	 * 			   True if the marker to place is the marker at the left, the minimum. False otherwise.
 	 */
 	public void setMarker(final double newPosition, final boolean minMarker) {
-		if (minMarker && newPosition < maxMarkerPosition) {
+		if (minMarker ) {
 			minMarkerPosition = newPosition;
-		} else if (!minMarker && newPosition > minMarkerPosition) {
+			if(newPosition > maxMarkerPosition){
+				maxMarkerPosition = minMarkerPosition;
+			}
+		} else if (!minMarker) {
 			maxMarkerPosition = newPosition;
+			if(newPosition < minMarkerPosition){
+				minMarkerPosition = maxMarkerPosition;
+			}
 		}
 		requestRepaint();
 	}

@@ -16,18 +16,19 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.List;
+import java.util.HashMap;
 
 import javax.swing.JPanel;
 
+import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.midi.TarsosSynth;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
+import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.ui.pitch.AudioFileChangedListener;
 import be.hogent.tarsos.ui.pitch.ScaleChangedListener;
 import be.hogent.tarsos.util.AudioFile;
-import be.hogent.tarsos.util.ConfKey;
-import be.hogent.tarsos.util.Configuration;
+import be.hogent.tarsos.util.KernelDensityEstimate;
 
 public final class PitchClassKdePanel extends JPanel implements ScaleChangedListener, AudioFileChangedListener,
 		AnnotationListener {
@@ -38,6 +39,7 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 	private final MouseDragListener kdeDrag;
 	private final MouseDragListener scaleDrag;
 	private final ScaleEditor editor;
+	private double[] scale;
 	
 	private final MouseListener clickForPitchListener = new MouseAdapter() {
 		public void mouseClicked(MouseEvent e) {
@@ -49,28 +51,28 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 
 	public PitchClassKdePanel() {
 		super();
+		//Focus should be enabled for the key listener (Scala layer editor)...
+		setFocusable(true);
 		
+		//add mouse listeners for dragging KDE
 		kdeDrag = new MouseDragListener(this, MouseEvent.BUTTON1);
-		scaleDrag = new MouseDragListener(this, MouseEvent.BUTTON2);
-		editor = new ScaleEditor(scaleDrag, this);
-		
-		//add mouse motion listeners for dragging scales or histo
 		addMouseMotionListener(kdeDrag);
+		addMouseListener(kdeDrag);
+	
+		//add mouse listeners for dragging scale
+		scaleDrag = new MouseDragListener(this, MouseEvent.BUTTON2);
 		addMouseMotionListener(scaleDrag);
+		addMouseListener(scaleDrag);
 		
 		//wire listeners for scale editor
+		editor = new ScaleEditor(scaleDrag, this);
 		addMouseListener(editor);
 		addMouseMotionListener(editor);
 		addKeyListener(editor);
 		
 		//wire click for pitch listener
 		addMouseListener(clickForPitchListener);
-		
-		List<String> trackers = Configuration.getList(ConfKey.pitch_tracker_list);
 	}
-
-
-
 	
 	public void paint(final Graphics g) {
 		final Graphics2D graphics = (Graphics2D) g;
@@ -78,6 +80,8 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 		graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		graphics.setBackground(Color.WHITE);
 		graphics.clearRect(0, 0, getWidth(), getHeight());
+		paintScale(g);
+		paintKDEs(g);
 	}
 	
 	private void paintScale(final Graphics g){
@@ -90,7 +94,7 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 		final int xOffsetPixels = (int) Math.round(xOffset * width);
 
 		g.setColor(Color.GRAY);
-		/*
+		
 		for (final double reference : scale) {
 			final int x = (int) (reference / 1200 * width + xOffsetPixels) % width;
 			final String text = Integer.valueOf((int) reference).toString();
@@ -107,22 +111,23 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 				g.drawString(text, x - start, height - yLabelsOffset);
 			}
 		}
-		*/
 	}
 	
-	public void paintKDEs(final Graphics g){
-		
+	private void paintKDEs(final Graphics g){
+		HashMap<PitchDetectionMode,KernelDensityEstimate> kdes = KDEData.getInstance().getKDEs();
+		int index = 0;
+		for(PitchDetectionMode mode : kdes.keySet()){
+			paintKDE(g,mode,kdes.get(mode),index);
+			index++;
+		}
 	}
 	
-	private void paintKDE(final Graphics g){
+	private void paintKDE(final Graphics g, PitchDetectionMode mode, KernelDensityEstimate kernelDensityEstimate, int index){
 		double xOffset = kdeDrag.calculateXOffset();
 		int yOffset = 20;
-		/*
-		double maxCount = values[0];
 
-		for (int i = 1; i < values.length; i++) {
-			maxCount = Math.max(maxCount, values[i]);
-		}
+		double maxCount = kernelDensityEstimate.getMaxElement();
+		double[] values = kernelDensityEstimate.getEstimate();
 
 		final int width = getWidth();
 		final int height = getHeight();
@@ -136,17 +141,28 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 		g.setColor(Color.GRAY);
 		g.drawLine(0, height - yOffset, width, height - yOffset);
 
-		g.setColor(Color.RED);
-
-		for (int i = 0; i < values.length; i++) {
-			x = (int) ((i / values.length  * width + xOffsetPixels) % width);
-			y = height - yOffset - (int) (values[i] / maxCount * height * 0.9);
-			if (x > previousPoint.x) {
-				g.drawLine(previousPoint.x, previousPoint.y, x, y);
+		Color modeColor = Tarsos.COLORS[mode.ordinal() % Tarsos.COLORS.length];
+		
+		if(kernelDensityEstimate.getSumFreq() > 0){
+			g.setColor(modeColor);
+			//draw graph
+			for (int i = 0; i < values.length; i++) {
+				x = (int) ((i / Double.valueOf(values.length)  * width + xOffsetPixels) % width);
+				y = height - yOffset - (int) (values[i] / maxCount * height * 0.9);
+				if (x >= previousPoint.x) {
+					g.drawLine(previousPoint.x, previousPoint.y, x, y);
+				}
+				previousPoint = new Point(x, y);
 			}
-			previousPoint = new Point(x, y);
+			
+			//draw legend
+			int legendElementWidth = 100;
+			int legendElementHeight = 18;
+			g.setColor(new Color(1.0f, 1.0f, 1.0f, 0.7f));
+			g.fillRect(width - legendElementWidth, index * legendElementHeight, legendElementWidth, legendElementHeight );
+			g.setColor(modeColor);
+			g.drawString(mode.getParametername(), width - legendElementWidth, legendElementHeight + index * legendElementHeight - 5);
 		}
-		*/
 	}
 
 
@@ -155,7 +171,10 @@ public final class PitchClassKdePanel extends JPanel implements ScaleChangedList
 	}
 
 	public void scaleChanged(final double[] newScale, final boolean isChanging, boolean shiftHisto) {
-
+		//propagate tha changed scale to the editor
+		editor.scaleChanged(newScale, isChanging, shiftHisto);
+		this.scale = newScale;
+		repaint();
 	}
 
 

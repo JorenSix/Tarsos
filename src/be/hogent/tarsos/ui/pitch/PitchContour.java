@@ -8,15 +8,6 @@
 **/
 package be.hogent.tarsos.ui.pitch;
 
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -25,7 +16,6 @@ import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 
 import ptolemy.plot.Plot;
-import ptolemy.plot.PlotPoint;
 import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
@@ -34,10 +24,10 @@ import be.hogent.tarsos.sampled.pitch.AnnotationSelection;
 import be.hogent.tarsos.sampled.pitch.Pitch;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
+import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
-import be.hogent.tarsos.util.FileUtils;
 
 public class PitchContour extends Plot implements AudioFileChangedListener, ScaleChangedListener,
 		AnnotationListener {
@@ -54,8 +44,10 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 
 	private PitchUnit pitchUnit;
 	private double[] scale;
-
-	public PitchContour() {
+	private final WaveForm waveForm;
+	
+	public PitchContour(WaveForm waveForm) {
+		this.waveForm = waveForm;
 		pitchUnit = PitchUnit.valueOf(Configuration.get(ConfKey.pitch_contour_unit));
 		setColors(Tarsos.COLORS);
 	}
@@ -136,84 +128,14 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 		final String title;
 		final String shortTitle;
 		
-			// not in live mode
-			setXRange(0, newAudioFile.getLengthInMilliSeconds() / 1000.0);
-			shortTitle = newAudioFile.originalBasename();
+		// not in live mode
+		setXRange(0, newAudioFile.getLengthInMilliSeconds() / 1000.0);
+		shortTitle = newAudioFile.originalBasename();
 		
 		title = String.format("%s - pitch in %s", shortTitle, pitchUnit.getHumanName());
 
 		setButtons(true);
-		if (button != null) {
-			remove(button);
-		}
-		button = new JButton(Frame.createImageIcon("/ptolemy/plot/img/fill.gif"));
-		button.setPreferredSize(new Dimension(20, 20));
-		button.setToolTipText("Export CSV and EPS file");
-		button.addActionListener(new ActionListener() {
-			final StringBuffer stringBuffer = new StringBuffer();
 
-			public void actionPerformed(ActionEvent arg0) {
-				// EPS
-				OutputStream out;
-				try {
-					out = new BufferedOutputStream(new FileOutputStream(new File(shortTitle + ".eps")));
-					export(out);
-					out.close();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				// CSV
-				stringBuffer.append("Time(sec);Pitch(" + pitchUnit.getHumanName() + ")\n");
-				for (ArrayList<PlotPoint> dataset : _points) {
-					for (PlotPoint p : dataset) {
-						stringBuffer.append(String.format("%.5f;%.5f\n", p.x, p.y));
-					}
-				}
-				FileUtils.writeFile(stringBuffer.toString(), shortTitle + ".csv");
-				stringBuffer.delete(0, stringBuffer.length());
-				// Matlab
-				stringBuffer.append("%Time(sec);Pitch(" + pitchUnit.getHumanName() + ")\n");
-				stringBuffer.append("annotations = [");
-				for (ArrayList<PlotPoint> dataset : _points) {
-					for (PlotPoint p : dataset) {
-						stringBuffer.append(String.format("%s,", p.y));
-					}
-				}
-				FileUtils.writeFile(stringBuffer.toString(), shortTitle + "_annotations.m");
-				stringBuffer.delete(0, stringBuffer.length());
-
-				/*
-				 * try { PitchSynth synth; synth = new PitchSynth();
-				 * 
-				 * double startTime = getXRange()[0]; double stopTime =
-				 * getXRange()[1]; double startPitch = getYRange()[0]; double
-				 * stopPitch = getYRange()[1]; List<Annotation> annotations =
-				 * AnnotationPublisher.getInstance().getAnnotations( startTime,
-				 * stopTime, startPitch, stopPitch); // order by time.
-				 * Collections.sort(annotations); double previousTime = -1;
-				 * double previousPitch = 0;
-				 * 
-				 * for (Annotation annotation : annotations) { double time =
-				 * annotation.getStart(); double pitch =
-				 * annotation.getPitch(pitchUnit); double timeDiff = time -
-				 * previousTime; double pitchDiff = pitch - previousPitch; if
-				 * (previousTime > 0) { Thread.sleep((long) (1000 * timeDiff));
-				 * } previousTime = time; if (pitchDiff > 3 || timeDiff > 0.07)
-				 * { synth.playAbsoluteCents(pitch, 100); } }
-				 * 
-				 * } catch (MidiUnavailableException e) { // TODO Auto-generated
-				 * catch block e.printStackTrace(); } catch
-				 * (InterruptedException e) { // TODO Auto-generated catch block
-				 * e.printStackTrace(); }
-				 */
-
-			}
-		});
-		button.setBorderPainted(false);
-
-		add(button);
 		setTitle(title);
 		setXLabel("Time (seconds)");
 
@@ -320,9 +242,12 @@ public class PitchContour extends Plot implements AudioFileChangedListener, Scal
 				minPitch = 0;
 			}
 			
-				AnnotationPublisher.getInstance().clear();
-				AnnotationPublisher.getInstance().alterSelection(minTime, maxTime, minPitch, maxPitch);
-				AnnotationPublisher.getInstance().delegateAddAnnotations(minTime, maxTime, minPitch, maxPitch);
+			waveForm.setMarker(minTime, true);
+			waveForm.setMarker(maxTime, false);
+			
+			AnnotationPublisher.getInstance().clear();
+			AnnotationPublisher.getInstance().alterSelection(minTime, maxTime, minPitch, maxPitch);
+			AnnotationPublisher.getInstance().delegateAddAnnotations(minTime, maxTime, minPitch, maxPitch);
 			
 		}
 	}
