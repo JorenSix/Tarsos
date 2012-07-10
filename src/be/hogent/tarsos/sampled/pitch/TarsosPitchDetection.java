@@ -10,8 +10,9 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import be.hogent.tarsos.dsp.AudioDispatcher;
 import be.hogent.tarsos.dsp.AudioEvent;
 import be.hogent.tarsos.dsp.AudioProcessor;
+import be.hogent.tarsos.dsp.pitch.PitchDetectionHandler;
+import be.hogent.tarsos.dsp.pitch.PitchDetectionResult;
 import be.hogent.tarsos.dsp.pitch.PitchProcessor;
-import be.hogent.tarsos.dsp.pitch.PitchProcessor.DetectedPitchHandler;
 import be.hogent.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import be.hogent.tarsos.util.AudioFile;
 
@@ -24,11 +25,13 @@ public class TarsosPitchDetection implements PitchDetector {
 	
 	private double progress;
 	
-	private DetectedPitchHandler handler = new DetectedPitchHandler() {
-		public void handlePitch(float pitch, float probability, float timeStamp,
-				float progress) {
-			if(pitch != -1){
-				Annotation annotation = new Annotation(timeStamp, pitch, annotationSource);
+	private PitchDetectionHandler handler = new PitchDetectionHandler() {
+
+
+		public void handlePitch(PitchDetectionResult pitchDetectionResult,
+				AudioEvent audioEvent) {
+			if(pitchDetectionResult.isPitched()){
+				Annotation annotation = new Annotation(audioEvent.getTimeStamp(), pitchDetectionResult.getPitch(), annotationSource,pitchDetectionResult.getProbability());
 				annotations.add(annotation);
 			}
 		}
@@ -53,6 +56,8 @@ public class TarsosPitchDetection implements PitchDetector {
 			algorithm = PitchEstimationAlgorithm.YIN;
 		}else if (pitchDetectionMode == PitchDetectionMode.TARSOS_DYNAMIC_WAVELET){
 			algorithm = PitchEstimationAlgorithm.DYNAMIC_WAVELET;
+		} else if (pitchDetectionMode == PitchDetectionMode.TARSOS_FFT_YIN){
+			algorithm = PitchEstimationAlgorithm.FFT_YIN;
 		} else {
 			throw new IllegalArgumentException("Algorithm not recognized, should be MPM, YIN or Dynamic Wavelet, is " + pitchDetectionMode.name());
 		}

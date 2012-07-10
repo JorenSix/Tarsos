@@ -36,10 +36,12 @@ import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
 
 import be.hogent.tarsos.dsp.AudioDispatcher;
+import be.hogent.tarsos.dsp.AudioEvent;
 import be.hogent.tarsos.dsp.AudioPlayer;
 import be.hogent.tarsos.dsp.WaveformWriter;
+import be.hogent.tarsos.dsp.pitch.PitchDetectionHandler;
+import be.hogent.tarsos.dsp.pitch.PitchDetectionResult;
 import be.hogent.tarsos.dsp.pitch.PitchProcessor;
-import be.hogent.tarsos.dsp.pitch.PitchProcessor.DetectedPitchHandler;
 import be.hogent.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import be.hogent.tarsos.sampled.SampledAudioUtilities;
 import be.hogent.tarsos.sampled.pitch.Annotation;
@@ -51,7 +53,7 @@ import be.hogent.tarsos.ui.WaveForm;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
 
-public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, ScaleChangedListener, AnnotationListener {
+public class TarsosLiveFrame extends JFrame implements PitchDetectionHandler, ScaleChangedListener, AnnotationListener {
 
 	/**
 	 * Logs messages.
@@ -282,6 +284,15 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 	public void handlePitch(float pitch, float probability, float timeStamp,
 			float progress) {
 		if(pitch != -1.0){
+			
+		}
+	}
+	
+	public void handlePitch(PitchDetectionResult pitchDetectionResult,
+			AudioEvent audioEvent) {
+		if(pitchDetectionResult.isPitched()){
+			float pitch  = pitchDetectionResult.getPitch();
+			double timeStamp = audioEvent.getTimeStamp();
 			Annotation annotation = new Annotation(timeStamp, pitch, PitchDetectionMode.TARSOS_YIN);
 			tree.add(annotation);
 			double currentTime = annotation.getStart();
@@ -289,6 +300,7 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 			publisher.delegateAddAnnotations(prevTime,currentTime);	
 			prevTime = timeStamp;
 		}
+		
 	}
 
 	public void scaleChanged(double[] newScale, boolean isChanging,
@@ -321,4 +333,5 @@ public class TarsosLiveFrame extends JFrame implements DetectedPitchHandler, Sca
 		// TODO Auto-generated method stub
 		
 	}
+	
 }

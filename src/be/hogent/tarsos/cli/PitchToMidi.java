@@ -40,6 +40,7 @@ import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.dsp.AudioDispatcher;
 import be.hogent.tarsos.dsp.AudioEvent;
 import be.hogent.tarsos.dsp.AudioProcessor;
+import be.hogent.tarsos.dsp.pitch.PitchDetectionResult;
 import be.hogent.tarsos.dsp.pitch.PitchDetector;
 import be.hogent.tarsos.dsp.pitch.Yin;
 import be.hogent.tarsos.midi.MidiCommon;
@@ -422,14 +423,14 @@ public class PitchToMidi extends AbstractTarsosApp {
 
 		public boolean process(AudioEvent audioEvent) {
 			float[] audioBuffer = audioEvent.getFloatBuffer();
-			final float pitch = pure.getPitch(audioBuffer);
-			final double midiCentValue = PitchUnit.hertzToMidiCent(pitch);
+			final PitchDetectionResult pitch = pure.getPitch(audioBuffer);
+			final double midiCentValue = PitchUnit.hertzToMidiCent(pitch.getPitch());
 			final int midiKey = (int) midiCentValue;
 			// 'musical' pitch detected ?
 			if (Math.abs(midiCentValue - midiKey) < 0.3 && midiCentValue < 128 && midiCentValue >= 0) {
 				final String lastDetectedNote = "Name: "
-						+ Pitch.getInstance(PitchUnit.HERTZ, pitch).noteName() + "\t Frequency: "
-						+ (int) pitch + "Hz \t" + " MIDI note:" + PitchUnit.hertzToMidiCent(pitch);
+						+ Pitch.getInstance(PitchUnit.HERTZ, pitch.getPitch()).noteName() + "\t Frequency: "
+						+ (int) pitch.getPitch() + "Hz \t" + " MIDI note:" + PitchUnit.hertzToMidiCent(pitch.getPitch());
 				Tarsos.println(lastDetectedNote);
 				// SPL is defined in db: 0 db = max => 128-SPL gives a MIDI
 				// velocity

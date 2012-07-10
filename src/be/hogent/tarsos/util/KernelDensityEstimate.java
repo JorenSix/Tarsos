@@ -255,10 +255,16 @@ public class KernelDensityEstimate {
 		double correlation;
 		double matchingArea = 0.0;
 		double biggestKDEArea = Math.max(getSumFreq(), other.getSumFreq());
-		for (int i = 0; i < accumulator.length; i++) {
-			int otherIndex = (i + positionsToShiftOther) % other.size();
-			matchingArea += Math.min(accumulator[i],
-					other.accumulator[otherIndex]);
+		//an if, else to prevent modulo calculation
+		if(positionsToShiftOther == 0){
+			for (int i = 0; i < accumulator.length; i++) {
+				matchingArea += Math.min(accumulator[i],other.accumulator[i]);
+			}
+		}else{
+			for (int i = 0; i < accumulator.length; i++) {
+				int otherIndex = (i + positionsToShiftOther) % other.size();
+				matchingArea += Math.min(accumulator[i],other.accumulator[otherIndex]);
+			}
 		}
 		if (matchingArea == 0.0) {
 			correlation = 0.0;

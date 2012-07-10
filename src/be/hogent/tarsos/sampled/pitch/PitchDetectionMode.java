@@ -95,7 +95,7 @@ public enum PitchDetectionMode {
 	POLYPHON("polyphon"),
 	
 	
-	SWIPE_OCTAVE("swipe_octave");
+	SWIPE_OCTAVE("swipe_octave"), TARSOS_FFT_YIN("tarsos_fft_yin");
 
 	/**
 	 * The name of the parameter.
@@ -159,6 +159,9 @@ public enum PitchDetectionMode {
 			break;
 		case SWIPE_OCTAVE:
 			detector = new SwipeOctave(audioFile, this);
+			break;
+		case TARSOS_FFT_YIN:
+			detector = new TarsosPitchDetection(audioFile, this);
 			break;
 		default:
 			detector = new VampPitchDetection(audioFile, this);
