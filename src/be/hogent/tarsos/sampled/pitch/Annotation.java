@@ -185,8 +185,7 @@ public final class Annotation implements Comparable<Annotation> {
 	 */
 	@Override
 	public String toString() {
-		return String.format(Locale.US, "%.5f,%.5f,%.5f,%s", start, getPitch(PitchUnit.HERTZ), probability,
-				source);
+		return String.format(Locale.US, "%.5f,%.5f,%.5f,%s", start, getPitch(PitchUnit.HERTZ), probability,source);
 	}
 
 	/**
