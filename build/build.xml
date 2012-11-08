@@ -2,7 +2,7 @@
 <project default="create_run_jar" name="Create Runnable Jar for Project Tarsos">
 
 	<!-- Configuration -->
-	<property name="version"   value="0.9"/>
+	<property name="version"   value="1.0"/>
 	<property name="built_by"  value="${user.name}"/>
 
 	<tstamp>
@@ -55,7 +55,7 @@
 			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosTranscoder-1.0-bin.jar"/>
 
 			<!-- TarsosDSP -->
-			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosDSP-1.2-bin.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosDSP-1.4-bin.jar"/>
 
 
 			<!-- Other Dependencies -->
@@ -88,7 +88,7 @@
 	        	access="protected" 
 	        	author="true" 
 	        	sourcepath="../src"
-	        	classpath="../lib/TarsosTranscoder-1.0-bin.jar;../lib/TarsosDSP-1.2-bin.jar;../lib/jave-1.0.2.jar;../lib/forms-1.3.0.jar;../lib/commons-math-2.0.jar;../lib/gervill.jar;../lib/kd.jar;../lib/swing-layout-1.0.jar;../lib/TableLayout-20050920.jar;../lib/mydoggy-api-1.4.2.jar;../lib/jopt-simple-3.2.jar;../lib/ptsupport.jar;../lib/java-getopt-1.0.13.jar;../lib/mydoggy-res-1.4.2.jar;../lib/mydoggy-plaf-1.4.2.jar;../lib/jgoodies-common-1.0.0.jar" 
+	        	classpath="../lib/TarsosTranscoder-1.0-bin.jar;../lib/TarsosDSP-1.4-bin.jar;../lib/jave-1.0.2.jar;../lib/forms-1.3.0.jar;../lib/commons-math-2.0.jar;../lib/gervill.jar;../lib/kd.jar;../lib/swing-layout-1.0.jar;../lib/TableLayout-20050920.jar;../lib/mydoggy-api-1.4.2.jar;../lib/jopt-simple-3.2.jar;../lib/ptsupport.jar;../lib/java-getopt-1.0.13.jar;../lib/mydoggy-res-1.4.2.jar;../lib/mydoggy-plaf-1.4.2.jar;../lib/jgoodies-common-1.0.0.jar" 
 	        	destdir="../doc" 
 	        	doctitle="Tarsos javadoc" 
 	        	nodeprecated="false" 
