@@ -1,11 +1,29 @@
-/**
+/*
+*              _______                      
+*             |__   __|                     
+*                | | __ _ _ __ ___  ___  ___
+*                | |/ _` | '__/ __|/ _ \/ __| 
+*                | | (_| | |  \__ \ (_) \__ \    
+*                |_|\__,_|_|  |___/\___/|___/    
+*                                                         
+* -----------------------------------------------------------
 *
 *  Tarsos is developed by Joren Six at 
-*  The Royal Academy of Fine Arts & Royal Conservatory,
+*  The School of Arts,
 *  University College Ghent,
 *  Hoogpoort 64, 9000 Ghent - Belgium
+*  
+* -----------------------------------------------------------
 *
-**/
+*  Info: http://tarsos.0110.be
+*  Github: https://github.com/JorenSix/Tarsos
+*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  
+*  Tarsos includes some source code by various authors,
+*  for credits and info, see README.
+* 
+*/
+
 package be.hogent.tarsos.ui.pitch;
 
 import java.awt.BorderLayout;
@@ -13,7 +31,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,11 +48,7 @@ import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
-import be.hogent.tarsos.ui.pitch.ph.KDEData;
 import be.hogent.tarsos.util.AudioFile;
-import be.hogent.tarsos.util.histogram.Histogram;
-import be.hogent.tarsos.util.histogram.peaks.Peak;
-import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
