@@ -158,15 +158,18 @@ public abstract class AbstractTarsosApp {
      * @param parser
      *            The command line argument parser.
      */
-    protected final void printHelp(final OptionParser parser) {
-        Tarsos.println("Application description");
-        Tarsos.println("-----------------------");
-        Tarsos.println(description());
-        Tarsos.println("");
+	protected final void printHelp(final OptionParser parser) {
+		Tarsos.printTarsosAsciiArt();
+		Tarsos.printSeparator();
+		Tarsos.println("");
+		Tarsos.println("Application description");
+		Tarsos.printSeparator();
+		Tarsos.println(description());
+		Tarsos.println("");
         
         if(synopsis() != null){
         	Tarsos.println("Synopsis");
-        	Tarsos.println("--------");
+        	Tarsos.printSeparator();
         	Tarsos.println("java -jar tarsos.jar " + name() + " " + synopsis());
         	Tarsos.println("");
         }        
@@ -179,11 +182,13 @@ public abstract class AbstractTarsosApp {
     }
     
     protected final void printError(final OptionParser parser,String message){
+    	printHelp(parser);
+    	Tarsos.println("");
     	Tarsos.println("Check your command line arguments");
-    	Tarsos.println("---------------------------------");
+    	Tarsos.printSeparator();
     	Tarsos.println("There is something wrong with your command line argumens. Please check the following:");
     	Tarsos.println("");
     	Tarsos.println(message);
-    	Tarsos.println("For more info, execute\n  java -jar tarsos.jar " + name() + " --help");
+    	Tarsos.println("For more info, execute\\n  java -jar tarsos.jar " + name() + " --help");
     }
 }

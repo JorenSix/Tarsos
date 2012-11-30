@@ -54,6 +54,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
+
 import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.Pitch;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
@@ -151,6 +155,31 @@ public final class FileUtils {
 			file = new File(file, path[i]);
 		}
 		return file.getPath();
+	}
+	
+	/**
+	 * Creates a link at the path denoted by link to target. 
+	 * Target should be an existing file. 
+	 * The link is created by executing "<code>ln -s target link</code>". 
+	 * This should be supported on your operating system. 
+	 * @param link The path for the link.
+	 * @param target The target link.
+	 * @return True if the link is correctly created, false otherwise.
+	 */
+	public static boolean createSymbolicLink(String link, String target){
+		String line = "ln -s \"" + target + "\" \"" + link + "\"";
+		CommandLine cmdLine = CommandLine.parse(line);
+		DefaultExecutor executor = new DefaultExecutor();
+		boolean success = false;
+		try {
+			int exitValue = executor.execute(cmdLine);
+			success = exitValue == 0;
+		} catch (ExecuteException e) {
+			success = false;
+		} catch (IOException e) {
+			success = false;
+		}
+		return success;
 	}
 	
 	private static byte[] createChecksum(String filename,final int numberOfBytes)

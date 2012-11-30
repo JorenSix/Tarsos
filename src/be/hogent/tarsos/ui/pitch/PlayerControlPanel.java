@@ -27,10 +27,13 @@ package be.hogent.tarsos.ui.pitch;
 
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -87,7 +90,11 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 			if(evt.getPropertyName() == "state"){
 				PlayerState newState = (PlayerState) evt.getNewValue();
 				playButton.setEnabled(newState!=PlayerState.NO_FILE_LOADED);
-				positionSlider.setEnabled(newState!=PlayerState.NO_FILE_LOADED);
+				loopCheckBox.setEnabled(newState!=PlayerState.NO_FILE_LOADED);				
+				if(loopCheckBox.isSelected())
+					positionSlider.setEnabled(false);
+				else
+					positionSlider.setEnabled(newState!=PlayerState.NO_FILE_LOADED);
 				if(newState == PlayerState.PLAYING) {
 					playButton.setText("Pauze");
 				} else if(newState == PlayerState.STOPPED)  {
@@ -127,18 +134,22 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 		}
 	};
 	
+	/**
+	 * Loops the audio, restarts the player when stop is reached and resumes from start.
+	 */
 	final AudioProcessor loopAudioProcessor = new AudioProcessor() {
 		public boolean process(AudioEvent audioEvent) {
 			return true;
 		}
 		
 		public void processingFinished() {
-			if(loopCheckBox.isSelected() && player.getState() == PlayerState.STOPPED){
-				
+			double diff = Math.abs(player.getCurrentTime() - player.getStopAt());//difference in seconds
+			//if the loop is completed - difference between stop and current smaller than 0.1 seconds- then restart
+			if(loopCheckBox.isSelected() && player.getState() == PlayerState.STOPPED && diff < 0.1 ){
 				double startAt = AnnotationPublisher.getInstance().getCurrentSelection().getStartTime();
-				AnnotationPublisher.getInstance().clear();
-				AnnotationPublisher.getInstance().alterSelection(startAt, startAt);
-				AnnotationPublisher.getInstance().delegateAddAnnotations(startAt, startAt);
+				AnnotationPublisher.getInstance().clear();//clear annotations
+				AnnotationPublisher.getInstance().alterSelection(startAt, startAt);//set annotation start
+				AnnotationPublisher.getInstance().delegateAddAnnotations(startAt, startAt);//add first annotations?
 				player.pauze(startAt);
 				player.play();
 			}
@@ -183,18 +194,79 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 		createSlider();
 		createProgressSlider();
 		loopCheckBox =  new JCheckBox();
+		loopCheckBox.setEnabled(false);
 		loopCheckBox.setText("Loop selection");
 		loopCheckBox.addItemListener(new ItemListener() {
-			
 			public void itemStateChanged(ItemEvent arg0) {
-				if(loopCheckBox.isSelected()){
-					double stopAt = AnnotationPublisher.getInstance().getCurrentSelection().getStopTime();
-					player.setStopAt(stopAt);
+				if(player.getState() == PlayerState.PLAYING){
+					if(loopCheckBox.isSelected()){
+						double stopAt = AnnotationPublisher.getInstance().getCurrentSelection().getStopTime();
+						double startAt = AnnotationPublisher.getInstance().getCurrentSelection().getStartTime();
+						player.setStopAt(stopAt);
+						player.pauze(startAt);
+						player.play();
+						positionSlider.setEnabled(false);
+					} else {
+						positionSlider.setEnabled(true);
+						player.setStopAt(Double.MAX_VALUE);
+					}
 				}else{
-					player.setStopAt(Double.MAX_VALUE);
+					if(loopCheckBox.isSelected()){
+						positionSlider.setEnabled(false);
+						double stopAt = AnnotationPublisher.getInstance().getCurrentSelection().getStopTime();
+						double startAt = AnnotationPublisher.getInstance().getCurrentSelection().getStartTime();
+						player.pauze(startAt);
+						player.setStopAt(stopAt);
+					}else{
+						positionSlider.setEnabled(true);
+						player.setStopAt(Double.MAX_VALUE);
+					}
 				}
 			}
 		});
+		
+		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+	    manager.addKeyEventDispatcher(new KeyEventDispatcher(){
+			public boolean dispatchKeyEvent(KeyEvent e) {
+				boolean consumed = false;
+				if(e.getKeyChar()=='n' &&  loopCheckBox.isSelected() && e.getID() == KeyEvent.KEY_TYPED && player.getState() != PlayerState.NO_FILE_LOADED){
+					e.consume();
+					double currentLoopStart = player.getStartAt();
+					double currentLoopStop = player.getStopAt();
+					double currentLoopLengt = currentLoopStop - currentLoopStart;
+					double nextLoopStart = currentLoopStop;
+					double nextLoopStop = currentLoopStop + currentLoopLengt;
+					AnnotationPublisher.getInstance().alterSelection(nextLoopStart, nextLoopStart);//set annotation start
+					player.pauze(nextLoopStart);
+					player.setStopAt(nextLoopStop);
+					player.play();
+					consumed = true;
+				} else if(e.getKeyChar()==' ' && e.getID() == KeyEvent.KEY_TYPED && playButton.isEnabled()){
+					playButton.doClick();
+					consumed = true;
+				} else if(e.getKeyChar()=='b' &&  loopCheckBox.isSelected() && e.getID() == KeyEvent.KEY_TYPED && player.getState() != PlayerState.NO_FILE_LOADED){
+					double currentLoopStart = player.getStartAt();
+					double currentLoopStop = player.getStopAt();
+					double currentLoopLength = currentLoopStop - currentLoopStart;
+					double nextLoopStart = currentLoopStart - currentLoopLength;
+					double nextLoopStop = currentLoopStart;
+					AnnotationPublisher.getInstance().alterSelection(nextLoopStart, nextLoopStart);//set annotation start
+					PlayerState previousState = player.getState();
+					player.setStopAt(nextLoopStop);
+					player.pauze(nextLoopStart);
+					if(previousState==PlayerState.PLAYING) {
+						player.play();
+					}
+					consumed = true;
+					e.consume();
+				} else if(e.getKeyChar()=='c' && e.getID() == KeyEvent.KEY_TYPED && loopCheckBox.isEnabled()){
+					loopCheckBox.getModel().setSelected(!loopCheckBox.isSelected());
+					consumed = true;
+					e.consume();
+				}
+				return consumed;
+			}});
+	    
 		doGroupLayout();
 		player = Player.getInstance();
 		player.addProcessorBeforeTimeStrechting(reportProgressProcessor);
@@ -263,13 +335,13 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 		tempoSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent arg0) {
 				double newTempo = tempoSlider.getValue()/100.0;
-				tempoLabel.setText(String.format("Tempo: %3d",  tempoSlider.getValue())+"%");
+				tempoLabel.setText(String.format("Tempo: %3d",  tempoSlider.getValue()) +"%");
 				player.setTempo(newTempo);
 			}
 		});
 		Player.getInstance().addPropertyChangeListener(tempoChanged);
 		tempoLabel = new JLabel("Tempo: 100%");
-		tempoLabel.setToolTipText("The time stretching factor in % (100 is no change).");
+		tempoLabel.setToolTipText("The time stretching factor: 100% is no change, 50% is half tempo.");
 	}
 	
 	private void createProgressSlider(){
@@ -299,7 +371,8 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 						ap.alterSelection(waveForm.getMarker(true), currentPosition);
 						ap.delegateAddAnnotations(waveForm.getMarker(true), currentPosition);
 						if(currentState == PlayerState.PLAYING){
-							player.play();							
+							player.pauze(currentPosition);
+							player.play();				
 						}
 						newPositionValue = currentValue;
 						positionSlider.setValue(currentValue);

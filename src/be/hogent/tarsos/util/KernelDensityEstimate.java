@@ -41,6 +41,15 @@ public class KernelDensityEstimate {
 			throw new IllegalArgumentException("The kernel size should be smaller than the acummulator size.");
 		}
 	}
+	
+	public KernelDensityEstimate(final Kernel kernel, double[] accumulator) {
+		this.accumulator = accumulator;
+		this.kernel = kernel;
+		if (kernel.size() > accumulator.length) { 
+			throw new IllegalArgumentException("The kernel size should be smaller than the acummulator size.");
+		}
+		calculateSumFreq();
+	}
 
 	/**
 	 * Add the kernel to an accumulator for each value.
@@ -501,7 +510,4 @@ public class KernelDensityEstimate {
 			return correlation;
 		}
 	}
-
-
-
 }

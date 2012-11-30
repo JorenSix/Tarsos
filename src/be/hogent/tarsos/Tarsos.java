@@ -47,9 +47,11 @@ import be.hogent.tarsos.cli.Annotate;
 import be.hogent.tarsos.cli.AnnotationSynth;
 import be.hogent.tarsos.cli.AudioToScala;
 import be.hogent.tarsos.cli.DetectPitch;
+import be.hogent.tarsos.cli.HistogramToScala;
 import be.hogent.tarsos.cli.MidiToWav;
 import be.hogent.tarsos.cli.PitchTable;
 import be.hogent.tarsos.cli.PitchToMidi;
+import be.hogent.tarsos.cli.PitchToHistogram;
 import be.hogent.tarsos.cli.PowerExtractor;
 import be.hogent.tarsos.cli.Rank;
 import be.hogent.tarsos.cli.TuneMidiSynth;
@@ -227,10 +229,16 @@ public final class Tarsos {
 
 	}
 	
-	private static boolean isMac(){		 
+	public static boolean isMac(){		 
 		String os = System.getProperty("os.name").toLowerCase();
 		//Mac
-	    return (os.indexOf( "mac" ) >= 0); 
+	    return os.indexOf("mac") >= 0; 
+	}
+	
+	public static boolean isWindows(){		 
+		String os = System.getProperty("os.name").toLowerCase();
+		//Mac
+		return os.indexOf("windows") >= 0; 
 	}
 
 	/**
@@ -256,11 +264,28 @@ public final class Tarsos {
 		if (applications.containsKey(subcommand)) {
 			applications.get(subcommand).run(subcommandArgs);
 		} else {
+			 printTarsosAsciiArt();
+			 printSeparator();
+			 
 			print("Unknown subcommand. Valid subcommands:");
 			for (final String key : applications.keySet()) {
 				print("\t" + key);
 			}
 		}
+	}
+	
+	public static void printTarsosAsciiArt(){
+		Tarsos.println("   _______                           ");
+		Tarsos.println("  |__   __|                          ");
+		Tarsos.println("     | | __ _ _ __ ___  ___  ___     ");
+		Tarsos.println("     | |/ _` | '__/ __|/ _ \\/ __| ");
+		Tarsos.println("     | | (_| | |  \\__ \\ (_) \\__ \\");
+		Tarsos.println("     |_|\\__,_|_|  |___/\\___/|___/  ");
+		Tarsos.println("");
+	}
+	
+	public static void printSeparator(){
+		Tarsos.println("-------------------------------------");
 	}
 
 	/**
@@ -278,6 +303,8 @@ public final class Tarsos {
 		applicationList.add(new TuneMidiSynth());
 		applicationList.add(new Rank());
 		applicationList.add(new PitchToMidi());
+		applicationList.add(new PitchToHistogram());
+		applicationList.add(new HistogramToScala());
 		for (final AbstractTarsosApp application : applicationList) {
 			registerApplication(application.name(), application);
 		}

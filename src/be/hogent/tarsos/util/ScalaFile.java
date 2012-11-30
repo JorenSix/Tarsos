@@ -217,29 +217,31 @@ public final class ScalaFile {
 	 */
 	public void write(final String scalaFile) {
 		if (pitches.length > 0) {
-			final StringBuilder contents = new StringBuilder();
-			contents.append("! ").append(FileUtils.basename(scalaFile)).append(".scl \n");
-			contents.append("!\n");
-			contents.append(getDescription()).append("\n");
-			contents.append(pitches.length).append("\n!\n");
-			for (int i = 0; i < pitches.length; i++) {
-				final double peakPosition = pitches[i];
-				contents.append(peakPosition);
-				if (pitchNames != null && pitchNames[i] != null) {
-					contents.append(" ").append(pitchNames[i]);
-				}
-				contents.append("\n");
-			}
-
 			/*
 			 * if (pitches[pitches.length - 1] != OCTAVE_IN_CENTS) {
 			 * contents.append(OCTAVE_IN_CENTS).append("\n"); }
 			 */
-
-			FileUtils.writeFile(contents.toString(), scalaFile);
+			String content = ("! " + FileUtils.basename(scalaFile) +".scl \n") + toString();
+			FileUtils.writeFile(content, scalaFile);
 		} else {
 			LOG.warning("No pitches defined, file: " + scalaFile + " not created.");
 		}
+	}
+	
+	public String toString(){
+		final StringBuilder contents = new StringBuilder();
+		contents.append("!\n");
+		contents.append(getDescription()).append("\n");
+		contents.append(pitches.length).append("\n!\n");
+		for (int i = 0; i < pitches.length; i++) {
+			final double peakPosition = pitches[i];
+			contents.append(peakPosition);
+			if (pitchNames != null && pitchNames[i] != null) {
+				contents.append(" ").append(pitchNames[i]);
+			}
+			contents.append("\n");
+		}
+		return contents.toString();
 	}
 
 	/**

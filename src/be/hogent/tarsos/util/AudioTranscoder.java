@@ -27,7 +27,9 @@
 package be.hogent.tarsos.util;
 
 import java.io.File;
+import java.io.IOException;
 
+import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.transcoder.Attributes;
 import be.hogent.tarsos.transcoder.DefaultAttributes;
 import be.hogent.tarsos.transcoder.Transcoder;
@@ -99,8 +101,15 @@ public final class AudioTranscoder {
 		if (Configuration.getBoolean(ConfKey.transcode_audio)) {
 			Transcoder.transcode(sourceFile, targetFile, attributes);
 		} else {
-			// if transcoding is disabled: copy the audio
-			FileUtils.cp(source, target);
+			// if transcoding is disabled: link the audio
+			if(Tarsos.isWindows()){
+				// Copy file on windows, does not support symbolic links transparently.
+				FileUtils.cp(source, target);
+			}else{
+				if(!FileUtils.createSymbolicLink(target,source)){
+					FileUtils.cp(source, target);
+				};
+			}
 		}
 	}
 

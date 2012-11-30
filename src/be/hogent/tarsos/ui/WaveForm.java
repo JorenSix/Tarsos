@@ -101,16 +101,18 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener  
 			public void mouseClicked(final MouseEvent event) {
 				if (event.getButton() == MouseEvent.BUTTON1) {
 					setMarkerInPixels(event.getX(), false);
-					Player player = Player.getInstance();
-					PlayerState previousState = player.getState();
+				} else {
+					setMarkerInPixels(event.getX(), true);
+				}
+				
+				Player player = Player.getInstance();
+				PlayerState previousState = player.getState();
+				if(previousState!=PlayerState.NO_FILE_LOADED){
 					player.pauze(maxMarkerPosition);
 					if(previousState == PlayerState.PLAYING) {
 						player.play();
 					}
-				} else {
-					setMarkerInPixels(event.getX(), true);
 				}
-
 				AnnotationPublisher.getInstance().clear();
 				AnnotationPublisher.getInstance().alterSelection(minMarkerPosition, maxMarkerPosition);
 				AnnotationPublisher.getInstance().delegateAddAnnotations(minMarkerPosition, maxMarkerPosition);
