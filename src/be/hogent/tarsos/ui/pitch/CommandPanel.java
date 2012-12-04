@@ -28,14 +28,12 @@ package be.hogent.tarsos.ui.pitch;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -48,7 +46,13 @@ import be.hogent.tarsos.sampled.pitch.Annotation;
 import be.hogent.tarsos.sampled.pitch.AnnotationListener;
 import be.hogent.tarsos.sampled.pitch.AnnotationPublisher;
 import be.hogent.tarsos.sampled.pitch.PitchDetectionMode;
+import be.hogent.tarsos.ui.pitch.ph.KDEData;
 import be.hogent.tarsos.util.AudioFile;
+import be.hogent.tarsos.util.KernelDensityEstimate;
+import be.hogent.tarsos.util.histogram.HistogramFactory;
+import be.hogent.tarsos.util.histogram.PitchClassHistogram;
+import be.hogent.tarsos.util.histogram.peaks.Peak;
+import be.hogent.tarsos.util.histogram.peaks.PeakDetector;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -149,19 +153,6 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 			}
 		});
 		listOfComponentsToDisableOrEnable.add(thresholdSlider);
-		
-
-
-		JButton resetButton = new JButton("Reset");
-		resetButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				/*
-				KDEData.getPitchClassHistogramInstance().clearHistograms();
-				KDEData.getPitchClassHistogramInstance().repaint();
-				*/
-			}
-		});
-		listOfComponentsToDisableOrEnable.add(resetButton);
 
 
 		FormLayout layout = new FormLayout("right:min,2dlu,min:grow");
@@ -186,11 +177,7 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		
 		builder.appendSeparator("Near to pitch class filter");
 		builder.append("Quantize:", quantizeToScaleSlider, true);
-		
-		builder.appendSeparator("Histogram commands");
-		//builder.append("Smooth:", smoothButton, true);
-		builder.append("Reset:", resetButton, true);
-		
+				
 		
 		this.add(new JScrollPane(builder.getPanel()));
 		setEnabledForAll(false);
@@ -220,9 +207,9 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 	
 	private void doPeakDetection(boolean detectorIsAdjusting){
 		PitchDetectionMode selectedHistogram = (PitchDetectionMode) pitchDetectorSelection.getSelectedItem();
-		//Histogram histo = KDEData.getPitchClassHistogramInstance().getHistogram(selectedHistogram);
-		/*
-		if (histo.getMaxBinCount() != 0) {
+		KernelDensityEstimate kde = KDEData.getInstance().getKDEs().get(selectedHistogram);
+		if(kde.getSumFreq()!=0){
+			PitchClassHistogram histo = HistogramFactory.createPitchClassHistogram(kde);
 			final List<Peak> peaks = PeakDetector.detect(histo, windowSizePeakDetection,thresholdPeakDetection);
 			final double[] peaksInCents = new double[peaks.size()];
 			int i = 0;
@@ -232,8 +219,6 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 			Arrays.sort(peaksInCents);
 			Frame.getInstance().scaleChanged(peaksInCents, detectorIsAdjusting, false);
 		}
-		*/
-		
 	}
 
 
@@ -250,31 +235,20 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 			rebuildPitchDetectorSelection();			
 		}
 	}
-
-
+	
 	public void clearAnnotations() {
 		// TODO Auto-generated method stub
 		
 	}
-
-
 	public void annotationsAdded() {
 		// TODO Auto-generated method stub
 		
 	}
-
-
 	public void extractionStarted() {
 		setEnabledForAll(false);
 		
 	}
-
-
 	public void extractionFinished() {
 		
 	}
-	
-	
-	
-
 }

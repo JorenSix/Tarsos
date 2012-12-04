@@ -33,7 +33,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -171,7 +170,7 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 		final PitchClassKdePanel pitchClassHistogramPanel = new PitchClassKdePanel();
 		//final PitchClassHistogramPanel ambitusPanel = new PitchClassHistogramPanel(new PitchHistogram(), this);
-		
+		final CommandPanel commandPanel = new CommandPanel();
 		final IntervalTable intervalTable = new IntervalTable();
 		final WaveForm waveForm = new WaveForm();
 		final PlayerControlPanel player = new PlayerControlPanel(waveForm);
@@ -183,45 +182,32 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 		// The annotation publisher is not a ui element.
 		final AnnotationPublisher annotationPublisher = AnnotationPublisher.getInstance();
 
-		AudioFileBrowserPanel browser = new AudioFileBrowserPanel(new GridLayout(0, 2));
-		browser.setBackground(Color.WHITE);
-		
-		
+	
 
 		// patch the scale changed listeners
 		addScaleChangedListener(pitchClassHistogramPanel);
-		//addScaleChangedListener(ambitusPanel);
+		addScaleChangedListener(commandPanel);
 		addScaleChangedListener(pitchContourPanel);
-
 		addScaleChangedListener(intervalTable);
 		addScaleChangedListener(keyboardPanel);
 		addScaleChangedListener(menu);
 
-
-		// Patch the audio file changed listeners.
 		addAudioFileChangedListener(KDEData.getInstance());
-		//addAudioFileChangedListener(KDEData.getPitchHistogramInstance());
-		
 		addAudioFileChangedListener(pitchClassHistogramPanel);
-		//addAudioFileChangedListener(ambitusPanel);
 		addAudioFileChangedListener(pitchContourPanel);
 		addAudioFileChangedListener(waveForm);
-		addAudioFileChangedListener(browser);
 		addAudioFileChangedListener(menu);
 		addAudioFileChangedListener(player);
+		addAudioFileChangedListener(commandPanel);
 
 
 		// Patch the annotation listeners
-		//annotationPublisher.addListener(KDEData.getPitchClassHistogramInstance());
 		annotationPublisher.addListener(KDEData.getInstance());
 		annotationPublisher.addListener(pitchClassHistogramPanel);
-		//annotationPublisher.addListener(ambitusPanel);
 		annotationPublisher.addListener(pitchContourPanel);
 		annotationPublisher.addListener(player);
-		
-
 		annotationPublisher.addListener(this);
-
+		annotationPublisher.addListener(commandPanel);
 
 		// initialize content and tool window manager of the 'mydoggy'
 		// framework.
@@ -256,16 +242,13 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 
 		content = contentManager.addContent("Configuration", "Configuration", null, configurationPanel);
 		MultiSplitConstraint constraint = new MultiSplitConstraint(content, 1);
-		
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
 		
-		/*
-		constraint = new MultiSplitConstraint(content, 2);
-		content = contentManager.addContent("Pitch Histogram", "Pitch Histogram", null, ambitusPanel, null, constraint);
+		content = contentManager.addContent("Command", "Command", null, commandPanel);
+		constraint = new MultiSplitConstraint(content, 1);
 		setDefaultTabbedContentOptions(content);
-		content.setMinimized(false);
-		*/
+		content.setMinimized(true);
 		
 		constraint = new MultiSplitConstraint(content, 3);
 		content = contentManager.addContent("Interval table", "Interval table", null, intervalTable,null,constraint);
@@ -323,29 +306,6 @@ public final class Frame extends JFrame implements ScaleChangedListener, Annotat
 			}
 		});
 	}
-	
-	/*
-	private void storeWorkspace(){
-		try {
-		    FileOutputStream output = new FileOutputStream("workspace.xml");
-		    toolWindowManager.getPersistenceDelegate().save(output);
-		    output.close();
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
-	}
-	
-	private void restoreWorkspace(){
-		PersistenceDelegate pstDelegate = toolWindowManager.getPersistenceDelegate();
-		try {
-		    FileInputStream inputStream = new FileInputStream("workspace.xml");
-		    pstDelegate.apply(inputStream);
-		    inputStream.close();
-		} catch (Exception e1) {
-		    e1.printStackTrace();
-		}
-	}
-	*/
 
 	private void setupChangeInPitchDetectors() {
 		//react to change in pitch detectors

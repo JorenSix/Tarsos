@@ -124,9 +124,6 @@ public class TarsosLiveFrame extends JFrame implements PitchDetectionHandler, Sc
 
 		// The annotation publisher is not a ui element.
 		final AnnotationPublisher annotationPublisher = AnnotationPublisher.getInstance();
-
-		AudioFileBrowserPanel browser = new AudioFileBrowserPanel(new GridLayout(0, 2));
-		browser.setBackground(Color.WHITE);
 		
 		//KDEData.getPitchClassHistogramInstance().setComponentToRepaint(pitchClassHistogramPanel);
 		//KDEData.getPitchHistogramInstance().setComponentToRepaint(ambitusPanel);

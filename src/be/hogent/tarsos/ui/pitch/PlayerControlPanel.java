@@ -225,6 +225,7 @@ public class PlayerControlPanel extends JPanel implements AudioFileChangedListen
 			}
 		});
 		
+		//register key events
 		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 	    manager.addKeyEventDispatcher(new KeyEventDispatcher(){
 			public boolean dispatchKeyEvent(KeyEvent e) {
