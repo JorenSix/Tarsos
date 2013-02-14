@@ -8,7 +8,7 @@ To give Tarsos a try you can "start Tarsos using JAVA WebStart":http://tarsos.01
 
 h2. Develop Tarsos
 
-If you want to help develop Tarsos, you are more than welcome to. Please, start by consulting the "API documentation":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest-Documentation/. If you want to build from source, you need "Apache Ant":http://ant.apache.org/ and "git":http://git-scm.com/ installed on your system. The following commands fetch the source and build Tarsos: 
+If you want to help develop Tarsos, you are more than welcome to. Please, start by consulting the "API documentation":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Documentation/. If you want to build from source, you need "Apache Ant":http://ant.apache.org/ and "git":http://git-scm.com/ installed on your system. The following commands fetch the source and build Tarsos: 
 <pre><code>git clone https://JorenSix@github.com/JorenSix/Tarsos.git
 cd Tarsos/build
 ant #Build Tarsos
