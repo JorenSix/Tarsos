@@ -123,6 +123,9 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		item = new JMenuItem("Scala file...");
 		item.addActionListener(importFileAction);		
 		importMenu.add(item);
+		
+		importMenu.addSeparator();
+		addScalaExamplesMenu(importMenu);
 
 		JMenu exportMenu = new JMenu("Export");
 		menu.add(exportMenu);
@@ -246,6 +249,38 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		menu.add(item);
 	}
 	
+	private void addScalaExamplesMenu(JMenu importMenu) {
+		String target = FileUtils.combine(FileUtils.temporaryDirectory(),"scales");
+		if(!FileUtils.exists(target)){
+			FileUtils.mkdirs(target);
+			FileUtils.copyDirFromJar("be/hogent/tarsos/ui/resources/scales",target);
+		}
+		addScalaExamplesMenu(importMenu,new File(target));
+	}
+	
+	
+	
+	private void addScalaExamplesMenu(JMenu importMenu,File file) {
+		if(file.isDirectory()){
+			JMenu exampleMenu = new JMenu(file.getName());
+			importMenu.add(exampleMenu);
+			for(File subFile : file.listFiles()){
+				addScalaExamplesMenu(exampleMenu,subFile);
+			}
+		} else {
+			JMenuItem scalaFileMenuItem = new JMenuItem(file.getName());
+			scalaFileMenuItem.addActionListener(openRecentFileAction);
+			scalaFileMenuItem.setActionCommand(file.getAbsolutePath());
+			try{
+				String toolTip = new ScalaFile(file.getAbsolutePath()).getDescription();
+				scalaFileMenuItem.setToolTipText(toolTip);
+			} catch(Exception e) {
+				//ignore
+			}
+			importMenu.add(scalaFileMenuItem);
+		}
+	}
+
 	List<JMenuItem> recentFilesMenuItems;
 	private void addRecentFilesToMenu(final JMenu menu) {
 		final List<String> files = Configuration.getList(ConfKey.file_recent);

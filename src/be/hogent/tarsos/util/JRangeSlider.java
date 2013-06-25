@@ -99,7 +99,7 @@ public class JRangeSlider extends JComponent
     protected int increment = 1;
     protected int minExtent = 0; // min extent, in pixels
     
-    protected ArrayList listeners = new ArrayList();
+    protected ArrayList<ChangeListener> listeners = new ArrayList<ChangeListener>();
     protected ChangeEvent changeEvent = null;
     protected ChangeListener lstnr;
  
@@ -180,6 +180,7 @@ public class JRangeSlider extends JComponent
     /** 
      * Returns the current "low" value shown by the range slider's bar. The low
      * value meets the constraint minimum <= lowValue <= highValue <= maximum. 
+     * @return The value.
      */
     public int getLowValue() {
         return model.getValue();
@@ -200,6 +201,7 @@ public class JRangeSlider extends JComponent
     /** 
      * Returns the current "high" value shown by the range slider's bar. The high
      * value meets the constraint minimum <= lowValue <= highValue <= maximum. 
+     * @return The value plus the extent.
      */
     public int getHighValue() {
         return model.getValue()+model.getExtent();
@@ -336,7 +338,7 @@ public class JRangeSlider extends JComponent
         repaint();
         if ( changeEvent == null )
             changeEvent = new ChangeEvent(this);
-        Iterator iter = listeners.iterator();
+        Iterator<ChangeListener> iter = listeners.iterator();
         while ( iter.hasNext() )
             ((ChangeListener)iter.next()).stateChanged(changeEvent);
     }

@@ -190,7 +190,6 @@ public final class ToneSequenceBuilder {
 
 			for (int sample = startSample; sample < stopSample; sample++) {
 				final double time = (sample - startSample) / sampleRate;
-				
 				final double fundamental = 0.65 * Math.sin(twoPiF * time + phase);
 				final double firstHarmonic = 0.08 * Math.sin(twoPiF * 4 * time + phaseFirst);
 				final double secondHarmonic = 0.03 * Math.sin(twoPiF * 6 * time + phaseSecond);

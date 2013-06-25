@@ -27,7 +27,6 @@
 package be.hogent.tarsos.util;
 
 import java.io.File;
-import java.io.IOException;
 
 import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.transcoder.Attributes;

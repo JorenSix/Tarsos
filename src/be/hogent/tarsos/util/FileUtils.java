@@ -42,6 +42,7 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
+import java.security.CodeSource;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -53,6 +54,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -393,6 +396,36 @@ public final class FileUtils {
 			LOG.log(Level.SEVERE, "File not found: " + e.getMessage(), e);
 		} catch (final IOException e) {
 			LOG.log(Level.SEVERE, "Exception while copying file from jar" + e.getMessage(), e);
+		}
+	}
+	
+	
+	public static void copyDirFromJar(String source,String target){
+		CodeSource src = FileUtils.class.getProtectionDomain().getCodeSource();
+		if (src != null) {
+			URL jar = src.getLocation();
+			if(FileUtils.exists(FileUtils.combine(jar.getFile(),source))){
+				FileUtils.cp(FileUtils.combine(jar.getFile(),source), target);
+			}else{				
+				try {
+					ZipInputStream zip;
+					zip = new ZipInputStream(jar.openStream());
+					ZipEntry ze = null;
+					while ((ze = zip.getNextEntry()) != null) {
+						String entryName = ze.getName();
+						
+						if (entryName.startsWith(source)) {
+							if(ze.isDirectory()){
+								//FileUtils.mkdirs(target)
+							}else{
+								//FileUtils.copyFileFromJar(source, target)
+							}
+						}
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 

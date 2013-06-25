@@ -90,8 +90,8 @@ public final class AnnotationSynth extends AbstractTarsosApp {
 		} else {
 			
 			final int filterSize = options.valueOf(filterSpec);
-			final boolean listen = options.has("listen");
-				final ToneSequenceBuilder builder = new ToneSequenceBuilder();
+			//final boolean listen = options.has("listen");
+			final ToneSequenceBuilder builder = new ToneSequenceBuilder();
 				
 			final CSVFileHandler handler = options.valueOf(annoFormatSpec).getCvsFileHandler();
 			final File outputFile = options.valueOf(outputSpec);

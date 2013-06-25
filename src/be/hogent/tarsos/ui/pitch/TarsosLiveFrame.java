@@ -26,16 +26,13 @@
 package be.hogent.tarsos.ui.pitch;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -47,7 +44,6 @@ import javax.sound.sampled.TargetDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import org.noos.xing.mydoggy.AggregationPosition;
 import org.noos.xing.mydoggy.Content;
@@ -83,8 +79,7 @@ public class TarsosLiveFrame extends JFrame implements PitchDetectionHandler, Sc
 	/**
 	 * Logs messages.
 	 */
-	private static final Logger LOG = Logger.getLogger(TarsosLiveFrame.class
-			.getName());
+	//private static final Logger LOG = Logger.getLogger(TarsosLiveFrame.class.getName());
 
 	private static final long serialVersionUID = -8189717288384206655L;
 
@@ -264,6 +259,7 @@ public class TarsosLiveFrame extends JFrame implements PitchDetectionHandler, Sc
 		}
 	}
 	
+	/*
 	private void handleMicrophoneError(Exception e, String audioFormat){
 		String message = "There is something wrong with the microphone input.\n Either the line is not available or recording at " + audioFormat + " is not possible.\n More details: \n " + e.getMessage() + "\n\nThis can be solved by choosing another microphone input.";
 		String title = "Microphone input not supported";
@@ -284,6 +280,7 @@ public class TarsosLiveFrame extends JFrame implements PitchDetectionHandler, Sc
 					+ defaultInputDeviceIndex);
 		}
 	}
+	*/
 	
 	public synchronized void addScaleChangedListener(ScaleChangedListener listener) {
 		scaleChangedListeners.add(listener);
@@ -353,7 +350,6 @@ public class TarsosLiveFrame extends JFrame implements PitchDetectionHandler, Sc
 
 	public void extractionFinished() {
 		// TODO Auto-generated method stub
-		
 	}
 	
 }

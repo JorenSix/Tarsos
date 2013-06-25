@@ -185,11 +185,19 @@ public class KernelDensityEstimate {
 	 * Sets the maximum value in accumulator to 1.0
 	 */
 	public void normalize() {
+		normalize(1.0);
+	}
+	
+	/**
+	 * Sets a new maximum bin value.
+	 * @param newMaxvalue The new maximum bin value.
+	 */
+	public void normalize(double newMaxvalue){
 		double maxElement = getMaxElement();
-		
+		double scaleFactor = newMaxvalue / getMaxElement();
 		if (maxElement > 0) {
 			for (int i = 0; i < size(); i++) {
-				accumulator[i] = accumulator[i] / maxElement;
+				accumulator[i] = accumulator[i] * scaleFactor;
 			}
 		}
 		calculateSumFreq();
