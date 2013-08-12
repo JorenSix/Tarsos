@@ -1,0 +1,32 @@
+%\documentclass{article}
+%\usepackage{scalefnt} %Mandatory: used to scale font in the pitch class histo
+%\usepackage{tikz} %Mandatory: used to draw the pitch class histo
+%\usepackage{pgfplots}
+%\begin{document}
+
+\begin{figure}
+\centering
+  \begin{tikzpicture}
+    \begin{axis}[axis x line=bottom,
+      extra x ticks={%comma_separated_pitch_classes%},
+      xtick={0},
+      extra x tick style={grid=major,tick label style={rotate=90,anchor=east}},
+      axis y line=left,
+      xmin=3600,
+   	  xmax=8400,
+   	  width=\hsize,
+      height=6cm,
+      compat=1.3,
+      xlabel=$Pitch\ (cent)$,
+      ylabel=$Number\ of\ annotations$,
+      legend style={legend pos=outer north east,cells={anchor=west}}]
+    
+      \addplot[line width=0.2pt,smooth,mark=triangle,red,mark size=1.5pt] plot file {%dat.file.dat%};
+      \addlegendentry{%dat.file.dat%}
+    \end{axis}
+  \end{tikzpicture}
+  \label{fig:pitch_class_histogram}
+  \caption{%dat.file.dat% Pitch class histogram}
+\end{figure}
+
+%\end{document}

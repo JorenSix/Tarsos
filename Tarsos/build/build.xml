@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project Tarsos">
+
+	<!-- Configuration -->
+	<property name="version"   value="1.0"/>
+	<property name="built_by"  value="${user.name}"/>
+
+	<tstamp>
+		<format property="TODAY" pattern="yyyy-MM-dd_HH:mm:ss" />
+	</tstamp>
+
+	<target name="clean">
+		<delete dir="../bin"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="../bin" />
+		<javac srcdir="../src" destdir="../bin">
+			<classpath>
+				<fileset dir="../lib" includes="*.jar" />
+			</classpath>
+		</javac>
+
+		<!-- copy all needed resources to bin dir -->
+		<copy todir="../bin/be/hogent/tarsos/sampled/pitch/resources">
+			<fileset dir="../src/be/hogent/tarsos/sampled/pitch/resources" />
+		</copy>
+		
+		<copy todir="../bin/be/hogent/tarsos/ui/resources">
+			<fileset dir="../src/be/hogent/tarsos/ui/resources" />
+		</copy>
+		
+		<copy todir="../bin/be/hogent/tarsos/util">
+			<fileset dir="../src/be/hogent/tarsos/util">
+				<include name="*.properties"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!--ANT 1.7 is required                                        -->
+	<target name="create_run_jar" depends="compile">
+		<jar destfile="../build/Tarsos-${version}.jar" filesetmanifest="mergewithoutmain" duplicate="preserve">
+
+			<manifest>
+				<attribute name="Main-Class" value="be.hogent.tarsos.Tarsos"/>
+				<!-- Standard manifest attributes -->
+				<attribute name="Implementation-Version" value="${version}-${DSTAMP}"/>
+				<attribute name="Built-By" value="${built_by}"/>
+				<attribute name="Created-By" value="${built_by}"/>
+				<attribute name="Built-Date" value="${TODAY}"/>
+			</manifest>
+			<fileset dir="../bin"/>
+
+			<!-- TarsosTranscoder -->
+			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosTranscoder-1.0-bin.jar"/>
+
+			<!-- TarsosDSP -->
+			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosDSP-1.6-bin.jar"/>
+
+
+			<!-- Other Dependencies -->
+			<zipfileset excludes="META-INF/*.SF" src="../lib/commons-math-2.0.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/gervill.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/jopt-simple-3.2.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/forms-1.3.0.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/jgoodies-common-1.0.0.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/ptsupport.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/swing-layout-1.0.jar"/>
+
+			<!-- my doggy-->
+			<zipfileset excludes="META-INF/*.SF" src="../lib/TableLayout-20050920.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/mydoggy-res-1.4.2.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/mydoggy-plaf-1.4.2.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/mydoggy-api-1.4.2.jar"/>
+
+			<!-- KD Tree -->
+			<zipfileset excludes="META-INF/*.SF" src="../lib/kd.jar"/>
+
+			<!-- include source files -->
+			<fileset dir="../src">
+				<include name="**/*.java"/>
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="javadoc">
+		<javadoc 
+	        	access="protected" 
+	        	author="true" 
+	        	sourcepath="../src"
+	        	classpath="../lib/TarsosTranscoder-1.0-bin.jar;../lib/TarsosDSP-1.4-bin.jar;../lib/jave-1.0.2.jar;../lib/forms-1.3.0.jar;../lib/commons-math-2.0.jar;../lib/gervill.jar;../lib/kd.jar;../lib/swing-layout-1.0.jar;../lib/TableLayout-20050920.jar;../lib/mydoggy-api-1.4.2.jar;../lib/jopt-simple-3.2.jar;../lib/ptsupport.jar;../lib/java-getopt-1.0.13.jar;../lib/mydoggy-res-1.4.2.jar;../lib/mydoggy-plaf-1.4.2.jar;../lib/jgoodies-common-1.0.0.jar" 
+	        	destdir="../doc" 
+	        	doctitle="Tarsos javadoc" 
+	        	nodeprecated="false" 
+	        	nodeprecatedlist="false" 
+	        	noindex="false" 
+	        	nonavbar="false" 
+	        	notree="false" 
+	        	source="1.5"
+	        	splitindex="true" 
+	        	use="true" 
+	        	version="true">
+		</javadoc>
+	</target>
+
+	<target name="release" depends="javadoc,create_run_jar">
+		<copy todir="Tarsos-${version}-Documentation">
+			<fileset dir="../doc" />
+		</copy>
+	</target>
+</project>
