@@ -11,11 +11,11 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.hogent.tarsos.dsp.AudioDispatcher;
 import be.hogent.tarsos.dsp.AudioEvent;
-import be.hogent.tarsos.dsp.example.PitchConverter;
 import be.hogent.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.hogent.tarsos.dsp.pitch.PitchDetectionResult;
 import be.hogent.tarsos.dsp.pitch.PitchProcessor;
 import be.hogent.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
 
 public class PitchContourLayer implements Layer{
 	
@@ -37,7 +37,7 @@ public class PitchContourLayer implements Layer{
 				public void handlePitch(PitchDetectionResult pitchDetectionResult,
 						AudioEvent audioEvent) {
 					if(pitchDetectionResult.isPitched()){
-						pitchContour.put(audioEvent.getTimeStamp()-timeLag, PitchConverter.hertzToAbsoluteCent(pitchDetectionResult.getPitch()));
+						pitchContour.put(audioEvent.getTimeStamp()-timeLag, PitchUnit.hertzToAbsoluteCent(pitchDetectionResult.getPitch()));
 					}
 				}
 			}));

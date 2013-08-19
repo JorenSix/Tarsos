@@ -13,7 +13,7 @@ import be.hogent.tarsos.dsp.AudioDispatcher;
 import be.hogent.tarsos.dsp.AudioEvent;
 import be.hogent.tarsos.dsp.AudioProcessor;
 import be.hogent.tarsos.dsp.ConstantQ;
-import be.hogent.tarsos.dsp.example.PitchConverter;
+import be.hogent.tarsos.sampled.pitch.PitchUnit;
 
 public class ConstantQLayer implements Layer {
 
@@ -57,8 +57,8 @@ public class ConstantQLayer implements Layer {
 		 * The default increment in samples.
 		 */
 		int increment = 1536;
-		float minimumFrequencyInHertz = (float) PitchConverter.absoluteCentToHertz(minimumFrequencyInCents);
-		float maximumFrequencyInHertz = (float) PitchConverter.absoluteCentToHertz(maximumFrequencyInCents);
+		float minimumFrequencyInHertz = (float) PitchUnit.absoluteCentToHertz(minimumFrequencyInCents);
+		float maximumFrequencyInHertz = (float) PitchUnit.absoluteCentToHertz(maximumFrequencyInCents);
 		
 		final ConstantQ constantQ = new ConstantQ(44100,minimumFrequencyInHertz,maximumFrequencyInHertz,binsPerOctave);
 		
@@ -68,7 +68,7 @@ public class ConstantQLayer implements Layer {
 		float[] startingPointsInHertz = constantQ.getFreqencies();
 		binStartingPointsInCents = new float[startingPointsInHertz.length];
 		for(int i=0;i<binStartingPointsInCents.length;i++){
-			binStartingPointsInCents[i]=(float) PitchConverter.hertzToAbsoluteCent(startingPointsInHertz[i]);
+			binStartingPointsInCents[i]=(float) PitchUnit.hertzToAbsoluteCent(startingPointsInHertz[i]);
 		}
 		
 		int size = constantQ.getFFTlength();
