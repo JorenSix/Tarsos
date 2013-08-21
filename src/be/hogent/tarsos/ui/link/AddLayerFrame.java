@@ -28,24 +28,24 @@ public class AddLayerFrame extends JFrame implements ItemListener {
 	
 	private Color color;
 	
-	private JComboBox<String> typeList;
-	private JComboBox<String> featureTypeList;
-	private JComboBox<String> colorList;
+	private JComboBox typeList;
+	private JComboBox featureTypeList;
+	private JComboBox colorList;
 
 	
 	public AddLayerFrame(){
 		super();
 		this.setLayout(new FlowLayout());
 		String[] types = { this.TYPE_BASIC_LAYER, this.TYPE_FEATURE_LAYER};
-		typeList = new JComboBox<String>(types);
+		typeList = new JComboBox(types);
 		typeList.addItemListener(this);
 		
 		String[] featureItems = { this.FEATURE_MFCC, this.FEATURE_CQT, this.FEATURE_PITCH, this.FEATURE_AC };
-		featureTypeList = new JComboBox<String>(featureItems);
+		featureTypeList = new JComboBox(featureItems);
 		featureTypeList.setEnabled(false);
 		
 		String[] kleuren = { "Grijs", "Rood", "Blauw", "Groen", "Geel"};
-		colorList = new JComboBox<String>(kleuren);
+		colorList = new JComboBox(kleuren);
 		
 		JLabel lblTypeLayer = new JLabel("Type layer: ");
 		JLabel lblTypeFeature = new JLabel("Type feature: ");
