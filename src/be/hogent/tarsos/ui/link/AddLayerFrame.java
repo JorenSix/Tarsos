@@ -65,7 +65,13 @@ public class AddLayerFrame extends JFrame implements ItemListener {
 		this.setVisible(true);
 	}
 
-	@Override
+
+//	public void itemStateChanged(ItemEvent e) {
+//		
+//		
+//	}
+
+//	@Override
 	public void itemStateChanged(ItemEvent arg0) {
 		if (typeList.getSelectedItem().equals(this.TYPE_FEATURE_LAYER)){
 			this.featureTypeList.setEnabled(true);

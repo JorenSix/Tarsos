@@ -129,12 +129,12 @@ public class LinkedFrame extends JFrame {
 		detectorTasks.add(transcodingTask);
 		transcodingTask.addHandler(new BackgroundTask.TaskHandler() {
 
-			@Override
+//			@Override
 			public void taskInterrupted(BackgroundTask backgroundTask,
 					Exception e) {
 			}
 
-			@Override
+//			@Override
 			public void taskDone(BackgroundTask backgroundTask) {
 				if (backgroundTask instanceof TranscodingTask) {
 					try {
@@ -157,7 +157,7 @@ public class LinkedFrame extends JFrame {
 				detectorTasks);
 		dialog.addPropertyChangeListener(new PropertyChangeListener() {
 
-			@Override
+//			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (evt.getPropertyName().equals("allTasksFinished")) {
 					// onAudioFileChange();
@@ -184,7 +184,7 @@ public class LinkedFrame extends JFrame {
 		public Void doInBackground() {
 			Runnable runTranscoder = new Runnable() {
 
-				@Override
+//				@Override
 				public void run() {
 					try {
 						transcodedAudioFile = new AudioFile(
@@ -227,7 +227,7 @@ public class LinkedFrame extends JFrame {
 
 		JMenuItem loadSongMenuItem = new JMenuItem("Load song...");
 		loadSongMenuItem.addActionListener(new ActionListener() {
-			@Override
+//			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = new JFileChooser();
 				fc.setAcceptAllFileFilterUsed(false);
@@ -251,7 +251,7 @@ public class LinkedFrame extends JFrame {
 
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.addActionListener(new ActionListener() {
-			@Override
+//			@Override
 			public void actionPerformed(ActionEvent e) {
 				LinkedFrame.getInstance().dispose();
 			}
@@ -260,7 +260,7 @@ public class LinkedFrame extends JFrame {
 		JMenuItem runMenuItem = new JMenuItem("Analyse");
 		runMenuItem.addActionListener(new ActionListener() {
 
-			@Override
+//			@Override
 			public void actionPerformed(ActionEvent e) {
 				analyseAudioFile();
 				for (LinkedPanel panel : panels) {
@@ -281,7 +281,7 @@ public class LinkedFrame extends JFrame {
 		JMenuItem layerMenuItem = new JMenuItem("Add layer...");
 		layerMenuItem.addActionListener(new ActionListener(){
 
-			@Override
+//			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				new AddLayerFrame();
 			}

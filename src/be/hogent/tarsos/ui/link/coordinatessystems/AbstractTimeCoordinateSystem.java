@@ -17,7 +17,7 @@ public abstract class AbstractTimeCoordinateSystem implements CoordinateSystem {
 		this.yMax = yMax;
 	}
 	
-	@Override
+//	@Override
 	public float getDelta(char axis){
 		if (axis == CoordinateSystem.X_AXIS){
 			return xMax-xMin;
@@ -28,7 +28,7 @@ public abstract class AbstractTimeCoordinateSystem implements CoordinateSystem {
 		}
 	}
 	
-	@Override
+//	@Override
 	public Units getUnitsForAxis(char axis){
 		if (axis == CoordinateSystem.X_AXIS){
 			return xAxisUnits;
@@ -39,7 +39,7 @@ public abstract class AbstractTimeCoordinateSystem implements CoordinateSystem {
 		}
 	}
 	
-	@Override
+//	@Override
 	public float getMin(char axis){
 		if (axis == CoordinateSystem.X_AXIS){
 			return xMin;
@@ -50,7 +50,7 @@ public abstract class AbstractTimeCoordinateSystem implements CoordinateSystem {
 		}
 	}
 	
-	@Override
+//	@Override
 	public float getMax(char axis){
 		if (axis == CoordinateSystem.X_AXIS){
 			return xMax;
@@ -61,7 +61,7 @@ public abstract class AbstractTimeCoordinateSystem implements CoordinateSystem {
 		}
 	}
 	
-	@Override
+//	@Override
 	public void setMax(char axis, float value){
 		if (axis == CoordinateSystem.X_AXIS){
 			xMax = value;
@@ -72,7 +72,7 @@ public abstract class AbstractTimeCoordinateSystem implements CoordinateSystem {
 		}
 	}
 	
-	@Override
+//	@Override
 	public void setMin(char axis, float value){
 		if (axis == CoordinateSystem.X_AXIS){
 			xMin = value;

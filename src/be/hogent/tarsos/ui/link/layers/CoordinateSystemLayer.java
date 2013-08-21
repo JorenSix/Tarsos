@@ -18,7 +18,7 @@ public final class CoordinateSystemLayer implements Layer {
 		yAxis = getLayerForUnit(CoordinateSystem.Y_AXIS, yAxisUnits);
 	}
 	
-	@Override
+//	@Override
 	public void draw(Graphics2D graphics) {
 		xAxis.draw(graphics);
 		yAxis.draw(graphics);
