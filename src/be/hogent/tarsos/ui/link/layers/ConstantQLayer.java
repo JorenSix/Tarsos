@@ -127,8 +127,10 @@ public class ConstantQLayer extends FeatureLayer {
 			adp = AudioDispatcher.fromFile(new File(LinkedFrame.getInstance()
 					.getAudioFile().originalPath()), this.getFrameSize(),
 					this.getOverlap());
-		} catch (UnsupportedAudioFileException | IOException e) {
+		} catch (UnsupportedAudioFileException e) {
 			e.printStackTrace();
+		} catch (IOException e2){
+			e2.printStackTrace();
 		}
 		adp.setZeroPad(true);
 		adp.addAudioProcessor(constantQ);

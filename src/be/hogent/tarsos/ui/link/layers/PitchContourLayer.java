@@ -55,9 +55,11 @@ public class PitchContourLayer extends FeatureLayer {
 			adp = AudioDispatcher.fromFile(new File(LinkedFrame.getInstance()
 					.getAudioFile().originalPath()), this.getFrameSize(),
 					this.getOverlap());
-		} catch (UnsupportedAudioFileException | IOException e) {
+		} catch (UnsupportedAudioFileException e) {
 			// @TODO: errorafhandeling
 			e.printStackTrace();
+		} catch (IOException e2){
+			e2.printStackTrace();
 		}
 		final double timeLag = 1024 / 44100.0;
 
