@@ -28,7 +28,7 @@ import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 import be.hogent.tarsos.ui.link.layers.PitchContourLayer;
 
-public class LinkedPanel extends JPanel implements ViewPortChangedListener {
+public class LinkedPanel extends JPanel {
 
 	private static final long serialVersionUID = -5055686566048886896L;
 	
@@ -99,7 +99,7 @@ public class LinkedPanel extends JPanel implements ViewPortChangedListener {
 		
 		this.csLayer = new CoordinateSystemLayer(this, Units.TIME_SSS, Units.FREQUENCY_CENTS);
 		
-		viewPort.addViewPortChangedListener(this);
+//		viewPort.addViewPortChangedListener(this);
 	}
 	
 	private class ZoomListener implements MouseWheelListener{		
@@ -206,10 +206,7 @@ public class LinkedPanel extends JPanel implements ViewPortChangedListener {
 		*/
 	}	
 	
-	public void viewPortChanged(ViewPort newViewPort) {
-		invalidate();
-		repaint();
-	}
+
 
 	public void initialiseLayers() {
 		for (Layer l: layers){

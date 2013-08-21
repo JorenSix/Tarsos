@@ -28,6 +28,7 @@ import be.hogent.tarsos.tarsossegmenter.util.io.SongFileFilter;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.BackgroundTask;
 import be.hogent.tarsos.ui.ProgressDialog;
+import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.TimeCentCoordinateSystem;
 import be.hogent.tarsos.util.AudioFile;
@@ -39,7 +40,7 @@ import be.hogent.tarsos.util.FileUtils;
 //Per layer een aparte audiodispatcher
 //FrameSize en overlapping per audiodispatcher
 
-public class LinkedFrame extends JFrame {
+public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 
 	private static final long serialVersionUID = 7301610309790983406L;
 
@@ -49,7 +50,7 @@ public class LinkedFrame extends JFrame {
 	private static Logger log;
 	private static final String LOG_PROPS = "/be/hogent/tarsos/util/logging.properties";
 	private AudioFile audioFile;
-
+	
 	public static void main(String... strings) {
 		configureLogging();
 		Configuration.checkForConfigurationAndWriteDefaults();
@@ -60,6 +61,7 @@ public class LinkedFrame extends JFrame {
 	private LinkedFrame() {
 		super();
 		panels = new ArrayList<LinkedPanel>();
+		
 	}
 
 	public static LinkedFrame getInstance() {
@@ -75,6 +77,8 @@ public class LinkedFrame extends JFrame {
 		LinkedPanel panel2 = new LinkedPanel(new TimeCentCoordinateSystem(100, 3000));
 		panel1.addDefaultLayers();
 		panel2.addDefaultLayers();
+		panel1.getViewPort().addViewPortChangedListener(this);
+		panel2.getViewPort().addViewPortChangedListener(this);
 		panels.add(panel1);
 		panels.add(panel2);
 
@@ -320,5 +324,12 @@ public class LinkedFrame extends JFrame {
 		menuBar.add(optionMenu);
 
 		return menuBar;
+	}
+	
+	public void viewPortChanged(ViewPort newViewPort) {
+		for (LinkedPanel panel : panels){
+			panel.revalidate();
+			panel.repaint();
+		}
 	}
 }

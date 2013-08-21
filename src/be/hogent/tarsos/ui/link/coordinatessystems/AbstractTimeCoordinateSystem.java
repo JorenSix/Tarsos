@@ -5,8 +5,8 @@ public abstract class AbstractTimeCoordinateSystem implements CoordinateSystem {
 	private Units xAxisUnits = Units.TIME_HH_MM_SS;
 	private Units yAxisUnits;
 	
-	private float xMin = 0;
-	private float xMax = 10000;
+	private static float xMin = 0;
+	private static float xMax = 10000;
 	
 	private float yMin = 0;
 	private float yMax = 0;
@@ -82,6 +82,4 @@ public abstract class AbstractTimeCoordinateSystem implements CoordinateSystem {
 			throw new IllegalArgumentException("Axis moest be X or Y: use CoordinateSystem.X_AXIS/Y_AXIS!");
 		}
 	}
-	
-	
 }
