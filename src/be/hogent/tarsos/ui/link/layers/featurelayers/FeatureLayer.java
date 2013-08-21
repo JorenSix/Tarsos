@@ -1,9 +1,10 @@
-package be.hogent.tarsos.ui.link.layers;
+package be.hogent.tarsos.ui.link.layers.featurelayers;
 
 import java.util.TreeMap;
 
 import be.hogent.tarsos.dsp.AudioDispatcher;
 import be.hogent.tarsos.ui.link.LinkedPanel;
+import be.hogent.tarsos.ui.link.layers.Layer;
 
 public abstract class FeatureLayer implements Layer {
 

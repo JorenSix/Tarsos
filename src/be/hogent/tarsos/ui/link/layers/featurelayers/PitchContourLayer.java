@@ -1,4 +1,4 @@
-package be.hogent.tarsos.ui.link.layers;
+package be.hogent.tarsos.ui.link.layers.featurelayers;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -20,6 +20,7 @@ import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.ViewPort;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 
 public class PitchContourLayer extends FeatureLayer {
 

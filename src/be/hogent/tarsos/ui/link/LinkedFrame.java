@@ -326,10 +326,14 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 		return menuBar;
 	}
 	
-	public void viewPortChanged(ViewPort newViewPort) {
+	private void updatePanels(){
 		for (LinkedPanel panel : panels){
 			panel.revalidate();
 			panel.repaint();
 		}
+	}
+	
+	public void viewPortChanged(ViewPort newViewPort) {
+		updatePanels();
 	}
 }

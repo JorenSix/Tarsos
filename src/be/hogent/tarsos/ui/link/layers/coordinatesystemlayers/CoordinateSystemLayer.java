@@ -1,10 +1,11 @@
-package be.hogent.tarsos.ui.link.layers;
+package be.hogent.tarsos.ui.link.layers.coordinatesystemlayers;
 
 import java.awt.Graphics2D;
 
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.layers.Layer;
 
 public final class CoordinateSystemLayer implements Layer {
 

@@ -1,6 +1,7 @@
-package be.hogent.tarsos.ui.link.layers;
+package be.hogent.tarsos.ui.link.layers.coordinatesystemlayers;
 
 import be.hogent.tarsos.ui.link.LinkedPanel;
+import be.hogent.tarsos.ui.link.layers.Layer;
 
 public abstract class AxisLayer implements Layer {
 

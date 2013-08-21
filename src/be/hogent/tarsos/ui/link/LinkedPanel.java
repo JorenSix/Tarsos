@@ -21,12 +21,12 @@ import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
 import be.hogent.tarsos.ui.link.layers.BackgroundLayer;
-import be.hogent.tarsos.ui.link.layers.ConstantQLayer;
-import be.hogent.tarsos.ui.link.layers.CoordinateSystemLayer;
-import be.hogent.tarsos.ui.link.layers.FeatureLayer;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
-import be.hogent.tarsos.ui.link.layers.PitchContourLayer;
+import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.CoordinateSystemLayer;
+import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
+import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
+import be.hogent.tarsos.ui.link.layers.featurelayers.PitchContourLayer;
 
 public class LinkedPanel extends JPanel {
 
@@ -98,7 +98,6 @@ public class LinkedPanel extends JPanel {
 //		layers.add(new CentsLabelLayer());
 		
 		this.csLayer = new CoordinateSystemLayer(this, Units.TIME_SSS, Units.FREQUENCY_CENTS);
-		
 //		viewPort.addViewPortChangedListener(this);
 	}
 	

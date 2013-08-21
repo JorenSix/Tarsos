@@ -1,4 +1,4 @@
-package be.hogent.tarsos.ui.link.layers;
+package be.hogent.tarsos.ui.link.layers.featurelayers;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

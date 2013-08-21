@@ -8,8 +8,8 @@ import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 
 public class BackgroundLayer implements Layer{
 
-	private final LinkedPanel parent;
-	private Color color;
+	protected final LinkedPanel parent;
+	protected Color color;
 
 	public BackgroundLayer(final LinkedPanel parent){
 		this.parent = parent;
