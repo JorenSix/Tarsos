@@ -1,4 +1,4 @@
-package be.hogent.tarsos.ui.link;
+package be.hogent.tarsos.ui.link.layers;
 
 import java.awt.Graphics2D;
 

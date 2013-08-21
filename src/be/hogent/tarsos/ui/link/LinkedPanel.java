@@ -1,9 +1,9 @@
 package be.hogent.tarsos.ui.link;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -14,57 +14,104 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFrame;
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
+import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.layers.BackgroundLayer;
+import be.hogent.tarsos.ui.link.layers.ConstantQLayer;
+import be.hogent.tarsos.ui.link.layers.CoordinateSystemLayer;
+import be.hogent.tarsos.ui.link.layers.FeatureLayer;
+import be.hogent.tarsos.ui.link.layers.Layer;
+import be.hogent.tarsos.ui.link.layers.LayerUtilities;
+import be.hogent.tarsos.ui.link.layers.PitchContourLayer;
 
 public class LinkedPanel extends JPanel implements ViewPortChangedListener {
 
 	private static final long serialVersionUID = -5055686566048886896L;
 	
-	
-	
-	private final List<Layer> layers;
+	private BackgroundLayer backgroundLayer;
+	private List<FeatureLayer> layers;
+	private CoordinateSystemLayer csLayer;
 	
 	private final ViewPort viewPort;
+	private CoordinateSystem cs;
 	
+	public CoordinateSystem getCoordinateSystem() {
+		return cs;
+	}
+
+	public void setCoordinateSystem(CoordinateSystem cs) {
+		this.cs = cs;
+	}
+
+	public ViewPort getViewPort() {
+		return viewPort;
+	}
+
+//	public LinkedPanel(){
+//		this.setPreferredSize(new Dimension(480,640));
+//		this.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+//
+//		viewPort = new ViewPort(this);
+//		
+//		DragListener dragListener = new DragListener(this);
+//		ZoomListener zoomListener = new ZoomListener();
+//		
+//		addMouseWheelListener(zoomListener);		
+//		addMouseListener(dragListener);
+//		addMouseMotionListener(dragListener);
+//		
+//		layers = new ArrayList<FeatureLayer>();
+//		layers.add(new ConstantQLayer(this, 32768,16384));
+////		layers.add(new MfccLayer(2048,512));
+//		layers.add(new PitchContourLayer(this, 2048,512));
+//		
+//		viewPort.addViewPortChangedListener(this);
+//	}
 	
-	public LinkedPanel(){
+	public LinkedPanel(CoordinateSystem coordinateSystem){
 		this.setPreferredSize(new Dimension(480,640));
-		
-		viewPort = ViewPort.getInstance();
-		
+		this.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+		this.cs = coordinateSystem;
+		viewPort = new ViewPort(this);
 		DragListener dragListener = new DragListener(this);
 		ZoomListener zoomListener = new ZoomListener();
 		
 		addMouseWheelListener(zoomListener);		
 		addMouseListener(dragListener);
 		addMouseMotionListener(dragListener);
+	}
+	
+	public void addDefaultLayers(){
+	
+		this.backgroundLayer = new BackgroundLayer(this);
 		
-		layers = new ArrayList<Layer>();
-		layers.add(new BackgroundLayer());
+		layers = new ArrayList<FeatureLayer>();
+//		layers.add(new BackgroundLayer());
 		
-		layers.add(new ConstantQLayer());
-		layers.add(new PitchContourLayer());
-		layers.add(new CentsLabelLayer());
+		layers.add(new ConstantQLayer(this, 32768,16384));
+//		layers.add(new MfccLayer(2048,512));
+		layers.add(new PitchContourLayer(this, 2048,512));
+//		layers.add(new CentsLabelLayer());
+		
+		this.csLayer = new CoordinateSystemLayer(this, Units.TIME_SSS, Units.FREQUENCY_CENTS);
 		
 		viewPort.addViewPortChangedListener(this);
 	}
 	
-	
-
-	
-	private static class ZoomListener implements MouseWheelListener{		
+	private class ZoomListener implements MouseWheelListener{		
 
 		public void mouseWheelMoved(MouseWheelEvent arg0) {
 			int amount = arg0.getWheelRotation() * arg0.getScrollAmount();		
-			ViewPort.getInstance().zoom(amount,arg0.getPoint());
+			viewPort.zoom(amount,arg0.getPoint());
 		}
 	}
 	
 
-	private static class DragListener extends MouseAdapter {
+	private class DragListener extends MouseAdapter {
 		
 		LinkedPanel panel;
 		Point previousPoint;
@@ -96,7 +143,7 @@ public class LinkedPanel extends JPanel implements ViewPortChangedListener {
 				float millisecondAmount = (float) (unitsPrevious.getX()- unitsCurrent.getX());
 				float centAmount = (float) (unitsPrevious.getY()- unitsCurrent.getY());
 				previousPoint = e.getPoint();
-				ViewPort.getInstance().drag(millisecondAmount, centAmount);
+				viewPort.drag(millisecondAmount, centAmount);
 				System.out.println("Mouse dragged over (" + millisecondAmount + " seconds," + centAmount + " cents)");
 			}
 		}
@@ -108,28 +155,34 @@ public class LinkedPanel extends JPanel implements ViewPortChangedListener {
 
 	
 	protected AffineTransform getTransform(){
-		double timeDelta = viewPort.getTimeDelta();
-		double frequencyDelta = viewPort.getFrequencyDelta();
+		double timeDelta = cs.getDelta(CoordinateSystem.X_AXIS);
+		double frequencyDelta = cs.getDelta(CoordinateSystem.Y_AXIS);
 		
 		AffineTransform transform = new AffineTransform();
 		transform.translate(0, getHeight());		
 		transform.scale(getWidth()/timeDelta,-getHeight()/frequencyDelta);
-		transform.translate(-viewPort.getMinTime(), -viewPort.getMinFrequencyInCents());
+		transform.translate(-cs.getMin(CoordinateSystem.X_AXIS), -cs.getMin(CoordinateSystem.Y_AXIS));
 		
 		return transform;
 	}
 	
 	@Override
-	public void paint(final Graphics g) {
+	public void paintComponent(final Graphics g) {
+		super.paintComponent(g);
 		Graphics2D graphics = (Graphics2D) g;	
 		
 		graphics.setTransform(getTransform());
 		
+		backgroundLayer.draw(graphics);
 		for(Layer layer:layers){
 			layer.draw(graphics);
 		}
-		//in layer?
+		csLayer.draw(graphics);
+		
+		//TODO in layer?
 		drawIndicator(graphics);
+		graphics.dispose();
+		g.dispose();
 	}
 	
 	
@@ -153,21 +206,26 @@ public class LinkedPanel extends JPanel implements ViewPortChangedListener {
 		*/
 	}	
 	
-
 	public void viewPortChanged(ViewPort newViewPort) {
 		invalidate();
 		repaint();
 	}
-	
-	
-	public static void main(String...strings){
-		JFrame frame = new JFrame();
-		frame.setLayout(new GridLayout(0, 1));
-		frame.add(new LinkedPanel());
-		frame.add(new LinkedPanel());
-		frame.pack();
-		frame.setLocationRelativeTo(null);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
+
+	public void initialiseLayers() {
+		for (Layer l: layers){
+			if (l instanceof FeatureLayer){
+				((FeatureLayer) l).initialise();
+			}
+		}
 	}
+	
+	public void calculateLayers() {
+		for (Layer l: layers){
+			if (l instanceof FeatureLayer){
+				((FeatureLayer) l).run();
+			}
+		}
+	}
+	
+	
 }
