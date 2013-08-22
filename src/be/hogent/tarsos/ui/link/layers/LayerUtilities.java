@@ -37,8 +37,8 @@ public class LayerUtilities {
 	 * @param horizontal Is it the horizontal or vertical axis?
 	 * @return A number of cents or milliseconds.
 	 */
-	public static float unitsToPixels(Graphics2D g,int pixels,boolean horizontal){
-		float numberOfPixels=0;
+	public static float pixelsToUnits(Graphics2D g,int pixels,boolean horizontal){
+		float numberOfUnits=0;
 		try {
 			Point2D originSrc = new Point2D.Double(0,0);
 			Point2D originDest;
@@ -47,14 +47,14 @@ public class LayerUtilities {
 			Point2D destDest;
 			destDest = g.getTransform().inverseTransform(destSrc, null);
 			if(horizontal){		
-				numberOfPixels = (float) (destDest.getX() - originDest.getX());
+				numberOfUnits = (float) (destDest.getX() - originDest.getX());
 			}else{
-				numberOfPixels = (float) (- destDest.getY() + originDest.getY());
+				numberOfUnits = (float) (- destDest.getY() + originDest.getY());
 			}
 		} catch (NoninvertibleTransformException e) {
 			e.printStackTrace();
 		}
-		return numberOfPixels;
+		return numberOfUnits;
 	}
 	
 	

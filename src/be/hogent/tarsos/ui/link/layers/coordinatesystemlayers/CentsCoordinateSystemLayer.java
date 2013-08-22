@@ -25,13 +25,13 @@ public class CentsCoordinateSystemLayer extends AxisLayer{
 		//Every 100 and 1200 cents
 		for(int i = (int) cs.getMin(direction) ; i < cs.getMax(direction) ; i++){
 			if(i%1200 == 0){
-				int lineWidth = Math.round(LayerUtilities.unitsToPixels(graphics,8, !horizontal));
+				int lineWidth = Math.round(LayerUtilities.pixelsToUnits(graphics,8, !horizontal));
 				graphics.drawLine(minOpposite, i, minOpposite+lineWidth,i);
 				String text = String.valueOf(i);
-				int textOffset = Math.round(LayerUtilities.unitsToPixels(graphics,12, !horizontal));
+				int textOffset = Math.round(LayerUtilities.pixelsToUnits(graphics,12, !horizontal));
 				LayerUtilities.drawString(graphics,text,minOpposite+textOffset,i,horizontal,!horizontal);
 			} else if(i%100 == 0){
-				int lineWidth = Math.round(LayerUtilities.unitsToPixels(graphics,4, !horizontal));
+				int lineWidth = Math.round(LayerUtilities.pixelsToUnits(graphics,4, !horizontal));
 				graphics.drawLine(minOpposite, i, minOpposite+lineWidth,i);
 			}
 		}

@@ -21,26 +21,26 @@ public class AmplitudeCoordinateSystemLayer extends AxisLayer {
 		boolean horizontal = direction == DIRECTION_X ? true : false;
 		int startOppositeAxis = Math.round(cs.getMin(oppositeDirection));
 
-		// Every 100 and 1200 cents
-		for (int i = (int) cs.getMin(direction); i < cs.getMax(direction); i++) {
-			if (i % 5 == 0) {
-				int lineWidth = Math.round(LayerUtilities.unitsToPixels(
-						graphics, 10, !horizontal));
-				if (direction == AxisLayer.DIRECTION_Y) {
+		
+		for (int i = (int) cs.getMin(direction); i < cs.getMax(direction); i+=1) {
+			if (i % 1000 == 0) {
+				int lineWidth = Math.round(LayerUtilities.pixelsToUnits(
+						graphics, 4, !horizontal));
+				if (direction == DIRECTION_Y) {
 					graphics.drawLine(startOppositeAxis, i, startOppositeAxis
 							+ lineWidth, i);
 				} else {
 					graphics.drawLine(i, startOppositeAxis, i,
 							startOppositeAxis + lineWidth);
 				}
-				String text = String.valueOf(i);
-				int textOffset = Math.round(LayerUtilities.unitsToPixels(
+				String text = String.valueOf(i/1000);
+				int textOffset = Math.round(LayerUtilities.pixelsToUnits(
 						graphics, 12, !horizontal));
 				LayerUtilities.drawString(graphics, text, startOppositeAxis
 						+ textOffset, i, horizontal, !horizontal);
-			} else {
-				int lineWidth = Math.round(LayerUtilities.unitsToPixels(
-						graphics, 1, !horizontal));
+			} else if (i%100 == 0) {
+				int lineWidth = Math.round(LayerUtilities.pixelsToUnits(
+						graphics, 2, !horizontal));
 				if (direction == AxisLayer.DIRECTION_Y) {
 					graphics.drawLine(startOppositeAxis, i, startOppositeAxis
 							+ lineWidth, i);

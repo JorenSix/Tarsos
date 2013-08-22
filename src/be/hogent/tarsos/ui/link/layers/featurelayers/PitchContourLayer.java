@@ -32,9 +32,9 @@ public class PitchContourLayer extends FeatureLayer {
 		CoordinateSystem cs = parent.getCoordinateSystem();
 
 		graphics.setColor(Color.green);
-		int ovalWidth = Math.round(LayerUtilities.unitsToPixels(graphics, 4,
+		int ovalWidth = Math.round(LayerUtilities.pixelsToUnits(graphics, 4,
 				true));
-		int ovalHeight = Math.round(LayerUtilities.unitsToPixels(graphics, 4,
+		int ovalHeight = Math.round(LayerUtilities.pixelsToUnits(graphics, 4,
 				false));
 		// every second
 		for (Map.Entry<Double, float[]> entry : features.subMap(

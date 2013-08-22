@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
@@ -58,7 +61,6 @@ public class LinkedPanel extends JPanel {
 		viewPort = new ViewPort(this);
 		DragListener dragListener = new DragListener(this);
 		ZoomListener zoomListener = new ZoomListener();
-
 		addMouseWheelListener(zoomListener);
 		addMouseListener(dragListener);
 		addMouseMotionListener(dragListener);
@@ -69,8 +71,8 @@ public class LinkedPanel extends JPanel {
 
 		this.backgroundLayer = new BackgroundLayer(this);
 
-//		layers.add(new ConstantQLayer(this, 32768, 16384));
-//		layers.add(new PitchContourLayer(this, 2048, 512));
+		layers.add(new ConstantQLayer(this, 32768, 16384));
+		layers.add(new PitchContourLayer(this, 2048, 512));
 
 		this.csLayer = new CoordinateSystemLayer(this, Units.TIME_SSS,
 				Units.FREQUENCY_CENTS);
@@ -79,7 +81,7 @@ public class LinkedPanel extends JPanel {
 	public void addWaveFormLayer() {
 		this.backgroundLayer = new BackgroundLayer(this);
 		
-//		layers.add(new WaveFormLayer(this));
+		layers.add(new WaveFormLayer(this));
 		
 		this.csLayer = new CoordinateSystemLayer(this, Units.TIME_SSS,
 				Units.AMPLITUDE);
@@ -211,5 +213,22 @@ public class LinkedPanel extends JPanel {
 			}
 		}
 	}
+
+	public void componentHidden(ComponentEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void componentMoved(ComponentEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void componentShown(ComponentEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
 
 }

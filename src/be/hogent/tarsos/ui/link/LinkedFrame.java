@@ -73,7 +73,8 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 	}
 
 	public void initialise() {
-		LinkedPanel panel1 = new LinkedPanel(new TimeAmpCoordinateSystem(-100, 100));
+		this.getContentPane().setLayout(new GridLayout(0, 1, 1, 1));
+		LinkedPanel panel1 = new LinkedPanel(new TimeAmpCoordinateSystem(-1000, 1000));
 		LinkedPanel panel2 = new LinkedPanel(new TimeCentCoordinateSystem(0, 8000));
 		panel1.addWaveFormLayer();
 		panel2.addDefaultLayers();
@@ -83,8 +84,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 		panels.add(panel2);
 
 		this.setJMenuBar(createMenu());
-		
-		this.getContentPane().setLayout(new GridLayout(0, 1, 1, 1));
 		
 		for (LinkedPanel panel : panels) {
 			this.getContentPane().add(panel);
