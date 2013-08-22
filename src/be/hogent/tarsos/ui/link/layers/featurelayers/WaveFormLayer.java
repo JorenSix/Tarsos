@@ -40,10 +40,10 @@ public class WaveFormLayer extends FeatureLayer {
 
 	public void draw(Graphics2D graphics) {
 		graphics.setColor(waveFormColor);
-		// graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-		// RenderingHints.VALUE_ANTIALIAS_ON);
-		// graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-		// RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		 graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+		 RenderingHints.VALUE_ANTIALIAS_ON);
+		 graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+		 RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		this.drawWaveForm(graphics);
 	}
 
@@ -70,79 +70,15 @@ public class WaveFormLayer extends FeatureLayer {
 			final int amountOfSamples = samples.length;
 			float sampleCalculateFactor = amountOfSamples / lengthInMs;
 			int amplitudeFactor = waveFormHeightInUnits / 2;
-
-			for (int i = waveFormXMin; i < waveFormXMax; i++) {
-				if (i >= 0 && i <= lengthInMs) {
-					int index = (int) (i * sampleCalculateFactor);
-					if (index < samples.length){
-						graphics.drawLine(i,0,i,(int)(samples[index]*amplitudeFactor));
-					}
+			
+			for (int i = Math.max(0, waveFormXMin); i < Math.min(waveFormXMax, lengthInMs); i++) {
+				int index = (int) (i * sampleCalculateFactor);
+				if (index < samples.length) {
+					graphics.drawLine(i, 0, i,
+							(int) (samples[index] * amplitudeFactor));
 				}
 			}
 		}
-	}
-
-	//
-	// AudioFile f = LinkedFrame.getInstance().getAudioFile();
-	// if (samples != null && samples.length > 0) {
-	//
-	//
-	// // graphics.transform(getSaneTransform(waveFormHeight));
-	//
-	// final float sampleRate = f.fileFormat().getFormat().getSampleRate();
-	//
-	// float percentageOfSongDisplayed = (float) waveFormWidthInUnits
-	// / (float) f.getLengthInMilliSeconds();
-	// int amountOfSamples = f.fileFormat().getFrameLength();
-	// int amountOfSamplesDisplayed = Math.round(amountOfSamples
-	// * percentageOfSongDisplayed);
-	// int samplesPerPixel = Math.round((float) amountOfSamplesDisplayed
-	// / (float) waveFormWidth);// waarom / 8 ??;
-	//
-	// // final float frameSizeInSec = samplesPerPixel / sampleRate; //
-	// samplesPerPixel(samples/pixel)/sampleRate(Samples/sec)
-	//
-	// // final int startY = (int) (waveFormHeight / 2);
-	// final int factor = (int)waveFormHeightInUnits;
-	// // om te tekenen: wat nodig?
-	// // - startPixel = 0 | ok
-	// // - laatstePixel | ok
-	// // - startSample | sample waarbij T >= XMin
-	// // - laatsteSample | sample waarbij T <= XMax
-	// // - samplesPerPixel | ok
-	// // sampleRate = samples/sec
-	// // i/sampleRate = Xmin => Xmin*sampleRate = i
-	// // i/sampleRate = XMax => Xmax*sampleRate = i
-	//
-	// int startSample = Math.round((waveFormXMin/1000) * sampleRate);
-	// int endSample = Math.round((waveFormXMax/1000) * sampleRate);
-	//
-	// for (int i = 0; i < waveFormWidth; i++){
-	//
-	// }
-	//
-	// for (int i = waveFormXMin; i < waveFormXMax; i += 1) {
-	// if (i >= 0 && i < lengthInMs){
-	// LayerUtilities.pixelsToUnits(g, pixels, horizontal)
-	// graphics.drawLine(i, 0, i, (int)samples[i] * factor);
-	// }
-	// }
-	//
-	//
-	// // int pixelCount = 0;
-	// // for (int i = startSample; i < endSample; i += samplesPerPixel) {
-	// // if (i >= 0 && i < samples.length){
-	// //// int y = (int) (samples[i] + one);
-	// // graphics.drawLine(pixelCount, 0, pixelCount, (int)samples[i] *
-	// factor);
-	// // }
-	// // pixelCount++;
-	// // }
-	// }
-	// }
-
-	private AffineTransform getSaneTransform(final float heigth) {
-		return new AffineTransform(1.0, 0.0, 0.0, -1.0, 0, heigth / 2);
 	}
 
 	@Override

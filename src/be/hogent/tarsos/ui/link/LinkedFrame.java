@@ -81,7 +81,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 		panel1.getViewPort().addViewPortChangedListener(this);
 		panel2.getViewPort().addViewPortChangedListener(this);
 		panels.add(panel1);
-		panels.add(panel2);
+//		panels.add(panel2);
 
 		this.setJMenuBar(createMenu());
 		
