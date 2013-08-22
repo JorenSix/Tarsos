@@ -31,7 +31,7 @@ public class TimeCoordinateSystemLayer extends AxisLayer{
 			}else if(i%1000 == 0){
 				int lineHeight = Math.round(LayerUtilities.unitsToPixels(graphics,4, !horizontal));
 				graphics.drawLine(i, minOpposite, i, minOpposite+lineHeight);
-				int textOffset = Math.round(LayerUtilities.unitsToPixels(graphics,8, !horizontal));
+				int textOffset = Math.round(LayerUtilities.unitsToPixels(graphics,9, !horizontal));
 				String text = String.valueOf(i/1000);
 				LayerUtilities.drawString(graphics,text,i, minOpposite+textOffset,horizontal,!horizontal);
 			}

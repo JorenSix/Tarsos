@@ -19,6 +19,8 @@ public abstract class FeatureLayer implements Layer {
 	public FeatureLayer(final LinkedPanel parent) {
 		features = new TreeMap<Double, float[]>();
 		this.parent = parent;
+		frameSize = 0;
+		overlap = 0;
 	}
 
 	public FeatureLayer(final LinkedPanel parent, int frameSize, int overlap) {

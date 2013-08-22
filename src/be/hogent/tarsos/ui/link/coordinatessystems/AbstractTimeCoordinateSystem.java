@@ -2,14 +2,14 @@ package be.hogent.tarsos.ui.link.coordinatessystems;
 
 public abstract class AbstractTimeCoordinateSystem implements CoordinateSystem {
 	
-	private Units xAxisUnits = Units.TIME_HH_MM_SS;
+	private Units xAxisUnits = Units.TIME_SSS;
 	private Units yAxisUnits;
 	
 	private static float xMin = 0;
 	private static float xMax = 10000;
 	
-	private float yMin = 0;
-	private float yMax = 0;
+	private float yMin;
+	private float yMax;
 	
 	public AbstractTimeCoordinateSystem(Units yAxisUnits, float yMin, float yMax){
 		this.yAxisUnits = yAxisUnits;

@@ -33,10 +33,10 @@ public class ViewPort {
 	}
 	
 	public void zoom(int amount, Point zoomPoint){
-		float timeDelta = parent.getCoordinateSystem().getDelta(CoordinateSystem.X_AXIS);
-		float newTimeDelta = timeDelta + amount * 1000;
-		if(newTimeDelta > 20 && newTimeDelta < 600000) {
-			cs.setMax(CoordinateSystem.X_AXIS, cs.getMin(CoordinateSystem.X_AXIS) + newTimeDelta);
+		float xDelta = cs.getDelta(CoordinateSystem.X_AXIS);
+		float newXDelta = xDelta + amount * 1000;
+		if(newXDelta > 20 && newXDelta < 600000) {
+			cs.setMax(CoordinateSystem.X_AXIS, cs.getMin(CoordinateSystem.X_AXIS) + newXDelta);
 		}
 		viewPortChanged();
 	}

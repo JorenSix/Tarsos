@@ -30,11 +30,10 @@ public class CentsCoordinateSystemLayer extends AxisLayer{
 				String text = String.valueOf(i);
 				int textOffset = Math.round(LayerUtilities.unitsToPixels(graphics,12, !horizontal));
 				LayerUtilities.drawString(graphics,text,minOpposite+textOffset,i,horizontal,!horizontal);
-			}else if(i%100 == 0){
+			} else if(i%100 == 0){
 				int lineWidth = Math.round(LayerUtilities.unitsToPixels(graphics,4, !horizontal));
 				graphics.drawLine(minOpposite, i, minOpposite+lineWidth,i);
 			}
 		}
 	}
-	
 }

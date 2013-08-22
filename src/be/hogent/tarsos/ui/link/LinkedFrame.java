@@ -30,6 +30,7 @@ import be.hogent.tarsos.ui.BackgroundTask;
 import be.hogent.tarsos.ui.ProgressDialog;
 import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.TimeAmpCoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.TimeCentCoordinateSystem;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
@@ -61,7 +62,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 	private LinkedFrame() {
 		super();
 		panels = new ArrayList<LinkedPanel>();
-		
 	}
 
 	public static LinkedFrame getInstance() {
@@ -73,9 +73,9 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 	}
 
 	public void initialise() {
-		LinkedPanel panel1 = new LinkedPanel(new TimeCentCoordinateSystem(100, 3000));
-		LinkedPanel panel2 = new LinkedPanel(new TimeCentCoordinateSystem(100, 3000));
-		panel1.addDefaultLayers();
+		LinkedPanel panel1 = new LinkedPanel(new TimeAmpCoordinateSystem(-100, 100));
+		LinkedPanel panel2 = new LinkedPanel(new TimeCentCoordinateSystem(0, 8000));
+		panel1.addWaveFormLayer();
 		panel2.addDefaultLayers();
 		panel1.getViewPort().addViewPortChangedListener(this);
 		panel2.getViewPort().addViewPortChangedListener(this);
@@ -122,14 +122,8 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 
 	public void setNewAudioFile(final File newFile) {
 		// AnnotationPublisher.getInstance().clearTree();
-		try {
-			this.audioFile = new AudioFile(newFile.getAbsolutePath());
-		} catch (EncoderException e) {
-			// @TODO: errorafhandeling
-			e.printStackTrace();
-		}
 		TranscodingTask transcodingTask = new TranscodingTask(newFile);
-		final List<BackgroundTask> detectorTasks = new ArrayList();
+		final List<BackgroundTask> detectorTasks = new ArrayList<BackgroundTask>();
 		detectorTasks.add(transcodingTask);
 		transcodingTask.addHandler(new BackgroundTask.TaskHandler() {
 

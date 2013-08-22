@@ -42,6 +42,8 @@ public final class CoordinateSystemLayer implements Layer {
 		} else if (unit==Units.FREQUENCY_HZ){
 			//TODO
 			return null;
+		} else if (unit==Units.AMPLITUDE){
+			return new AmplitudeCoordinateSystemLayer(parent, direction);
 		} else {
 			throw new IllegalArgumentException("ERROR: Please choose a Unit available in the Units enum!");
 		}
