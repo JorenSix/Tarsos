@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -22,6 +23,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 
 import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.tarsossegmenter.util.io.SongFileFilter;
@@ -32,6 +34,9 @@ import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.TimeAmpCoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.TimeCentCoordinateSystem;
+import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
+import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
+import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -47,12 +52,16 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 
 	private static LinkedFrame instance;
 
-	private static List<LinkedPanel> panels;
+	private static HashMap<String, LinkedPanel> panels;
 	private static Logger log;
 	private static final String LOG_PROPS = "/be/hogent/tarsos/util/logging.properties";
 	private AudioFile audioFile;
 	
-	JMenu optionMenu;
+	
+	
+	private JMenu optionMenu;
+	private JMenuBar menuBar;
+	private int panelID;
 
 	public static void main(String... strings) {
 		configureLogging();
@@ -63,7 +72,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 
 	private LinkedFrame() {
 		super();
-		panels = new ArrayList<LinkedPanel>();
+		panels = new HashMap<String, LinkedPanel>();
 	}
 
 	public static LinkedFrame getInstance() {
@@ -76,14 +85,9 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 
 	public void initialise() {
 		this.getContentPane().setLayout(new GridLayout(0, 1, 1, 1));
-		addPanel(new TimeAmpCoordinateSystem(-1000,1000), Color.WHITE);
-		addPanel(new TimeCentCoordinateSystem(0,8000), Color.WHITE);
-
+		
 		this.setJMenuBar(createMenu());
 
-//		for (LinkedPanel panel : panels) {
-//			this.getContentPane().add(panel);
-//		}
 
 		pack();
 		setLocationRelativeTo(null);
@@ -93,9 +97,51 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	
 	private void addPanel(CoordinateSystem cs, Color bgColor){
 		LinkedPanel p = new LinkedPanel(cs);
+		p.getViewPort().addViewPortChangedListener(this);
 		p.setBackgroundLayer(bgColor);
-		panels.add(p);
+		panels.put("Panel " + panelID, p);
 		this.getContentPane().add(p);
+		optionMenu.add(createPanelSubMenu("Panel " + panelID));
+		panelID++;
+		menuBar.revalidate();
+		
+	}
+	
+	private JMenu createPanelSubMenu(final String panelName){
+		final JMenu subMenu = new JMenu(panelName);
+//		subMenu.set
+		JMenuItem addLayerMenuItem = new JMenuItem("Add layer...");
+		addLayerMenuItem.addActionListener(new ActionListener(){
+
+			public void actionPerformed(ActionEvent arg0) {
+				//TODO
+				//new AddLayerFrame();
+				FeatureLayer fl = new WaveFormLayer(panels.get(panelName));
+//				FeatureLayer fl = new ConstantQLayer(panels.get(panelName), 65536, 60000);
+				panels.get(panelName).addLayer(fl);
+			}
+			
+		});
+		
+		JMenuItem deletePanelMenuItem = new JMenuItem("Delete Panel...");
+		deletePanelMenuItem.addActionListener(new ActionListener(){
+
+			public void actionPerformed(ActionEvent arg0) {
+				int result = JOptionPane.showConfirmDialog(LinkedFrame.this, "Are you sure you want to delete this panel?");	
+				if (result == JOptionPane.OK_OPTION){
+					LinkedFrame.this.getContentPane().remove(panels.get(panelName));
+					panels.remove(panelName);
+					optionMenu.remove(subMenu);
+					menuBar.revalidate();
+				}
+			}
+			
+		});
+		subMenu.add(addLayerMenuItem);
+		subMenu.add(deletePanelMenuItem);
+		subMenu.addSeparator();
+		
+		return subMenu;
 	}
 
 	private static void configureLogging() {
@@ -216,14 +262,14 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	}
 
 	public void analyseAudioFile() {
-		for (LinkedPanel p : panels) {
+		for (LinkedPanel p : panels.values()) {
 			p.initialiseLayers();
 			p.calculateLayers();
 		}
 	}
 
 	private JMenuBar createMenu() {
-		JMenuBar menuBar = new JMenuBar();
+		menuBar = new JMenuBar();
 
 		JMenu fileMenu = new JMenu("File");
 
@@ -265,7 +311,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 			// @Override
 			public void actionPerformed(ActionEvent e) {
 				analyseAudioFile();
-				for (LinkedPanel panel : panels) {
+				for (LinkedPanel panel : panels.values()) {
 					panel.repaint();
 				}
 			}
@@ -278,36 +324,29 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		fileMenu.addSeparator();
 		fileMenu.add(exitMenuItem);
 
-		JMenu optionMenu = new JMenu("Settings");
+		optionMenu = new JMenu("Settings");
 		
 		JMenuItem panelMenuItem = new JMenuItem("Add panel...");
 		panelMenuItem.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				new AddPanelFrame();
+				//TODO
+//				new AddPanelFrame();
+				addPanel(new TimeAmpCoordinateSystem(-1000,1000), Color.WHITE);
+				addPanel(new TimeCentCoordinateSystem(0,8000), Color.WHITE);
 			}
 
 		});
-
-		JMenuItem layerMenuItem = new JMenuItem("Add layer...");
-		layerMenuItem.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent arg0) {
-				new AddLayerFrame();
-			}
-
-		});
-
-		optionMenu.add(layerMenuItem);
-
+		
+		optionMenu.add(panelMenuItem);
 		menuBar.add(fileMenu);
 		menuBar.add(optionMenu);
-
+		
 		return menuBar;
 	}
 
 	private void updatePanels() {
-		for (LinkedPanel panel : panels) {
+		for (LinkedPanel panel : panels.values()) {
 			panel.revalidate();
 			panel.repaint();
 		}

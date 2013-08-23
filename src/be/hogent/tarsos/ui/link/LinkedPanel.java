@@ -57,12 +57,6 @@ public class LinkedPanel extends JPanel {
 		this.csLayer = new CoordinateSystemLayer(this, cs.getUnitsForAxis(CoordinateSystem.X_AXIS),
 				cs.getUnitsForAxis(CoordinateSystem.Y_AXIS));
 	}
-//	
-//	public CoordinateSystemLayer getCoordinateSystemLayer(CoordinateSystem cs){
-//		Units xUnits = cs.getUnitsForAxis(CoordinateSystem.X_AXIS);
-//		Units yUnits = cs.getUnitsForAxis(CoordinateSystem.Y_AXIS);
-//		
-//	}
 
 	public ViewPort getViewPort() {
 		return viewPort;
@@ -70,14 +64,16 @@ public class LinkedPanel extends JPanel {
 
 	public LinkedPanel(CoordinateSystem coordinateSystem) {
 		this.setPreferredSize(new Dimension(480, 640));
+		layers = new ArrayList<FeatureLayer>();
 		setCoordinateSystem(coordinateSystem);
 		viewPort = new ViewPort(this);
+		
 		DragListener dragListener = new DragListener(this);
 		ZoomListener zoomListener = new ZoomListener();
 		addMouseWheelListener(zoomListener);
 		addMouseListener(dragListener);
 		addMouseMotionListener(dragListener);
-		layers = new ArrayList<FeatureLayer>();
+		
 	}
 	
 	public void setDefaultBackgroundLayer(){
@@ -86,6 +82,11 @@ public class LinkedPanel extends JPanel {
 	
 	public void setBackgroundLayer(Color c){
 		this.backgroundLayer = new BackgroundLayer(this, c);
+	}
+	
+	public void addLayer(FeatureLayer fl){
+		this.layers.add(fl);
+		
 	}
 	
 //	public void addDefaultLayers() {
