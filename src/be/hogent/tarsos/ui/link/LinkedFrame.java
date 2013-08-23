@@ -41,17 +41,19 @@ import be.hogent.tarsos.util.FileUtils;
 //Per layer een aparte audiodispatcher
 //FrameSize en overlapping per audiodispatcher
 
-public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
+public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 
 	private static final long serialVersionUID = 7301610309790983406L;
 
 	private static LinkedFrame instance;
-	
+
 	private static List<LinkedPanel> panels;
 	private static Logger log;
 	private static final String LOG_PROPS = "/be/hogent/tarsos/util/logging.properties";
 	private AudioFile audioFile;
 	
+	JMenu optionMenu;
+
 	public static void main(String... strings) {
 		configureLogging();
 		Configuration.checkForConfigurationAndWriteDefaults();
@@ -74,25 +76,26 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 
 	public void initialise() {
 		this.getContentPane().setLayout(new GridLayout(0, 1, 1, 1));
-		LinkedPanel panel1 = new LinkedPanel(new TimeAmpCoordinateSystem(-1000, 1000));
-		LinkedPanel panel2 = new LinkedPanel(new TimeCentCoordinateSystem(0, 8000));
-		panel1.addWaveFormLayer();
-		panel2.addDefaultLayers();
-		panel1.getViewPort().addViewPortChangedListener(this);
-		panel2.getViewPort().addViewPortChangedListener(this);
-		panels.add(panel1);
-//		panels.add(panel2);
+		addPanel(new TimeAmpCoordinateSystem(-1000,1000), Color.WHITE);
+		addPanel(new TimeCentCoordinateSystem(0,8000), Color.WHITE);
 
 		this.setJMenuBar(createMenu());
-		
-		for (LinkedPanel panel : panels) {
-			this.getContentPane().add(panel);
-		}
+
+//		for (LinkedPanel panel : panels) {
+//			this.getContentPane().add(panel);
+//		}
 
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
+	}
+	
+	private void addPanel(CoordinateSystem cs, Color bgColor){
+		LinkedPanel p = new LinkedPanel(cs);
+		p.setBackgroundLayer(bgColor);
+		panels.add(p);
+		this.getContentPane().add(p);
 	}
 
 	private static void configureLogging() {
@@ -114,8 +117,8 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 	public AudioFile getAudioFile() {
 		return audioFile;
 	}
-	
-	public void setAudioFile(AudioFile file){
+
+	public void setAudioFile(AudioFile file) {
 		this.audioFile = file;
 	}
 
@@ -126,19 +129,22 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 		detectorTasks.add(transcodingTask);
 		transcodingTask.addHandler(new BackgroundTask.TaskHandler() {
 
-//			@Override
+			// @Override
 			public void taskInterrupted(BackgroundTask backgroundTask,
 					Exception e) {
 			}
 
-//			@Override
+			// @Override
 			public void taskDone(BackgroundTask backgroundTask) {
 				if (backgroundTask instanceof TranscodingTask) {
 					try {
-						LinkedFrame.getInstance().setAudioFile(new AudioFile(((TranscodingTask) backgroundTask)
-								.getAudioFile().transcodedPath()));
+						LinkedFrame.getInstance().setAudioFile(
+								new AudioFile(
+										((TranscodingTask) backgroundTask)
+												.getAudioFile()
+												.transcodedPath()));
 					} catch (EncoderException e) {
-						//@TODO: errorafhandeling
+						// @TODO: errorafhandeling
 						e.printStackTrace();
 					}
 				}
@@ -154,7 +160,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 				detectorTasks);
 		dialog.addPropertyChangeListener(new PropertyChangeListener() {
 
-//			@Override
+			// @Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (evt.getPropertyName().equals("allTasksFinished")) {
 					// onAudioFileChange();
@@ -181,7 +187,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 		public Void doInBackground() {
 			Runnable runTranscoder = new Runnable() {
 
-//				@Override
+				// @Override
 				public void run() {
 					try {
 						transcodedAudioFile = new AudioFile(
@@ -214,7 +220,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 			p.initialiseLayers();
 			p.calculateLayers();
 		}
-		
 	}
 
 	private JMenuBar createMenu() {
@@ -236,7 +241,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 				}
 				int returnVal = fc.showOpenDialog(LinkedFrame.getInstance());
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					// @TODO
+					// TODO
 					// runButton.setEnabled(false);
 					File file = fc.getSelectedFile();
 					// Configuration.set(ConfKey.file_import_dir,
@@ -248,7 +253,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.addActionListener(new ActionListener() {
-//			@Override
+			// @Override
 			public void actionPerformed(ActionEvent e) {
 				LinkedFrame.getInstance().dispose();
 			}
@@ -257,7 +262,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 		JMenuItem runMenuItem = new JMenuItem("Analyse");
 		runMenuItem.addActionListener(new ActionListener() {
 
-//			@Override
+			// @Override
 			public void actionPerformed(ActionEvent e) {
 				analyseAudioFile();
 				for (LinkedPanel panel : panels) {
@@ -273,59 +278,41 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener  {
 		fileMenu.addSeparator();
 		fileMenu.add(exitMenuItem);
 
-		 JMenu optionMenu = new JMenu("Settings");
-		 
-		JMenuItem layerMenuItem = new JMenuItem("Add layer...");
-		layerMenuItem.addActionListener(new ActionListener(){
+		JMenu optionMenu = new JMenu("Settings");
+		
+		JMenuItem panelMenuItem = new JMenuItem("Add panel...");
+		panelMenuItem.addActionListener(new ActionListener() {
 
-//			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				new AddPanelFrame();
+			}
+
+		});
+
+		JMenuItem layerMenuItem = new JMenuItem("Add layer...");
+		layerMenuItem.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent arg0) {
 				new AddLayerFrame();
 			}
-			
-		});
-		//
-		// JMenuItem optionMenuItem = new JMenuItem("Options...");
-		// optionMenuItem.addActionListener(new ActionListener() {
-		// @Override
-		// public void actionPerformed(ActionEvent e) {
-		// // new OptionsGUI();
-		// }
-		// });
 
-		// toggleMatrix = new JCheckBoxMenuItem("Show self-similarity matrix");
-		// toggleMatrix.addItemListener(LinkedPanel.this);
-		// toggleMatrix.setSelected(false);
-		// toggleMatrix.setEnabled(false);
-		//
-		// final JCheckBoxMenuItem initialMatrixMenuItem = new
-		// JCheckBoxMenuItem("Display initial matrix");
-		// initialMatrixMenuItem.addItemListener(new ItemListener() {
-		// @Override
-		// public void itemStateChanged(ItemEvent e) {
-		// mg.setDisplayInitialMatrix(initialMatrixMenuItem.isSelected());
-		// }
-		// });
-		//
-		// optionMenu.add(optionMenuItem);
-		// optionMenu.addSeparator();
-		// optionMenu.add(toggleMatrix);
-		
+		});
+
 		optionMenu.add(layerMenuItem);
-		 
+
 		menuBar.add(fileMenu);
 		menuBar.add(optionMenu);
 
 		return menuBar;
 	}
-	
-	private void updatePanels(){
-		for (LinkedPanel panel : panels){
+
+	private void updatePanels() {
+		for (LinkedPanel panel : panels) {
 			panel.revalidate();
 			panel.repaint();
 		}
 	}
-	
+
 	public void viewPortChanged(ViewPort newViewPort) {
 		updatePanels();
 	}

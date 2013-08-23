@@ -1,5 +1,6 @@
 package be.hogent.tarsos.ui.link.layers.coordinatesystemlayers;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 
 import be.hogent.tarsos.ui.link.LinkedPanel;
@@ -21,8 +22,14 @@ public final class CoordinateSystemLayer implements Layer {
 	
 //	@Override
 	public void draw(Graphics2D graphics) {
+		CoordinateSystem cs = parent.getCoordinateSystem();
 		xAxis.draw(graphics);
 		yAxis.draw(graphics);
+		graphics.setColor(Color.BLACK);
+		graphics.drawRect(Math.round(cs.getMin(CoordinateSystem.X_AXIS)), 
+				Math.round(cs.getMin(CoordinateSystem.Y_AXIS)), 
+				Math.round(cs.getDelta(CoordinateSystem.X_AXIS)), 
+				Math.round(cs.getDelta(CoordinateSystem.Y_AXIS)));
 	}
 	
 	private AxisLayer getLayerForUnit(char direction, Units unit){

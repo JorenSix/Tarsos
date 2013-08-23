@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
@@ -22,11 +23,15 @@ import javax.swing.JPanel;
 
 import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.TimeCentCoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
 import be.hogent.tarsos.ui.link.layers.BackgroundLayer;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
+import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.AmplitudeCoordinateSystemLayer;
+import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.CentsCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.CoordinateSystemLayer;
+import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.TimeCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.PitchContourLayer;
@@ -49,7 +54,15 @@ public class LinkedPanel extends JPanel {
 
 	public void setCoordinateSystem(CoordinateSystem cs) {
 		this.cs = cs;
+		this.csLayer = new CoordinateSystemLayer(this, cs.getUnitsForAxis(CoordinateSystem.X_AXIS),
+				cs.getUnitsForAxis(CoordinateSystem.Y_AXIS));
 	}
+//	
+//	public CoordinateSystemLayer getCoordinateSystemLayer(CoordinateSystem cs){
+//		Units xUnits = cs.getUnitsForAxis(CoordinateSystem.X_AXIS);
+//		Units yUnits = cs.getUnitsForAxis(CoordinateSystem.Y_AXIS);
+//		
+//	}
 
 	public ViewPort getViewPort() {
 		return viewPort;
@@ -57,7 +70,7 @@ public class LinkedPanel extends JPanel {
 
 	public LinkedPanel(CoordinateSystem coordinateSystem) {
 		this.setPreferredSize(new Dimension(480, 640));
-		this.cs = coordinateSystem;
+		setCoordinateSystem(coordinateSystem);
 		viewPort = new ViewPort(this);
 		DragListener dragListener = new DragListener(this);
 		ZoomListener zoomListener = new ZoomListener();
@@ -66,26 +79,32 @@ public class LinkedPanel extends JPanel {
 		addMouseMotionListener(dragListener);
 		layers = new ArrayList<FeatureLayer>();
 	}
-
-	public void addDefaultLayers() {
-
+	
+	public void setDefaultBackgroundLayer(){
 		this.backgroundLayer = new BackgroundLayer(this);
-
-		layers.add(new ConstantQLayer(this, 32768, 16384));
-		layers.add(new PitchContourLayer(this, 2048, 512));
-
-		this.csLayer = new CoordinateSystemLayer(this, Units.TIME_SSS,
-				Units.FREQUENCY_CENTS);
 	}
-
-	public void addWaveFormLayer() {
-		this.backgroundLayer = new BackgroundLayer(this);
-		
-		layers.add(new WaveFormLayer(this));
-		
-		this.csLayer = new CoordinateSystemLayer(this, Units.TIME_SSS,
-				Units.AMPLITUDE);
+	
+	public void setBackgroundLayer(Color c){
+		this.backgroundLayer = new BackgroundLayer(this, c);
 	}
+	
+//	public void addDefaultLayers() {
+//
+//		layers.add(new ConstantQLayer(this, 32768, 16384));
+//		layers.add(new PitchContourLayer(this, 2048, 512));
+//
+//		this.csLayer = new CoordinateSystemLayer(this, Units.TIME_SSS,
+//				Units.FREQUENCY_CENTS);
+//	}
+//
+//	public void addWaveFormLayer() {
+//		this.backgroundLayer = new BackgroundLayer(this);
+//
+//		layers.add(new WaveFormLayer(this));
+//
+//		this.csLayer = new CoordinateSystemLayer(this, Units.TIME_SSS,
+//				Units.AMPLITUDE);
+//	}
 
 	private class ZoomListener implements MouseWheelListener {
 
@@ -161,6 +180,10 @@ public class LinkedPanel extends JPanel {
 		Graphics2D graphics = (Graphics2D) g;
 
 		graphics.setTransform(getTransform());
+		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+//		graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+//				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
 		backgroundLayer.draw(graphics);
 		if (!layers.isEmpty()) {
@@ -216,19 +239,17 @@ public class LinkedPanel extends JPanel {
 
 	public void componentHidden(ComponentEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void componentMoved(ComponentEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void componentShown(ComponentEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	
 
 }

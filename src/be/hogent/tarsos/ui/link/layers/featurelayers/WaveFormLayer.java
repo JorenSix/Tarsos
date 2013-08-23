@@ -40,10 +40,6 @@ public class WaveFormLayer extends FeatureLayer {
 
 	public void draw(Graphics2D graphics) {
 		graphics.setColor(waveFormColor);
-		 graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-		 RenderingHints.VALUE_ANTIALIAS_ON);
-		 graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-		 RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		this.drawWaveForm(graphics);
 	}
 
