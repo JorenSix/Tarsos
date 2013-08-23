@@ -128,13 +128,13 @@ public class LinkedPanel extends JPanel {
 		@Override
 		public void mousePressed(MouseEvent e) {
 			previousPoint = e.getPoint();
-			System.out.println("Pressed!!");
+//			System.out.println("Pressed!!");
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
 			previousPoint = null;
-			System.out.println("Released!!");
+//			System.out.println("Released!!");
 		}
 
 		@Override
@@ -152,8 +152,8 @@ public class LinkedPanel extends JPanel {
 						.getY());
 				previousPoint = e.getPoint();
 				viewPort.drag(millisecondAmount, centAmount);
-				System.out.println("Mouse dragged over (" + millisecondAmount
-						+ " seconds," + centAmount + " cents)");
+//				System.out.println("Mouse dragged over (" + millisecondAmount
+//						+ " seconds," + centAmount + " cents)");
 			}
 		}
 

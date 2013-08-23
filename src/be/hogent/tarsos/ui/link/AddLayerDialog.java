@@ -1,0 +1,137 @@
+package be.hogent.tarsos.ui.link;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
+import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
+import be.hogent.tarsos.ui.link.layers.featurelayers.PitchContourLayer;
+import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
+
+public class AddLayerDialog extends JDialog implements ItemListener, ActionListener {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4659122917576332161L;
+	
+	private final String FEATURE_WAVEFORM = "WaveForm";
+	private final String FEATURE_MFCC = "MFCC";
+	private final String FEATURE_CQT = "CQT";
+	private final String FEATURE_PITCH = "Pitch contour";
+	
+	private Color color;
+	
+	private JComboBox featureTypeList;
+	private JComboBox colorList;
+	
+	private JButton createButton;
+	private JButton cancelButton;
+	
+	private String featureType;
+	private int frameSize;
+	private float overlap;
+	
+	private LinkedPanel parent;
+
+	private boolean answer = false;
+
+	public boolean getAnswer() {
+		return answer;
+	}
+	
+	public AddLayerDialog(JFrame frame, LinkedPanel parent, boolean setModel, String myMessage) {
+		super(frame, myMessage, setModel);
+		this.parent = parent;
+		initialise();
+		
+		
+		this.setMinimumSize(new Dimension(300,150));
+//		this.setResizable(false);
+//		this.setVisible(true);
+		setLocationRelativeTo(frame);
+		setVisible(true);
+	}
+	
+	public void initialise(){
+		JPanel contentPanel = new JPanel();
+		contentPanel.setLayout(new FlowLayout());
+		
+		String[] featureItems = { this.FEATURE_WAVEFORM, this.FEATURE_CQT, this.FEATURE_PITCH };
+		featureTypeList = new JComboBox(featureItems);
+//		featureTypeList.setEnabled(false);
+		featureTypeList.addItemListener(this);
+		
+		String[] kleuren = { "Grijs", "Rood", "Blauw", "Groen", "Geel"};
+		colorList = new JComboBox(kleuren);
+		
+//		JLabel lblTypeLayer = new JLabel("Type layer: ");
+		JLabel lblTypeFeature = new JLabel("Type feature: ");
+		JLabel lblColor = new JLabel("Kleur: ");
+		JLabel lblFrameSize = new JLabel("Framesize: ");
+		JLabel lblOverlapping = new JLabel("Overlapping: ");
+		createButton = new JButton("Create");
+		createButton.addActionListener(this);
+		cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(this);
+		
+//		contentPanel.add(lblTypeLayer);
+		contentPanel.add(lblTypeFeature);
+		contentPanel.add(featureTypeList);
+		
+		contentPanel.add(createButton);
+		contentPanel.add(cancelButton);
+//		contentPanel.add(lblColor);
+		featureType = this.FEATURE_WAVEFORM;
+		frameSize = 32768;
+		overlap = 0.8f;
+//		this.add(colorList);
+		this.getContentPane().add(contentPanel);
+
+		
+		
+	}
+
+//	@Override
+	public void itemStateChanged(ItemEvent arg0) {
+		if (arg0.getSource().equals(featureTypeList)) {
+			featureType = arg0.getItemSelectable().getSelectedObjects()[0].toString();
+		}
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		if (createButton == e.getSource()) {
+			answer = true;
+			this.setVisible(false);
+		} else if (cancelButton == e.getSource()) {
+			answer = false;
+			this.setVisible(false);
+		}
+	}
+	
+	public FeatureLayer getLayer(){
+		if (featureType == FEATURE_CQT){
+			return new ConstantQLayer(parent, frameSize, (int)(overlap*frameSize));
+		} else if (featureType == FEATURE_PITCH){
+			return new PitchContourLayer(parent, frameSize, (int)(overlap*frameSize));
+		} else if (featureType == FEATURE_WAVEFORM){
+			return new WaveFormLayer(parent);
+		}
+		return null;
+	}
+	
+}

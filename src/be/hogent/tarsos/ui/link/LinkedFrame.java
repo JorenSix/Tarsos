@@ -1,6 +1,7 @@
 package be.hogent.tarsos.ui.link;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,6 +35,10 @@ import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.TimeAmpCoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.TimeCentCoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.AmplitudeCoordinateSystemLayer;
+import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.CentsCoordinateSystemLayer;
+import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.TimeCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
@@ -57,8 +62,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	private static final String LOG_PROPS = "/be/hogent/tarsos/util/logging.properties";
 	private AudioFile audioFile;
 	
-	
-	
 	private JMenu optionMenu;
 	private JMenuBar menuBar;
 	private int panelID;
@@ -73,6 +76,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	private LinkedFrame() {
 		super();
 		panels = new HashMap<String, LinkedPanel>();
+		this.setPreferredSize(new Dimension(800,400));
 	}
 
 	public static LinkedFrame getInstance() {
@@ -109,16 +113,15 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	
 	private JMenu createPanelSubMenu(final String panelName){
 		final JMenu subMenu = new JMenu(panelName);
-//		subMenu.set
 		JMenuItem addLayerMenuItem = new JMenuItem("Add layer...");
 		addLayerMenuItem.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent arg0) {
 				//TODO
-				//new AddLayerFrame();
-				FeatureLayer fl = new WaveFormLayer(panels.get(panelName));
-//				FeatureLayer fl = new ConstantQLayer(panels.get(panelName), 65536, 60000);
-				panels.get(panelName).addLayer(fl);
+				AddLayerDialog ld = new AddLayerDialog(LinkedFrame.this, panels.get(panelName), true, "Add layer to " + panelName);
+				if (ld.getAnswer()){
+					panels.get(panelName).addLayer(ld.getLayer());
+				 }
 			}
 			
 		});
@@ -330,10 +333,10 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		panelMenuItem.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				//TODO
-//				new AddPanelFrame();
-				addPanel(new TimeAmpCoordinateSystem(-1000,1000), Color.WHITE);
-				addPanel(new TimeCentCoordinateSystem(0,8000), Color.WHITE);
+				 AddPanelDialog myDialog = new AddPanelDialog(LinkedFrame.this, true, "Create new panel");
+				 if (myDialog.getAnswer()){
+					 addPanel(getCoordinateSystem(myDialog.getXUnits(), myDialog.getYUnits()), Color.white);
+				 }
 			}
 
 		});
@@ -354,5 +357,16 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 
 	public void viewPortChanged(ViewPort newViewPort) {
 		updatePanels();
+	}
+	
+	private CoordinateSystem getCoordinateSystem(Units xUnits, Units yUnits){
+		if (xUnits==Units.TIME_SSS){
+			if (yUnits==Units.FREQUENCY_CENTS){
+				return new TimeCentCoordinateSystem(200,8000);
+			} else if (yUnits==Units.AMPLITUDE){
+				return new TimeAmpCoordinateSystem(-1000, 1000);
+			}
+		}
+		return null;
 	}
 }
