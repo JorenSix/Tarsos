@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -25,6 +26,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JSplitPane;
+
+import org.noos.xing.mydoggy.plaf.ui.cmp.MultiSplitPane;
 
 import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.tarsossegmenter.util.io.SongFileFilter;
@@ -52,7 +56,8 @@ import be.hogent.tarsos.util.FileUtils;
 //FrameSize en overlapping per audiodispatcher
 
 public class LinkedFrame extends JFrame implements ViewPortChangedListener {
-
+	private JSplitPane lastSplitPane;
+	// private LinkedList<JSplitPane> splitPanels;
 	private static final long serialVersionUID = 7301610309790983406L;
 
 	private static LinkedFrame instance;
@@ -61,10 +66,11 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	private static Logger log;
 	private static final String LOG_PROPS = "/be/hogent/tarsos/util/logging.properties";
 	private AudioFile audioFile;
-	
+
 	private JMenu optionMenu;
 	private JMenuBar menuBar;
 	private int panelID;
+	private int linkedPanelCount;
 
 	public static void main(String... strings) {
 		configureLogging();
@@ -76,7 +82,9 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	private LinkedFrame() {
 		super();
 		panels = new HashMap<String, LinkedPanel>();
-		this.setPreferredSize(new Dimension(800,400));
+		panelID = 0;
+		linkedPanelCount = 0;
+		this.setPreferredSize(new Dimension(800, 400));
 	}
 
 	public static LinkedFrame getInstance() {
@@ -88,62 +96,111 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	}
 
 	public void initialise() {
-		this.getContentPane().setLayout(new GridLayout(0, 1, 1, 1));
+		JSplitPane p = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+//		p.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+		p.setDividerSize(0);
 		
+		this.lastSplitPane = p;
+		this.setContentPane(p);
 		this.setJMenuBar(createMenu());
-
 
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
+		p.setDividerLocation(0);
 	}
 	
-	private void addPanel(CoordinateSystem cs, Color bgColor){
+	public void createNewSplitPane(){
+		lastSplitPane.setDividerSize(2);
+		JSplitPane sp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		sp.setOneTouchExpandable(true);
+        sp.setContinuousLayout(true);
+		sp.setDividerSize(0);
+		lastSplitPane.add(sp, JSplitPane.BOTTOM);
+		lastSplitPane = sp;
+		
+	}
+	
+	private void doSplitPaneLayout() {
+		JSplitPane tempPane = (JSplitPane)this.getContentPane();
+		int count = 0;
+		while (tempPane != null){ 
+			System.out.println("Panel " + count + ": " + (double)(1.0/(double)(linkedPanelCount-count)) + " Height: " + tempPane.getHeight() + " - Location: " + tempPane.getDividerLocation());
+			tempPane.setDividerLocation((double)(1.0/(double)(linkedPanelCount-count)));
+			tempPane = (JSplitPane)tempPane.getRightComponent();
+			count++;
+		}
+		this.updatePanels();
+	}
+
+	private void addPanel(CoordinateSystem cs, Color bgColor) {
+		if (linkedPanelCount!=0){
+			createNewSplitPane();
+		}
 		LinkedPanel p = new LinkedPanel(cs);
 		p.getViewPort().addViewPortChangedListener(this);
 		p.setBackgroundLayer(bgColor);
 		panels.put("Panel " + panelID, p);
-		this.getContentPane().add(p);
+		lastSplitPane.add(p, JSplitPane.TOP);
+		linkedPanelCount++;
+		doSplitPaneLayout();
 		optionMenu.add(createPanelSubMenu("Panel " + panelID));
 		panelID++;
 		menuBar.revalidate();
-		
 	}
-	
-	private JMenu createPanelSubMenu(final String panelName){
+
+	private JMenu createPanelSubMenu(final String panelName) {
 		final JMenu subMenu = new JMenu(panelName);
 		JMenuItem addLayerMenuItem = new JMenuItem("Add layer...");
-		addLayerMenuItem.addActionListener(new ActionListener(){
+		addLayerMenuItem.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				//TODO
-				AddLayerDialog ld = new AddLayerDialog(LinkedFrame.this, panels.get(panelName), true, "Add layer to " + panelName);
-				if (ld.getAnswer()){
+				// TODO
+				AddLayerDialog ld = new AddLayerDialog(LinkedFrame.this, panels
+						.get(panelName), true, "Add layer to " + panelName);
+				if (ld.getAnswer()) {
 					panels.get(panelName).addLayer(ld.getLayer());
-				 }
-			}
-			
-		});
-		
-		JMenuItem deletePanelMenuItem = new JMenuItem("Delete Panel...");
-		deletePanelMenuItem.addActionListener(new ActionListener(){
-
-			public void actionPerformed(ActionEvent arg0) {
-				int result = JOptionPane.showConfirmDialog(LinkedFrame.this, "Are you sure you want to delete this panel?");	
-				if (result == JOptionPane.OK_OPTION){
-					LinkedFrame.this.getContentPane().remove(panels.get(panelName));
-					panels.remove(panelName);
-					optionMenu.remove(subMenu);
-					menuBar.revalidate();
 				}
 			}
-			
+
+		});
+
+		JMenuItem deletePanelMenuItem = new JMenuItem("Delete Panel...");
+		deletePanelMenuItem.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent arg0) {
+				int result = JOptionPane.showConfirmDialog(LinkedFrame.this,
+						"Are you sure you want to delete this panel?");
+				if (result == JOptionPane.OK_OPTION) {
+					JSplitPane parent = null;
+					JSplitPane sp = (JSplitPane)LinkedFrame.this.getContentPane();
+					LinkedPanel panelToRemove = panels.get(panelName);
+					while (sp.getTopComponent() != panelToRemove){
+						parent = sp;
+						sp = (JSplitPane)sp.getBottomComponent();
+					}
+					if (parent == null){
+						LinkedFrame.this.setContentPane((JSplitPane)(sp.getBottomComponent()));
+					} else {
+						parent.remove(2);
+						if (sp.getBottomComponent() != null){
+							parent.add(sp.getBottomComponent(), JSplitPane.BOTTOM);
+						}
+					}
+					panels.remove(panelName);
+					optionMenu.remove(subMenu);
+					linkedPanelCount--;
+					menuBar.revalidate();
+					LinkedFrame.this.doSplitPaneLayout();
+				}
+			}
+
 		});
 		subMenu.add(addLayerMenuItem);
 		subMenu.add(deletePanelMenuItem);
 		subMenu.addSeparator();
-		
+
 		return subMenu;
 	}
 
@@ -278,7 +335,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 
 		JMenuItem loadSongMenuItem = new JMenuItem("Load song...");
 		loadSongMenuItem.addActionListener(new ActionListener() {
-//			@Override
+			// @Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = new JFileChooser();
 				fc.setAcceptAllFileFilterUsed(false);
@@ -328,23 +385,26 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		fileMenu.add(exitMenuItem);
 
 		optionMenu = new JMenu("Settings");
-		
+
 		JMenuItem panelMenuItem = new JMenuItem("Add panel...");
 		panelMenuItem.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				 AddPanelDialog myDialog = new AddPanelDialog(LinkedFrame.this, true, "Create new panel");
-				 if (myDialog.getAnswer()){
-					 addPanel(getCoordinateSystem(myDialog.getXUnits(), myDialog.getYUnits()), Color.white);
-				 }
+				AddPanelDialog myDialog = new AddPanelDialog(LinkedFrame.this,
+						true, "Create new panel");
+				if (myDialog.getAnswer()) {
+					addPanel(
+							getCoordinateSystem(myDialog.getXUnits(),
+									myDialog.getYUnits()), Color.white);
+				}
 			}
 
 		});
-		
+
 		optionMenu.add(panelMenuItem);
 		menuBar.add(fileMenu);
 		menuBar.add(optionMenu);
-		
+
 		return menuBar;
 	}
 
@@ -358,12 +418,12 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	public void viewPortChanged(ViewPort newViewPort) {
 		updatePanels();
 	}
-	
-	private CoordinateSystem getCoordinateSystem(Units xUnits, Units yUnits){
-		if (xUnits==Units.TIME_SSS){
-			if (yUnits==Units.FREQUENCY_CENTS){
-				return new TimeCentCoordinateSystem(200,8000);
-			} else if (yUnits==Units.AMPLITUDE){
+
+	private CoordinateSystem getCoordinateSystem(Units xUnits, Units yUnits) {
+		if (xUnits == Units.TIME_SSS) {
+			if (yUnits == Units.FREQUENCY_CENTS) {
+				return new TimeCentCoordinateSystem(200, 8000);
+			} else if (yUnits == Units.AMPLITUDE) {
 				return new TimeAmpCoordinateSystem(-1000, 1000);
 			}
 		}
