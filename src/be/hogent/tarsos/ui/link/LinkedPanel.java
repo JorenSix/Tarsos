@@ -73,7 +73,6 @@ public class LinkedPanel extends JPanel {
 		addMouseWheelListener(zoomListener);
 		addMouseListener(dragListener);
 		addMouseMotionListener(dragListener);
-		
 	}
 	
 	public void setDefaultBackgroundLayer(){

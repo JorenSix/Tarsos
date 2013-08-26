@@ -93,7 +93,8 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 		
 		frameSizeList.setSelectedIndex(5);
 		overlapList.setSelectedIndex(5);
-		featureTypeList.setSelectedItem(FEATURE_WAVEFORM);
+//		featureTypeList.setSelectedItem(FEATURE_WAVEFORM);
+		featureTypeList.setSelectedIndex(0);
 		
 //		JLabel lblTypeLayer = new JLabel("Type layer: ");
 		JLabel lblTypeFeature = new JLabel("Type feature: ");
