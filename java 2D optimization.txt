@@ -1,0 +1,4 @@
+-Dsun.java2d.opengl=true meegeven aan de JVM
+http://docs.oracle.com/javase/7/docs/technotes/guides/2d/flags.html
+https://performance.netbeans.org/howto/jvmswitches/
+http://ubuntuforums.org/archive/index.php/t-1129187.html
