@@ -53,6 +53,7 @@ public class ConstantQLayer extends FeatureLayer {
 	public ConstantQLayer(final LinkedPanel parent, int frameSize, int overlap) {
 		super(parent, frameSize, overlap);
 		increment = frameSize - overlap;
+		this.name = "CQT layer";
 	}
 
 	public ConstantQLayer(final LinkedPanel parent, int frameSize, int overlap, int binsPerOctave) {

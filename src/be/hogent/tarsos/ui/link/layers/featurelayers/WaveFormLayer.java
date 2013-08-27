@@ -31,6 +31,7 @@ public class WaveFormLayer extends FeatureLayer {
 	public WaveFormLayer(LinkedPanel parent) {
 		super(parent);
 		waveFormColor = Color.black;
+		this.name = "Waveform layer";
 	}
 
 	public WaveFormLayer(LinkedPanel parent, Color color) {

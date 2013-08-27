@@ -26,6 +26,7 @@ public class PitchContourLayer extends FeatureLayer {
 
 	public PitchContourLayer(LinkedPanel parent, int frameSize, int overlap) {
 		super(parent, frameSize, overlap);
+		this.name = "Pitch contour layer";
 	}
 
 	public void draw(Graphics2D graphics) {

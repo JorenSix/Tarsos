@@ -4,7 +4,7 @@ import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.layers.Layer;
 
 public abstract class AxisLayer implements Layer {
-
+	protected String name;
 	public static final char DIRECTION_X = 'X';
 	public static final char DIRECTION_Y = 'Y';
 
@@ -12,6 +12,10 @@ public abstract class AxisLayer implements Layer {
 	protected final char direction;
 	protected final char oppositeDirection;
 
+	public String getName(){
+		return name;
+	}
+	
 	public AxisLayer(final LinkedPanel parent, char direction) {
 		if ((direction == DIRECTION_X || direction == DIRECTION_Y)
 				&& parent != null) {

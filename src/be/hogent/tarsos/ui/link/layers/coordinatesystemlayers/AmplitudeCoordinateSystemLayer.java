@@ -8,11 +8,12 @@ import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 
 public class AmplitudeCoordinateSystemLayer extends AxisLayer {
-
+	
 	public AmplitudeCoordinateSystemLayer(LinkedPanel parent, char direction) {
 		super(parent, direction);
+		this.name = "Amplitude Axis";
 	}
-
+	
 	public void draw(Graphics2D graphics) {
 		CoordinateSystem cs = parent.getCoordinateSystem();
 

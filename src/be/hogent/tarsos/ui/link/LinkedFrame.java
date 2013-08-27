@@ -2,9 +2,12 @@ package be.hogent.tarsos.ui.link;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -19,6 +22,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.DebugGraphics;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -27,6 +31,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
+import javax.swing.MenuElement;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.noos.xing.mydoggy.plaf.ui.cmp.MultiSplitPane;
 
@@ -40,6 +47,7 @@ import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.TimeAmpCoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.TimeCentCoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.AmplitudeCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.CentsCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.TimeCoordinateSystemLayer;
@@ -67,10 +75,11 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	private static final String LOG_PROPS = "/be/hogent/tarsos/util/logging.properties";
 	private AudioFile audioFile;
 
-	private JMenu optionMenu;
+	private JMenu viewMenu;
 	private JMenuBar menuBar;
 	private int panelID;
 	private int linkedPanelCount;
+	private boolean drawing = false;
 
 	public static void main(String... strings) {
 		configureLogging();
@@ -84,7 +93,9 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		panels = new HashMap<String, LinkedPanel>();
 		panelID = 0;
 		linkedPanelCount = 0;
-		this.setPreferredSize(new Dimension(800, 400));
+		// this.setPreferredSize(new Dimension(800, 400));
+
+		// this.setSize(new Dimension(800, 400));
 	}
 
 	public static LinkedFrame getInstance() {
@@ -96,46 +107,44 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	}
 
 	public void initialise() {
-		JSplitPane p = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-//		p.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-		p.setDividerSize(0);
-		
-		this.lastSplitPane = p;
-		this.setContentPane(p);
+		this.setMinimumSize(new Dimension(800, 400));
+		JSplitPane contentPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		this.lastSplitPane = contentPane;
+		this.setContentPane(contentPane);
 		this.setJMenuBar(createMenu());
 
-		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		pack();
+		contentPane.setDividerLocation(0);
+		buildStdSetUp();
 		setVisible(true);
-		p.setDividerLocation(0);
 	}
-	
-	public void createNewSplitPane(){
+
+	public void createNewSplitPane() {
 		lastSplitPane.setDividerSize(2);
 		JSplitPane sp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		sp.setOneTouchExpandable(true);
-        sp.setContinuousLayout(true);
 		sp.setDividerSize(0);
 		lastSplitPane.add(sp, JSplitPane.BOTTOM);
 		lastSplitPane = sp;
-		
 	}
-	
+
 	private void doSplitPaneLayout() {
-		JSplitPane tempPane = (JSplitPane)this.getContentPane();
+		JSplitPane tempPane = (JSplitPane) this.getContentPane();
 		int count = 0;
-		while (tempPane != null){ 
-			System.out.println("Panel " + count + ": " + (double)(1.0/(double)(linkedPanelCount-count)) + " Height: " + tempPane.getHeight() + " - Location: " + tempPane.getDividerLocation());
-			tempPane.setDividerLocation((double)(1.0/(double)(linkedPanelCount-count)));
-			tempPane = (JSplitPane)tempPane.getRightComponent();
+		while (tempPane != null) {
+			System.out.println("Panel " + count + ": "
+					+ (double) (1.0 / (double) (linkedPanelCount - count))
+					+ " Height: " + tempPane.getHeight() + " - Location: "
+					+ tempPane.getDividerLocation());
+			tempPane.setDividerLocation((double) (1.0 / (double) (linkedPanelCount - count)));
+			tempPane = (JSplitPane) tempPane.getRightComponent();
 			count++;
 		}
-		this.updatePanels();
 	}
 
 	private void addPanel(CoordinateSystem cs, Color bgColor) {
-		if (linkedPanelCount!=0){
+		if (linkedPanelCount != 0) {
 			createNewSplitPane();
 		}
 		LinkedPanel p = new LinkedPanel(cs);
@@ -145,9 +154,23 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		lastSplitPane.add(p, JSplitPane.TOP);
 		linkedPanelCount++;
 		doSplitPaneLayout();
-		optionMenu.add(createPanelSubMenu("Panel " + panelID));
+		viewMenu.add(createPanelSubMenu("Panel " + panelID));
 		panelID++;
-		menuBar.revalidate();
+	}
+	
+	public void updatePanelMenus(){
+		for (int i = 2; i < viewMenu.getItemCount(); i++){
+			updatePanelMenu((JMenu)viewMenu.getItem(i));
+		}
+	}
+	
+	private void updatePanelMenu(JMenu subMenu){
+		for (int i = subMenu.getItemCount()-1; i >= 3; i--){
+			subMenu.remove(subMenu.getItem(i));
+		}
+		for (String s : panels.get(subMenu.getText()).getLayers()){
+			subMenu.add(new JMenuItem(s));
+		}
 	}
 
 	private JMenu createPanelSubMenu(final String panelName) {
@@ -161,6 +184,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 						.get(panelName), true, "Add layer to " + panelName);
 				if (ld.getAnswer()) {
 					panels.get(panelName).addLayer(ld.getLayer());
+					updatePanelMenu(subMenu);
 				}
 			}
 
@@ -174,22 +198,25 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 						"Are you sure you want to delete this panel?");
 				if (result == JOptionPane.OK_OPTION) {
 					JSplitPane parent = null;
-					JSplitPane sp = (JSplitPane)LinkedFrame.this.getContentPane();
+					JSplitPane sp = (JSplitPane) LinkedFrame.this
+							.getContentPane();
 					LinkedPanel panelToRemove = panels.get(panelName);
-					while (sp.getTopComponent() != panelToRemove){
+					while (sp.getTopComponent() != panelToRemove) {
 						parent = sp;
-						sp = (JSplitPane)sp.getBottomComponent();
+						sp = (JSplitPane) sp.getBottomComponent();
 					}
-					if (parent == null){
-						LinkedFrame.this.setContentPane((JSplitPane)(sp.getBottomComponent()));
+					if (parent == null) {
+						LinkedFrame.this.setContentPane((JSplitPane) (sp
+								.getBottomComponent()));
 					} else {
 						parent.remove(2);
-						if (sp.getBottomComponent() != null){
-							parent.add(sp.getBottomComponent(), JSplitPane.BOTTOM);
+						if (sp.getBottomComponent() != null) {
+							parent.add(sp.getBottomComponent(),
+									JSplitPane.BOTTOM);
 						}
 					}
 					panels.remove(panelName);
-					optionMenu.remove(subMenu);
+					viewMenu.remove(subMenu);
 					linkedPanelCount--;
 					menuBar.revalidate();
 					LinkedFrame.this.doSplitPaneLayout();
@@ -205,13 +232,11 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	}
 
 	private static void configureLogging() {
-		// a default (not configured) logger
 		log = Logger.getLogger(Tarsos.class.getName());
 		try {
 			final InputStream stream = Tarsos.class
 					.getResourceAsStream(LOG_PROPS);
 			LogManager.getLogManager().readConfiguration(stream);
-			// a configured logger
 			log = Logger.getLogger(Tarsos.class.getName());
 		} catch (final SecurityException e) {
 			log.log(Level.SEVERE, e.getLocalizedMessage(), e);
@@ -322,9 +347,13 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	}
 
 	public void analyseAudioFile() {
-		for (LinkedPanel p : panels.values()) {
-			p.initialiseLayers();
-			p.calculateLayers();
+		if (this.audioFile != null) {
+			for (LinkedPanel p : panels.values()) {
+				p.initialiseLayers();
+				p.calculateLayers();
+			}
+		} else {
+			JOptionPane.showMessageDialog(this, "Please, first load a audio file.", "No audio file loaded!", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -371,9 +400,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 			// @Override
 			public void actionPerformed(ActionEvent e) {
 				analyseAudioFile();
-				for (LinkedPanel panel : panels.values()) {
-					panel.repaint();
-				}
+				updatePanels();
 			}
 
 		});
@@ -384,7 +411,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		fileMenu.addSeparator();
 		fileMenu.add(exitMenuItem);
 
-		optionMenu = new JMenu("Settings");
+		viewMenu = new JMenu("View");
 
 		JMenuItem panelMenuItem = new JMenuItem("Add panel...");
 		panelMenuItem.addActionListener(new ActionListener() {
@@ -396,22 +423,27 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 					addPanel(
 							getCoordinateSystem(myDialog.getXUnits(),
 									myDialog.getYUnits()), Color.white);
+					LinkedFrame.this.updatePanelMenus();
 				}
 			}
 
 		});
 
-		optionMenu.add(panelMenuItem);
+		viewMenu.add(panelMenuItem);
+		viewMenu.addSeparator();
 		menuBar.add(fileMenu);
-		menuBar.add(optionMenu);
+		menuBar.add(viewMenu);
 
 		return menuBar;
 	}
 
 	private void updatePanels() {
-		for (LinkedPanel panel : panels.values()) {
-			panel.revalidate();
-			panel.repaint();
+		if (!drawing) {
+			drawing = true;
+			for (LinkedPanel panel : panels.values()) {
+				panel.repaint();
+			}
+			drawing = false;
 		}
 	}
 
@@ -428,5 +460,17 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 			}
 		}
 		return null;
+	}
+
+	private void buildStdSetUp() {
+		CoordinateSystem cs = new TimeAmpCoordinateSystem(-1000, 1000);
+		this.addPanel(cs, Color.WHITE);
+		((LinkedPanel) this.lastSplitPane.getTopComponent())
+				.addLayer(new WaveFormLayer((LinkedPanel) this.lastSplitPane
+						.getTopComponent()));
+
+		CoordinateSystem cs2 = new TimeCentCoordinateSystem(300, 8000);
+		this.addPanel(cs2, Color.WHITE);
+		updatePanelMenus();
 	}
 }

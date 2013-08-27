@@ -12,6 +12,7 @@ public class CentsCoordinateSystemLayer extends AxisLayer{
 	
 	public CentsCoordinateSystemLayer(final LinkedPanel parent, char direction) {
 		super(parent, direction);
+		this.name = "Cents Axis";
 	}
 
 	public void draw(Graphics2D graphics){

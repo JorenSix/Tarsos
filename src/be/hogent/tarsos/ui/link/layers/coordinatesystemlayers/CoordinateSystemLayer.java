@@ -14,6 +14,10 @@ public final class CoordinateSystemLayer implements Layer {
 	private AxisLayer yAxis;
 	private final LinkedPanel parent;
 	
+	public String getName(){
+		return xAxis.getName() + "/" + yAxis.getName();
+	}
+	
 	public CoordinateSystemLayer(final LinkedPanel parent, Units xAxisUnits, Units yAxisUnits){
 		this.parent = parent;
 		xAxis = getLayerForUnit(CoordinateSystem.X_AXIS, xAxisUnits);

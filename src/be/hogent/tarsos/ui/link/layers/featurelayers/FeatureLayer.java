@@ -15,18 +15,20 @@ public abstract class FeatureLayer implements Layer {
 	private int overlap;
 	protected final TreeMap<Double, float[]> features;
 	protected final LinkedPanel parent;
-//	private boolean isInitialized;
+	protected String name;
 
 	public abstract void initialise();
 	
-//	public abstract void drawFeatures(Graphics2D graphics);
-
 	public FeatureLayer(final LinkedPanel parent) {
 		features = new TreeMap<Double, float[]>();
 		this.parent = parent;
 		frameSize = 0;
 		overlap = 0;
-//		isInitialized = false;
+		name = "Feature layer";
+	}
+	
+	public String getName(){
+		return this.name;
 	}
 
 	public FeatureLayer(final LinkedPanel parent, int frameSize, int overlap) {
@@ -59,11 +61,4 @@ public abstract class FeatureLayer implements Layer {
 	public void setOverlap(int overlap) {
 		this.overlap = overlap;
 	}
-	
-//	public final void draw(Graphics2D graphics){
-//		if(isInitialized){
-//			this.drawFeatures(graphics);
-//		}
-//	}
-
 }

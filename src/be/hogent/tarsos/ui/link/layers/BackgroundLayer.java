@@ -14,6 +14,7 @@ public class BackgroundLayer implements Layer{
 	public BackgroundLayer(final LinkedPanel parent){
 		this.parent = parent;
 		this.color = Color.WHITE;
+		
 	}
 	
 	public BackgroundLayer(final LinkedPanel parent, Color color){
@@ -21,7 +22,7 @@ public class BackgroundLayer implements Layer{
 		this.color = color;
 	}
 	
-	public void draw(Graphics2D graphics) {
+	public void draw(final Graphics2D graphics) {
 		//draw background
 		CoordinateSystem cs = parent.getCoordinateSystem();
 		graphics.setColor(color);
@@ -31,5 +32,11 @@ public class BackgroundLayer implements Layer{
 				Math.round(cs.getMin(CoordinateSystem.Y_AXIS)), 
 				Math.round(cs.getDelta(CoordinateSystem.X_AXIS)), 
 				Math.round(cs.getDelta(CoordinateSystem.Y_AXIS)));
+//		graphics.setTransform();
+//		graphics.fillRect(0,0,500,500);
+	}
+
+	public String getName() {
+		return "Background layer";// - " + this.color.toString();
 	}
 }
