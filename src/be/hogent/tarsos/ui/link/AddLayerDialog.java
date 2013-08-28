@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
 import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
+import be.hogent.tarsos.ui.link.layers.featurelayers.FFTLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.PitchContourLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
@@ -28,6 +29,8 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 	 * 
 	 */
 	private static final long serialVersionUID = 4659122917576332161L;
+
+	private final String LAYER_FEATURE_FFT = "FFT";
 	
 	private final String LAYER_FEATURE_WAVEFORM = "WaveForm";
 //	private final String LAYER_FEATURE_MFCC = "MFCC";
@@ -77,7 +80,7 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 		JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new FlowLayout());
 		
-		String[] featureItems = { this.LAYER_FEATURE_WAVEFORM, this.LAYER_FEATURE_CQT, this.LAYER_FEATURE_PITCH, this.LAYER_SEGMENTATION };
+		String[] featureItems = { this.LAYER_FEATURE_WAVEFORM, this.LAYER_FEATURE_CQT, this.LAYER_FEATURE_PITCH, this.LAYER_SEGMENTATION, this.LAYER_FEATURE_FFT };
 		featureTypeList = new JComboBox(featureItems);
 		featureTypeList.addItemListener(this);
 		
@@ -165,6 +168,8 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 	public FeatureLayer getLayer(){
 		if (featureType == LAYER_FEATURE_CQT){
 			return new ConstantQLayer(parent, frameSize, (int)(overlap*frameSize));
+		} else if (featureType == LAYER_FEATURE_FFT){
+				return new FFTLayer(parent, frameSize, (int)(overlap*frameSize));
 		} else if (featureType == LAYER_FEATURE_PITCH){
 			return new PitchContourLayer(parent, frameSize, (int)(overlap*frameSize));
 		} else if (featureType == LAYER_FEATURE_WAVEFORM){
