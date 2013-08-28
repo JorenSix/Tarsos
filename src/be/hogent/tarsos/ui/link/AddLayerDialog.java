@@ -29,10 +29,11 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 	 */
 	private static final long serialVersionUID = 4659122917576332161L;
 	
-	private final String FEATURE_WAVEFORM = "WaveForm";
-	private final String FEATURE_MFCC = "MFCC";
-	private final String FEATURE_CQT = "CQT";
-	private final String FEATURE_PITCH = "Pitch contour";
+	private final String LAYER_FEATURE_WAVEFORM = "WaveForm";
+//	private final String LAYER_FEATURE_MFCC = "MFCC";
+	private final String LAYER_FEATURE_CQT = "CQT";
+	private final String LAYER_FEATURE_PITCH = "Pitch contour";
+	private final String LAYER_SEGMENTATION = "Segmentation";
 	
 	private Integer[] frameSizes = {512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
 	private Float[] overlapPercent = {0.0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
@@ -76,7 +77,7 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 		JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new FlowLayout());
 		
-		String[] featureItems = { this.FEATURE_WAVEFORM, this.FEATURE_CQT, this.FEATURE_PITCH };
+		String[] featureItems = { this.LAYER_FEATURE_WAVEFORM, this.LAYER_FEATURE_CQT, this.LAYER_FEATURE_PITCH, this.LAYER_SEGMENTATION };
 		featureTypeList = new JComboBox(featureItems);
 		featureTypeList.addItemListener(this);
 		
@@ -91,10 +92,16 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 		overlapList = new JComboBox(overlapPercent);
 		overlapList.addItemListener(this);
 		
+		
 		frameSizeList.setSelectedIndex(5);
 		overlapList.setSelectedIndex(5);
 //		featureTypeList.setSelectedItem(FEATURE_WAVEFORM);
 		featureTypeList.setSelectedIndex(0);
+		
+		
+		frameSize = frameSizes[5];
+		overlap = overlapPercent[5];
+		featureType = LAYER_FEATURE_WAVEFORM;
 		
 //		JLabel lblTypeLayer = new JLabel("Type layer: ");
 		JLabel lblTypeFeature = new JLabel("Type feature: ");
@@ -124,16 +131,19 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 	}
 
 //	@Override
-	@SuppressWarnings("deprecation")
 	public void itemStateChanged(ItemEvent arg0) {
 		if (arg0.getSource().equals(featureTypeList)) {
 			featureType = arg0.getItemSelectable().getSelectedObjects()[0].toString();
-			if (featureType.equals(this.FEATURE_WAVEFORM)){
-				this.frameSizeList.enable(false);
-				this.overlapList.enable(false);
+			if (featureType.equals(this.LAYER_FEATURE_WAVEFORM)){
+				this.frameSizeList.setEnabled(false);
+				this.frameSizeList.setVisible(false);
+				this.overlapList.setEnabled(false);
+				this.overlapList.setVisible(false);
 			} else {
-				this.frameSizeList.enable(true);
-				this.overlapList.enable(true);
+				this.frameSizeList.setEnabled(true);
+				this.frameSizeList.setVisible(true);
+				this.overlapList.setEnabled(true);
+				this.overlapList.setVisible(true);
 			}
 		} else if (arg0.getSource().equals(frameSizeList)) {
 			frameSize = (Integer)arg0.getItemSelectable().getSelectedObjects()[0];
@@ -153,12 +163,14 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 	}
 	
 	public FeatureLayer getLayer(){
-		if (featureType == FEATURE_CQT){
+		if (featureType == LAYER_FEATURE_CQT){
 			return new ConstantQLayer(parent, frameSize, (int)(overlap*frameSize));
-		} else if (featureType == FEATURE_PITCH){
+		} else if (featureType == LAYER_FEATURE_PITCH){
 			return new PitchContourLayer(parent, frameSize, (int)(overlap*frameSize));
-		} else if (featureType == FEATURE_WAVEFORM){
+		} else if (featureType == LAYER_FEATURE_WAVEFORM){
 			return new WaveFormLayer(parent);
+		} else if (featureType == LAYER_SEGMENTATION){
+			
 		}
 		return null;
 	}

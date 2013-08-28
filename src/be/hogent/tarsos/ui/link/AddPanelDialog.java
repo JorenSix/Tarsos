@@ -25,6 +25,9 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 	private final String AXIS_TIME = "Time[s]";
 	private final String AXIS_CENT = "Frequency[cents]";
 	private final String AXIS_AMPL = "Amplitude";
+	private final String AXIS_NONE = "None";
+	private final String[] AXIS_X = {AXIS_TIME};
+	private final String[] AXIS_Y = {AXIS_AMPL, AXIS_CENT, AXIS_NONE};
 
 	private Units xUnits;
 	private Units yUnits;
@@ -52,11 +55,8 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 
 	public void initialise() {
 		JPanel contentPanel = new JPanel();
-		xUnitsList = new JComboBox();
-		xUnitsList.addItem(AXIS_TIME);
-		yUnitsList = new JComboBox();
-		yUnitsList.addItem(AXIS_CENT);
-		yUnitsList.addItem(AXIS_AMPL);
+		xUnitsList = new JComboBox(AXIS_X);
+		yUnitsList = new JComboBox(AXIS_Y);
 		xUnitsList.addItemListener(this);
 		yUnitsList.addItemListener(this);
 		contentPanel.add(xUnitsList);
