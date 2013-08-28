@@ -1,6 +1,7 @@
 package be.hogent.tarsos.ui.link.layers.segmentationlayers;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.layers.Layer;
+import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
 
 public class SegmentationLayer extends FeatureLayer {
@@ -55,7 +57,8 @@ public class SegmentationLayer extends FeatureLayer {
 	public void draw(Graphics2D graphics) {
 		
 		if (segments != null && !segments.isEmpty()){
-			
+//			Font oldfont = graphics.getFont();
+//			graphics.setFont(new Font ("Garamond", Font.BOLD , 36));
 			CoordinateSystem cs = parent.getCoordinateSystem();
 			final int xMin = (int) cs.getMin(CoordinateSystem.X_AXIS);
 			final int xMax = (int) cs.getMax(CoordinateSystem.X_AXIS);
@@ -67,19 +70,29 @@ public class SegmentationLayer extends FeatureLayer {
 				int startMiliSec = Math.round(s.startTime*1000);
 				int endMiliSec = Math.round(s.endTime*1000);
 				if (!(endMiliSec <= xMin || startMiliSec >= xMax)){
-//					int startPixel = Math.round((s.startTime-xMin)/scaleFactor);
-					graphics.setColor(Color.LIGHT_GRAY);
-//					System.out.println(Math.max(startMiliSec, xMin) , yMin, Math.min(endMiliSec, xMax), yMax
-					graphics.fillRect(Math.max(startMiliSec, xMin), yMin, Math.min(endMiliSec, xMax)-startMiliSec, yMax-yMin);
-//					graphics.setStroke(new Stroke(10));
+					graphics.setColor(s.color);
+					int begin = Math.max(startMiliSec, xMin);
+					int end = Math.min(endMiliSec, xMax);
+					graphics.fillRect(begin, yMin, end-startMiliSec, yMax-yMin);
 					graphics.setColor(Color.BLACK);
-					graphics.drawLine(Math.max(startMiliSec, xMin), yMin, Math.max(startMiliSec, xMin), yMax);
+					graphics.drawLine(begin, yMin, Math.max(startMiliSec, xMin), yMax);
+					System.out.println("Printing " + s.label + " @(" + (end+begin)/2+","+0+")");
+					int textOffset = Math.round(LayerUtilities.pixelsToUnits(graphics,12, false));
+					LayerUtilities.drawString(graphics,s.label,(end+begin)/2-(textOffset/2),0,true,false);
+					
+				} else if (startMiliSec <= xMin && endMiliSec >= xMax ){
+					int begin = Math.max(startMiliSec, xMin);
+					int end = Math.min(endMiliSec, xMax);
+					int textOffset = Math.round(LayerUtilities.pixelsToUnits(graphics,12, false));
+					LayerUtilities.drawString(graphics,s.label,(end+begin)/2-(textOffset/2),0,true,false);
 				}
 			}
 			int lastBoundry = Math.round(segments.get(segments.size()-1).endTime*1000);
 			if (lastBoundry < xMax){
 				graphics.drawLine(Math.max(lastBoundry, xMin), yMin, Math.max(lastBoundry, xMin), yMax);
 			}
+//			graphics.setFont(oldfont);
+			
 		}
 
 	}

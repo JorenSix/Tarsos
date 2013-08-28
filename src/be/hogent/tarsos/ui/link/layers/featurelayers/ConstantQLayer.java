@@ -18,6 +18,7 @@ import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.ViewPort;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.util.AudioFile;
 
 public class ConstantQLayer extends FeatureLayer {
 
@@ -73,6 +74,27 @@ public class ConstantQLayer extends FeatureLayer {
 		CoordinateSystem cs = parent.getCoordinateSystem();
 		Map<Double, float[]> spectralInfoSubMap = features.subMap(
 				cs.getMin(CoordinateSystem.X_AXIS) / 1000.0, cs.getMax(CoordinateSystem.X_AXIS) / 1000.0);
+		
+		
+//		AudioFile f = LinkedFrame.getInstance().getAudioFile();
+//		final int waveFormHeightInUnits = (int) cs
+//				.getDelta(CoordinateSystem.Y_AXIS);
+//		final float lengthInMs = f.getLengthInMilliSeconds();
+//		final int amountOfSamples = f.fileFormat().getFrameLength();
+//		float sampleCalculateFactor = amountOfSamples / lengthInMs;
+//		int amplitudeFactor = waveFormHeightInUnits / 2;
+//		
+//		for (int i = Math.max(0, waveFormXMin); i < Math.min(waveFormXMax, lengthInMs); i++) {
+//			int index = (int) (i * sampleCalculateFactor);
+//			if (index < samples.length) {
+//				graphics.drawLine(i, 0, i,
+//						(int) (samples[index] * amplitudeFactor));
+//			}
+//		}
+		
+		
+		
+		
 		for (Map.Entry<Double, float[]> column : spectralInfoSubMap.entrySet()) {
 			double timeStart = column.getKey();// in seconds
 			float[] spectralEnergy = column.getValue();// in cents

@@ -45,6 +45,7 @@ public class WaveFormLayer extends FeatureLayer {
 	}
 
 	private void drawWaveForm(Graphics2D graphics) {
+		
 		CoordinateSystem cs = parent.getCoordinateSystem();
 		final int waveFormXMin = (int) cs.getMin(CoordinateSystem.X_AXIS);
 		final int waveFormXMax = (int) cs.getMax(CoordinateSystem.X_AXIS);
@@ -52,6 +53,7 @@ public class WaveFormLayer extends FeatureLayer {
 		graphics.drawLine(waveFormXMin, 0, waveFormXMax,0);
 		graphics.setColor(Color.BLACK);
 		if (samples != null && samples.length > 0) {
+			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 			// - X as overlopen
 			// - Waveform tekenen waar i>=0 && i<=lengteLiedjeInMilisec &&
 			// i>=XMin && i<=XMax
@@ -80,6 +82,7 @@ public class WaveFormLayer extends FeatureLayer {
 							(int) (samples[index] * amplitudeFactor));
 				}
 			}
+			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_OFF);
 		}
 	}
 

@@ -26,15 +26,14 @@ public class TimeCoordinateSystemLayer extends AxisLayer {
 		boolean horizontal = direction == DIRECTION_X ? true : false;
 		float deltaX = cs.getDelta(DIRECTION_X); //Breedte in milisec.
 		int beginDrawInterval = 1000;
-		int smallDrawInterval = beginDrawInterval*intervals[intervalIndex];
 		intervalIndex = 0;
-		while(deltaX/smallDrawInterval*(1200/parent.getWidth()) > 30){
+		int smallDrawInterval = beginDrawInterval*intervals[intervalIndex];
+		while(deltaX/smallDrawInterval*(1500/parent.getWidth()) > 30){
 			intervalIndex++;
 			smallDrawInterval = beginDrawInterval*intervals[intervalIndex];
 		}
 		
 		for (int i = (int) cs.getMin(direction); i < cs.getMax(direction); i++) {
-			
 			if (i % (smallDrawInterval*5) == 0) {
 				int lineHeight = Math.round(LayerUtilities.pixelsToUnits(
 						graphics, 8, !horizontal));
