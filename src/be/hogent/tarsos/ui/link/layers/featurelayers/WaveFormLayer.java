@@ -45,6 +45,12 @@ public class WaveFormLayer extends FeatureLayer {
 	}
 
 	private void drawWaveForm(Graphics2D graphics) {
+		CoordinateSystem cs = parent.getCoordinateSystem();
+		final int waveFormXMin = (int) cs.getMin(CoordinateSystem.X_AXIS);
+		final int waveFormXMax = (int) cs.getMax(CoordinateSystem.X_AXIS);
+		graphics.setColor(Color.GRAY);
+		graphics.drawLine(waveFormXMin, 0, waveFormXMax,0);
+		graphics.setColor(Color.BLACK);
 		if (samples != null && samples.length > 0) {
 			// - X as overlopen
 			// - Waveform tekenen waar i>=0 && i<=lengteLiedjeInMilisec &&
@@ -58,9 +64,8 @@ public class WaveFormLayer extends FeatureLayer {
 			// -> x = i*aantalSamples/lengteLiedjeInMilisec
 
 			AudioFile f = LinkedFrame.getInstance().getAudioFile();
-			CoordinateSystem cs = parent.getCoordinateSystem();
-			final int waveFormXMin = (int) cs.getMin(CoordinateSystem.X_AXIS);
-			final int waveFormXMax = (int) cs.getMax(CoordinateSystem.X_AXIS);
+			
+		
 			final int waveFormHeightInUnits = (int) cs
 					.getDelta(CoordinateSystem.Y_AXIS);
 			final float lengthInMs = f.getLengthInMilliSeconds();
