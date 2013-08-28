@@ -10,18 +10,18 @@ import java.awt.event.ItemListener;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.tarsossegmenter.model.AASModel;
 import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FFTLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.PitchContourLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
+import be.hogent.tarsos.ui.link.layers.segmentationlayers.SegmentationLayer;
 
 public class AddLayerDialog extends JDialog implements ItemListener, ActionListener {
 
@@ -175,7 +175,7 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 		} else if (featureType == LAYER_FEATURE_WAVEFORM){
 			return new WaveFormLayer(parent);
 		} else if (featureType == LAYER_SEGMENTATION){
-			
+			return new SegmentationLayer(parent, AASModel.MACRO_LEVEL, 100, 4000);
 		}
 		return null;
 	}

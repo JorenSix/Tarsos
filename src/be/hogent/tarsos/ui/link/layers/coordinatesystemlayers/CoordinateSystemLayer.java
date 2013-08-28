@@ -55,6 +55,8 @@ public final class CoordinateSystemLayer implements Layer {
 			return null;
 		} else if (unit==Units.AMPLITUDE){
 			return new AmplitudeCoordinateSystemLayer(parent, direction);
+		} else if (unit==Units.NONE){
+			return new EmptyCoordinateSystemLayer(parent, direction);
 		} else {
 			throw new IllegalArgumentException("ERROR: Please choose a Unit available in the Units enum!");
 		}

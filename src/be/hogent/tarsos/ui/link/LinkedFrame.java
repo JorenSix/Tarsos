@@ -46,6 +46,7 @@ import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.TimeAmpCoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.TimeCentCoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.TimeNoneCoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.AmplitudeCoordinateSystemLayer;
@@ -457,6 +458,8 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 				return new TimeCentCoordinateSystem(200, 8000);
 			} else if (yUnits == Units.AMPLITUDE) {
 				return new TimeAmpCoordinateSystem(-1000, 1000);
+			} else if (yUnits == Units.NONE){
+				return new TimeNoneCoordinateSystem(-1000, 1000);
 			}
 		}
 		return null;

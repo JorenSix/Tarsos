@@ -87,6 +87,8 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 				yUnits = Units.FREQUENCY_CENTS;
 			} else if (arg0.getItemSelectable().getSelectedObjects()[0].toString().equals(AXIS_AMPL)) {
 				yUnits = Units.AMPLITUDE;
+			} else  if (arg0.getItemSelectable().getSelectedObjects()[0].toString().equals(AXIS_NONE)) {
+				yUnits = Units.NONE;
 			} else {
 				yUnits = null;
 			}
