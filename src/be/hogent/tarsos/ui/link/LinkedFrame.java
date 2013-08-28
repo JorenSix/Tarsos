@@ -134,10 +134,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		JSplitPane tempPane = (JSplitPane) this.getContentPane();
 		int count = 0;
 		while (tempPane != null) {
-			System.out.println("Panel " + count + ": "
-					+ (double) (1.0 / (double) (linkedPanelCount - count))
-					+ " Height: " + tempPane.getHeight() + " - Location: "
-					+ tempPane.getDividerLocation());
 			tempPane.setDividerLocation((double) (1.0 / (double) (linkedPanelCount - count)));
 			tempPane = (JSplitPane) tempPane.getRightComponent();
 			count++;

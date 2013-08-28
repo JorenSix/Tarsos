@@ -20,11 +20,17 @@ public class SegmentationLayer extends FeatureLayer {
 	private ArrayList<Segment> segments;
 	private int lowerFilterFreq;
 	private int upperFilterFreq;
+	private be.hogent.tarsos.tarsossegmenter.model.AudioFile af;
 
 	protected final LinkedPanel parent;
 
 	public void initialise() {
-
+		try {
+			af = new be.hogent.tarsos.tarsossegmenter.model.AudioFile(
+					LinkedFrame.getInstance().getAudioFile().transcodedPath());
+		} catch (EncoderException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public SegmentationLayer(final LinkedPanel parent, int niveau,
@@ -38,16 +44,12 @@ public class SegmentationLayer extends FeatureLayer {
 	}
 
 	public void run() {
-		be.hogent.tarsos.tarsossegmenter.model.AudioFile af = null;
-		try {
-			af = new be.hogent.tarsos.tarsossegmenter.model.AudioFile(
-					LinkedFrame.getInstance().getAudioFile().transcodedPath());
-		} catch (EncoderException e) {
-			e.printStackTrace();
-		}
+		System.out.println("Starting segmentation calculation");
 		AASModel.getInstance().calculateWithDefaults(af, lowerFilterFreq,
 				upperFilterFreq);
+		System.out.println("Segmentation calculation done");
 		segments = AASModel.getInstance().getSegmentation().getSegments(niveau);
+		System.out.println("Segments received - size: " + segments.size()) ;
 	}
 
 	public void draw(Graphics2D graphics) {
@@ -64,14 +66,19 @@ public class SegmentationLayer extends FeatureLayer {
 			for (Segment s : segments){
 				int startMiliSec = Math.round(s.startTime*1000);
 				int endMiliSec = Math.round(s.endTime*1000);
-				if ( startMiliSec >= xMin && endMiliSec <= xMax){
+				if (!(endMiliSec <= xMin || startMiliSec >= xMax)){
 //					int startPixel = Math.round((s.startTime-xMin)/scaleFactor);
 					graphics.setColor(Color.LIGHT_GRAY);
-					graphics.fillRect(startMiliSec, yMin, endMiliSec, yMax);
+//					System.out.println(Math.max(startMiliSec, xMin) , yMin, Math.min(endMiliSec, xMax), yMax
+					graphics.fillRect(Math.max(startMiliSec, xMin), yMin, Math.min(endMiliSec, xMax)-startMiliSec, yMax-yMin);
 //					graphics.setStroke(new Stroke(10));
 					graphics.setColor(Color.BLACK);
-					graphics.drawLine(startMiliSec, yMin, startMiliSec, yMax);
+					graphics.drawLine(Math.max(startMiliSec, xMin), yMin, Math.max(startMiliSec, xMin), yMax);
 				}
+			}
+			int lastBoundry = Math.round(segments.get(segments.size()-1).endTime*1000);
+			if (lastBoundry < xMax){
+				graphics.drawLine(Math.max(lastBoundry, xMin), yMin, Math.max(lastBoundry, xMin), yMax);
 			}
 		}
 

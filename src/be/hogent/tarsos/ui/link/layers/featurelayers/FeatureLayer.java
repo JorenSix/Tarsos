@@ -38,12 +38,7 @@ public abstract class FeatureLayer implements Layer {
 	}
 
 	public void run() {
-		if (adp != null) {
-			adp.run();
-		} else {
-			initialise();
-			adp.run();
-		}
+		adp.run();
 	}
 
 	public int getFrameSize() {
