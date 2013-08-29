@@ -1,5 +1,6 @@
 package be.hogent.tarsos.ui.link.layers.segmentationlayers;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -57,6 +58,8 @@ public class SegmentationLayer extends FeatureLayer {
 	public void draw(Graphics2D graphics) {
 		
 		if (segments != null && !segments.isEmpty()){
+			graphics.setStroke(new BasicStroke(Math.round(LayerUtilities.pixelsToUnits(graphics,4, true))));
+			
 //			Font oldfont = graphics.getFont();
 //			graphics.setFont(new Font ("Garamond", Font.BOLD , 36));
 			CoordinateSystem cs = parent.getCoordinateSystem();
@@ -74,7 +77,8 @@ public class SegmentationLayer extends FeatureLayer {
 					int begin = Math.max(startMiliSec, xMin);
 					int end = Math.min(endMiliSec, xMax);
 					graphics.fillRect(begin, yMin, end-startMiliSec, yMax-yMin);
-					graphics.setColor(Color.BLACK);
+					graphics.setColor(Color.DARK_GRAY);
+					
 					graphics.drawLine(begin, yMin, Math.max(startMiliSec, xMin), yMax);
 					System.out.println("Printing " + s.label + " @(" + (end+begin)/2+","+0+")");
 					int textOffset = Math.round(LayerUtilities.pixelsToUnits(graphics,12, false));
@@ -94,7 +98,7 @@ public class SegmentationLayer extends FeatureLayer {
 //			graphics.setFont(oldfont);
 			
 		}
-
+		graphics.setStroke(new BasicStroke(1));
 	}
 
 	public String getName() {

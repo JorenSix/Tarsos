@@ -1,15 +1,18 @@
 package be.hogent.tarsos.ui.link;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
@@ -47,6 +50,8 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 
 	public AddPanelDialog(JFrame frame, boolean setModel, String myMessage) {
 		super(frame, myMessage, setModel);
+		this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
+		
 		initialise();
 		pack();
 		setLocationRelativeTo(frame);
@@ -54,24 +59,41 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 	}
 
 	public void initialise() {
-		JPanel contentPanel = new JPanel();
+		JPanel row1Panel = new JPanel();
+		JPanel row2Panel = new JPanel();
+		JPanel row3Panel = new JPanel();
+		
+		Dimension dropDownDimension = new Dimension(130,20);
+		Dimension buttonDimension = new Dimension(75,20);
+		
 		xUnitsList = new JComboBox(AXIS_X);
-		yUnitsList = new JComboBox(AXIS_Y);
+		xUnitsList.setEnabled(false);
 		xUnitsList.addItemListener(this);
+		xUnitsList.setPreferredSize(dropDownDimension);
+		row1Panel.add(new JLabel("X Axis: "));
+		row1Panel.add(xUnitsList);
+		
+		yUnitsList = new JComboBox(AXIS_Y);
 		yUnitsList.addItemListener(this);
-		contentPanel.add(xUnitsList);
-		contentPanel.add(yUnitsList);
+		yUnitsList.setPreferredSize(dropDownDimension);
+		row2Panel.add(new JLabel("Y Axis: "));
+		row2Panel.add(yUnitsList);
+		
 		createButton = new JButton("Create");
 		createButton.addActionListener(this);
-		contentPanel.add(createButton);
+		createButton.setPreferredSize(buttonDimension);
 		cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(this);
-		contentPanel.add(cancelButton);
+		cancelButton.setPreferredSize(buttonDimension);
+		row3Panel.add(createButton);
+		row3Panel.add(cancelButton);
 		
 		xUnits = Units.TIME_SSS;
 		yUnits = Units.FREQUENCY_CENTS;
 
-		this.getContentPane().add(contentPanel);
+		this.getContentPane().add(row1Panel);
+		this.getContentPane().add(row2Panel);
+		this.getContentPane().add(row3Panel);
 
 	}
 
