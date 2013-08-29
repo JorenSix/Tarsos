@@ -74,7 +74,7 @@ public class BeatLayer extends FeatureLayer {
 		adp.addAudioProcessor(new AudioProcessor() {
 			public void processingFinished() {
 				broeh.trackBeats(new OnsetHandler() {
-					@Override
+//					@Override
 					public void handleOnset(double time, double salience) {
 						beats.add(time-lag);
 					}
@@ -85,7 +85,7 @@ public class BeatLayer extends FeatureLayer {
 			}
 		});
 		detector.setHandler(new OnsetHandler() {
-			@Override
+//			@Override
 			public void handleOnset(double time, double salience) {
 				onsets.add(time - lag);
 				broeh.handleOnset(time - lag, salience);

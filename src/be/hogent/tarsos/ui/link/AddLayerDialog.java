@@ -2,7 +2,6 @@ package be.hogent.tarsos.ui.link;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -19,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import be.hogent.tarsos.tarsossegmenter.model.AASModel;
+import be.hogent.tarsos.ui.link.layers.featurelayers.BeatLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FFTLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
@@ -40,8 +40,9 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 	private final String LAYER_FEATURE_CQT = "CQT";
 	private final String LAYER_FEATURE_PITCH = "Pitch contour";
 	private final String LAYER_SEGMENTATION = "Segmentation";
+	private final String LAYER_BEAT = "Beat detection";
 	
-	private Integer[] frameSizes = {512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
+	private Integer[] frameSizes = {128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
 	private Float[] overlapPercent = {0.0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f};
 	
 	private Color color;
@@ -92,7 +93,7 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 		JPanel row3Panel = new JPanel();
 		JPanel row4Panel = new JPanel();
 		
-		String[] featureItems = { this.LAYER_FEATURE_WAVEFORM, this.LAYER_FEATURE_CQT, this.LAYER_FEATURE_PITCH, this.LAYER_SEGMENTATION, this.LAYER_FEATURE_FFT };
+		String[] featureItems = { this.LAYER_FEATURE_WAVEFORM, this.LAYER_FEATURE_CQT, this.LAYER_FEATURE_PITCH, this.LAYER_SEGMENTATION, this.LAYER_FEATURE_FFT, this.LAYER_BEAT };
 		featureTypeList = new JComboBox(featureItems);
 		featureTypeList.addItemListener(this);
 		featureTypeList.setPreferredSize(dropDownDimension);
@@ -115,7 +116,7 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 		overlapList.setSelectedIndex(5);
 		featureTypeList.setSelectedIndex(0);
 		
-		frameSize = frameSizes[5];
+		frameSize = frameSizes[7];
 		overlap = overlapPercent[5];
 		featureType = LAYER_FEATURE_WAVEFORM;
 		frameSizeList.setEnabled(false);
@@ -205,6 +206,8 @@ public class AddLayerDialog extends JDialog implements ItemListener, ActionListe
 			return new WaveFormLayer(parent);
 		} else if (featureType == LAYER_SEGMENTATION){
 			return new SegmentationLayer(parent, AASModel.MACRO_LEVEL, 100, 4000);
+		} else if (featureType == LAYER_BEAT){
+			return new BeatLayer(parent, frameSize, (int)(overlap*frameSize));
 		}
 		return null;
 	}

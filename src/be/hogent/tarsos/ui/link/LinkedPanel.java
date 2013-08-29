@@ -10,6 +10,7 @@ import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
@@ -26,6 +28,7 @@ import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.CoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
+import be.hogent.tarsos.ui.link.layers.segmentationlayers.SegmentationLayer;
 
 public class LinkedPanel extends JPanel {
 
@@ -37,6 +40,10 @@ public class LinkedPanel extends JPanel {
 
 	private final ViewPort viewPort;
 	private CoordinateSystem cs;
+	
+	private SegmentationLayer mouseMovedListener;
+	
+	
 
 	// private boolean isDrawing = false;
 
@@ -83,7 +90,11 @@ public class LinkedPanel extends JPanel {
 
 	public void addLayer(FeatureLayer fl) {
 		this.layers.add(fl);
-
+		if (fl instanceof SegmentationLayer){
+			mouseMovedListener = (SegmentationLayer)fl;
+//			this.addMouseMotionListener(new MoveListener());
+		}
+		
 	}
 
 	private class ZoomListener implements MouseWheelListener {
@@ -116,6 +127,15 @@ public class LinkedPanel extends JPanel {
 		}
 	}
 	
+//	private class MoveListener extends MouseMotionAdapter  {
+//
+//		@Override
+//		public void mouseMoved(MouseEvent e) {
+//			mouseListener.mouseMoved(e);
+//		}
+//		
+//	}
+	
 	private class DragListener extends MouseAdapter {
 
 		LinkedPanel panel;
@@ -125,10 +145,18 @@ public class LinkedPanel extends JPanel {
 			panel = p;
 			previousPoint = null;
 		}
-
+		
+		@Override 
+		public void mouseClicked(MouseEvent e){
+			if (LinkedPanel.this.mouseMovedListener != null && SwingUtilities.isRightMouseButton(e)){
+				LinkedPanel.this.mouseMovedListener.addSegment(e.getX());
+			}
+		}
+		
 		@Override
 		public void mousePressed(MouseEvent e) {
 			previousPoint = e.getPoint();
+
 			// System.out.println("Pressed!!");
 		}
 
@@ -153,14 +181,15 @@ public class LinkedPanel extends JPanel {
 						.getY());
 				previousPoint = e.getPoint();
 				viewPort.drag(millisecondAmount, centAmount);
-				// graphics.dispose();
-				// System.out.println("Mouse dragged over (" + millisecondAmount
-				// + " seconds," + centAmount + " cents)");
+				graphics.dispose();
 			}
 		}
 
 		@Override
 		public void mouseMoved(MouseEvent e) {
+			if (LinkedPanel.this.mouseMovedListener != null){
+				mouseMovedListener.mouseMoved(e);
+			}
 		}
 	}
 
@@ -178,30 +207,6 @@ public class LinkedPanel extends JPanel {
 		return transform;
 	}
 
-	// @Override
-	// public void paint(final Graphics g){
-	// Graphics2D graphics = (Graphics2D) g;
-	//
-	// graphics.setTransform(getTransform());
-	// // graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-	// // RenderingHints.VALUE_ANTIALIAS_ON);
-	// // graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-	// // RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-	//
-	// backgroundLayer.draw(graphics);
-	// if (!layers.isEmpty()) {
-	// for (Layer layer : layers) {
-	// layer.draw(graphics);
-	// }
-	// }
-	// csLayer.draw(graphics);
-	//
-	// // TODO in layer?
-	// drawIndicator(graphics);
-	//
-	// graphics.dispose();
-	// g.dispose();
-	// }
 
 	@Override
 	public void paintComponent(final Graphics g) {

@@ -89,7 +89,7 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 		row3Panel.add(cancelButton);
 		
 		xUnits = Units.TIME_SSS;
-		yUnits = Units.FREQUENCY_CENTS;
+		yUnits = Units.AMPLITUDE;
 
 		this.getContentPane().add(row1Panel);
 		this.getContentPane().add(row2Panel);

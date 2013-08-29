@@ -88,6 +88,10 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		Tarsos.configureDirectories(log);
 		LinkedFrame.getInstance();
 	}
+	
+	protected JSplitPane getLastSplitPane(){
+		return this.lastSplitPane;
+	}
 
 	private LinkedFrame() {
 		super();
@@ -211,6 +215,9 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 							parent.add(sp.getBottomComponent(),
 									JSplitPane.BOTTOM);
 						}
+					}
+					if (lastSplitPane.getTopComponent() == panelToRemove){
+						lastSplitPane = parent;
 					}
 					panels.remove(panelName);
 					viewMenu.remove(subMenu);
