@@ -20,6 +20,7 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.Units;
 import be.hogent.tarsos.ui.link.layers.BackgroundLayer;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
@@ -59,7 +60,12 @@ public class LinkedPanel extends JPanel {
 		layers = new ArrayList<FeatureLayer>();
 		setCoordinateSystem(coordinateSystem);
 		viewPort = new ViewPort(this);
-		DragListener dragListener = new DragListener(this);
+		DragListener dragListener;
+		if (cs.getUnitsForAxis(CoordinateSystem.Y_AXIS) == Units.AMPLITUDE || cs.getUnitsForAxis(CoordinateSystem.Y_AXIS) == Units.NONE){
+			dragListener = new HorizontalDragListener(this);
+		} else {
+			dragListener = new DragListener(this);
+		}
 		ZoomListener zoomListener = new ZoomListener();
 		addMouseWheelListener(zoomListener);
 		addMouseListener(dragListener);
@@ -88,6 +94,28 @@ public class LinkedPanel extends JPanel {
 		}
 	}
 
+	private class HorizontalDragListener extends DragListener {
+		private HorizontalDragListener(LinkedPanel p){
+			super(p);
+		}
+		
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			if (previousPoint != null) {
+				Graphics2D graphics = (Graphics2D) panel.getGraphics();
+				graphics.setTransform(panel.getTransform());
+				Point2D unitsCurrent = LayerUtilities.pixelsToUnits(graphics,
+						e.getX(), (int) previousPoint.getY());
+				Point2D unitsPrevious = LayerUtilities.pixelsToUnits(graphics,
+						(int) previousPoint.getX(), (int) previousPoint.getY());
+				float millisecondAmount = (float) (unitsPrevious.getX() - unitsCurrent
+						.getX());
+				previousPoint = e.getPoint();
+				viewPort.drag(millisecondAmount, 0);
+			}
+		}
+	}
+	
 	private class DragListener extends MouseAdapter {
 
 		LinkedPanel panel;
