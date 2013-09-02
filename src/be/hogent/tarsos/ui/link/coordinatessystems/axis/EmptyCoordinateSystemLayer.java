@@ -1,4 +1,4 @@
-package be.hogent.tarsos.ui.link.layers.coordinatesystemlayers;
+package be.hogent.tarsos.ui.link.coordinatessystems.axis;
 
 import java.awt.Graphics2D;
 

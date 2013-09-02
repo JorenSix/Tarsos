@@ -1,4 +1,4 @@
-package be.hogent.tarsos.ui.link.layers.coordinatesystemlayers;
+package be.hogent.tarsos.ui.link.coordinatessystems.axis;
 
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.layers.Layer;

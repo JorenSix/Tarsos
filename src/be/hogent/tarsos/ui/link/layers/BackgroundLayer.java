@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import be.hogent.tarsos.ui.link.LinkedPanel;
-import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 
 public class BackgroundLayer implements Layer{
 
@@ -24,14 +24,14 @@ public class BackgroundLayer implements Layer{
 	
 	public void draw(final Graphics2D graphics) {
 		//draw background
-		CoordinateSystem cs = parent.getCoordinateSystem();
+		ICoordinateSystem cs = parent.getCoordinateSystem();
 		graphics.setColor(color);
 		
 		graphics.fillRect(
-				Math.round(cs.getMin(CoordinateSystem.X_AXIS)), 
-				Math.round(cs.getMin(CoordinateSystem.Y_AXIS)), 
-				Math.round(cs.getDelta(CoordinateSystem.X_AXIS)), 
-				Math.round(cs.getDelta(CoordinateSystem.Y_AXIS)));
+				Math.round(cs.getMin(ICoordinateSystem.X_AXIS)), 
+				Math.round(cs.getMin(ICoordinateSystem.Y_AXIS)), 
+				Math.round(cs.getDelta(ICoordinateSystem.X_AXIS)), 
+				Math.round(cs.getDelta(ICoordinateSystem.Y_AXIS)));
 //		graphics.setTransform();
 //		graphics.fillRect(0,0,500,500);
 	}

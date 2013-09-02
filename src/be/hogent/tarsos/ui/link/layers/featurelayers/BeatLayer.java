@@ -17,12 +17,14 @@ import be.hogent.tarsos.dsp.onsets.ComplexOnsetDetector;
 import be.hogent.tarsos.dsp.onsets.OnsetHandler;
 import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
-import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 
 public class BeatLayer extends FeatureLayer {
 
 	final List<Double> onsets; // in seconds
 	final List<Double> beats; //in seconds
+	
+	
 	public BeatLayer(LinkedPanel parent) {
 		this(parent,256,0);
 	}
@@ -35,9 +37,9 @@ public class BeatLayer extends FeatureLayer {
 	}
 	
 	public void draw(Graphics2D graphics){
-		CoordinateSystem cs = parent.getCoordinateSystem();
-		int maxY = Math.round(cs.getMax(CoordinateSystem.Y_AXIS));
-		int minY = Math.round(cs.getMin(CoordinateSystem.Y_AXIS));
+		ICoordinateSystem cs = parent.getCoordinateSystem();
+		int maxY = Math.round(cs.getMax(ICoordinateSystem.Y_AXIS));
+		int minY = Math.round(cs.getMin(ICoordinateSystem.Y_AXIS));
 		if(!onsets.isEmpty()){
 			graphics.setColor(Color.blue);
 			for(Double onset : onsets){
@@ -93,5 +95,11 @@ public class BeatLayer extends FeatureLayer {
 		});
 		adp.run();
 	}
+
+//	@Override
+//	protected void setProperties() {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 }

@@ -31,14 +31,14 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 	private final String AXIS_NONE = "None";
 	private final String[] AXIS_X = {AXIS_TIME};
 	private final String[] AXIS_Y = {AXIS_AMPL, AXIS_CENT, AXIS_NONE};
-
+	
 	private Units xUnits;
 	private Units yUnits;
-	private Color bgColor;
+//	private Color bgColor;
 
-	private JComboBox xUnitsList;
-	private JComboBox yUnitsList;
-	private JComboBox bgColorList;
+	private JComboBox<String> xUnitsList;
+	private JComboBox<String> yUnitsList;
+//	private JComboBox<Color> bgColorList;
 
 	private JButton createButton = null;
 	private JButton cancelButton = null;
@@ -66,14 +66,14 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 		Dimension dropDownDimension = new Dimension(130,20);
 		Dimension buttonDimension = new Dimension(75,20);
 		
-		xUnitsList = new JComboBox(AXIS_X);
+		xUnitsList = new JComboBox<String>(AXIS_X);
 		xUnitsList.setEnabled(false);
 		xUnitsList.addItemListener(this);
 		xUnitsList.setPreferredSize(dropDownDimension);
 		row1Panel.add(new JLabel("X Axis: "));
 		row1Panel.add(xUnitsList);
 		
-		yUnitsList = new JComboBox(AXIS_Y);
+		yUnitsList = new JComboBox<String>(AXIS_Y);
 		yUnitsList.addItemListener(this);
 		yUnitsList.setPreferredSize(dropDownDimension);
 		row2Panel.add(new JLabel("Y Axis: "));
@@ -88,7 +88,7 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 		row3Panel.add(createButton);
 		row3Panel.add(cancelButton);
 		
-		xUnits = Units.TIME_SSS;
+		xUnits = Units.TIME;
 		yUnits = Units.AMPLITUDE;
 
 		this.getContentPane().add(row1Panel);
@@ -100,13 +100,13 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 	public void itemStateChanged(ItemEvent arg0) {
 		if (arg0.getSource().equals(xUnitsList)) {
 			if (arg0.getItemSelectable().getSelectedObjects()[0].toString().equals(AXIS_TIME)) {
-				xUnits = Units.TIME_SSS;
+				xUnits = Units.TIME;
 			} else {
 				xUnits = null;
 			}
 		} else if (arg0.getSource().equals(yUnitsList)) {
 			if (arg0.getItemSelectable().getSelectedObjects()[0].toString().equals(AXIS_CENT)) {
-				yUnits = Units.FREQUENCY_CENTS;
+				yUnits = Units.FREQUENCY;
 			} else if (arg0.getItemSelectable().getSelectedObjects()[0].toString().equals(AXIS_AMPL)) {
 				yUnits = Units.AMPLITUDE;
 			} else  if (arg0.getItemSelectable().getSelectedObjects()[0].toString().equals(AXIS_NONE)) {

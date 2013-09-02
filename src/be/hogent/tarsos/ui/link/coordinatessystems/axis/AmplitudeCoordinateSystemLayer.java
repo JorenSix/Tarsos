@@ -1,10 +1,10 @@
-package be.hogent.tarsos.ui.link.layers.coordinatesystemlayers;
+package be.hogent.tarsos.ui.link.coordinatessystems.axis;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 
 import be.hogent.tarsos.ui.link.LinkedPanel;
-import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 
 public class AmplitudeCoordinateSystemLayer extends AxisLayer {
@@ -15,7 +15,7 @@ public class AmplitudeCoordinateSystemLayer extends AxisLayer {
 	}
 	
 	public void draw(Graphics2D graphics) {
-		CoordinateSystem cs = parent.getCoordinateSystem();
+		ICoordinateSystem cs = parent.getCoordinateSystem();
 
 		// draw legend
 		graphics.setColor(Color.black);

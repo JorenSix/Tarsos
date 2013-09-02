@@ -2,8 +2,10 @@ package be.hogent.tarsos.ui.link.layers.segmentationlayers;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Stroke;
 import java.awt.event.MouseEvent;
@@ -15,7 +17,7 @@ import be.hogent.tarsos.tarsossegmenter.model.segmentation.Segment;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
-import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
@@ -28,7 +30,10 @@ public class SegmentationLayer extends FeatureLayer {
 	private int upperFilterFreq;
 	private be.hogent.tarsos.tarsossegmenter.model.AudioFile af;
 	private Point mousePoint;
-	private final float TIME_TOLERANCE = 0.05f; 
+	private final float TIME_TOLERANCE = 0.01f;
+	private int movingSegmentIndex;
+	private boolean dragging;
+	private int mouseDraggingPointX;
 
 	protected final LinkedPanel parent;
 
@@ -48,7 +53,26 @@ public class SegmentationLayer extends FeatureLayer {
 		this.niveau = niveau;
 		this.lowerFilterFreq = lowerFilterFreq;
 		this.upperFilterFreq = upperFilterFreq;
+		dragging = false;
 		// segments = new ArrayList<Segment>();
+	}
+	
+	public void setDragging(boolean value){
+		this.dragging = value;
+	}
+
+	public void dragSegment(Graphics2D graphics, MouseEvent e) {
+		if (movingSegmentIndex > 0) {
+			Point2D unitsCurrent = LayerUtilities.pixelsToUnits(graphics,
+					(int) Math.round(e.getX()),
+					(int) Math.round(e.getY()));
+			segments.get(movingSegmentIndex).startTime = (float) (unitsCurrent
+					.getX() / (double)1000);
+			segments.get(movingSegmentIndex - 1).endTime = (float) (unitsCurrent
+					.getX() / (double)1000);
+			mouseDraggingPointX = (int)Math.round(unitsCurrent.getX());
+		}
+		draw(graphics);
 	}
 
 	public void run() {
@@ -66,16 +90,11 @@ public class SegmentationLayer extends FeatureLayer {
 			graphics.setStroke(new BasicStroke(Math.round(LayerUtilities
 					.pixelsToUnits(graphics, 4, true))));
 
-			// Font oldfont = graphics.getFont();
-			// graphics.setFont(new Font ("Garamond", Font.BOLD , 36));
-			CoordinateSystem cs = parent.getCoordinateSystem();
-			final int xMin = (int) cs.getMin(CoordinateSystem.X_AXIS);
-			final int xMax = (int) cs.getMax(CoordinateSystem.X_AXIS);
-			final int yMin = (int) cs.getMin(CoordinateSystem.Y_AXIS);
-			final int yMax = (int) cs.getMax(CoordinateSystem.Y_AXIS);
-			// final float scaleFactor =
-			// ((float)xMax)/((float)parent.getWidth());
-			// final int height = parent.getHeight();
+			ICoordinateSystem cs = parent.getCoordinateSystem();
+			final int xMin = (int) cs.getMin(ICoordinateSystem.X_AXIS);
+			final int xMax = (int) cs.getMax(ICoordinateSystem.X_AXIS);
+			final int yMin = (int) cs.getMin(ICoordinateSystem.Y_AXIS);
+			final int yMax = (int) cs.getMax(ICoordinateSystem.Y_AXIS);
 			for (Segment s : segments) {
 				int startMiliSec = Math.round(s.startTime * 1000);
 				int endMiliSec = Math.round(s.endTime * 1000);
@@ -108,29 +127,63 @@ public class SegmentationLayer extends FeatureLayer {
 				graphics.drawLine(Math.max(lastBoundry, xMin), yMin,
 						Math.max(lastBoundry, xMin), yMax);
 			}
-			if (mousePoint != null) {
+
+			if (!dragging && mousePoint != null) {
 				Point2D unitsCurrent = LayerUtilities.pixelsToUnits(graphics,
 						(int) Math.round(mousePoint.getX()),
 						(int) Math.round(mousePoint.getY()));
-				float relativeOffset = TIME_TOLERANCE*cs.getDelta(CoordinateSystem.X_AXIS)/1000;
+
+				float relativeOffset = TIME_TOLERANCE
+						* cs.getDelta(ICoordinateSystem.X_AXIS);
 				int i = 0;
-				while (i < segments.size() && unitsCurrent.getX()/1000 < (segments.get(i).startTime-relativeOffset)){
+				while (i < segments.size()
+						&& segments.get(i).endTime * 1000 < unitsCurrent.getX()
+						&& !(unitsCurrent.getX() >= segments.get(i).startTime * 1000 && unitsCurrent
+								.getX() <= segments.get(i).endTime * 1000)) {
 					i++;
 				}
-//				for (Segment s: segments){
-//					if (s.startTime)
-//				}
-				
-				
-				graphics.setColor(Color.LIGHT_GRAY);
-				graphics.setStroke(new BasicStroke(Math.round(LayerUtilities
-						.pixelsToUnits(graphics, 2, true))));
-				graphics.drawLine((int) Math.round(unitsCurrent.getX()), yMin,
-						(int) Math.round(unitsCurrent.getX()), yMax);
-			}
-//			graphics.dispose();
-			// graphics.setFont(oldfont);
+				boolean onSegmentBoundry = false;
+				if (i < segments.size()
+						&& segments.get(i).endTime * 1000 >= unitsCurrent
+								.getX()) {
+					if (unitsCurrent.getX() <= (segments.get(i).startTime * 1000)
+							+ relativeOffset
+							|| unitsCurrent.getX() >= (segments.get(i).endTime * 1000)
+									- relativeOffset) {
+						if (unitsCurrent.getX() >= (segments.get(i).endTime * 1000)
+								- relativeOffset) {
+							i++;
+						}
+						if (i > 0 && i < segments.size()) {
+							onSegmentBoundry = true;
+							movingSegmentIndex = i;
+						}
+					}
+				}
 
+				if (onSegmentBoundry) {
+					parent.setCursor(Cursor
+							.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+				} else {
+					movingSegmentIndex = -1;
+					parent.setCursor(Cursor
+							.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					graphics.setColor(Color.LIGHT_GRAY);
+					graphics.setStroke(new BasicStroke(Math
+							.round(LayerUtilities.pixelsToUnits(graphics, 2,
+									true))));
+					graphics.drawLine((int) Math.round(unitsCurrent.getX()),
+							yMin, (int) Math.round(unitsCurrent.getX()), yMax);
+				}
+			} else if (dragging){
+				graphics.setColor(Color.DARK_GRAY);
+				graphics.setStroke(new BasicStroke(Math
+						.round(LayerUtilities.pixelsToUnits(graphics, 2,
+								true))));
+				graphics.drawLine((int) Math.round(mouseDraggingPointX),
+						yMin, (int) Math.round(mouseDraggingPointX), yMax);
+//				System.out.println("dragging");
+			}
 		}
 		graphics.setStroke(new BasicStroke(1));
 	}
@@ -177,11 +230,12 @@ public class SegmentationLayer extends FeatureLayer {
 							Color.WHITE);
 					segments.get(i).endTime = time;
 					segments.add(i + 1, s);
-				} else if (i == segments.size()){
-					Segment s = new Segment(segments.get(i-1).endTime, time, "", Color.WHITE);
+				} else if (i == segments.size()) {
+					Segment s = new Segment(segments.get(i - 1).endTime, time,
+							"", Color.WHITE);
 					segments.add(s);
 				}
-			} else { 
+			} else {
 				segments = new ArrayList<Segment>();
 				Segment s = new Segment(0, time, "", Color.WHITE);
 				segments.add(s);
@@ -189,5 +243,4 @@ public class SegmentationLayer extends FeatureLayer {
 			parent.repaint();
 		}
 	}
-
 }

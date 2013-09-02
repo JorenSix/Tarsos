@@ -15,7 +15,7 @@ import be.hogent.tarsos.dsp.AudioEvent;
 import be.hogent.tarsos.dsp.AudioProcessor;
 import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
-import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 import be.hogent.tarsos.ui.link.layers.BackgroundLayer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 import be.hogent.tarsos.util.AudioFile;
@@ -46,9 +46,9 @@ public class WaveFormLayer extends FeatureLayer {
 
 	private void drawWaveForm(Graphics2D graphics) {
 		
-		CoordinateSystem cs = parent.getCoordinateSystem();
-		final int waveFormXMin = (int) cs.getMin(CoordinateSystem.X_AXIS);
-		final int waveFormXMax = (int) cs.getMax(CoordinateSystem.X_AXIS);
+		ICoordinateSystem cs = parent.getCoordinateSystem();
+		final int waveFormXMin = (int) cs.getMin(ICoordinateSystem.X_AXIS);
+		final int waveFormXMax = (int) cs.getMax(ICoordinateSystem.X_AXIS);
 		graphics.setColor(Color.GRAY);
 		graphics.drawLine(waveFormXMin, 0, waveFormXMax,0);
 		graphics.setColor(Color.BLACK);
@@ -69,7 +69,7 @@ public class WaveFormLayer extends FeatureLayer {
 			
 		
 			final int waveFormHeightInUnits = (int) cs
-					.getDelta(CoordinateSystem.Y_AXIS);
+					.getDelta(ICoordinateSystem.Y_AXIS);
 			final float lengthInMs = f.getLengthInMilliSeconds();
 			final int amountOfSamples = samples.length;
 			float sampleCalculateFactor = amountOfSamples / lengthInMs;
@@ -114,5 +114,11 @@ public class WaveFormLayer extends FeatureLayer {
 		});
 
 	}
+
+//	@Override
+//	protected void setProperties() {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 }

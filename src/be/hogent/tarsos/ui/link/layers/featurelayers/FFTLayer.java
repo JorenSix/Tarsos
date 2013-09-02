@@ -15,7 +15,7 @@ import be.hogent.tarsos.dsp.util.fft.FFT;
 import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
-import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 
 public class FFTLayer extends FeatureLayer {
 
@@ -49,9 +49,9 @@ public class FFTLayer extends FeatureLayer {
 	}
 
 	public void draw(Graphics2D graphics) {
-		CoordinateSystem cs = parent.getCoordinateSystem();
+		ICoordinateSystem cs = parent.getCoordinateSystem();
 		Map<Double, float[]> spectralInfoSubMap = features.subMap(
-				cs.getMin(CoordinateSystem.X_AXIS) / 1000.0, cs.getMax(CoordinateSystem.X_AXIS) / 1000.0);
+				cs.getMin(ICoordinateSystem.X_AXIS) / 1000.0, cs.getMax(ICoordinateSystem.X_AXIS) / 1000.0);
 		for (Map.Entry<Double, float[]> column : spectralInfoSubMap.entrySet()) {
 			double timeStart = column.getKey();// in seconds
 			float[] spectralEnergy = column.getValue();// in cents
@@ -61,8 +61,8 @@ public class FFTLayer extends FeatureLayer {
 				Color color = Color.black; 
 				float centsStartingPoint = binStartingPointsInCents[i];
 				// only draw the visible frequency range
-				if (centsStartingPoint >= cs.getMin(CoordinateSystem.Y_AXIS)
-						&& centsStartingPoint <= cs.getMax(CoordinateSystem.Y_AXIS)) {
+				if (centsStartingPoint >= cs.getMin(ICoordinateSystem.Y_AXIS)
+						&& centsStartingPoint <= cs.getMax(ICoordinateSystem.Y_AXIS)) {
 					
 					int greyValue = 255 - (int) (spectralEnergy[i]
 							/ maxSpectralEnergy * 255);
@@ -132,5 +132,4 @@ public class FFTLayer extends FeatureLayer {
 			}
 		});
 	}
-
 }

@@ -1,16 +1,13 @@
 package be.hogent.tarsos.ui.link;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
@@ -22,11 +19,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
 import be.hogent.tarsos.ui.link.layers.BackgroundLayer;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
-import be.hogent.tarsos.ui.link.layers.coordinatesystemlayers.CoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
 import be.hogent.tarsos.ui.link.layers.segmentationlayers.SegmentationLayer;
 
@@ -35,40 +32,32 @@ public class LinkedPanel extends JPanel {
 	private static final long serialVersionUID = -5055686566048886896L;
 
 	private BackgroundLayer backgroundLayer;
-	private List<FeatureLayer> layers;
-	private CoordinateSystemLayer csLayer;
+	private List<Layer> layers;
 
-	private final ViewPort viewPort;
-	private CoordinateSystem cs;
-	
+	private ViewPort viewPort;
+	private ICoordinateSystem cs;
+
 	private SegmentationLayer mouseMovedListener;
-	
-	
-
-	// private boolean isDrawing = false;
-
-	public CoordinateSystem getCoordinateSystem() {
-		return cs;
-	}
-
-	public void setCoordinateSystem(CoordinateSystem cs) {
-		this.cs = cs;
-		this.csLayer = new CoordinateSystemLayer(this,
-				cs.getUnitsForAxis(CoordinateSystem.X_AXIS),
-				cs.getUnitsForAxis(CoordinateSystem.Y_AXIS));
-	}
 
 	public ViewPort getViewPort() {
 		return viewPort;
 	}
 
-	public LinkedPanel(CoordinateSystem coordinateSystem) {
+	public ICoordinateSystem getCoordinateSystem() {
+		return cs;
+	}
+
+	public LinkedPanel() {
 		super();
-		layers = new ArrayList<FeatureLayer>();
-		setCoordinateSystem(coordinateSystem);
-		viewPort = new ViewPort(this);
+		layers = new ArrayList<Layer>();
+	}
+
+	public void initialise(Units xAxisUnits, Units yAxisUnits) {
+		this.setDefaultBackgroundLayer();
+		this.cs = new CoordinateSystem(this, xAxisUnits, yAxisUnits);
+		viewPort = new ViewPort(cs);
 		DragListener dragListener;
-		if (cs.getUnitsForAxis(CoordinateSystem.Y_AXIS) == Units.AMPLITUDE || cs.getUnitsForAxis(CoordinateSystem.Y_AXIS) == Units.NONE){
+		if (yAxisUnits == Units.AMPLITUDE || yAxisUnits == Units.NONE) {
 			dragListener = new HorizontalDragListener(this);
 		} else {
 			dragListener = new DragListener(this);
@@ -80,7 +69,7 @@ public class LinkedPanel extends JPanel {
 		this.setVisible(true);
 	}
 
-	public void setDefaultBackgroundLayer() {
+	private void setDefaultBackgroundLayer() {
 		this.backgroundLayer = new BackgroundLayer(this);
 	}
 
@@ -88,13 +77,12 @@ public class LinkedPanel extends JPanel {
 		this.backgroundLayer = new BackgroundLayer(this, c);
 	}
 
-	public void addLayer(FeatureLayer fl) {
+	public void addLayer(Layer fl) {
 		this.layers.add(fl);
-		if (fl instanceof SegmentationLayer){
-			mouseMovedListener = (SegmentationLayer)fl;
-//			this.addMouseMotionListener(new MoveListener());
+		if (fl instanceof SegmentationLayer) {
+			mouseMovedListener = (SegmentationLayer) fl;
 		}
-		
+
 	}
 
 	private class ZoomListener implements MouseWheelListener {
@@ -105,16 +93,36 @@ public class LinkedPanel extends JPanel {
 		}
 	}
 
-	private class HorizontalDragListener extends DragListener {
-		private HorizontalDragListener(LinkedPanel p){
+	private class HorizontalDragListener extends DragListener{
+
+		private SegmentationLayer sl;
+
+		private HorizontalDragListener(LinkedPanel p) {
 			super(p);
 		}
 		
+//		@Override
+//		public void mouseMoved(MouseEvent e) {
+//			mX = (int) me.getPoint().getX();
+//		    mY = (int) me.getPoint().getY();
+//		}
+
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			if (previousPoint != null) {
-				Graphics2D graphics = (Graphics2D) panel.getGraphics();
-				graphics.setTransform(panel.getTransform());
+			Graphics2D graphics = (Graphics2D) panel.getGraphics();
+			graphics.setTransform(panel.getTransform());
+			if (sl == null){
+				for (Layer l : layers) {
+					if (l instanceof SegmentationLayer) {
+						sl = ((SegmentationLayer) l);
+						sl.setDragging(true);
+					}
+				}
+			}
+			if (LinkedPanel.this.getCursor().getType() == Cursor.E_RESIZE_CURSOR
+					&& sl != null) {
+				sl.dragSegment(graphics, e);
+			} else if (previousPoint != null) {
 				Point2D unitsCurrent = LayerUtilities.pixelsToUnits(graphics,
 						e.getX(), (int) previousPoint.getY());
 				Point2D unitsPrevious = LayerUtilities.pixelsToUnits(graphics,
@@ -125,17 +133,27 @@ public class LinkedPanel extends JPanel {
 				viewPort.drag(millisecondAmount, 0);
 			}
 		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			previousPoint = null;
+			if (sl != null) {
+				sl.setDragging(false);
+				sl = null;
+				repaint();
+			}
+		}
 	}
-	
-//	private class MoveListener extends MouseMotionAdapter  {
-//
-//		@Override
-//		public void mouseMoved(MouseEvent e) {
-//			mouseListener.mouseMoved(e);
-//		}
-//		
-//	}
-	
+
+	// private class MoveListener extends MouseMotionAdapter {
+	//
+	// @Override
+	// public void mouseMoved(MouseEvent e) {
+	// mouseListener.mouseMoved(e);
+	// }
+	//
+	// }
+
 	private class DragListener extends MouseAdapter {
 
 		LinkedPanel panel;
@@ -145,14 +163,15 @@ public class LinkedPanel extends JPanel {
 			panel = p;
 			previousPoint = null;
 		}
-		
-		@Override 
-		public void mouseClicked(MouseEvent e){
-			if (LinkedPanel.this.mouseMovedListener != null && SwingUtilities.isRightMouseButton(e)){
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if (LinkedPanel.this.mouseMovedListener != null
+					&& SwingUtilities.isRightMouseButton(e)) {
 				LinkedPanel.this.mouseMovedListener.addSegment(e.getX());
 			}
 		}
-		
+
 		@Override
 		public void mousePressed(MouseEvent e) {
 			previousPoint = e.getPoint();
@@ -187,26 +206,25 @@ public class LinkedPanel extends JPanel {
 
 		@Override
 		public void mouseMoved(MouseEvent e) {
-			if (LinkedPanel.this.mouseMovedListener != null){
+			if (LinkedPanel.this.mouseMovedListener != null) {
 				mouseMovedListener.mouseMoved(e);
 			}
 		}
 	}
 
 	private AffineTransform getTransform() {
-		double xDelta = cs.getDelta(CoordinateSystem.X_AXIS);
-		double yDelta = cs.getDelta(CoordinateSystem.Y_AXIS);
+		double xDelta = cs.getDelta(ICoordinateSystem.X_AXIS);
+		double yDelta = cs.getDelta(ICoordinateSystem.Y_AXIS);
 
 		AffineTransform transform = new AffineTransform();
 		// System.out.println(this.getHeight() + " - " + this.getWidth());
 		transform.translate(0, getHeight());
 		transform.scale(getWidth() / xDelta, -getHeight() / yDelta);
-		transform.translate(-cs.getMin(CoordinateSystem.X_AXIS),
-				-cs.getMin(CoordinateSystem.Y_AXIS));
+		transform.translate(-cs.getMin(ICoordinateSystem.X_AXIS),
+				-cs.getMin(ICoordinateSystem.Y_AXIS));
 
 		return transform;
 	}
-
 
 	@Override
 	public void paintComponent(final Graphics g) {
@@ -219,20 +237,21 @@ public class LinkedPanel extends JPanel {
 				layer.draw(graphics);
 			}
 		}
-		csLayer.draw(graphics);
+		cs.draw(graphics);
 		drawIndicator(graphics);
-
+		graphics.dispose();
+		g.dispose();
 	}
 
 	public AffineTransform updateTransform(AffineTransform transform) {
-		double xDelta = cs.getDelta(CoordinateSystem.X_AXIS);
-		double yDelta = cs.getDelta(CoordinateSystem.Y_AXIS);
+		double xDelta = cs.getDelta(ICoordinateSystem.X_AXIS);
+		double yDelta = cs.getDelta(ICoordinateSystem.Y_AXIS);
 
 		// System.out.println(this.getHeight() + " - " + this.getWidth());
 		transform.translate(0, getHeight());
 		transform.scale(getWidth() / xDelta, -getHeight() / yDelta);
-		transform.translate(-cs.getMin(CoordinateSystem.X_AXIS),
-				-cs.getMin(CoordinateSystem.Y_AXIS));
+		transform.translate(-cs.getMin(ICoordinateSystem.X_AXIS),
+				-cs.getMin(ICoordinateSystem.Y_AXIS));
 		return transform;
 	}
 
@@ -287,14 +306,13 @@ public class LinkedPanel extends JPanel {
 	public void componentShown(ComponentEvent arg0) {
 		// TODO Auto-generated method stub
 	}
-	
-	public ArrayList<String> getLayers(){
+
+	public ArrayList<String> getLayers() {
 		ArrayList<String> layers = new ArrayList<String>();
-		layers.add(this.backgroundLayer.getName());
-		for (FeatureLayer fl : this.layers){
+		// layers.add(this.backgroundLayer.getName());
+		for (Layer fl : this.layers) {
 			layers.add(fl.getName());
 		}
-		layers.add(this.csLayer.getName());
 		return layers;
 	}
 }

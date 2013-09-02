@@ -19,7 +19,7 @@ import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.ViewPort;
-import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 
 public class PitchContourLayer extends FeatureLayer {
@@ -30,7 +30,7 @@ public class PitchContourLayer extends FeatureLayer {
 	}
 
 	public void draw(Graphics2D graphics) {
-		CoordinateSystem cs = parent.getCoordinateSystem();
+		ICoordinateSystem cs = parent.getCoordinateSystem();
 
 		graphics.setColor(Color.green);
 		int ovalWidth = Math.round(LayerUtilities.pixelsToUnits(graphics, 4,
@@ -39,12 +39,12 @@ public class PitchContourLayer extends FeatureLayer {
 				false));
 		// every second
 		for (Map.Entry<Double, float[]> entry : features.subMap(
-				cs.getMin(CoordinateSystem.X_AXIS) / 1000.0,
-				cs.getMax(CoordinateSystem.X_AXIS) / 1000.0).entrySet()) {
+				cs.getMin(ICoordinateSystem.X_AXIS) / 1000.0,
+				cs.getMax(ICoordinateSystem.X_AXIS) / 1000.0).entrySet()) {
 			double time = entry.getKey();// in seconds
 			double pitch = entry.getValue()[0];// in cents
-			if (pitch > cs.getMin(CoordinateSystem.Y_AXIS)
-					&& pitch < cs.getMax(CoordinateSystem.Y_AXIS)) {
+			if (pitch > cs.getMin(ICoordinateSystem.Y_AXIS)
+					&& pitch < cs.getMax(ICoordinateSystem.Y_AXIS)) {
 				graphics.drawOval((int) (time * 1000), (int) pitch, ovalWidth,
 						ovalHeight);
 			}
@@ -83,5 +83,11 @@ public class PitchContourLayer extends FeatureLayer {
 					}
 				}));
 	}
+
+//	@Override
+//	protected void setProperties() {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 }

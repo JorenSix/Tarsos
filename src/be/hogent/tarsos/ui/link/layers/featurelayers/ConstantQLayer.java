@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -17,7 +19,8 @@ import be.hogent.tarsos.sampled.pitch.PitchUnit;
 import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.ViewPort;
-import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
+import be.hogent.tarsos.ui.link.layers.LayerProperty;
 import be.hogent.tarsos.util.AudioFile;
 
 public class ConstantQLayer extends FeatureLayer {
@@ -58,8 +61,7 @@ public class ConstantQLayer extends FeatureLayer {
 	}
 
 	public ConstantQLayer(final LinkedPanel parent, int frameSize, int overlap, int binsPerOctave) {
-		super(parent, frameSize, overlap);
-		increment = frameSize - overlap;
+		this(parent, frameSize, overlap);
 		this.binsPerOctave = binsPerOctave;
 	}
 
@@ -71,29 +73,9 @@ public class ConstantQLayer extends FeatureLayer {
 	}
 
 	public void draw(Graphics2D graphics) {
-		CoordinateSystem cs = parent.getCoordinateSystem();
+		ICoordinateSystem cs = parent.getCoordinateSystem();
 		Map<Double, float[]> spectralInfoSubMap = features.subMap(
-				cs.getMin(CoordinateSystem.X_AXIS) / 1000.0, cs.getMax(CoordinateSystem.X_AXIS) / 1000.0);
-		
-		
-//		AudioFile f = LinkedFrame.getInstance().getAudioFile();
-//		final int waveFormHeightInUnits = (int) cs
-//				.getDelta(CoordinateSystem.Y_AXIS);
-//		final float lengthInMs = f.getLengthInMilliSeconds();
-//		final int amountOfSamples = f.fileFormat().getFrameLength();
-//		float sampleCalculateFactor = amountOfSamples / lengthInMs;
-//		int amplitudeFactor = waveFormHeightInUnits / 2;
-//		
-//		for (int i = Math.max(0, waveFormXMin); i < Math.min(waveFormXMax, lengthInMs); i++) {
-//			int index = (int) (i * sampleCalculateFactor);
-//			if (index < samples.length) {
-//				graphics.drawLine(i, 0, i,
-//						(int) (samples[index] * amplitudeFactor));
-//			}
-//		}
-		
-		
-		
+				cs.getMin(ICoordinateSystem.X_AXIS) / 1000.0, cs.getMax(ICoordinateSystem.X_AXIS) / 1000.0);
 		
 		for (Map.Entry<Double, float[]> column : spectralInfoSubMap.entrySet()) {
 			double timeStart = column.getKey();// in seconds
@@ -104,8 +86,8 @@ public class ConstantQLayer extends FeatureLayer {
 				Color color = Color.black;
 				float centsStartingPoint = binStartingPointsInCents[i];
 				// only draw the visible frequency range
-				if (centsStartingPoint >= cs.getMin(CoordinateSystem.Y_AXIS)
-						&& centsStartingPoint <= cs.getMax(CoordinateSystem.Y_AXIS)) {
+				if (centsStartingPoint >= cs.getMin(ICoordinateSystem.Y_AXIS)
+						&& centsStartingPoint <= cs.getMax(ICoordinateSystem.Y_AXIS)) {
 					int greyValue = 255 - (int) (spectralEnergy[i]
 							/ maxSpectralEnergy * 255);
 					greyValue = Math.max(0, greyValue);
@@ -181,5 +163,4 @@ public class ConstantQLayer extends FeatureLayer {
 			}
 		});
 	}
-
 }

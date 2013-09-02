@@ -1,12 +1,16 @@
 package be.hogent.tarsos.ui.link.layers.featurelayers;
 
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.TreeMap;
 
 import be.hogent.tarsos.dsp.AudioDispatcher;
 import be.hogent.tarsos.ui.link.LinkedPanel;
-import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 import be.hogent.tarsos.ui.link.layers.Layer;
+import be.hogent.tarsos.ui.link.layers.LayerProperty;
 
 public abstract class FeatureLayer implements Layer {
 
