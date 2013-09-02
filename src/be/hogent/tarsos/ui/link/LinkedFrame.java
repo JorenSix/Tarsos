@@ -76,9 +76,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		panels = new HashMap<String, LinkedPanel>();
 		panelID = 0;
 		linkedPanelCount = 0;
-		// this.setPreferredSize(new Dimension(800, 400));
-
-		// this.setSize(new Dimension(800, 400));
 	}
 
 	public static LinkedFrame getInstance() {
@@ -165,7 +162,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 			});
 			layerMenuItem.add(deleteLayerMenuItem);
 			subMenu.add(layerMenuItem);
-
 		}
 	}
 
@@ -173,7 +169,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		final JMenu subMenu = new JMenu(panelName);
 		JMenuItem addLayerMenuItem = new JMenuItem("Add layer...");
 		addLayerMenuItem.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO
 				AddLayerDialog ld = new AddLayerDialog(LinkedFrame.this, panels
@@ -183,7 +178,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 					updatePanelMenu(subMenu);
 				}
 			}
-
 		});
 
 		JMenuItem deletePanelMenuItem = new JMenuItem("Delete Panel...");

@@ -168,7 +168,7 @@ public class LinkedPanel extends JPanel {
 		public void mouseClicked(MouseEvent e) {
 			if (LinkedPanel.this.mouseMovedListener != null
 					&& SwingUtilities.isRightMouseButton(e)) {
-				LinkedPanel.this.mouseMovedListener.addSegment(e.getX());
+				LinkedPanel.this.mouseMovedListener.addOrRemoveSegment(e.getX());
 			}
 		}
 

@@ -56,21 +56,20 @@ public class SegmentationLayer extends FeatureLayer {
 		dragging = false;
 		// segments = new ArrayList<Segment>();
 	}
-	
-	public void setDragging(boolean value){
+
+	public void setDragging(boolean value) {
 		this.dragging = value;
 	}
 
 	public void dragSegment(Graphics2D graphics, MouseEvent e) {
 		if (movingSegmentIndex > 0) {
 			Point2D unitsCurrent = LayerUtilities.pixelsToUnits(graphics,
-					(int) Math.round(e.getX()),
-					(int) Math.round(e.getY()));
+					(int) Math.round(e.getX()), (int) Math.round(e.getY()));
 			segments.get(movingSegmentIndex).startTime = (float) (unitsCurrent
-					.getX() / (double)1000);
+					.getX() / (double) 1000);
 			segments.get(movingSegmentIndex - 1).endTime = (float) (unitsCurrent
-					.getX() / (double)1000);
-			mouseDraggingPointX = (int)Math.round(unitsCurrent.getX());
+					.getX() / (double) 1000);
+			mouseDraggingPointX = (int) Math.round(unitsCurrent.getX());
 		}
 		draw(graphics);
 	}
@@ -135,17 +134,9 @@ public class SegmentationLayer extends FeatureLayer {
 
 				float relativeOffset = TIME_TOLERANCE
 						* cs.getDelta(ICoordinateSystem.X_AXIS);
-				int i = 0;
-				while (i < segments.size()
-						&& segments.get(i).endTime * 1000 < unitsCurrent.getX()
-						&& !(unitsCurrent.getX() >= segments.get(i).startTime * 1000 && unitsCurrent
-								.getX() <= segments.get(i).endTime * 1000)) {
-					i++;
-				}
+				int i = getSegmentIndex(unitsCurrent.getX());
 				boolean onSegmentBoundry = false;
-				if (i < segments.size()
-						&& segments.get(i).endTime * 1000 >= unitsCurrent
-								.getX()) {
+				if (i > 0) {
 					if (unitsCurrent.getX() <= (segments.get(i).startTime * 1000)
 							+ relativeOffset
 							|| unitsCurrent.getX() >= (segments.get(i).endTime * 1000)
@@ -175,17 +166,30 @@ public class SegmentationLayer extends FeatureLayer {
 					graphics.drawLine((int) Math.round(unitsCurrent.getX()),
 							yMin, (int) Math.round(unitsCurrent.getX()), yMax);
 				}
-			} else if (dragging){
+			} else if (dragging) {
 				graphics.setColor(Color.DARK_GRAY);
-				graphics.setStroke(new BasicStroke(Math
-						.round(LayerUtilities.pixelsToUnits(graphics, 2,
-								true))));
-				graphics.drawLine((int) Math.round(mouseDraggingPointX),
-						yMin, (int) Math.round(mouseDraggingPointX), yMax);
-//				System.out.println("dragging");
+				graphics.setStroke(new BasicStroke(Math.round(LayerUtilities
+						.pixelsToUnits(graphics, 2, true))));
+				graphics.drawLine((int) Math.round(mouseDraggingPointX), yMin,
+						(int) Math.round(mouseDraggingPointX), yMax);
+				// System.out.println("dragging");
 			}
 		}
 		graphics.setStroke(new BasicStroke(1));
+	}
+
+	private int getSegmentIndex(double x) {
+		int i = 0;
+		while (i < segments.size()
+				&& segments.get(i).endTime * 1000 < x
+				&& !(x >= segments.get(i).startTime * 1000 && x <= segments
+						.get(i).endTime * 1000)) {
+			i++;
+		}
+		if (i < segments.size()) {
+			return i;
+		}
+		return -1;
 	}
 
 	public String getName() {
@@ -209,38 +213,54 @@ public class SegmentationLayer extends FeatureLayer {
 		parent.repaint();
 	}
 
-	public void addSegment(int pixelUnitX) {
+	public void addOrRemoveSegment(int pixelUnitX) {
 		Graphics2D g = (Graphics2D) parent.getGraphics();
 		g.setTransform(parent.updateTransform(g.getTransform()));
 		Point2D unitsCurrent = LayerUtilities.pixelsToUnits(g,
 				(int) Math.round(pixelUnitX), 0);
 		float time = (float) unitsCurrent.getX();
+		float relativeOffset = TIME_TOLERANCE
+				* parent.getCoordinateSystem().getDelta(
+						ICoordinateSystem.X_AXIS);
+		int i = this.getSegmentIndex(time);
+
+		if (i > -1 && i < segments.size()) {
+			if (unitsCurrent.getX() <= (segments.get(i).startTime * 1000)
+					+ relativeOffset
+					|| unitsCurrent.getX() >= (segments.get(i).endTime * 1000)
+							- relativeOffset) {
+				if (unitsCurrent.getX() >= (segments.get(i).endTime * 1000)
+						- relativeOffset) {
+					i++;
+				}
+				if (i > 0 && i < segments.size()) {
+					segments.get(i - 1).endTime = segments.get(i).endTime;
+					segments.remove(i);
+					SegmentationLayer.this.draw(g);
+				}
+			}
+		}
+
 		if (time > 0
 				&& time <= LinkedFrame.getInstance().getAudioFile()
 						.getLengthInMilliSeconds()) {
 			time /= 1000;
-			int i = 0;
-			if (segments != null && segments.size() != 0) {
-				while (i < segments.size() && segments.get(i).endTime < time) {
-					i++;
-				}
-				if (i < segments.size() && segments.get(i).endTime > time
-						&& segments.get(i).startTime < time) {
-					Segment s = new Segment(time, segments.get(i).endTime, "",
-							Color.WHITE);
-					segments.get(i).endTime = time;
-					segments.add(i + 1, s);
-				} else if (i == segments.size()) {
-					Segment s = new Segment(segments.get(i - 1).endTime, time,
-							"", Color.WHITE);
-					segments.add(s);
-				}
-			} else {
-				segments = new ArrayList<Segment>();
-				Segment s = new Segment(0, time, "", Color.WHITE);
+			if (i < segments.size() && segments.get(i).endTime > time
+					&& segments.get(i).startTime < time) {
+				Segment s = new Segment(time, segments.get(i).endTime, "",
+						Color.WHITE);
+				segments.get(i).endTime = time;
+				segments.add(i + 1, s);
+			} else if (i == segments.size()) {
+				Segment s = new Segment(segments.get(i - 1).endTime, time, "",
+						Color.WHITE);
 				segments.add(s);
 			}
-			parent.repaint();
+		} else {
+			segments = new ArrayList<Segment>();
+			Segment s = new Segment(0, time, "", Color.WHITE);
+			segments.add(s);
 		}
+		parent.repaint();
 	}
 }
