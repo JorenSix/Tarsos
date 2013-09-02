@@ -31,6 +31,7 @@ import be.hogent.tarsos.ui.BackgroundTask;
 import be.hogent.tarsos.ui.ProgressDialog;
 import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
@@ -142,12 +143,29 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		}
 	}
 
-	private void updatePanelMenu(JMenu subMenu) {
+	private void updatePanelMenu(final JMenu subMenu) {
 		for (int i = subMenu.getItemCount() - 1; i >= 3; i--) {
 			subMenu.remove(subMenu.getItem(i));
 		}
-		for (String s : panels.get(subMenu.getText()).getLayers()) {
-			subMenu.add(new JMenuItem(s));
+		for (final Layer l : panels.get(subMenu.getText()).getLayers()) {
+			JMenu layerMenuItem = new JMenu(l.getName());
+			JMenuItem deleteLayerMenuItem = new JMenuItem("Delete...");
+			deleteLayerMenuItem.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent arg0) {
+					int result = JOptionPane.showConfirmDialog(
+							LinkedFrame.this,
+							"Are you sure you want to delete this layer?", "Delete layer?", JOptionPane.OK_CANCEL_OPTION);
+					if (result == JOptionPane.OK_OPTION) {
+						panels.get(subMenu.getText()).deleteLayer(l);
+						LinkedFrame.instance.updatePanelMenu(subMenu);
+					}
+				}
+
+			});
+			layerMenuItem.add(deleteLayerMenuItem);
+			subMenu.add(layerMenuItem);
+
 		}
 	}
 
@@ -184,7 +202,8 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 						sp = (JSplitPane) sp.getBottomComponent();
 					}
 					if (parent == null) {
-						//@TODO: indien laatste panel is -> nieuwe empty panel maken!!
+						// @TODO: indien laatste panel is -> nieuwe empty panel
+						// maken!!
 						LinkedFrame.this.setContentPane((JSplitPane) (sp
 								.getBottomComponent()));
 					} else {
@@ -233,6 +252,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 
 	public void setAudioFile(AudioFile file) {
 		this.audioFile = file;
+
 	}
 
 	public void setNewAudioFile(final File newFile) {
@@ -266,8 +286,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		String title = "Progress: "
 				+ FileUtils.basename(newFile.getAbsolutePath());
 
-		// AnnotationPublisher.getInstance().clear();
-		// AnnotationPublisher.getInstance().extractionStarted();
 		final ProgressDialog dialog = new ProgressDialog(
 				LinkedFrame.getInstance(), title, transcodingTask,
 				detectorTasks);

@@ -307,12 +307,20 @@ public class LinkedPanel extends JPanel {
 		// TODO Auto-generated method stub
 	}
 
-	public ArrayList<String> getLayers() {
+	public ArrayList<String> getLayerNames() {
 		ArrayList<String> layers = new ArrayList<String>();
 		// layers.add(this.backgroundLayer.getName());
 		for (Layer fl : this.layers) {
 			layers.add(fl.getName());
 		}
 		return layers;
+	}
+	
+	public List<Layer> getLayers() {
+		return layers;
+	}
+
+	public void deleteLayer(Layer l) {
+		layers.remove(l);
 	}
 }
