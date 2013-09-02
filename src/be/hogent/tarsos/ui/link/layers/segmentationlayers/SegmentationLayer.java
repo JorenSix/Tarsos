@@ -8,9 +8,13 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Stroke;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+
+import javax.swing.JTextField;
 
 import be.hogent.tarsos.tarsossegmenter.model.AASModel;
 import be.hogent.tarsos.tarsossegmenter.model.segmentation.Segment;
@@ -22,7 +26,7 @@ import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
 
-public class SegmentationLayer extends FeatureLayer {
+public class SegmentationLayer extends FeatureLayer implements KeyListener {
 
 	private int niveau;
 	private ArrayList<Segment> segments;
@@ -32,6 +36,7 @@ public class SegmentationLayer extends FeatureLayer {
 	private Point mousePoint;
 	private final float TIME_TOLERANCE = 0.01f;
 	private int movingSegmentIndex;
+	private int editLabelSegmentIndex;
 	private boolean dragging;
 	private int mouseDraggingPointX;
 
@@ -54,6 +59,8 @@ public class SegmentationLayer extends FeatureLayer {
 		this.lowerFilterFreq = lowerFilterFreq;
 		this.upperFilterFreq = upperFilterFreq;
 		dragging = false;
+		parent.setFocusable(true);
+		parent.addKeyListener(this);
 		// segments = new ArrayList<Segment>();
 	}
 
@@ -132,17 +139,20 @@ public class SegmentationLayer extends FeatureLayer {
 						(int) Math.round(mousePoint.getX()),
 						(int) Math.round(mousePoint.getY()));
 
-				float relativeOffset = TIME_TOLERANCE
-						* cs.getDelta(ICoordinateSystem.X_AXIS);
 				int i = getSegmentIndex(unitsCurrent.getX());
 				boolean onSegmentBoundry = false;
+				boolean onSegmentLabel = false;
+
 				if (i > 0) {
-					if (unitsCurrent.getX() <= (segments.get(i).startTime * 1000)
-							+ relativeOffset
-							|| unitsCurrent.getX() >= (segments.get(i).endTime * 1000)
-									- relativeOffset) {
-						if (unitsCurrent.getX() >= (segments.get(i).endTime * 1000)
-								- relativeOffset) {
+					float relativeOffset = TIME_TOLERANCE
+							* cs.getDelta(ICoordinateSystem.X_AXIS);
+					int textOffset = Math.round(LayerUtilities.pixelsToUnits(
+							graphics, 12, false));
+					double startTime = segments.get(i).startTime * 1000;
+					double endTime = segments.get(i).endTime * 1000;
+					if (unitsCurrent.getX() <= startTime + relativeOffset
+							|| unitsCurrent.getX() >= endTime - relativeOffset) {
+						if (unitsCurrent.getX() >= endTime - relativeOffset) {
 							i++;
 						}
 						if (i > 0 && i < segments.size()) {
@@ -150,13 +160,28 @@ public class SegmentationLayer extends FeatureLayer {
 							movingSegmentIndex = i;
 						}
 					}
+					if (!onSegmentBoundry && i >= 0) {
+						startTime = Math.max(startTime, xMin);
+						endTime = Math.min(endTime, xMax);
+						//@TODO: hoe kom je aan de juiste offset???
+						if (unitsCurrent.getX() >= (startTime + endTime) / 2 - (textOffset)
+						 && unitsCurrent.getX() <= (startTime + endTime) / 2 + (textOffset)) {
+							onSegmentLabel = true;
+							editLabelSegmentIndex = i;
+						}
+					}
 				}
 
 				if (onSegmentBoundry) {
 					parent.setCursor(Cursor
 							.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+				} else if (onSegmentLabel) {
+					parent.setCursor(Cursor
+							.getPredefinedCursor(Cursor.TEXT_CURSOR));
+					parent.requestFocusInWindow();
 				} else {
 					movingSegmentIndex = -1;
+					editLabelSegmentIndex = -1;
 					parent.setCursor(Cursor
 							.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 					graphics.setColor(Color.LIGHT_GRAY);
@@ -240,7 +265,6 @@ public class SegmentationLayer extends FeatureLayer {
 				}
 			}
 		}
-
 		if (time > 0
 				&& time <= LinkedFrame.getInstance().getAudioFile()
 						.getLengthInMilliSeconds()) {
@@ -262,5 +286,22 @@ public class SegmentationLayer extends FeatureLayer {
 			segments.add(s);
 		}
 		parent.repaint();
+	}
+
+	public void keyPressed(KeyEvent arg0) {
+	}
+
+	public void keyReleased(KeyEvent arg0) {
+	}
+
+	public void keyTyped(KeyEvent e) {
+		if (editLabelSegmentIndex >= 0){
+			if ((int)e.getKeyChar() == 8){
+				segments.get(editLabelSegmentIndex).label = String.valueOf(segments.get(editLabelSegmentIndex).label.subSequence(0, segments.get(editLabelSegmentIndex).label.length()-1));
+			} else {
+				segments.get(editLabelSegmentIndex).label = segments.get(editLabelSegmentIndex).label.concat(String.valueOf(e.getKeyChar()));
+			}
+			parent.repaint();
+		}
 	}
 }

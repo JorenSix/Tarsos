@@ -82,7 +82,6 @@ public class LinkedPanel extends JPanel {
 		if (fl instanceof SegmentationLayer) {
 			mouseMovedListener = (SegmentationLayer) fl;
 		}
-
 	}
 
 	private class ZoomListener implements MouseWheelListener {
@@ -100,12 +99,6 @@ public class LinkedPanel extends JPanel {
 		private HorizontalDragListener(LinkedPanel p) {
 			super(p);
 		}
-		
-//		@Override
-//		public void mouseMoved(MouseEvent e) {
-//			mX = (int) me.getPoint().getX();
-//		    mY = (int) me.getPoint().getY();
-//		}
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
@@ -144,15 +137,6 @@ public class LinkedPanel extends JPanel {
 			}
 		}
 	}
-
-	// private class MoveListener extends MouseMotionAdapter {
-	//
-	// @Override
-	// public void mouseMoved(MouseEvent e) {
-	// mouseListener.mouseMoved(e);
-	// }
-	//
-	// }
 
 	private class DragListener extends MouseAdapter {
 
