@@ -1,11 +1,19 @@
 package be.hogent.tarsos.ui.link.coordinatessystems;
 
 public enum Units {
-	TIME,
-	FREQUENCY,
-	AMPLITUDE,
-	NONE;
+	TIME("s", 1000),
+	FREQUENCY("cents", 1),
+	AMPLITUDE("", 1000),
+	NONE("", 1000);
+	
+	private String unit;
+	private double factor;
 
+	private Units(String unit, double factor){
+		this.unit = unit;
+		this.factor = factor;
+	}
+	
 	public static int getMin(Units u) {
 		switch (u) {
 		case TIME:
@@ -33,4 +41,22 @@ public enum Units {
 		}
 		return 0;
 	}
+
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
+
+	public double getFactor() {
+		return factor;
+	}
+
+	public void setFactor(double factor) {
+		this.factor = factor;
+	}
+	
+	
 }

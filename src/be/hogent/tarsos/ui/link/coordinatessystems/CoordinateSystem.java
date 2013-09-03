@@ -3,12 +3,14 @@ package be.hogent.tarsos.ui.link.coordinatessystems;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.coordinatessystems.axis.AmplitudeCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.coordinatessystems.axis.AxisLayer;
 import be.hogent.tarsos.ui.link.coordinatessystems.axis.CentsCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.coordinatessystems.axis.EmptyCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.coordinatessystems.axis.TimeCoordinateSystemLayer;
+import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 
 public class CoordinateSystem implements ICoordinateSystem {
 	
@@ -115,6 +117,11 @@ public class CoordinateSystem implements ICoordinateSystem {
 				Math.round(getMin(ICoordinateSystem.Y_AXIS)), 
 				Math.round(getDelta(ICoordinateSystem.X_AXIS)), 
 				Math.round(getDelta(ICoordinateSystem.Y_AXIS)));
+		int x = LinkedFrame.getInstance().getMouseX();
+		double convertedX = LayerUtilities.pixelsToUnits(g, x, 0).getX();
+		g.setColor(Color.RED);
+		g.drawLine((int)Math.round(convertedX), Math.round(this.getMin(Y_AXIS)), (int)Math.round(convertedX), Math.round(this.getMax(Y_AXIS)));
+//		System.out.println("yMin: " + getMin(Y_AXIS) + " - yMax: " + getMax(Y_AXIS));
 	}
 	
 	

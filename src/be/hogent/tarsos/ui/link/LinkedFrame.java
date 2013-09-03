@@ -1,14 +1,20 @@
 package be.hogent.tarsos.ui.link;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +22,15 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import be.hogent.tarsos.Tarsos;
@@ -30,8 +39,12 @@ import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.BackgroundTask;
 import be.hogent.tarsos.ui.ProgressDialog;
 import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
+import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
 import be.hogent.tarsos.ui.link.layers.Layer;
+import be.hogent.tarsos.ui.link.layers.LayerUtilities;
+import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
@@ -42,7 +55,7 @@ import be.hogent.tarsos.util.FileUtils;
 //Per layer een aparte audiodispatcher
 //FrameSize en overlapping per audiodispatcher
 
-public class LinkedFrame extends JFrame implements ViewPortChangedListener {
+public class LinkedFrame extends JFrame implements ViewPortChangedListener, MouseMotionListener {
 
 	private static final long serialVersionUID = 7301610309790983406L;
 
@@ -57,14 +70,17 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	private JMenuBar menuBar;
 	private int panelID;
 	private int linkedPanelCount;
-
+	private int mouseX;
+	private JSplitPane contentPane;
 	private JSplitPane lastSplitPane;
+	private JLabel statusLabel;
 
 	public static void main(String... strings) {
 		configureLogging();
 		Configuration.checkForConfigurationAndWriteDefaults();
 		Tarsos.configureDirectories(log);
 		LinkedFrame.getInstance();
+		
 	}
 
 	protected JSplitPane getLastSplitPane() {
@@ -88,16 +104,19 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 
 	public void initialise() {
 		this.setMinimumSize(new Dimension(800, 400));
-		JSplitPane contentPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		this.setContentPane(new JPanel(new BorderLayout()));
+		contentPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		this.lastSplitPane = contentPane;
-		this.setContentPane(contentPane);
+		this.getContentPane().add(contentPane, BorderLayout.CENTER);
 		this.setJMenuBar(createMenu());
-
+		
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
 		contentPane.setDividerLocation(0);
 		buildStdSetUp();
+		this.getContentPane().add(this.createStatusBar(), BorderLayout.SOUTH);
+		this.setFocusable(true);
 		setVisible(true);
 	}
 
@@ -110,7 +129,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 	}
 
 	private void doSplitPaneLayout() {
-		JSplitPane tempPane = (JSplitPane) this.getContentPane();
+		JSplitPane tempPane = contentPane;
 		int count = 0;
 		while (tempPane != null) {
 			tempPane.setDividerLocation((double) (1.0 / (double) (linkedPanelCount - count)));
@@ -118,12 +137,24 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 			count++;
 		}
 	}
+	
+	private JPanel createStatusBar(){
+		JPanel statusBar = new JPanel(new BorderLayout());
+		statusBar.setPreferredSize(new Dimension(0,16));
+		statusBar.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.black));
+		statusBar.setBackground(Color.LIGHT_GRAY);
+		
+		statusLabel = new JLabel();
+		statusBar.add(statusLabel, BorderLayout.EAST);
+		return statusBar;
+	}
 
 	private void addPanel(Units x, Units y, Color bgColor) {
 		if (linkedPanelCount != 0) {
 			createNewSplitPane();
 		}
 		LinkedPanel p = new LinkedPanel();
+		p.addMouseMotionListener(this);
 		p.initialise(x, y);
 		p.getViewPort().addViewPortChangedListener(this);
 		panels.put("Panel " + panelID, p);
@@ -132,6 +163,12 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		doSplitPaneLayout();
 		viewMenu.add(createPanelSubMenu("Panel " + panelID));
 		panelID++;
+	}
+	
+	public void setCurrentStatus(String panelName, double x, double y, Units xUnits, Units yUnits){
+		DecimalFormat nft = new DecimalFormat("#0.##");
+		nft.setDecimalSeparatorAlwaysShown(false);
+		statusLabel.setText(panelName + " - X: " + nft.format(x) + xUnits.getUnit() + ", Y: " + nft.format(y) + yUnits.getUnit());
 	}
 
 	public void updatePanelMenus() {
@@ -188,8 +225,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 						"Are you sure you want to delete this panel?");
 				if (result == JOptionPane.OK_OPTION) {
 					JSplitPane parent = null;
-					JSplitPane sp = (JSplitPane) LinkedFrame.this
-							.getContentPane();
+					JSplitPane sp = (JSplitPane) LinkedFrame.this.contentPane;
 					LinkedPanel panelToRemove = panels.get(panelName);
 					while (sp.getTopComponent() != panelToRemove) {
 						parent = sp;
@@ -449,4 +485,58 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener {
 		this.addPanel(Units.TIME, Units.FREQUENCY, Color.WHITE);
 		updatePanelMenus();
 	}
+
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseDragged(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseMoved(MouseEvent e) {
+//		System.out.println("(" + e.getX() + "," + e.getY() +")");
+		mouseX = e.getPoint().x;
+		this.repaint();
+		LinkedPanel lp = ((LinkedPanel)(e.getSource()));
+		
+		Graphics2D g = (Graphics2D)lp.getGraphics().create();
+		g.setTransform(lp.updateTransform(g.getTransform()));
+		Point2D currentPoint = LayerUtilities.pixelsToUnits(g, mouseX, e.getY());
+//		System.out.println("(" + currentPoint.getX() + "," + currentPoint.getY() +")");
+		ICoordinateSystem cs = lp.getCoordinateSystem();
+		String layerName = "No Layer";
+		if (lp.getLayerNames() != null && lp.getLayerNames().size() > 0){
+			layerName = lp.getLayerNames().get(lp.getLayerNames().size()-1);
+		}
+		setCurrentStatus(layerName, currentPoint.getX()/cs.getUnitsForAxis(ICoordinateSystem.X_AXIS).getFactor(), currentPoint.getY()/cs.getUnitsForAxis(ICoordinateSystem.Y_AXIS).getFactor(), cs.getUnitsForAxis(CoordinateSystem.X_AXIS), cs.getUnitsForAxis(CoordinateSystem.Y_AXIS));
+		lp.mouseMoved(currentPoint);
+		g.dispose();
+	}
+	
+	public int getMouseX(){
+		return mouseX;
+	}	
 }

@@ -102,7 +102,7 @@ public class LinkedPanel extends JPanel {
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			Graphics2D graphics = (Graphics2D) panel.getGraphics();
+			Graphics2D graphics = (Graphics2D) panel.getGraphics().create();
 			graphics.setTransform(panel.getTransform());
 			if (sl == null){
 				for (Layer l : layers) {
@@ -125,6 +125,7 @@ public class LinkedPanel extends JPanel {
 				previousPoint = e.getPoint();
 				viewPort.drag(millisecondAmount, 0);
 			}
+			graphics.dispose();
 		}
 
 		@Override
@@ -172,7 +173,7 @@ public class LinkedPanel extends JPanel {
 		@Override
 		public void mouseDragged(MouseEvent e) {
 			if (previousPoint != null) {
-				Graphics2D graphics = (Graphics2D) panel.getGraphics();
+				Graphics2D graphics = (Graphics2D) panel.getGraphics().create();
 				graphics.setTransform(panel.getTransform());
 				Point2D unitsCurrent = LayerUtilities.pixelsToUnits(graphics,
 						e.getX(), e.getY());
@@ -190,9 +191,9 @@ public class LinkedPanel extends JPanel {
 
 		@Override
 		public void mouseMoved(MouseEvent e) {
-			if (LinkedPanel.this.mouseMovedListener != null) {
-				mouseMovedListener.mouseMoved(e);
-			}
+//			if (LinkedPanel.this.mouseMovedListener != null) {
+//				mouseMovedListener.mouseMoved(e);
+//			}
 		}
 	}
 
@@ -225,6 +226,12 @@ public class LinkedPanel extends JPanel {
 		drawIndicator(graphics);
 		graphics.dispose();
 		g.dispose();
+	}
+	
+	public void mouseMoved(Point2D e) {
+		if (LinkedPanel.this.mouseMovedListener != null) {
+			mouseMovedListener.mouseMoved(e);
+		}
 	}
 
 	public AffineTransform updateTransform(AffineTransform transform) {

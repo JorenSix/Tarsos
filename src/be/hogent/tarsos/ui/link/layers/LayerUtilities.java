@@ -80,6 +80,40 @@ public class LayerUtilities {
 				e1.printStackTrace();
 			}
 			graphics.transform(transform);
-		
 	}
+	
+	public static void drawVerticalString(Graphics2D graphics, String text, double x, double y,boolean centerHorizontal,boolean centerVertical){
+		
+		AffineTransform transform = graphics.getTransform();
+		Point2D source = new Point2D.Double(x,y);
+		Point2D destination = new Point2D.Double();
+		transform.transform(source, destination);
+		try {
+			transform.invert();
+		} catch (NoninvertibleTransformException e1) {
+			e1.printStackTrace();
+		}
+		graphics.transform(transform);
+		Rectangle2D r = graphics.getFontMetrics().getStringBounds(text, graphics);
+		Rectangle2D r2 = graphics.getFontMetrics().getStringBounds("M", graphics);
+		int xPosition = Math.round((float) (destination.getX() + (centerHorizontal ? r2.getWidth() + r2.getWidth()/2.0f - 1 : r2.getWidth()) ));
+		int yPosition = Math.round((float) (destination.getY() - (centerVertical ? r.getHeight()*(text.length()+2) /2.0f : 0) ));
+//		graphics.drawString(text,xPosition,yPosition);
+		String newText = "";//text.charAt(0) + "\n";
+		
+		for (int i = 0; i < text.length()-1; i++){
+			newText = newText.concat(text.charAt(i) + "\n");
+		}
+		newText = newText.concat(String.valueOf(text.charAt(text.length()-1)));
+		text = newText;
+		for (String line : text.split("\n")){
+			graphics.drawString(line, Math.round(xPosition), Math.round(yPosition -= LayerUtilities.pixelsToUnits(graphics, graphics.getFontMetrics().getHeight(), false)));
+        }
+		try {
+			transform.invert();
+		} catch (NoninvertibleTransformException e1) {
+			e1.printStackTrace();
+		}
+		graphics.transform(transform);
+}
 }
