@@ -34,6 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import be.hogent.tarsos.Tarsos;
+import be.hogent.tarsos.tarsossegmenter.util.io.SegmentationFileFilter;
 import be.hogent.tarsos.tarsossegmenter.util.io.SongFileFilter;
 import be.hogent.tarsos.transcoder.ffmpeg.EncoderException;
 import be.hogent.tarsos.ui.BackgroundTask;
@@ -42,10 +43,13 @@ import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.io.SegmentationFileParser;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
+import be.hogent.tarsos.ui.link.layers.segmentationlayers.SegmentationLayer;
+import be.hogent.tarsos.ui.link.segmentation.Segmentation;
 import be.hogent.tarsos.util.AudioFile;
 import be.hogent.tarsos.util.ConfKey;
 import be.hogent.tarsos.util.Configuration;
@@ -55,7 +59,8 @@ import be.hogent.tarsos.util.FileUtils;
 //Per layer een aparte audiodispatcher
 //FrameSize en overlapping per audiodispatcher
 
-public class LinkedFrame extends JFrame implements ViewPortChangedListener, MouseMotionListener {
+public class LinkedFrame extends JFrame implements ViewPortChangedListener,
+		MouseMotionListener {
 
 	private static final long serialVersionUID = 7301610309790983406L;
 
@@ -75,12 +80,31 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 	private JSplitPane lastSplitPane;
 	private JLabel statusLabel;
 
+	private float lowerFrequencyLimit;
+	private float upperFrequencyLimit;
+
+	public float getLowerFrequencyLimit() {
+		return lowerFrequencyLimit;
+	}
+
+	public void setLowerFrequencyLimit(float lowerFrequencyLimit) {
+		this.lowerFrequencyLimit = lowerFrequencyLimit;
+	}
+
+	public float getUpperFrequencyLimit() {
+		return upperFrequencyLimit;
+	}
+
+	public void setUpperFrequencyLimit(float upperFrequencyLimit) {
+		this.upperFrequencyLimit = upperFrequencyLimit;
+	}
+
 	public static void main(String... strings) {
 		configureLogging();
 		Configuration.checkForConfigurationAndWriteDefaults();
 		Tarsos.configureDirectories(log);
 		LinkedFrame.getInstance();
-		
+
 	}
 
 	protected JSplitPane getLastSplitPane() {
@@ -109,7 +133,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 		this.lastSplitPane = contentPane;
 		this.getContentPane().add(contentPane, BorderLayout.CENTER);
 		this.setJMenuBar(createMenu());
-		
+
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
@@ -118,6 +142,9 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 		this.getContentPane().add(this.createStatusBar(), BorderLayout.SOUTH);
 		this.setFocusable(true);
 		setVisible(true);
+
+		this.lowerFrequencyLimit = 150;
+		this.upperFrequencyLimit = 4000;
 	}
 
 	public void createNewSplitPane() {
@@ -137,19 +164,20 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 			count++;
 		}
 	}
-	
-	private JPanel createStatusBar(){
+
+	private JPanel createStatusBar() {
 		JPanel statusBar = new JPanel(new BorderLayout());
-		statusBar.setPreferredSize(new Dimension(0,16));
-		statusBar.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.black));
+		statusBar.setPreferredSize(new Dimension(0, 16));
+		statusBar.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1,
+				Color.black));
 		statusBar.setBackground(Color.LIGHT_GRAY);
-		
+
 		statusLabel = new JLabel();
 		statusBar.add(statusLabel, BorderLayout.EAST);
 		return statusBar;
 	}
 
-	private void addPanel(Units x, Units y, Color bgColor) {
+	public LinkedPanel addPanel(Units x, Units y, Color bgColor) {
 		if (linkedPanelCount != 0) {
 			createNewSplitPane();
 		}
@@ -163,12 +191,17 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 		doSplitPaneLayout();
 		viewMenu.add(createPanelSubMenu("Panel " + panelID));
 		panelID++;
+		return p;
 	}
-	
-	public void setCurrentStatus(String panelName, double x, double y, Units xUnits, Units yUnits){
+
+	public void setCurrentStatus(String panelName, double x, double y,
+			Units xUnits, Units yUnits) {
 		DecimalFormat nft = new DecimalFormat("#0.##");
 		nft.setDecimalSeparatorAlwaysShown(false);
-		statusLabel.setText(panelName + " - X: " + nft.format(x) + xUnits.getUnit() + ", Y: " + nft.format(y) + yUnits.getUnit());
+		statusLabel
+				.setText(panelName + " - X: " + nft.format(x)
+						+ xUnits.getUnit() + ", Y: " + nft.format(y)
+						+ yUnits.getUnit());
 	}
 
 	public void updatePanelMenus() {
@@ -189,7 +222,8 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 				public void actionPerformed(ActionEvent arg0) {
 					int result = JOptionPane.showConfirmDialog(
 							LinkedFrame.this,
-							"Are you sure you want to delete this layer?", "Delete layer?", JOptionPane.OK_CANCEL_OPTION);
+							"Are you sure you want to delete this layer?",
+							"Delete layer?", JOptionPane.OK_CANCEL_OPTION);
 					if (result == JOptionPane.OK_OPTION) {
 						panels.get(subMenu.getText()).deleteLayer(l);
 						LinkedFrame.instance.updatePanelMenu(subMenu);
@@ -197,6 +231,25 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 				}
 
 			});
+			if (l instanceof FeatureLayer) {
+				JMenuItem calculateLayerMenuItem = new JMenuItem("Calculate");
+				calculateLayerMenuItem.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						if (LinkedFrame.getInstance().getAudioFile() != null) {
+							((FeatureLayer) l).initialise();
+							((FeatureLayer) l).run();
+							updatePanels();
+						} else {
+							JOptionPane.showMessageDialog(
+									LinkedFrame.getInstance(),
+									"Please, first load a audio file.",
+									"No audio file loaded!",
+									JOptionPane.ERROR_MESSAGE);
+						}
+					}
+				});
+				layerMenuItem.add(calculateLayerMenuItem);
+			}
 			layerMenuItem.add(deleteLayerMenuItem);
 			subMenu.add(layerMenuItem);
 		}
@@ -281,8 +334,9 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 	}
 
 	public void setAudioFile(AudioFile file) {
+		Segmentation.getInstance().clear();
+		Segmentation.getInstance().setCalculated(false);
 		this.audioFile = file;
-
 	}
 
 	public void setNewAudioFile(final File newFile) {
@@ -307,7 +361,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 												.getAudioFile()
 												.transcodedPath()));
 					} catch (EncoderException e) {
-						// @TODO: errorafhandeling
 						e.printStackTrace();
 					}
 				}
@@ -410,13 +463,100 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					// TODO
 					// runButton.setEnabled(false);
+
+					// File dir =
+					// Configuration.getFile(ConfKey.file_import_dir);
 					File file = fc.getSelectedFile();
-					// Configuration.set(ConfKey.file_import_dir,
+					Configuration.set(ConfKey.file_import_dir, file.getParent());
 					// file.getParent());
 					setNewAudioFile(file);
 				}
 			}
 		});
+
+		JMenuItem loadSegmentationMenuItem = new JMenuItem(
+				"Load segmentation file...");
+		loadSegmentationMenuItem.addActionListener(new ActionListener() {
+			// @Override
+			public void actionPerformed(ActionEvent e) {
+				if (LinkedFrame.getInstance().getAudioFile() != null) {
+					JFileChooser fc = new JFileChooser();
+					fc.setAcceptAllFileFilterUsed(false);
+					fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					fc.addChoosableFileFilter(new SegmentationFileFilter());
+					File dir = Configuration.getFile(ConfKey.file_import_dir);
+					if (dir.exists() && dir.isDirectory()) {
+						fc.setCurrentDirectory(dir);
+					}
+					int returnVal = fc.showOpenDialog(LinkedFrame.this);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						File file = fc.getSelectedFile();
+						// model.getSegmentation().clearAll();
+						Configuration.set(ConfKey.file_import_dir,
+								file.getParent());
+						if (file.getName().toLowerCase().endsWith(".textgrid")) {
+							SegmentationFileParser.parseFile(file
+									.getAbsolutePath());
+						} else if (file.getName().toLowerCase()
+								.endsWith(".csv")) {
+							// TODO
+							// SegmentationFileParser.parseCSVFile(
+							// file.getAbsolutePath());
+						}
+						Segmentation.getInstance().setCalculated(true);
+						for (LinkedPanel p : panels.values()) {
+							for (Layer l : p.getLayers()) {
+								if (l instanceof SegmentationLayer) { // TODO ||
+																		// l
+																		// instanceof
+																		// BeatLayer
+									((SegmentationLayer) l).run();
+								}
+							}
+						}
+						updatePanels();
+					}
+				} else {
+					JOptionPane.showMessageDialog(LinkedFrame.this,
+							"Please open a soundfile first!",
+							"Error: No Soundfile found",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		//
+		// JMenuItem saveMenuItem = new JMenuItem("Save segmentation as...");
+		// saveMenuItem.addActionListener(new ActionListener() {
+		// // @Override
+		// public void actionPerformed(ActionEvent e) {
+		// JFileChooser fc = new JFileChooser();
+		// fc.setAcceptAllFileFilterUsed(false);
+		// fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		// fc.addChoosableFileFilter(SegmentationFileFilter.getTextGridFileFilter());
+		// fc.addChoosableFileFilter(SegmentationFileFilter.getCSVFileFilter());
+		//
+		// File dir = Configuration.getFile(ConfKey.file_export_dir);
+		// if (dir.exists() && dir.isDirectory()) {
+		// fc.setCurrentDirectory(dir);
+		// }
+		//
+		// int returnVal = fc.showSaveDialog(LinkedFrame.this);
+		// if (returnVal == JFileChooser.APPROVE_OPTION) {
+		// File file = fc.getSelectedFile();
+		// String extension = fc.getFileFilter().getDescription();
+		// Configuration.set(ConfKey.file_export_dir, file.getParent());
+		// if (extension.equals("*.TextGrid")) {
+		// SegmentationFileParser.writeToFile(file.getParent() + "/" +
+		// file.getName().split("\\.")[0] + ".TextGrid",
+		// model.getSegmentation());
+		// }
+		// if (extension.equals("*.csv")) {
+		// SegmentationFileParser.writeToCSVFile(file.getParent() + "/" +
+		// file.getName().split("\\.")[0] + ".csv", model.getSegmentation());
+		// }
+		// }
+		// }
+		// });
 
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.addActionListener(new ActionListener() {
@@ -438,6 +578,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 		});
 
 		fileMenu.add(loadSongMenuItem);
+		fileMenu.add(loadSegmentationMenuItem);
 		fileMenu.addSeparator();
 		fileMenu.add(runMenuItem);
 		fileMenu.addSeparator();
@@ -488,55 +629,65 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener, Mous
 
 	public void mouseClicked(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void mouseEntered(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void mouseExited(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void mousePressed(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void mouseReleased(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void mouseDragged(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void mouseMoved(MouseEvent e) {
-//		System.out.println("(" + e.getX() + "," + e.getY() +")");
+		// System.out.println("(" + e.getX() + "," + e.getY() +")");
 		mouseX = e.getPoint().x;
 		this.repaint();
-		LinkedPanel lp = ((LinkedPanel)(e.getSource()));
-		
-		Graphics2D g = (Graphics2D)lp.getGraphics().create();
+		LinkedPanel lp = ((LinkedPanel) (e.getSource()));
+
+		Graphics2D g = (Graphics2D) lp.getGraphics().create();
 		g.setTransform(lp.updateTransform(g.getTransform()));
-		Point2D currentPoint = LayerUtilities.pixelsToUnits(g, mouseX, e.getY());
-//		System.out.println("(" + currentPoint.getX() + "," + currentPoint.getY() +")");
+		Point2D currentPoint = LayerUtilities
+				.pixelsToUnits(g, mouseX, e.getY());
+		// System.out.println("(" + currentPoint.getX() + "," +
+		// currentPoint.getY() +")");
 		ICoordinateSystem cs = lp.getCoordinateSystem();
 		String layerName = "No Layer";
-		if (lp.getLayerNames() != null && lp.getLayerNames().size() > 0){
-			layerName = lp.getLayerNames().get(lp.getLayerNames().size()-1);
+		if (lp.getLayerNames() != null && lp.getLayerNames().size() > 0) {
+			layerName = lp.getLayerNames().get(lp.getLayerNames().size() - 1);
 		}
-		setCurrentStatus(layerName, currentPoint.getX()/cs.getUnitsForAxis(ICoordinateSystem.X_AXIS).getFactor(), currentPoint.getY()/cs.getUnitsForAxis(ICoordinateSystem.Y_AXIS).getFactor(), cs.getUnitsForAxis(CoordinateSystem.X_AXIS), cs.getUnitsForAxis(CoordinateSystem.Y_AXIS));
+		setCurrentStatus(
+				layerName,
+				currentPoint.getX()
+						/ cs.getUnitsForAxis(ICoordinateSystem.X_AXIS)
+								.getFactor(), currentPoint.getY()
+						/ cs.getUnitsForAxis(ICoordinateSystem.Y_AXIS)
+								.getFactor(),
+				cs.getUnitsForAxis(CoordinateSystem.X_AXIS),
+				cs.getUnitsForAxis(CoordinateSystem.Y_AXIS));
 		lp.mouseMoved(currentPoint);
 		g.dispose();
 	}
-	
-	public int getMouseX(){
+
+	public int getMouseX() {
 		return mouseX;
-	}	
+	}
 }

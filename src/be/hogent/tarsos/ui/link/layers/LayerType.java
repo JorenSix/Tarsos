@@ -10,6 +10,7 @@ import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.segmentation.SegmentationLevel;
 
 public enum LayerType {
 	WAVEFORM, FEATURE_FFT, FEATURE_CQT, FEATURE_PITCH, SEGMENTATION, BEAT;
@@ -67,6 +68,12 @@ public enum LayerType {
 					0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)));
 			break;
 		case SEGMENTATION:
+			SegmentationLevel[] segmentationLevels = SegmentationLevel.values();
+			String [] SegmentationLevelNames = new String[segmentationLevels.length];
+			for (int i =0; i <segmentationLevels.length; i++){
+				SegmentationLevelNames[i] = segmentationLevels[i].getName();
+			}
+			properties.add(new LayerProperty<String>("Level", Arrays.asList(SegmentationLevelNames)));
 			break;
 		case BEAT:
 			break;

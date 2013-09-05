@@ -26,6 +26,11 @@ public class LayerProperty<T> implements ItemListener {
 		this.values = values;
 	}
 	
+	public LayerProperty(String propertyName, T value){
+		this.propertyName = propertyName;
+		this.selectedValue = value;
+	}
+	
 	public JPanel getGUI(){
 		JPanel p = new JPanel();
 		JLabel label = new JLabel(propertyName, SwingConstants.RIGHT);

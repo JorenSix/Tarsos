@@ -1,6 +1,5 @@
 package be.hogent.tarsos.ui.link;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,18 +17,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import be.hogent.tarsos.tarsossegmenter.model.AASModel;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerBuilder;
 import be.hogent.tarsos.ui.link.layers.LayerProperty;
 import be.hogent.tarsos.ui.link.layers.LayerType;
-import be.hogent.tarsos.ui.link.layers.featurelayers.BeatLayer;
-import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
-import be.hogent.tarsos.ui.link.layers.featurelayers.FFTLayer;
-import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
-import be.hogent.tarsos.ui.link.layers.featurelayers.PitchContourLayer;
-import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
-import be.hogent.tarsos.ui.link.layers.segmentationlayers.SegmentationLayer;
 
 public class AddLayerDialog extends JDialog implements ItemListener,
 		ActionListener {
@@ -113,7 +104,7 @@ public class AddLayerDialog extends JDialog implements ItemListener,
 		LayerType lt = (LayerType) this.layerTypeList.getSelectedItem();
 		properties = LayerType.getProperties(lt);
 		this.height = MINHEIGHT;
-		for (LayerProperty lp : properties) {
+		for (LayerProperty<?> lp : properties) {
 			this.getContentPane().add(lp.getGUI());
 			this.height += STEPHEIGHT;
 		}

@@ -28,14 +28,14 @@ import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 import be.hogent.tarsos.ui.link.layers.featurelayers.FeatureLayer;
+import be.hogent.tarsos.ui.link.segmentation.Segmentation;
+import be.hogent.tarsos.ui.link.segmentation.SegmentationLevel;
+import be.hogent.tarsos.ui.link.segmentation.SegmentationList;
 
 public class SegmentationLayer extends FeatureLayer implements KeyListener {
 
-	private int niveau;
-	private ArrayList<Segment> segments;
-	private int lowerFilterFreq;
-	private int upperFilterFreq;
-	private be.hogent.tarsos.tarsossegmenter.model.AudioFile af;
+	private SegmentationLevel niveau;
+	private SegmentationList segments;
 	private Point2D mousePoint;
 	private final float TIME_TOLERANCE = 0.01f;
 	private int movingSegmentIndex;
@@ -46,25 +46,24 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 	protected final LinkedPanel parent;
 
 	public void initialise() {
-		try {
-			af = new be.hogent.tarsos.tarsossegmenter.model.AudioFile(
-					LinkedFrame.getInstance().getAudioFile().transcodedPath());
-		} catch (EncoderException e) {
-			e.printStackTrace();
-		}
 	}
 
-	public SegmentationLayer(final LinkedPanel parent, int niveau,
-			int lowerFilterFreq, int upperFilterFreq) {
+	public SegmentationLayer(final LinkedPanel parent, SegmentationLevel niveau) {
 		super(parent);
 		this.parent = parent;
 		this.niveau = niveau;
-		this.lowerFilterFreq = lowerFilterFreq;
-		this.upperFilterFreq = upperFilterFreq;
 		dragging = false;
-		// parent.setFocusable(true);
+		segments = Segmentation.getInstance().constructNewSegmentationList(niveau);
 		parent.addKeyListener(this);
-		// segments = new ArrayList<Segment>();
+	}
+	
+	public SegmentationLayer(final LinkedPanel parent, SegmentationLevel niveau, String label) {
+		super(parent);
+		this.parent = parent;
+		this.niveau = niveau;
+		dragging = false;
+		segments = Segmentation.getInstance().constructNewSegmentationList(niveau, label);
+		parent.addKeyListener(this);
 	}
 
 	public void setDragging(boolean value) {
@@ -85,12 +84,7 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 	}
 
 	public void run() {
-//		System.out.println("Starting segmentation calculation");
-		AASModel.getInstance().calculateWithDefaults(af, lowerFilterFreq,
-				upperFilterFreq);
-//		System.out.println("Segmentation calculation done");
-		segments = AASModel.getInstance().getSegmentation().getSegments(niveau);
-//		System.out.println("Segments received - size: " + segments.size());
+		segments = Segmentation.getInstance().getSegmentationList(segments.getLabel());
 	}
 
 	public void draw(Graphics2D graphics) {
@@ -222,7 +216,8 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 		
 		graphics.setFont(new Font(graphics.getFont().getName(), Font.BOLD, graphics.getFont().getSize())); 
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-		LayerUtilities.drawVerticalString(graphics, "MACRO", xMin, 0, false, true);
+		String label = niveau.getName().split(" ")[0].toUpperCase();	
+		LayerUtilities.drawVerticalString(graphics, label.substring(0, Math.min(6, label.length())), xMin, 0, false, true);
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_OFF);
 		graphics.setFont(new Font(graphics.getFont().getName(), Font.PLAIN, graphics.getFont().getSize())); 
 		graphics.setStroke(new BasicStroke(1));
@@ -244,17 +239,8 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 
 	public String getName() {
 		String name = "Segmentationlayer";
-		switch (this.niveau) {
-		case AASModel.MACRO_LEVEL:
-			name += " - macro";
-			break;
-		case AASModel.MESO_LEVEL:
-			name += " - meso";
-			break;
-		case AASModel.MICRO_LEVEL:
-			name += " - micro";
-			break;
-		}
+		name += " - ";
+		name += segments.getLabel();
 		return name;
 	}
 
@@ -306,7 +292,6 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 				segments.add(s);
 			}
 		} else {
-			segments = new ArrayList<Segment>();
 			Segment s = new Segment(0, time, "", Color.WHITE);
 			segments.add(s);
 		}

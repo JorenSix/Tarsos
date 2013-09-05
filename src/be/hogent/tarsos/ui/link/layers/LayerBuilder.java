@@ -11,6 +11,7 @@ import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.PitchContourLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
 import be.hogent.tarsos.ui.link.layers.segmentationlayers.SegmentationLayer;
+import be.hogent.tarsos.ui.link.segmentation.SegmentationLevel;
 
 public final class LayerBuilder {
 
@@ -59,8 +60,31 @@ public final class LayerBuilder {
 			return new PitchContourLayer(parent, framesize,
 					Math.round(framesize * overlap));
 		case SEGMENTATION:
-			return new SegmentationLayer(parent, AASModel.MACRO_LEVEL, 100,
-					4000);
+			SegmentationLevel level = null;
+			String label = null;
+			for (LayerProperty lp : properties) {
+				if (lp.getPropertyName().equals("Level")) {
+					level = SegmentationLevel.getLevelByName(String.valueOf(lp
+							.getSelectedValue()));
+				} else if (lp.getPropertyName().equals("Label")) {
+					label = String.valueOf(lp.getSelectedValue());
+				}
+			}
+			if (label != null) {
+				switch (level) {
+				case BEAT:
+					return new BeatLayer(parent);
+				default:
+					return new SegmentationLayer(parent, level, label);
+				}
+			} else {
+				switch (level) {
+				case BEAT:
+					return new BeatLayer(parent);
+				default:
+					return new SegmentationLayer(parent, level);
+				}
+			}
 		case WAVEFORM:
 			return new WaveFormLayer(parent);
 		}

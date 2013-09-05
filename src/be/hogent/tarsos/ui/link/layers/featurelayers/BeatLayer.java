@@ -95,11 +95,4 @@ public class BeatLayer extends FeatureLayer {
 		});
 		adp.run();
 	}
-
-//	@Override
-//	protected void setProperties() {
-//		// TODO Auto-generated method stub
-//		
-//	}
-
 }
