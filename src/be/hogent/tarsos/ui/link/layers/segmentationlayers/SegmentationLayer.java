@@ -217,6 +217,9 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 		graphics.setFont(new Font(graphics.getFont().getName(), Font.BOLD, graphics.getFont().getSize())); 
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 		String label = niveau.getName().split(" ")[0].toUpperCase();	
+		if (label.equals("CUSTOM")){
+			label = this.segments.getLabel().split(" ")[0].toUpperCase();
+		}
 		LayerUtilities.drawVerticalString(graphics, label.substring(0, Math.min(6, label.length())), xMin, 0, false, true);
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_OFF);
 		graphics.setFont(new Font(graphics.getFont().getName(), Font.PLAIN, graphics.getFont().getSize())); 

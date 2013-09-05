@@ -1,6 +1,5 @@
 package be.hogent.tarsos.ui.link;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,30 +14,21 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.coordinatessystems.Quantity;
 
 public class AddPanelDialog extends JDialog implements ItemListener,
 		ActionListener {
 
-	// TODO:
-	// X_Axis
-	// Y_Axis
-	// BGColor
-
-	private final String AXIS_TIME = "Time[s]";
-	private final String AXIS_CENT = "Frequency[cents]";
-	private final String AXIS_AMPL = "Amplitude";
-	private final String AXIS_NONE = "None";
-	private final String[] AXIS_X = {AXIS_TIME};
-	private final String[] AXIS_Y = {AXIS_AMPL, AXIS_CENT, AXIS_NONE};
+	private static final long serialVersionUID = 1L;
 	
-	private Units xUnits;
-	private Units yUnits;
-//	private Color bgColor;
+	private final Quantity[] AXIS_X = {Quantity.TIME};
+	private final Quantity[] AXIS_Y = {Quantity.FREQUENCY, Quantity.AMPLITUDE, Quantity.NONE};
+	
+	private Quantity xQuantity;
+	private Quantity yQuantity;
 
-	private JComboBox xUnitsList;
-	private JComboBox yUnitsList;
-//	private JComboBox<Color> bgColorList;
+	private JComboBox xQuantityList;
+	private JComboBox yQuantityList;
 
 	private JButton createButton = null;
 	private JButton cancelButton = null;
@@ -66,18 +56,18 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 		Dimension dropDownDimension = new Dimension(130,20);
 		Dimension buttonDimension = new Dimension(75,20);
 		
-		xUnitsList = new JComboBox(AXIS_X);
-		xUnitsList.setEnabled(false);
-		xUnitsList.addItemListener(this);
-		xUnitsList.setPreferredSize(dropDownDimension);
+		xQuantityList = new JComboBox(AXIS_X);
+		xQuantityList.setEnabled(false);
+		xQuantityList.addItemListener(this);
+		xQuantityList.setPreferredSize(dropDownDimension);
 		row1Panel.add(new JLabel("X Axis: "));
-		row1Panel.add(xUnitsList);
+		row1Panel.add(xQuantityList);
 		
-		yUnitsList = new JComboBox(AXIS_Y);
-		yUnitsList.addItemListener(this);
-		yUnitsList.setPreferredSize(dropDownDimension);
+		yQuantityList = new JComboBox(AXIS_Y);
+		yQuantityList.addItemListener(this);
+		yQuantityList.setPreferredSize(dropDownDimension);
 		row2Panel.add(new JLabel("Y Axis: "));
-		row2Panel.add(yUnitsList);
+		row2Panel.add(yQuantityList);
 		
 		createButton = new JButton("Create");
 		createButton.addActionListener(this);
@@ -88,8 +78,8 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 		row3Panel.add(createButton);
 		row3Panel.add(cancelButton);
 		
-		xUnits = Units.TIME;
-		yUnits = Units.AMPLITUDE;
+		xQuantity = Quantity.TIME;
+		yQuantity = Quantity.FREQUENCY;
 
 		this.getContentPane().add(row1Panel);
 		this.getContentPane().add(row2Panel);
@@ -98,26 +88,12 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 	}
 
 	public void itemStateChanged(ItemEvent arg0) {
-		if (arg0.getSource().equals(xUnitsList)) {
-			if (arg0.getItemSelectable().getSelectedObjects()[0].toString().equals(AXIS_TIME)) {
-				xUnits = Units.TIME;
-			} else {
-				xUnits = null;
-			}
-		} else if (arg0.getSource().equals(yUnitsList)) {
-			if (arg0.getItemSelectable().getSelectedObjects()[0].toString().equals(AXIS_CENT)) {
-				yUnits = Units.FREQUENCY;
-			} else if (arg0.getItemSelectable().getSelectedObjects()[0].toString().equals(AXIS_AMPL)) {
-				yUnits = Units.AMPLITUDE;
-			} else  if (arg0.getItemSelectable().getSelectedObjects()[0].toString().equals(AXIS_NONE)) {
-				yUnits = Units.NONE;
-			} else {
-				yUnits = null;
-			}
+		if (arg0.getSource().equals(xQuantityList)) {
+			xQuantity = (Quantity) arg0.getItemSelectable().getSelectedObjects()[0];
+		} else if (arg0.getSource().equals(yQuantityList)) {
+			yQuantity = (Quantity) arg0.getItemSelectable().getSelectedObjects()[0];
 		}
 	}
-	
-	
 
 	public void actionPerformed(ActionEvent e) {
 		if (createButton == e.getSource()) {
@@ -129,11 +105,11 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 		}
 	}
 	
-	public Units getXUnits(){
-		return xUnits;
+	public Quantity getXUnits(){
+		return xQuantity;
 	}
 	
-	public Units getYUnits(){
-		return yUnits;
+	public Quantity getYUnits(){
+		return yQuantity;
 	}
 }

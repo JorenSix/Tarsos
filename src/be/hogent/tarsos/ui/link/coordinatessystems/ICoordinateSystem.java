@@ -10,7 +10,7 @@ public interface ICoordinateSystem {
 	public float getMin(char axis);
 	public float getMax(char axis);
 	
-	public Units getUnitsForAxis(char axis);
+	public Quantity getQuantityForAxis(char axis);
 	
 	public void setMax(char axis, float value);
 	public void setMin(char axis, float value);

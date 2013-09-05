@@ -14,7 +14,7 @@ import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 
 public class CoordinateSystem implements ICoordinateSystem {
 	
-	private Units xAxisUnits, yAxisUnits;
+	private Quantity xAxisUnits, yAxisUnits;
 	
 	private AxisLayer xAxis;
 	private AxisLayer yAxis;
@@ -28,14 +28,14 @@ public class CoordinateSystem implements ICoordinateSystem {
 	
 	private final LinkedPanel parent;
 
-	public CoordinateSystem(final LinkedPanel parent, Units xAxisUnits, Units yAxisUnits) {
+	public CoordinateSystem(final LinkedPanel parent, Quantity xAxisUnits, Quantity yAxisUnits) {
 		this.parent = parent;
 		this.xAxisUnits = xAxisUnits;
 		this.yAxisUnits = yAxisUnits;
 		xAxis = getLayerForUnit(ICoordinateSystem.X_AXIS, xAxisUnits);
 		yAxis = getLayerForUnit(ICoordinateSystem.Y_AXIS, yAxisUnits);
-		this.yMin = Units.getMin(yAxisUnits);
-		this.yMax = Units.getMax(yAxisUnits);
+		this.yMin = yAxisUnits.getMin();
+		this.yMax = yAxisUnits.getMax();
 	}
 	
 	public float getDelta(char axis) {
@@ -50,7 +50,7 @@ public class CoordinateSystem implements ICoordinateSystem {
 	}
 
 	// @Override
-	public Units getUnitsForAxis(char axis) {
+	public Quantity getQuantityForAxis(char axis) {
 		if (axis == ICoordinateSystem.X_AXIS) {
 			return xAxisUnits;
 		} else if (axis == ICoordinateSystem.Y_AXIS) {
@@ -126,17 +126,17 @@ public class CoordinateSystem implements ICoordinateSystem {
 	
 	
 	//@TODO: switch case
-	private AxisLayer getLayerForUnit(char direction, Units unit){
+	private AxisLayer getLayerForUnit(char direction, Quantity unit){
 		if (direction != ICoordinateSystem.X_AXIS && direction != ICoordinateSystem.Y_AXIS){
 			throw new IllegalArgumentException("ERROR: A AxisLayer must have a X or Y direction!");
 		}
-		if (unit==Units.TIME){
+		if (unit==Quantity.TIME){
 			return new TimeCoordinateSystemLayer(parent, direction);
-		} else if (unit==Units.FREQUENCY){
+		} else if (unit==Quantity.FREQUENCY){
 			return new CentsCoordinateSystemLayer(parent, direction);
-		} else if (unit==Units.AMPLITUDE){
+		} else if (unit==Quantity.AMPLITUDE){
 			return new AmplitudeCoordinateSystemLayer(parent, direction);
-		} else if (unit==Units.NONE){
+		} else if (unit==Quantity.NONE){
 			return new EmptyCoordinateSystemLayer(parent, direction);
 		} else {
 			throw new IllegalArgumentException("ERROR: Please choose a Unit available in the Units enum!");

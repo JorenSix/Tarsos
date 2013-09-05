@@ -28,12 +28,13 @@ public class ConstantQLayer extends FeatureLayer {
 	/**
 	 * 
 	 */
+	
 	private static final long serialVersionUID = -5067038057235544900L;
 
 	private float maxSpectralEnergy = 0;
 	private float minSpectralEnergy = 100000;
 	private float[] binStartingPointsInCents;
-	private float binWith;// in seconds
+//	private float binWith;// in seconds
 	private float binHeight;// in seconds
 
 	/**
@@ -52,22 +53,22 @@ public class ConstantQLayer extends FeatureLayer {
 	/**
 	 * The default increment in samples.
 	 */
-	private int increment;
+//	private int increment;
 
-	public ConstantQLayer(final LinkedPanel parent, int frameSize, int overlap) {
-		super(parent, frameSize, overlap);
-		increment = frameSize - overlap;
+	public ConstantQLayer(final LinkedPanel parent, int overlap) {
+		super(parent, -1, overlap);
+//		increment = 0;//frameSize - overlap;
 		this.name = "CQT layer";
 	}
 
-	public ConstantQLayer(final LinkedPanel parent, int frameSize, int overlap, int binsPerOctave) {
-		this(parent, frameSize, overlap);
+	public ConstantQLayer(final LinkedPanel parent, int overlap, int binsPerOctave) {
+		this(parent, overlap);
 		this.binsPerOctave = binsPerOctave;
 	}
 
-	public ConstantQLayer(final LinkedPanel parent, int frameSize, int overlap, int minFreqInCents,
+	public ConstantQLayer(final LinkedPanel parent, int overlap, int minFreqInCents,
 			int maxFreqInCents, int binsPerOctave) {
-		this(parent, frameSize, overlap, binsPerOctave);
+		this(parent, overlap, binsPerOctave);
 		this.minimumFrequencyInCents = minFreqInCents;
 		this.maximumFrequencyInCents = maxFreqInCents;
 	}
@@ -93,10 +94,10 @@ public class ConstantQLayer extends FeatureLayer {
 					greyValue = Math.max(0, greyValue);
 					color = new Color(greyValue, greyValue, greyValue);
 					graphics.setColor(color);
-					graphics.fillRect((int) Math.round(timeStart * 1000),
-							Math.round(centsStartingPoint),
-							(int) Math.round(binWith * 1000),
-							(int) Math.ceil(binHeight));
+//					graphics.fillRect((int) Math.round(timeStart * 1000),
+//							Math.round(centsStartingPoint),
+////							(int) Math.round(binWith * 1000),
+//							(int) Math.ceil(binHeight));
 				}
 			}
 		}
@@ -109,14 +110,14 @@ public class ConstantQLayer extends FeatureLayer {
 		float maximumFrequencyInHertz = (float) PitchUnit
 				.absoluteCentToHertz(maximumFrequencyInCents);
 
-		final ConstantQ constantQ = new ConstantQ(this.getFrameSize(),
+		final ConstantQ constantQ = new ConstantQ(
 				LinkedFrame.getInstance().getAudioFile().fileFormat()
 						.getFormat().getSampleRate(), minimumFrequencyInHertz,
 				maximumFrequencyInHertz, binsPerOctave);
 
-		binWith = increment
-				/ LinkedFrame.getInstance().getAudioFile().fileFormat()
-						.getFormat().getSampleRate();
+//		binWith = increment
+//				/ LinkedFrame.getInstance().getAudioFile().fileFormat()
+//						.getFormat().getSampleRate();
 		binHeight = 1200 / (float) binsPerOctave;
 
 		float[] startingPointsInHertz = constantQ.getFreqencies();
@@ -127,7 +128,7 @@ public class ConstantQLayer extends FeatureLayer {
 		}
 
 		int size = constantQ.getFFTlength();
-		final double constantQLag = size / 44100.0 - binWith / 2.0;// in seconds
+//		final double constantQLag = size / 44100.0 - binWith / 2.0;// in seconds
 		try {
 			adp = AudioDispatcher.fromFile(new File(LinkedFrame.getInstance()
 					.getAudioFile().originalPath()), this.getFrameSize(),
@@ -157,8 +158,8 @@ public class ConstantQLayer extends FeatureLayer {
 			}
 
 			public boolean process(AudioEvent audioEvent) {
-				features.put(audioEvent.getTimeStamp() - constantQLag,
-						constantQ.getMagnitudes().clone());
+//				features.put(audioEvent.getTimeStamp() - constantQLag,
+//						constantQ.getMagnitudes().clone());
 				return true;
 			}
 		});

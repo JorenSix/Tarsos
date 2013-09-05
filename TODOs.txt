@@ -1,5 +1,9 @@
-- Meerdere bestandsoorten inladen
+DONE - Meerdere bestandsoorten inladen
 - Custom layer: labelName opvragen
 - Boundries niet over elkaar kunnen trekken
 - Segmentatie's wegschrijven
 - set min-max frequencies visueel
+- rectangle teruggeven via draw string in juiste units
+DONE - eenheiden via configuratie (extra menu)
+DONE - borders weg bij JSplitPane
+- Meer eenheden: h-m-s en hz!

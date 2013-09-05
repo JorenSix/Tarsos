@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
-import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.coordinatessystems.Quantity;
 import be.hogent.tarsos.ui.link.segmentation.SegmentationLevel;
 
 public enum LayerType {
@@ -25,15 +25,15 @@ public enum LayerType {
 
 	public static LayerType[] getLayerTypes(ICoordinateSystem cs) {
 		ArrayList<LayerType> lt = new ArrayList<LayerType>();
-		if (cs.getUnitsForAxis(ICoordinateSystem.X_AXIS) == Units.TIME) {
-			if (cs.getUnitsForAxis(ICoordinateSystem.Y_AXIS) == Units.FREQUENCY) {
+		if (cs.getQuantityForAxis(ICoordinateSystem.X_AXIS) == Quantity.TIME) {
+			if (cs.getQuantityForAxis(ICoordinateSystem.Y_AXIS) == Quantity.FREQUENCY) {
 				lt.add(FEATURE_CQT);
 				lt.add(FEATURE_FFT);
 				lt.add(FEATURE_PITCH);
-			} else if (cs.getUnitsForAxis(ICoordinateSystem.Y_AXIS) == Units.NONE) {
+			} else if (cs.getQuantityForAxis(ICoordinateSystem.Y_AXIS) == Quantity.NONE) {
 				lt.add(SEGMENTATION);
 				lt.add(BEAT);
-			} else if (cs.getUnitsForAxis(ICoordinateSystem.Y_AXIS) == Units.AMPLITUDE) {
+			} else if (cs.getQuantityForAxis(ICoordinateSystem.Y_AXIS) == Quantity.AMPLITUDE) {
 				lt.add(WAVEFORM);
 			}
 		}
@@ -54,8 +54,6 @@ public enum LayerType {
 					.asList(2, 3, 4, 6, 12, 24, 48, 96)));
 			break;
 		case FEATURE_CQT:
-			properties.add(new LayerProperty<Integer>("Framesize", Arrays
-					.asList(4096, 8192, 16384, 32768, 65536)));
 			properties.add(new LayerProperty<Float>("Overlap", Arrays.asList(
 					0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f)));
 			properties.add(new LayerProperty<Integer>("Bins/octave", Arrays

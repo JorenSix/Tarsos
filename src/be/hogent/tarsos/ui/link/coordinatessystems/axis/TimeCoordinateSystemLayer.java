@@ -56,17 +56,7 @@ public class TimeCoordinateSystemLayer extends AxisLayer {
 		float deltaX = cs.getDelta(DIRECTION_X); //Breedte in milisec.
 		int idealStepSize = (int)Math.round((deltaX/((double)amountToDraw)));
 		int step = intervals[getClosestDrawIndex(idealStepSize)];
-//		System.out.println("amountToDraw: " + amountToDraw + " - IdealStepSize: " + idealStepSize + " - Closest Step size: " + step);
-		
-//		int beginDrawInterval = 1000;
-//		intervalIndex = 0;
-		
-//		int smallDrawInterval = beginDrawInterval*intervals[intervalIndex];
-//		while(deltaX/smallDrawInterval*(1500/parent.getWidth()) > 30){
-//			intervalIndex++;
-//			smallDrawInterval = beginDrawInterval*intervals[intervalIndex];
-//		}
-		
+
 		for (int i = (int) cs.getMin(direction); i < cs.getMax(direction); i++) {
 			if (i % (step*5) == 0) {
 				int lineHeight = Math.round(LayerUtilities.pixelsToUnits(

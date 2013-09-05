@@ -20,7 +20,7 @@ import javax.swing.SwingUtilities;
 
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
-import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.coordinatessystems.Quantity;
 import be.hogent.tarsos.ui.link.layers.BackgroundLayer;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
@@ -52,12 +52,12 @@ public class LinkedPanel extends JPanel {
 		layers = new ArrayList<Layer>();
 	}
 
-	public void initialise(Units xAxisUnits, Units yAxisUnits) {
+	public void initialise(Quantity xAxisUnits, Quantity yAxisUnits) {
 		this.setDefaultBackgroundLayer();
 		this.cs = new CoordinateSystem(this, xAxisUnits, yAxisUnits);
 		viewPort = new ViewPort(cs);
 		DragListener dragListener;
-		if (yAxisUnits == Units.AMPLITUDE || yAxisUnits == Units.NONE) {
+		if (yAxisUnits == Quantity.AMPLITUDE || yAxisUnits == Quantity.NONE) {
 			dragListener = new HorizontalDragListener(this);
 		} else {
 			dragListener = new DragListener(this);

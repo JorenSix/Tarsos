@@ -8,6 +8,7 @@ import be.hogent.tarsos.tarsossegmenter.model.AASModel;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.layers.featurelayers.BeatLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.ConstantQLayer;
+import be.hogent.tarsos.ui.link.layers.featurelayers.FFTLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.PitchContourLayer;
 import be.hogent.tarsos.ui.link.layers.featurelayers.WaveFormLayer;
 import be.hogent.tarsos.ui.link.layers.segmentationlayers.SegmentationLayer;
@@ -26,15 +27,13 @@ public final class LayerBuilder {
 		case FEATURE_CQT:
 			int cqtBins = 0;
 			for (LayerProperty lp : properties) {
-				if (lp.getPropertyName().equals("Framesize")) {
-					framesize = (Integer) lp.getSelectedValue();
-				} else if (lp.getPropertyName().equals("Overlap")) {
+				if (lp.getPropertyName().equals("Overlap")) {
 					overlap = (Float) lp.getSelectedValue();
 				} else if (lp.getPropertyName().equals("Bins/octave")) {
 					cqtBins = (Integer) lp.getSelectedValue();
 				}
 			}
-			return new ConstantQLayer(parent, framesize, Math.round(framesize
+			return new ConstantQLayer(parent, Math.round(framesize
 					* overlap), cqtBins);
 		case FEATURE_FFT:
 			int bins = 0;
@@ -47,7 +46,7 @@ public final class LayerBuilder {
 					bins = (Integer) lp.getSelectedValue();
 				}
 			}
-			return new ConstantQLayer(parent, framesize, Math.round(framesize
+			return new FFTLayer(parent, framesize, Math.round(framesize
 					* overlap), bins);
 		case FEATURE_PITCH:
 			for (LayerProperty lp : properties) {

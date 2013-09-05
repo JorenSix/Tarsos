@@ -8,7 +8,7 @@ import be.hogent.tarsos.tarsossegmenter.model.AASModel;
 import be.hogent.tarsos.tarsossegmenter.model.segmentation.Segment;
 import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
-import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.coordinatessystems.Quantity;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerBuilder;
 import be.hogent.tarsos.ui.link.layers.LayerProperty;
@@ -57,7 +57,7 @@ public class SegmentationFileParser {
 										SegmentationLevel.CUSTOM, label);
 					}
 					LinkedPanel p = LinkedFrame.getInstance().addPanel(
-							Units.TIME, Units.NONE, Color.WHITE);
+							Quantity.TIME, Quantity.NONE, Color.WHITE);
 					ArrayList<LayerProperty> properties = new ArrayList<LayerProperty>();
 					properties.add(new LayerProperty<String>("Level", level
 							.getName()));
@@ -260,7 +260,7 @@ public class SegmentationFileParser {
 					}
 
 					LinkedPanel p = LinkedFrame.getInstance().addPanel(
-							Units.TIME, Units.NONE, Color.WHITE);
+							Quantity.TIME, Quantity.NONE, Color.WHITE);
 					ArrayList<LayerProperty> properties = new ArrayList<LayerProperty>();
 					properties.add(new LayerProperty<String>("Level", level
 							.getName()));

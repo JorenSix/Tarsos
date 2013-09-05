@@ -14,7 +14,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +22,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -31,7 +31,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
+import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import be.hogent.tarsos.Tarsos;
 import be.hogent.tarsos.tarsossegmenter.util.io.SegmentationFileFilter;
@@ -42,7 +46,8 @@ import be.hogent.tarsos.ui.ProgressDialog;
 import be.hogent.tarsos.ui.link.ViewPort.ViewPortChangedListener;
 import be.hogent.tarsos.ui.link.coordinatessystems.CoordinateSystem;
 import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
-import be.hogent.tarsos.ui.link.coordinatessystems.Units;
+import be.hogent.tarsos.ui.link.coordinatessystems.Quantity;
+import be.hogent.tarsos.ui.link.coordinatessystems.Unit;
 import be.hogent.tarsos.ui.link.io.SegmentationFileParser;
 import be.hogent.tarsos.ui.link.layers.Layer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
@@ -103,6 +108,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 		configureLogging();
 		Configuration.checkForConfigurationAndWriteDefaults();
 		Tarsos.configureDirectories(log);
+		UIManager.getDefaults().put("SplitPane.border", BorderFactory.createEmptyBorder());
 		LinkedFrame.getInstance();
 
 	}
@@ -127,9 +133,13 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 	}
 
 	public void initialise() {
+		for (Quantity q: Quantity.values()){
+			q.setUnit(Unit.NONE);
+		}
 		this.setMinimumSize(new Dimension(800, 400));
 		this.setContentPane(new JPanel(new BorderLayout()));
 		contentPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+//		contentPane.set
 		this.lastSplitPane = contentPane;
 		this.getContentPane().add(contentPane, BorderLayout.CENTER);
 		this.setJMenuBar(createMenu());
@@ -145,6 +155,8 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 
 		this.lowerFrequencyLimit = 150;
 		this.upperFrequencyLimit = 4000;
+		
+
 	}
 
 	public void createNewSplitPane() {
@@ -177,7 +189,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 		return statusBar;
 	}
 
-	public LinkedPanel addPanel(Units x, Units y, Color bgColor) {
+	public LinkedPanel addPanel(Quantity x, Quantity y, Color bgColor) {
 		if (linkedPanelCount != 0) {
 			createNewSplitPane();
 		}
@@ -194,14 +206,24 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 		return p;
 	}
 
-	public void setCurrentStatus(String panelName, double x, double y,
-			Units xUnits, Units yUnits) {
-		DecimalFormat nft = new DecimalFormat("#0.##");
-		nft.setDecimalSeparatorAlwaysShown(false);
-		statusLabel
-				.setText(panelName + " - X: " + nft.format(x)
-						+ xUnits.getUnit() + ", Y: " + nft.format(y)
-						+ yUnits.getUnit());
+//	public void setCurrentStatus(String panelName, double x, double y,
+//			Quantity xUnits, Quantity yUnits) {
+//		DecimalFormat nft = new DecimalFormat("#0.##");
+//		nft.setDecimalSeparatorAlwaysShown(false);
+//		statusLabel
+//				.setText(panelName + " - X: " + nft.format(x)
+//						+ xUnits.getUnit().getUnit() + ", Y: " + nft.format(y)
+//						+ yUnits.getUnit().getUnit());
+//	}
+	
+	public void setCurrentStatus(String panelName, Point2D p, Quantity xUnits, Quantity yUnits) {
+		statusLabel.setText(panelName + " - X: " + xUnits.getFormattedString(p.getX()) + ", Y: " + yUnits.getFormattedString(p.getY()));
+//		DecimalFormat nft = new DecimalFormat("#0.##");
+//		nft.setDecimalSeparatorAlwaysShown(false);
+//		statusLabel
+//				.setText(panelName + " - X: " + nft.format(x)
+//						+ xUnits.getUnit().getUnit() + ", Y: " + nft.format(y)
+//						+ yUnits.getUnit().getUnit());
 	}
 
 	public void updatePanelMenus() {
@@ -608,7 +630,52 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 		viewMenu.addSeparator();
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
+		
+		JMenu settingsMenu = new JMenu("Settings");
+		Unit.SECONDS.getQuantity();
+		JMenu settingsTimeUnit = new JMenu("Time unit");
+		ButtonGroup group = new ButtonGroup();
+		for(final Unit u: Unit.getUnitsForQuantity(Quantity.TIME)){
+			JRadioButtonMenuItem rb = new JRadioButtonMenuItem(u.getUnit());
+			rb.addChangeListener(new ChangeListener(){
 
+				public void stateChanged(ChangeEvent arg0) {
+					if (((JRadioButtonMenuItem)arg0.getSource()).isSelected())
+						Quantity.TIME.setUnit(u);
+				}
+				
+			});
+			group.add(rb);
+			settingsTimeUnit.add(rb);
+			if (u == Unit.SECONDS){
+				rb.setSelected(true);
+			}
+		}
+       
+		JMenu settingsFrequencyUnit = new JMenu("Frequency unit");
+		ButtonGroup group2 = new ButtonGroup();
+		for(final Unit u: Unit.getUnitsForQuantity(Quantity.FREQUENCY)){
+			JRadioButtonMenuItem rb = new JRadioButtonMenuItem(u.getUnit());
+			rb.addChangeListener(new ChangeListener(){
+
+				public void stateChanged(ChangeEvent arg0) {
+					if (((JRadioButtonMenuItem)arg0.getSource()).isSelected())
+						Quantity.FREQUENCY.setUnit(u);
+				}
+				
+			});
+			group2.add(rb);
+			settingsFrequencyUnit.add(rb);
+			if (u == Unit.CENTS){
+				rb.setSelected(true);
+			}
+		}
+		
+		settingsMenu.add(settingsTimeUnit);
+		settingsMenu.add(settingsFrequencyUnit);
+
+		menuBar.add(settingsMenu);
+		
 		return menuBar;
 	}
 
@@ -623,10 +690,10 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 	}
 
 	private void buildStdSetUp() {
-		this.addPanel(Units.TIME, Units.AMPLITUDE, Color.WHITE);
+		this.addPanel(Quantity.TIME, Quantity.AMPLITUDE, Color.WHITE);
 		LinkedPanel panel = (LinkedPanel) this.lastSplitPane.getTopComponent();
 		panel.addLayer(new WaveFormLayer(panel));
-		this.addPanel(Units.TIME, Units.FREQUENCY, Color.WHITE);
+		this.addPanel(Quantity.TIME, Quantity.FREQUENCY, Color.WHITE);
 		updatePanelMenus();
 	}
 
@@ -677,15 +744,8 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 		if (lp.getLayerNames() != null && lp.getLayerNames().size() > 0) {
 			layerName = lp.getLayerNames().get(lp.getLayerNames().size() - 1);
 		}
-		setCurrentStatus(
-				layerName,
-				currentPoint.getX()
-						/ cs.getUnitsForAxis(ICoordinateSystem.X_AXIS)
-								.getFactor(), currentPoint.getY()
-						/ cs.getUnitsForAxis(ICoordinateSystem.Y_AXIS)
-								.getFactor(),
-				cs.getUnitsForAxis(CoordinateSystem.X_AXIS),
-				cs.getUnitsForAxis(CoordinateSystem.Y_AXIS));
+		setCurrentStatus(layerName, currentPoint, cs.getQuantityForAxis(CoordinateSystem.X_AXIS),
+				cs.getQuantityForAxis(CoordinateSystem.Y_AXIS));
 		lp.mouseMoved(currentPoint);
 		g.dispose();
 	}
