@@ -515,6 +515,7 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 							}
 						}
 						updatePanels();
+						updatePanelMenus();
 					}
 				} else {
 					JOptionPane.showMessageDialog(LinkedFrame.this,

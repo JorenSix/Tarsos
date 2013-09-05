@@ -52,8 +52,6 @@ public class SegmentationFileParser {
 					} else {
 						l = Segmentation.getInstance().constructNewSegmentationList(SegmentationLevel.CUSTOM, label);
 					}
-					System.out.println("Level: " + l.getLevel().getName());
-					System.out.println("Label: " + l.getLabel());
 					LinkedPanel p = LinkedFrame.getInstance().addPanel(Units.TIME, Units.NONE, Color.WHITE);
 					ArrayList<LayerProperty> properties = new ArrayList<LayerProperty>();
 					properties.add(new LayerProperty<String>("Level", level.getName()));
@@ -61,7 +59,6 @@ public class SegmentationFileParser {
 						properties.add(new LayerProperty<String>("Label", label));
 					}
 					Layer layer = LayerBuilder.buildLayer(p, LayerType.SEGMENTATION, properties);
-					System.out.println("Layer name: " + ((SegmentationLayer)layer).getName());
 					p.addLayer(layer);
 				} else if (strLine.contains("intervals [")) {
 					float begin = Float
