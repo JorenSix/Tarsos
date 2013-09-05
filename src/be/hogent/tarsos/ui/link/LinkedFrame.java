@@ -497,13 +497,15 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 						if (file.getName().toLowerCase().endsWith(".textgrid")) {
 							SegmentationFileParser.parseFile(file
 									.getAbsolutePath());
+							Segmentation.getInstance().setCalculated(true);
 						} else if (file.getName().toLowerCase()
 								.endsWith(".csv")) {
 							// TODO
-							// SegmentationFileParser.parseCSVFile(
-							// file.getAbsolutePath());
+							 SegmentationFileParser.parseCSVFile(
+							 file.getAbsolutePath());
+							 Segmentation.getInstance().setCalculated(true);
 						}
-						Segmentation.getInstance().setCalculated(true);
+						
 						for (LinkedPanel p : panels.values()) {
 							for (Layer l : p.getLayers()) {
 								if (l instanceof SegmentationLayer) { // TODO ||

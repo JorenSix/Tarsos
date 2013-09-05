@@ -16,7 +16,7 @@ public class LayerProperty<T> implements ItemListener {
 	private String propertyName;
 	private List<T> values;
 	private T selectedValue;
-	private JComboBox<T> cb;
+	private JComboBox cb;
 	
 	private final Dimension dropDownDimension = new Dimension(110,20);
 	private final Dimension labelDimension = new Dimension(80,20);
@@ -35,7 +35,7 @@ public class LayerProperty<T> implements ItemListener {
 		JPanel p = new JPanel();
 		JLabel label = new JLabel(propertyName, SwingConstants.RIGHT);
 		label.setPreferredSize(labelDimension);
-		cb = new JComboBox<T>((T[])values.toArray());
+		cb = new JComboBox((T[])values.toArray());
 		cb.setPreferredSize(dropDownDimension);
 		cb.addItemListener(this);
 		this.selectedValue = values.get(0);

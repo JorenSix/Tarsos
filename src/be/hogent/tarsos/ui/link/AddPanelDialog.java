@@ -36,8 +36,8 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 	private Units yUnits;
 //	private Color bgColor;
 
-	private JComboBox<String> xUnitsList;
-	private JComboBox<String> yUnitsList;
+	private JComboBox xUnitsList;
+	private JComboBox yUnitsList;
 //	private JComboBox<Color> bgColorList;
 
 	private JButton createButton = null;
@@ -66,14 +66,14 @@ public class AddPanelDialog extends JDialog implements ItemListener,
 		Dimension dropDownDimension = new Dimension(130,20);
 		Dimension buttonDimension = new Dimension(75,20);
 		
-		xUnitsList = new JComboBox<String>(AXIS_X);
+		xUnitsList = new JComboBox(AXIS_X);
 		xUnitsList.setEnabled(false);
 		xUnitsList.addItemListener(this);
 		xUnitsList.setPreferredSize(dropDownDimension);
 		row1Panel.add(new JLabel("X Axis: "));
 		row1Panel.add(xUnitsList);
 		
-		yUnitsList = new JComboBox<String>(AXIS_Y);
+		yUnitsList = new JComboBox(AXIS_Y);
 		yUnitsList.addItemListener(this);
 		yUnitsList.setPreferredSize(dropDownDimension);
 		row2Panel.add(new JLabel("Y Axis: "));

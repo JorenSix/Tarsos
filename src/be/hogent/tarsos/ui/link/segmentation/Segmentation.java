@@ -62,8 +62,8 @@ public class Segmentation {
 	}
 
 	public SegmentationList constructNewSegmentationList(
-			SegmentationLevel niveau, String label) {
-		SegmentationList list = new SegmentationList(niveau, label);
+			SegmentationLevel level, String label) {
+		SegmentationList list = new SegmentationList(level, label);
 		if (!segmentationLists.containsKey(label)) {
 			segmentationLists.put(list.getLabel(), list);
 			return list;

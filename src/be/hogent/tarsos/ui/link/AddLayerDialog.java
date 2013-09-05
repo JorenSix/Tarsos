@@ -27,7 +27,7 @@ public class AddLayerDialog extends JDialog implements ItemListener,
 
 	private static final long serialVersionUID = 4659122917576332161L;
 
-	private JComboBox<LayerType> layerTypeList;
+	private JComboBox layerTypeList;
 
 	private JButton createButton;
 	private JButton cancelButton;
@@ -75,7 +75,7 @@ public class AddLayerDialog extends JDialog implements ItemListener,
 		layerTypePanel = new JPanel();
 		LayerType[] layerTypes = LayerType.getLayerTypes(parent
 				.getCoordinateSystem());
-		layerTypeList = new JComboBox<LayerType>(layerTypes);
+		layerTypeList = new JComboBox(layerTypes);
 		layerTypeList.addItemListener(this);
 		layerTypeList.setPreferredSize(dropDownDimension);
 		JLabel lblTypeLayer = new JLabel("Type layer: ", SwingConstants.RIGHT);
@@ -83,7 +83,7 @@ public class AddLayerDialog extends JDialog implements ItemListener,
 		layerTypePanel.add(Box.createHorizontalGlue());
 		layerTypePanel.add(lblTypeLayer);
 		layerTypePanel.add(layerTypeList);
-		layerType = layerTypeList.getItemAt(0);
+		layerType = (LayerType)layerTypeList.getItemAt(0);
 		buttonPanel = new JPanel();
 		createButton = new JButton("Create");
 		createButton.addActionListener(this);
@@ -113,7 +113,7 @@ public class AddLayerDialog extends JDialog implements ItemListener,
 		this.setMaximumSize(new Dimension(270, height));
 		this.setPreferredSize(new Dimension(270, height));
 		this.setSize(new Dimension(270, height));
-		this.revalidate();
+//		this.revalidate();
 		this.repaint();
 	}
 

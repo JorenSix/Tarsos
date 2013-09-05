@@ -1,0 +1,5 @@
+- Meerdere bestandsoorten inladen
+- Custom layer: labelName opvragen
+- Boundries niet over elkaar kunnen trekken
+- Segmentatie's wegschrijven
+- set min-max frequencies visueel
