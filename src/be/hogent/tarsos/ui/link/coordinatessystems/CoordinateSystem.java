@@ -7,7 +7,7 @@ import be.hogent.tarsos.ui.link.LinkedFrame;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.coordinatessystems.axis.AmplitudeCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.coordinatessystems.axis.AxisLayer;
-import be.hogent.tarsos.ui.link.coordinatessystems.axis.CentsCoordinateSystemLayer;
+import be.hogent.tarsos.ui.link.coordinatessystems.axis.FrequencyCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.coordinatessystems.axis.EmptyCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.coordinatessystems.axis.TimeCoordinateSystemLayer;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
@@ -133,7 +133,7 @@ public class CoordinateSystem implements ICoordinateSystem {
 		if (unit==Quantity.TIME){
 			return new TimeCoordinateSystemLayer(parent, direction);
 		} else if (unit==Quantity.FREQUENCY){
-			return new CentsCoordinateSystemLayer(parent, direction);
+			return new FrequencyCoordinateSystemLayer(parent, direction);
 		} else if (unit==Quantity.AMPLITUDE){
 			return new AmplitudeCoordinateSystemLayer(parent, direction);
 		} else if (unit==Quantity.NONE){

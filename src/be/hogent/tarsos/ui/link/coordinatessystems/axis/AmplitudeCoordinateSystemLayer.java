@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.Quantity;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 
 public class AmplitudeCoordinateSystemLayer extends AxisLayer {
@@ -34,7 +35,7 @@ public class AmplitudeCoordinateSystemLayer extends AxisLayer {
 					graphics.drawLine(i, startOppositeAxis, i,
 							startOppositeAxis + lineWidth);
 				}
-				String text = String.valueOf(i/1000);
+				String text = String.valueOf(Quantity.NONE.getUnit().getValueInUnits(i));
 				int textOffset = Math.round(LayerUtilities.pixelsToUnits(
 						graphics, 12, !horizontal));
 				LayerUtilities.drawString(graphics, text, startOppositeAxis

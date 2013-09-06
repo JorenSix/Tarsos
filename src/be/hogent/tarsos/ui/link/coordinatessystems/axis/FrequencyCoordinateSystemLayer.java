@@ -6,11 +6,12 @@ import java.awt.Graphics2D;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.ViewPort;
 import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.Quantity;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 
-public class CentsCoordinateSystemLayer extends AxisLayer{
+public class FrequencyCoordinateSystemLayer extends AxisLayer{
 	
-	public CentsCoordinateSystemLayer(final LinkedPanel parent, char direction) {
+	public FrequencyCoordinateSystemLayer(final LinkedPanel parent, char direction) {
 		super(parent, direction);
 		this.name = "Cents Axis";
 	}
@@ -28,7 +29,7 @@ public class CentsCoordinateSystemLayer extends AxisLayer{
 			if(i%1200 == 0){
 				int lineWidth = Math.round(LayerUtilities.pixelsToUnits(graphics,8, !horizontal));
 				graphics.drawLine(minOpposite, i, minOpposite+lineWidth,i);
-				String text = String.valueOf(i);
+				String text = String.valueOf(Quantity.FREQUENCY.getUnit().getValueInUnits(i));
 				int textOffset = Math.round(LayerUtilities.pixelsToUnits(graphics,12, !horizontal));
 				LayerUtilities.drawString(graphics,text,minOpposite+textOffset,i,horizontal,!horizontal);
 			} else if(i%100 == 0){

@@ -9,6 +9,7 @@ import java.text.NumberFormat;
 import be.hogent.tarsos.ui.link.LinkedPanel;
 import be.hogent.tarsos.ui.link.ViewPort;
 import be.hogent.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
+import be.hogent.tarsos.ui.link.coordinatessystems.Quantity;
 import be.hogent.tarsos.ui.link.layers.LayerUtilities;
 
 public class TimeCoordinateSystemLayer extends AxisLayer {
@@ -64,7 +65,7 @@ public class TimeCoordinateSystemLayer extends AxisLayer {
 				graphics.drawLine(i, minOpposite, i, minOpposite + lineHeight);
 				int textOffset = Math.round(LayerUtilities.pixelsToUnits(
 						graphics, 12, !horizontal));
-				String text = fmt(i / 1000f);
+				String text = fmt(Quantity.TIME.getUnit().getValueInUnits((double)i));
 				LayerUtilities.drawString(graphics, text, i, minOpposite
 						+ textOffset, horizontal, !horizontal);
 			} else if (i % step == 0) {
@@ -73,7 +74,7 @@ public class TimeCoordinateSystemLayer extends AxisLayer {
 				graphics.drawLine(i, minOpposite, i, minOpposite + lineHeight);
 				int textOffset = Math.round(LayerUtilities.pixelsToUnits(
 						graphics, 9, !horizontal));
-				String text = fmt(i / 1000f);
+				String text = fmt(Quantity.NONE.getUnit().getValueInUnits((double)i));
 				LayerUtilities.drawString(graphics, text, i, minOpposite
 						+ textOffset, horizontal, !horizontal);
 			}

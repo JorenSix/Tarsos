@@ -38,6 +38,9 @@ public class LinkedPanel extends JPanel {
 	private ICoordinateSystem cs;
 
 	private SegmentationLayer mouseMovedListener;
+	
+	private LinkedPanel upperPanel;
+	private LinkedPanel lowerPanel;
 
 	public ViewPort getViewPort() {
 		return viewPort;
@@ -154,6 +157,10 @@ public class LinkedPanel extends JPanel {
 			if (LinkedPanel.this.mouseMovedListener != null
 					&& SwingUtilities.isRightMouseButton(e)) {
 				LinkedPanel.this.mouseMovedListener.addOrRemoveSegment(e.getX());
+			}
+			if (LinkedPanel.this.mouseMovedListener != null
+					&& SwingUtilities.isLeftMouseButton(e)) {
+				LinkedPanel.this.mouseMovedListener.extendSegment(e.getX());
 			}
 		}
 
@@ -314,4 +321,22 @@ public class LinkedPanel extends JPanel {
 	public void deleteLayer(Layer l) {
 		layers.remove(l);
 	}
+
+	public LinkedPanel getUpperPanel() {
+		return upperPanel;
+	}
+
+	public void setUpperPanel(LinkedPanel upperPanel) {
+		this.upperPanel = upperPanel;
+	}
+
+	public LinkedPanel getLowerPanel() {
+		return lowerPanel;
+	}
+
+	public void setLowerPanel(LinkedPanel lowerPanel) {
+		this.lowerPanel = lowerPanel;
+	}
+	
+	
 }

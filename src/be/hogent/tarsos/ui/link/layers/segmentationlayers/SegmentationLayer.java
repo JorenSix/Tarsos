@@ -15,7 +15,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.JTextField;
 
@@ -42,6 +44,8 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 	private int editLabelSegmentIndex;
 	private boolean dragging;
 	private int mouseDraggingPointX;
+	private boolean onSegmentBoundryCircleUp = false;
+	private boolean onSegmentBoundryCircleDown = false;
 
 	protected final LinkedPanel parent;
 
@@ -53,16 +57,19 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 		this.parent = parent;
 		this.niveau = niveau;
 		dragging = false;
-		segments = Segmentation.getInstance().constructNewSegmentationList(niveau);
+		segments = Segmentation.getInstance().constructNewSegmentationList(
+				niveau);
 		parent.addKeyListener(this);
 	}
-	
-	public SegmentationLayer(final LinkedPanel parent, SegmentationLevel niveau, String label) {
+
+	public SegmentationLayer(final LinkedPanel parent,
+			SegmentationLevel niveau, String label) {
 		super(parent);
 		this.parent = parent;
 		this.niveau = niveau;
 		dragging = false;
-		segments = Segmentation.getInstance().constructNewSegmentationList(niveau, label);
+		segments = Segmentation.getInstance().constructNewSegmentationList(
+				niveau, label);
 		parent.addKeyListener(this);
 	}
 
@@ -84,15 +91,24 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 	}
 
 	public void run() {
-		segments = Segmentation.getInstance().getSegmentationList(segments.getLabel());
+		segments = Segmentation.getInstance().getSegmentationList(
+				segments.getLabel());
 	}
 
 	public void draw(Graphics2D graphics) {
+
+		onSegmentBoundryCircleUp = false;
+		onSegmentBoundryCircleDown = false;
+		
 		ICoordinateSystem cs = parent.getCoordinateSystem();
+
 		final int xMin = (int) cs.getMin(ICoordinateSystem.X_AXIS);
 		final int xMax = (int) cs.getMax(ICoordinateSystem.X_AXIS);
 		final int yMin = (int) cs.getMin(ICoordinateSystem.Y_AXIS);
 		final int yMax = (int) cs.getMax(ICoordinateSystem.Y_AXIS);
+
+		Rectangle2D labelRectangle = null;
+
 		if (segments != null && !segments.isEmpty()) {
 			graphics.setStroke(new BasicStroke(Math.round(LayerUtilities
 					.pixelsToUnits(graphics, 4, true))));
@@ -109,14 +125,14 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 					graphics.drawLine(begin, yMin,
 							Math.max(startMiliSec, xMin), yMax);
 
-					LayerUtilities.drawString(graphics, s.label,
-							(end + begin) / 2, 0, true, false);
+					labelRectangle = LayerUtilities.drawString(graphics,
+							s.label, (end + begin) / 2, 0, true, true);
 
 				} else if (startMiliSec <= xMin && endMiliSec >= xMax) {
 					int begin = Math.max(startMiliSec, xMin);
 					int end = Math.min(endMiliSec, xMax);
-					LayerUtilities.drawString(graphics, s.label,
-							(end + begin) / 2, 0, true, true);
+					labelRectangle = LayerUtilities.drawString(graphics,
+							s.label, (end + begin) / 2, 0, true, true);
 				}
 			}
 			int lastBoundry = Math
@@ -127,28 +143,17 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 			}
 
 			if (!dragging && mousePoint != null) {
-				Point2D unitsCurrent = mousePoint;//LayerUtilities.pixelsToUnits(graphics,
-						//(int) Math.round(mousePoint.getX()),
-						//(int) Math.round(mousePoint.getY()));
-//				System.out.println(unitsCurrent.getX() + " - " + unitsCurrent.getY());
+				Point2D unitsCurrent = mousePoint;
 				int i = getSegmentIndex(unitsCurrent.getX());
 				boolean onSegmentBoundry = false;
 				boolean onSegmentLabel = false;
 
+				int xTolerance = Math.round(cs.getDelta(ICoordinateSystem.X_AXIS)/40f);
+				int yTolerance = Math.round(cs.getDelta(ICoordinateSystem.Y_AXIS)/15f);
+				
 				if (i > 0) {
 					float relativeOffset = TIME_TOLERANCE
 							* cs.getDelta(ICoordinateSystem.X_AXIS);
-					FontMetrics metrics = graphics.getFontMetrics(graphics
-							.getFont());
-					int hgt = metrics.getHeight();
-					int adv = metrics.stringWidth(segments.get(i).label);
-					int textOffsetX = Math.round(LayerUtilities.pixelsToUnits(
-							graphics, Math.max(adv, 12), false));
-					int textOffsetY = Math.round(LayerUtilities.pixelsToUnits(
-							graphics, Math.max(hgt, 12), true));
-					// LayerUtilities.drawString(graphics, s.label, (end +
-					// begin)
-					// / 2 - (textOffset / 2), -hgt/2, true, false);
 					double startTime = segments.get(i).startTime * 1000;
 					double endTime = segments.get(i).endTime * 1000;
 					if (unitsCurrent.getX() <= startTime + relativeOffset
@@ -159,26 +164,27 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 						if (i > 0 && i < segments.size()) {
 							onSegmentBoundry = true;
 							movingSegmentIndex = i;
+							if (unitsCurrent.getY() > cs
+									.getMax(ICoordinateSystem.Y_AXIS) - yTolerance && unitsCurrent.getY() < cs
+									.getMax(ICoordinateSystem.Y_AXIS)) {
+								onSegmentBoundryCircleUp = true;
+							} else if (unitsCurrent.getY() < cs
+									.getMin(ICoordinateSystem.Y_AXIS) + yTolerance && unitsCurrent.getY() > cs
+									.getMin(ICoordinateSystem.Y_AXIS)) {
+								onSegmentBoundryCircleDown = true;
+							}
 						}
 					}
 					if (!onSegmentBoundry && i >= 0) {
-						startTime = Math.max(startTime, xMin);
-						endTime = Math.min(endTime, xMax);
-						// @TODO: hoe kom je aan de juiste offset???
-						//
-//						System.out.println("Position: (" + unitsCurrent.getX() + "," + unitsCurrent.getY() + ")" );
-//						System.out.println("Rectangle: (" + ((startTime + endTime) / 2
-//								- (textOffsetX / 4) + 2) + "," + ((startTime + endTime) / 2 + (textOffsetX / 4) + 2) + "," + (-(textOffsetY / 2) * 3) + "," + ((textOffsetY / 2) * 3) + ")"); 
-//						System.out.println("Rectangle: (" + (unitsCurrent.getX() >= (startTime + endTime) / 2
-//								- (textOffsetX / 4) + 2) + "," + (unitsCurrent.getX() <= (startTime + endTime)
-//								/ 2 + (textOffsetX / 4) + 2) + "," + (unitsCurrent.getY() >= -(textOffsetY / 2) * 3) + "," + (unitsCurrent.getY() <= (textOffsetY / 2) * 3) + ")"); 
-						if (unitsCurrent.getX() >= (startTime + endTime) / 2
-								- (textOffsetX / 4) + 2
-								&& unitsCurrent.getX() <= (startTime + endTime)
-										/ 2 + (textOffsetX / 4) + 2
-								&& unitsCurrent.getY() >= -(textOffsetY / 2) * 3
-								&& unitsCurrent.getY() <= (textOffsetY / 2) * 3) {
-//							System.out.println("On label!");
+						if (labelRectangle != null
+								&& unitsCurrent.getX() >= labelRectangle
+										.getMinX()
+								&& unitsCurrent.getX() <= labelRectangle
+										.getMaxX()
+								&& unitsCurrent.getY() >= labelRectangle
+										.getMinY()
+								&& unitsCurrent.getY() <= labelRectangle
+										.getMaxY()) {
 							onSegmentLabel = true;
 							editLabelSegmentIndex = i;
 						}
@@ -186,8 +192,34 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 				}
 
 				if (onSegmentBoundry) {
-					parent.setCursor(Cursor
-							.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+					if (onSegmentBoundryCircleUp) {
+						SegmentationLayer l = this.getUpperSegmentationLayer();
+						if (l != null) {
+							graphics.setColor(Color.BLUE);
+							graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+							graphics.fillArc(Math.round(segments.get(movingSegmentIndex).startTime*1000-xTolerance/2), Math.round(cs.getMax(ICoordinateSystem.Y_AXIS)-yTolerance/2), xTolerance, yTolerance, 0, 180);
+							graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_OFF);
+							graphics.setColor(Color.BLACK);
+							parent.setCursor(Cursor
+									.getPredefinedCursor(Cursor.HAND_CURSOR));
+//							l.drawTempBoundry(graphics, segments.get(movingSegmentIndex).startTime*1000);
+						}
+					} else if (onSegmentBoundryCircleDown) {
+						SegmentationLayer l = this.getLowerSegmentationLayer();
+						if (l != null) {
+							graphics.setColor(Color.BLUE);
+							graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+							graphics.fillArc(Math.round(segments.get(movingSegmentIndex).startTime*1000-xTolerance/2), Math.round(cs.getMin(ICoordinateSystem.Y_AXIS)-yTolerance/2), xTolerance, yTolerance, 0, -180);
+							graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_OFF);
+							graphics.setColor(Color.BLACK);
+							parent.setCursor(Cursor
+									.getPredefinedCursor(Cursor.HAND_CURSOR));
+//							l.drawTempBoundry(graphics, segments.get(movingSegmentIndex).startTime*1000);
+						}
+					} else {
+						parent.setCursor(Cursor
+								.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+					}
 				} else if (onSegmentLabel) {
 					parent.setCursor(Cursor
 							.getPredefinedCursor(Cursor.TEXT_CURSOR));
@@ -213,16 +245,22 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 			}
 		}
 		graphics.setColor(Color.black);
-		
-		graphics.setFont(new Font(graphics.getFont().getName(), Font.BOLD, graphics.getFont().getSize())); 
-		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-		String label = niveau.getName().split(" ")[0].toUpperCase();	
-		if (label.equals("CUSTOM")){
+
+		graphics.setFont(new Font(graphics.getFont().getName(), Font.BOLD,
+				graphics.getFont().getSize()));
+		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		String label = niveau.getName().split(" ")[0].toUpperCase();
+		if (label.equals("CUSTOM")) {
 			label = this.segments.getLabel().split(" ")[0].toUpperCase();
 		}
-		LayerUtilities.drawVerticalString(graphics, label.substring(0, Math.min(6, label.length())), xMin, 0, false, true);
-		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_OFF);
-		graphics.setFont(new Font(graphics.getFont().getName(), Font.PLAIN, graphics.getFont().getSize())); 
+		LayerUtilities.drawVerticalString(graphics,
+				label.substring(0, Math.min(6, label.length())), xMin, 0,
+				false, true);
+		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_OFF);
+		graphics.setFont(new Font(graphics.getFont().getName(), Font.PLAIN,
+				graphics.getFont().getSize()));
 		graphics.setStroke(new BasicStroke(1));
 	}
 
@@ -251,12 +289,13 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 		mousePoint = e;
 		parent.repaint();
 	}
-
+	
 	public void addOrRemoveSegment(int pixelUnitX) {
 		Graphics2D g = (Graphics2D) parent.getGraphics().create();
 		g.setTransform(parent.updateTransform(g.getTransform()));
 		Point2D unitsCurrent = LayerUtilities.pixelsToUnits(g,
 				(int) Math.round(pixelUnitX), 0);
+		
 		float time = (float) unitsCurrent.getX();
 		float relativeOffset = TIME_TOLERANCE
 				* parent.getCoordinateSystem().getDelta(
@@ -325,4 +364,67 @@ public class SegmentationLayer extends FeatureLayer implements KeyListener {
 			parent.repaint();
 		}
 	}
+
+	// TODO this returns the segmentationlayer added just before this one. This
+	// is not always correct!
+	private SegmentationLayer getUpperSegmentationLayer() {
+		SegmentationLayer sl = null;
+		if (this.parent.getUpperPanel() != null) {
+			for (Layer l : this.parent.getUpperPanel().getLayers()) {
+				if (l instanceof SegmentationLayer) {
+					sl = (SegmentationLayer) l;
+				}
+			}
+		}
+		return sl;
+	}
+
+	private SegmentationLayer getLowerSegmentationLayer() {
+		SegmentationLayer sl = null;
+		if (this.parent.getLowerPanel() != null) {
+			for (Layer l : this.parent.getLowerPanel().getLayers()) {
+				if (l instanceof SegmentationLayer) {
+					sl = (SegmentationLayer) l;
+				}
+			}
+		}
+		return sl;
+	}
+
+	// X in time format
+//	public void drawTempBoundry(Graphics2D g, double x) {
+//		Graphics2D graphics = (Graphics2D) parent.getGraphics().create();
+////		graphics.setTransform(g.getTransform());
+//		graphics.setStroke(new BasicStroke(Math.round(LayerUtilities
+//				.pixelsToUnits(graphics, 4, true))));
+//		graphics.setColor(Color.green);
+//		System.out.println("Drawing line on (" + (int) Math.round(x) + "," +
+//				Math.round(this.parent.getCoordinateSystem().getMin(ICoordinateSystem.Y_AXIS)) + ")(" +
+//				(int) Math.round(x) + "," + 
+//				Math.round(this.parent.getCoordinateSystem().getMax(ICoordinateSystem.Y_AXIS)) + ")");
+//		graphics.drawLine(
+//				(int) Math.round(x),
+//				Math.round(this.parent.getCoordinateSystem().getMin(ICoordinateSystem.Y_AXIS)),
+//				(int) Math.round(x),
+//				Math.round(this.parent.getCoordinateSystem().getMax(ICoordinateSystem.Y_AXIS))
+//		);
+//	}
+
+	// TODO: beter zou zijn om de tijdscoordinaten te gebruiken in plaats van de muiscoordinaten (kopie maken van de waarde)
+	public void extendSegment(int x) {
+		
+//		Graphics2D g = (Graphics2D)this.parent.getGraphics();
+//		Point2D unitsCurrent = LayerUtilities.pixelsToUnits(g,
+//				(int) Math.round(x), 0);
+//		Void toevoegen om een exact tijdstip toe te voegen.. eventueel gebaseerd op AddOrRemoveSegment.
+		
+		System.out.println("Pixel: " + x);
+		if (onSegmentBoundryCircleUp && this.getUpperSegmentationLayer() != null){
+			this.getUpperSegmentationLayer().addOrRemoveSegment(x);
+		} else if (onSegmentBoundryCircleDown && this.getLowerSegmentationLayer() != null){
+			this.getLowerSegmentationLayer().addOrRemoveSegment(x);
+		}
+	}
+	
+	
 }

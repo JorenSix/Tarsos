@@ -190,10 +190,15 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 	}
 
 	public LinkedPanel addPanel(Quantity x, Quantity y, Color bgColor) {
+		LinkedPanel lastPanel = (LinkedPanel)lastSplitPane.getTopComponent();
 		if (linkedPanelCount != 0) {
 			createNewSplitPane();
 		}
 		LinkedPanel p = new LinkedPanel();
+		if (lastPanel != null){
+			p.setUpperPanel(lastPanel);
+			lastPanel.setLowerPanel(p);
+		}
 		p.addMouseMotionListener(this);
 		p.initialise(x, y);
 		p.getViewPort().addViewPortChangedListener(this);
@@ -302,6 +307,12 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 					JSplitPane parent = null;
 					JSplitPane sp = (JSplitPane) LinkedFrame.this.contentPane;
 					LinkedPanel panelToRemove = panels.get(panelName);
+					if (panelToRemove.getUpperPanel() != null){
+						panelToRemove.getUpperPanel().setLowerPanel(panelToRemove.getLowerPanel());
+						if (panelToRemove.getLowerPanel() != null){
+							panelToRemove.getLowerPanel().setUpperPanel(panelToRemove.getUpperPanel());
+						}
+					}
 					while (sp.getTopComponent() != panelToRemove) {
 						parent = sp;
 						sp = (JSplitPane) sp.getBottomComponent();
@@ -728,7 +739,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 	}
 
 	public void mouseMoved(MouseEvent e) {
-		// System.out.println("(" + e.getX() + "," + e.getY() +")");
 		mouseX = e.getPoint().x;
 		this.repaint();
 		LinkedPanel lp = ((LinkedPanel) (e.getSource()));
@@ -737,8 +747,6 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 		g.setTransform(lp.updateTransform(g.getTransform()));
 		Point2D currentPoint = LayerUtilities
 				.pixelsToUnits(g, mouseX, e.getY());
-		// System.out.println("(" + currentPoint.getX() + "," +
-		// currentPoint.getY() +")");
 		ICoordinateSystem cs = lp.getCoordinateSystem();
 		String layerName = "No Layer";
 		if (lp.getLayerNames() != null && lp.getLayerNames().size() > 0) {
@@ -752,5 +760,9 @@ public class LinkedFrame extends JFrame implements ViewPortChangedListener,
 
 	public int getMouseX() {
 		return mouseX;
+	}
+	
+	public HashMap<String, LinkedPanel> getPanels(){
+		return panels;
 	}
 }
