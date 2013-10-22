@@ -430,30 +430,31 @@ public class TarsosSynth implements ConfigChangeListener {
 	
 	private void setConfiguredInstrument() {
 		for(MidiDevice synthDevice : synthDevices){
-		if (synthDevice instanceof Synthesizer) {
-			Synthesizer synth = (Synthesizer) synthDevice;
-			Instrument[] available = synth.getAvailableInstruments();
-			int instrumentIndex = Configuration.getInt(ConfKey.midi_instrument_index);
-			
-			//check and reset instrument index
-			int defaultInstrumentIndex = 0;
-			if(instrumentIndex >= available.length){
-				LOG.warning("Ignored configured instrument index (" + instrumentIndex + ") reset to "  + defaultInstrumentIndex);
-				Configuration.set(ConfKey.midi_instrument_index, defaultInstrumentIndex);
-				instrumentIndex = Configuration.getInt(ConfKey.midi_instrument_index);
+			if (synthDevice instanceof Synthesizer) {
+				Synthesizer synth = (Synthesizer) synthDevice;
+				Instrument[] available = synth.getAvailableInstruments();
+				int instrumentIndex = Configuration.getInt(ConfKey.midi_instrument_index);
+				
+				//check and reset instrument index
+				int defaultInstrumentIndex = 0;
+				if(instrumentIndex >= available.length){
+					//LOG.warning("Ignored configured instrument index (" + instrumentIndex + ") reset to "  + defaultInstrumentIndex);
+					//Configuration.set(ConfKey.midi_instrument_index, defaultInstrumentIndex);
+					//instrumentIndex = Configuration.getInt(ConfKey.midi_instrument_index);
+					//instrumentIndex = defaultInstrumentIndex;
+				}
+				Instrument configuredInstrument = available[instrumentIndex];
+	
+				MidiChannel channel = synth.getChannels()[PITCH_BEND_MIDI_CHANNEL];
+				Patch patch = configuredInstrument.getPatch();
+				channel.programChange(patch.getBank(), patch.getProgram());
+				
+				channel = synth.getChannels()[TUNED_MIDI_CHANNEL];
+				patch = configuredInstrument.getPatch();
+				channel.programChange(patch.getBank(), patch.getProgram());
+				
+				LOG.info(String.format("Configured synth with %s.", configuredInstrument.getName()));
 			}
-			Instrument configuredInstrument = available[instrumentIndex];
-
-			MidiChannel channel = synth.getChannels()[PITCH_BEND_MIDI_CHANNEL];
-			Patch patch = configuredInstrument.getPatch();
-			channel.programChange(patch.getBank(), patch.getProgram());
-			
-			channel = synth.getChannels()[TUNED_MIDI_CHANNEL];
-			patch = configuredInstrument.getPatch();
-			channel.programChange(patch.getBank(), patch.getProgram());
-			
-			LOG.info(String.format("Configured synth with %s.", configuredInstrument.getName()));
-		}
 		}
 	}
 	
