@@ -55,7 +55,7 @@
 			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosTranscoder-1.0-bin.jar"/>
 
 			<!-- TarsosDSP -->
-			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosDSP-1.6-bin.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosDSP-1.7-bin.jar"/>
 
 
 			<!-- Other Dependencies -->
