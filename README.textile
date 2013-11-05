@@ -1,10 +1,10 @@
 h1. Tarsos
 
-Tarsos is a software tool to analyze and experiment with pitch organization in all kinds of musics. Most of the analysis is done using pitch histograms and octave reduced pitch class histograms. Tarsos has an intuitive user interface and contains a couple of command line programs to analyse large sets of music.
+Tarsos is a software tool to analyze and experiment with pitch organization in all kinds of musics. Most of the analysis is done using pitch histograms and octave reduced pitch class histograms. Tarsos has an intuitive user interface and contains a couple of command line programs to analyze large sets of music.
 
-To see Tarsos in action you can check the "Tarsos screencast":http://www.youtube.com/watch?v=nzDdYvqgcOo. More detailed information, news and updates can be found on the "Tarsos website":http://tarsos.0110.be  
+To see Tarsos in action you can check the "Tarsos screencast":http://www.youtube.com/watch?v=nzDdYvqgcOo. More detailed information, news and updates can be found on the "Tarsos website":http://0110.be  
 
-To give Tarsos a try you can "start Tarsos using JAVA WebStart":http://tarsos.0110.be/releases/Tarsos-latest.jnlp or download the "executable Tarsos JAR-file":http://tarsos.0110.be/releases/Tarsos-latest/Tarsos-latest.jar. A JAVA 5 runtime is required, a more recent runtime is preferred. A "manual for Tarsos":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Manual.pdf an a complete "API reference for Tarsos":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Documentation/ are also available. Drop me a line if you use Tarsos. Always nice to hear how this software is used.
+To give Tarsos a try, download the "executable Tarsos JAR-file":http://0110.be/releases/Tarsos-latest/Tarsos-latest.jar. A JAVA 6 runtime is required, a more recent runtime is preferred. A "manual for Tarsos":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Manual.pdf an a complete "API reference for Tarsos":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Documentation/ are also available. Drop me a line if you use Tarsos. Always nice to hear how this software is used.
 
 h2. Develop Tarsos
 
@@ -18,7 +18,7 @@ When everything runs correctly you should be able to run Tarsos, also the Javado
 
 h2. Credits
 
-Tarsos is developed at University College Ghent, Faculty of Music "http://cons.hogent.be":http://cons.hogent.be
+Tarsos is developed at the "University College Ghent, Faculty of Music":http://cons.hogent.be and "University Ghent":http://ugent.be.
 
 Tarsos uses a number of open source libraries:
 * "Gervill":https://gervill.dev.java.net/: a software sound synthesizer, supports the MIDI Tuning Standard. "API":https://gervill.dev.java.net/nonav/javadoc/index.html.
