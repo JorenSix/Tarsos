@@ -1,0 +1,36 @@
+@prefix xsd:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix vamp:     <http://purl.org/ontology/vamp/> .
+@prefix :         <#> .
+
+:transform_plugin a vamp:Plugin ;
+    vamp:identifier "aubiopitch" .
+
+:transform_library a vamp:PluginLibrary ;
+    vamp:identifier "vamp-aubio" ;
+    vamp:available_plugin :transform_plugin .
+
+:transform a vamp:Transform ;
+    vamp:plugin :transform_plugin ;
+    vamp:step_size "512"^^xsd:int ; 
+    vamp:block_size "2048"^^xsd:int ; 
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "maxfreq" ] ;
+        vamp:value "8000.00"^^xsd:float ;
+    ] ;
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "minfreq" ] ;
+        vamp:value "40.00"^^xsd:float ;
+    ] ;
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "pitchtype" ] ;
+        vamp:value "2"^^xsd:float ;
+    ] ;
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "silencethreshold" ] ;
+        vamp:value "-80"^^xsd:float ;
+    ] ;
+    vamp:parameter_binding [
+        vamp:parameter [ vamp:identifier "wraprange" ] ;
+        vamp:value "0"^^xsd:float ;
+    ] ;
+    vamp:output [ vamp:identifier "frequency" ] .

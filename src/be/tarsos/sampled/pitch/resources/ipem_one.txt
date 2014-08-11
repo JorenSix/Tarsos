@@ -1,0 +1,8 @@
+pitchdetection old	=> 1 kandidaat per 1/100 sec
+
+Execute with:
+
+ipem_one.exe audio/file.wav data/output.txt
+
+
+

@@ -2,7 +2,7 @@
 <project default="create_run_jar" name="Create Runnable Jar for Project Tarsos">
 
 	<!-- Configuration -->
-	<property name="version"   value="1.0"/>
+	<property name="version"   value="1.1"/>
 	<property name="built_by"  value="${user.name}"/>
 
 	<tstamp>
@@ -15,23 +15,23 @@
 
 	<target name="compile">
 		<mkdir dir="../bin" />
-		<javac srcdir="../src" destdir="../bin">
+		<javac srcdir="../src" destdir="../bin"  includeantruntime="false">
 			<classpath>
 				<fileset dir="../lib" includes="*.jar" />
 			</classpath>
 		</javac>
 
 		<!-- copy all needed resources to bin dir -->
-		<copy todir="../bin/be/hogent/tarsos/sampled/pitch/resources">
-			<fileset dir="../src/be/hogent/tarsos/sampled/pitch/resources" />
+		<copy todir="../bin/be/tarsos/sampled/pitch/resources">
+			<fileset dir="../src/be/tarsos/sampled/pitch/resources" />
 		</copy>
 		
-		<copy todir="../bin/be/hogent/tarsos/ui/resources">
-			<fileset dir="../src/be/hogent/tarsos/ui/resources" />
+		<copy todir="../bin/be/tarsos/ui/resources">
+			<fileset dir="../src/be/tarsos/ui/resources" />
 		</copy>
 		
-		<copy todir="../bin/be/hogent/tarsos/util">
-			<fileset dir="../src/be/hogent/tarsos/util">
+		<copy todir="../bin/be/tarsos/util">
+			<fileset dir="../src/be/tarsos/util">
 				<include name="*.properties"/>
 			</fileset>
 		</copy>
@@ -42,7 +42,7 @@
 		<jar destfile="../build/Tarsos-${version}.jar" filesetmanifest="mergewithoutmain" duplicate="preserve">
 
 			<manifest>
-				<attribute name="Main-Class" value="be.hogent.tarsos.Tarsos"/>
+				<attribute name="Main-Class" value="be.tarsos.Tarsos"/>
 				<!-- Standard manifest attributes -->
 				<attribute name="Implementation-Version" value="${version}-${DSTAMP}"/>
 				<attribute name="Built-By" value="${built_by}"/>
@@ -52,11 +52,10 @@
 			<fileset dir="../bin"/>
 
 			<!-- TarsosTranscoder -->
-			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosTranscoder-1.0-bin.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosTranscoder-1.2-bin.jar"/>
 
 			<!-- TarsosDSP -->
-			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosDSP-1.7-bin.jar"/>
-
+			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosDSP-1.9.jar"/>
 
 			<!-- Other Dependencies -->
 			<zipfileset excludes="META-INF/*.SF" src="../lib/commons-math-2.0.jar"/>
@@ -88,15 +87,15 @@
 	        	access="protected" 
 	        	author="true" 
 	        	sourcepath="../src"
-	        	classpath="../lib/TarsosTranscoder-1.0-bin.jar;../lib/TarsosDSP-1.4-bin.jar;../lib/jave-1.0.2.jar;../lib/forms-1.3.0.jar;../lib/commons-math-2.0.jar;../lib/gervill.jar;../lib/kd.jar;../lib/swing-layout-1.0.jar;../lib/TableLayout-20050920.jar;../lib/mydoggy-api-1.4.2.jar;../lib/jopt-simple-3.2.jar;../lib/ptsupport.jar;../lib/java-getopt-1.0.13.jar;../lib/mydoggy-res-1.4.2.jar;../lib/mydoggy-plaf-1.4.2.jar;../lib/jgoodies-common-1.0.0.jar" 
+	        	classpath="../lib/TarsosTranscoder-1.2-bin.jar;../lib/TarsosDSP-1.9.jar;../lib/forms-1.3.0.jar;../lib/commons-math-2.0.jar;../lib/gervill.jar;../lib/kd.jar;../lib/swing-layout-1.0.jar;../lib/TableLayout-20050920.jar;../lib/mydoggy-api-1.4.2.jar;../lib/jopt-simple-3.2.jar;../lib/ptsupport.jar;../lib/java-getopt-1.0.13.jar;../lib/mydoggy-res-1.4.2.jar;../lib/mydoggy-plaf-1.4.2.jar;../lib/jgoodies-common-1.0.0.jar" 
 	        	destdir="../doc" 
-	        	doctitle="Tarsos javadoc" 
+	        	doctitle="Tarsos" 
 	        	nodeprecated="false" 
 	        	nodeprecatedlist="false" 
 	        	noindex="false" 
 	        	nonavbar="false" 
 	        	notree="false" 
-	        	source="1.5"
+	        	source="1.7"
 	        	splitindex="true" 
 	        	use="true" 
 	        	version="true">
@@ -107,5 +106,9 @@
 		<copy todir="Tarsos-${version}-Documentation">
 			<fileset dir="../doc" />
 		</copy>
+	</target>
+	
+	<target name="install" depends="javadoc,create_run_jar">
+		<copy file="Tarsos-${version}.jar" tofile="/opt/tarsos/tarsos.jar"/>
 	</target>
 </project>

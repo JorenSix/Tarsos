@@ -1,0 +1,1 @@
+pitchdetection kan	=> 6 kandidaten per 1/100 sec + hun evidentie (alle scripts werken hiermee)

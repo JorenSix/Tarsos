@@ -1,0 +1,80 @@
+%\documentclass{article}
+%\usepackage{scalefnt} %Mandatory: used to scale font in the pitch class histo
+%\usepackage{tikz} %Mandatory: used to draw the pitch class histo
+%\usepackage{pgfplots}
+%\begin{document}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[x=0.008cm,y=0.008cm,scale=0.7]
+
+  \def\xmin{0}
+  \def\xmax{1200}
+  \def\ymin{0}
+  \def\ymax{650}
+  \def\ticksize{12}
+    
+  % plot the data from the file data.dat
+  % smooth the curve and mark the data point with a dot
+  \draw[color=blue] plot[mark=*,mark size=0.5pt] file
+  {%dat.file.dat%};  
+
+  % xticks
+ \foreach \x in {%comma_separated_pitch_classes%}
+     \draw[style=solid] (\x,\ymin+\ticksize) -- (\x,\ymin-\ticksize);
+     
+ % xticks labels
+  \foreach \x in {%comma_separated_pitch_classes%}
+    \node at (\x, \ymin) [below] {$\x$};
+ 
+  % Scale as a reference (dashed light gray)
+  \foreach \x in {%comma_separated_pitch_classes%}
+    \draw[style=dashed,color=gray] (\x,\ymin) -- (\x,\ymax);
+   
+  % y ticks (every 100 annotations)
+  \foreach \y in {100,200,...,600}
+    \draw[style=solid] (\xmin+\ticksize,\y) -- (\xmin-\ticksize,\y);
+    
+  %yticks labels
+  \foreach \y in {100,200,...,600}
+    \node at (\xmin,\y) [left] {$\y$};
+  
+  % axes
+  \draw[-|] (\xmin,\ymin) -- (\xmax,\ymin); 
+  \draw[->] (\xmin,\ymin) -- (\xmin,\ymax+50);
+  
+  % axes labels
+  \node at (625,-60) [below] {$Pitch\ (cent)$};
+  \node at (-200,325) [below,rotate=90] {$Number\ of\ annotations$};
+ 
+
+\end{tikzpicture}
+\label{fig:pitch_class_histogram}
+\caption{Pitch class histogram}
+\end{figure}
+
+PGF plots alternative:
+
+\begin{figure}
+\centering
+  \begin{tikzpicture}
+    \begin{axis}[axis x line*=bottom,
+      extra x ticks={%comma_separated_pitch_classes%},
+      xtick={0},
+      xmin=0,
+      xmax=1200,
+      extra x tick style={grid=major},
+      axis y line=left,
+      xlabel=$Pitch\ (cent)$,
+      ylabel=$Number\ of\ annotations$,
+      legend style={legend pos=outer north east,cells={anchor=west}}]
+    
+      \addplot[line width=0.2pt,smooth,mark=triangle,red,mark size=1.5pt] plot file {%dat.file.dat%};
+      \addlegendentry{%dat.file.dat%}
+    \end{axis}
+  \end{tikzpicture}
+  \label{fig:pitch_class_histogram}
+  \caption{%dat.file.dat% Pitch class histogram}
+\end{figure}
+
+%\end{document}
