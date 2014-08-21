@@ -58,6 +58,8 @@ import be.tarsos.Tarsos;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
+import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchDetector;
 import be.tarsos.dsp.pitch.Yin;
@@ -75,6 +77,7 @@ import be.tarsos.util.SignalPowerExtractor;
  */
 public class PitchToMidi extends AbstractTarsosApp {
 
+	
 	/**
 	 * The number of MIDI keys.
 	 */
@@ -87,7 +90,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 	private final Note[] notes;
 	private final List<Note> noteList;
 	
-	private int bufferCount = 0;
+	//private int bufferCount = 0;
 
 	private boolean toFile;
 
@@ -312,10 +315,11 @@ public class PitchToMidi extends AbstractTarsosApp {
 					line.open(format, numberOfSamples);
 					line.start();
 					final AudioInputStream stream = new AudioInputStream(line);
-					proc = new AudioDispatcher(stream, samplesPerBuffer, 0);
+					JVMAudioInputStream inputStream = new JVMAudioInputStream(stream); 
+					proc = new AudioDispatcher(inputStream, samplesPerBuffer, 0);
 				} else {
 					final String path = new AudioFile(inputAudio).transcodedPath();
-					proc = AudioDispatcher.fromFile(new File(path), samplesPerBuffer,1024);
+					proc = AudioDispatcherFactory.fromFile(new File(path), samplesPerBuffer,1024);
 				}
 
 				proc.addAudioProcessor(processor);
@@ -376,7 +380,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @seebe.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#
+		 * @seebe.tarsos.util.RealTimeAudioProcessor.AudioProcessor#
 		 * processingFinished()
 		 */
 		public void processingFinished() {
@@ -414,7 +418,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 
 			sendNoteMessages();
 
-			bufferCount++;
+			//bufferCount++;
 			return true;
 		}
 
@@ -431,7 +435,7 @@ public class PitchToMidi extends AbstractTarsosApp {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @seebe.hogent.tarsos.util.RealTimeAudioProcessor.AudioProcessor#
+		 * @seebe.tarsos.util.RealTimeAudioProcessor.AudioProcessor#
 		 * processingFinished()
 		 */
 		public void processingFinished() {

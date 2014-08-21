@@ -92,7 +92,7 @@ public final class IPEMPitchDetection implements PitchDetector {
 		for (final String target : ipemFiles()) {
 			if (!FileUtils.exists(target)) {
 				final String name = FileUtils.basename(target) + "." + FileUtils.extension(target);
-				FileUtils.copyFileFromJar("/be/hogent/tarsos/sampled/pitch/resources/" + name, target);
+				FileUtils.copyFileFromJar("/be/tarsos/sampled/pitch/resources/" + name, target);
 			}
 		}
 	}

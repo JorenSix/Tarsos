@@ -15,6 +15,7 @@ import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
 import be.tarsos.dsp.ConstantQ;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.sampled.pitch.PitchUnit;
 import be.tarsos.ui.link.LinkedFrame;
 import be.tarsos.ui.link.LinkedPanel;
@@ -130,7 +131,7 @@ public class ConstantQLayer extends FeatureLayer {
 		int size = constantQ.getFFTlength();
 //		final double constantQLag = size / 44100.0 - binWith / 2.0;// in seconds
 		try {
-			adp = AudioDispatcher.fromFile(new File(LinkedFrame.getInstance()
+			adp = AudioDispatcherFactory.fromFile(new File(LinkedFrame.getInstance()
 					.getAudioFile().originalPath()), this.getFrameSize(),
 					this.getOverlap());
 		} catch (UnsupportedAudioFileException e) {

@@ -11,6 +11,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.dsp.util.fft.FFT;
 import be.tarsos.sampled.pitch.PitchUnit;
 import be.tarsos.ui.link.LinkedFrame;
@@ -97,7 +98,7 @@ public class FFTLayer extends FeatureLayer {
 		
 		final double lag =  this.getFrameSize() / sampleRate - binWith / 2.0;// in seconds
 		try {
-			adp = AudioDispatcher.fromFile(new File(LinkedFrame.getInstance()
+			adp = AudioDispatcherFactory.fromFile(new File(LinkedFrame.getInstance()
 					.getAudioFile().originalPath()), this.getFrameSize(),
 					this.getOverlap());
 		} catch (UnsupportedAudioFileException e) {

@@ -386,7 +386,7 @@ public enum PitchUnit {
 	private static void initializeScalaFile(){
 		String scalaFilePath = Configuration.get(ConfKey.interval_scala_file);
 		if(!FileUtils.exists(scalaFilePath)){
-			FileUtils.copyFileFromJar("/be/hogent/tarsos/sampled/pitch/resources/ratios.scl",scalaFilePath);
+			FileUtils.copyFileFromJar("/be/tarsos/sampled/pitch/resources/ratios.scl",scalaFilePath);
 		}
 		PitchUnit.scalaFile = new ScalaFile(scalaFilePath);
 	}

@@ -92,6 +92,10 @@ public final class AnnotationPublisher{
 		rebuildTree(new PitchClassFilter(pitchClasses, maxCentsDifference));
 	}
 	
+	public void applyWaveletCompressionFilter(final double maxCentsDifference){
+		rebuildTree(new WaveletCompressionFilter(maxCentsDifference));
+	}
+	
 	
 	
 	
@@ -379,14 +383,40 @@ public final class AnnotationPublisher{
 
 		
 		public void filter(final List<Annotation> listToFilter) {
-			listToFilter.size();
+			int size = nextPowerOf2(listToFilter.size());
+			float[] values = new float[size];
+			for(int i = 0;i<listToFilter.size();i++){
+				values[i] = (float) listToFilter.get(i).getPitch(PitchUnit.ABSOLUTE_CENTS);
+			}
+			ht.transform(values);
+			
+			
+			for(int i = 0;i<listToFilter.size();i++){
+				if(Math.abs(values[i]) < maxCentsDifference){
+					values[i]=0;
+				}
+			}
+			
+			ht.inverseTransform(values);
+			
+			for(int i = 0;i<listToFilter.size();i++){
+				Annotation unmodified = listToFilter.get(i);
+				double modifiedPitchInHz =  PitchUnit.absoluteCentToHertz(values[i]);
+				Annotation modified = new Annotation(unmodified.getStart(),modifiedPitchInHz,unmodified.getSource(),unmodified.getProbability());
+				listToFilter.set(i, modified);
+			}
 			
 		}
 		
-	}
-
-	public void applyWaveletCompression(double cents) {
-	
+		private int nextPowerOf2(final int a)
+	    {
+	        int b = 1;
+	        while (b < a)
+	        {
+	            b = b << 1;
+	        }
+	        return b;
+	    }
 		
 	}
 }

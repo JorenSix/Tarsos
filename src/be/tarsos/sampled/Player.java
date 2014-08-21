@@ -52,12 +52,13 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
-import be.tarsos.dsp.AudioPlayer;
 import be.tarsos.dsp.AudioProcessor;
 import be.tarsos.dsp.GainProcessor;
 import be.tarsos.dsp.StopAudioProcessor;
 import be.tarsos.dsp.WaveformSimilarityBasedOverlapAdd;
 import be.tarsos.dsp.WaveformSimilarityBasedOverlapAdd.Parameters;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
+import be.tarsos.dsp.io.jvm.AudioPlayer;
 
 /**
  * Player plays audio. 
@@ -199,7 +200,7 @@ public class Player implements AudioProcessor {
 			wsola = new WaveformSimilarityBasedOverlapAdd(
 					Parameters.slowdownDefaults(tempo, format.getSampleRate()));
 
-			dispatcher = AudioDispatcher.fromFile(loadedFile,
+			dispatcher = AudioDispatcherFactory.fromFile(loadedFile,
 					wsola.getInputBufferSize(), wsola.getOverlap());
 
 			wsola.setDispatcher(dispatcher);

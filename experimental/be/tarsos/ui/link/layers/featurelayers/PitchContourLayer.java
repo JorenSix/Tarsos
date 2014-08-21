@@ -11,6 +11,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
@@ -54,7 +55,7 @@ public class PitchContourLayer extends FeatureLayer {
 	@Override
 	public void initialise() {
 		try {
-			adp = AudioDispatcher.fromFile(new File(LinkedFrame.getInstance()
+			adp = AudioDispatcherFactory.fromFile(new File(LinkedFrame.getInstance()
 					.getAudioFile().originalPath()), this.getFrameSize(),
 					this.getOverlap());
 		} catch (UnsupportedAudioFileException e) {

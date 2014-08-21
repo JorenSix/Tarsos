@@ -60,7 +60,7 @@ public final class VampPitchDetection implements PitchDetector {
 		String fileName = FileUtils.combine(FileUtils.temporaryDirectory(), setting);
 		if (!FileUtils.exists(fileName)) {
 			FileUtils.rm(fileName);
-			FileUtils.copyFileFromJar("/be/hogent/tarsos/sampled/pitch/resources/" + setting, fileName);
+			FileUtils.copyFileFromJar("/be/tarsos/sampled/pitch/resources/" + setting, fileName);
 			LOG.info(String.format("Copied %s from jar file to %s .", setting, fileName));
 		}
 	}

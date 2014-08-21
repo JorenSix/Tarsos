@@ -123,17 +123,17 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		});
 		listOfComponentsToDisableOrEnable.add(quantizeToScaleSlider);
 		
-		JSlider waveletCompressionSlider = new JSlider(0, 150);
+		JSlider waveletCompressionSlider = new JSlider(0, 3000);
 		waveletCompressionSlider.setValue(0);
-		quantizeToScaleSlider.setMajorTickSpacing(10);
-		quantizeToScaleSlider.addChangeListener(new ChangeListener() {
+		waveletCompressionSlider.setMajorTickSpacing(10);
+		waveletCompressionSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(final ChangeEvent e) {
 				final JSlider source = (JSlider) e.getSource();
 				final double cents = source.getValue(); //cents
-				AnnotationPublisher.getInstance().applyWaveletCompression(cents);
+				AnnotationPublisher.getInstance().applyWaveletCompressionFilter(cents);
 			}
 		});
-		listOfComponentsToDisableOrEnable.add(quantizeToScaleSlider);
+		listOfComponentsToDisableOrEnable.add(waveletCompressionSlider);
 		
 		
 			
@@ -173,7 +173,6 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		FormLayout layout = new FormLayout("right:min,2dlu,min:grow");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 		builder.setDefaultDialogBorder();
-		//builder.setRowGroupingEnabled(true);
 		
 		
 		

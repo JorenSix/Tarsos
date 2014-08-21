@@ -359,7 +359,7 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 	public static void setTarsosProgramIcon(JFrame frame) {
 		try {
 			final BufferedImage image;
-			final String iconPath = "/be/hogent/tarsos/ui/resources/tarsos_logo_small.png";
+			final String iconPath = "/be/tarsos/ui/resources/tarsos_logo_small.png";
 			image = ImageIO.read(frame.getClass().getResource(iconPath));
 			frame.setIconImage(image);
 		} catch (IOException e) {

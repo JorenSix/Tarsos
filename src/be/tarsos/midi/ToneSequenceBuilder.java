@@ -41,7 +41,8 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.tarsos.dsp.AudioDispatcher;
-import be.tarsos.dsp.AudioPlayer;
+import be.tarsos.dsp.io.jvm.AudioPlayer;
+import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.sampled.pitch.PitchFunctions;
 import be.tarsos.util.FileUtils;
 import be.tarsos.util.SignalPowerExtractor;
@@ -234,8 +235,9 @@ public final class ToneSequenceBuilder {
 		final AudioFormat audioFormat = new AudioFormat((float) sampleRate, 16, 2, true, false);
 		final ByteArrayInputStream bais = new ByteArrayInputStream(byteBuffer);
 		final AudioInputStream audioInputStream = new AudioInputStream(bais, audioFormat, numberOfSamples);
+		JVMAudioInputStream stream = new JVMAudioInputStream(audioInputStream);
 		if (fileName == null) {
-			final AudioDispatcher dispatcher = new AudioDispatcher(audioInputStream, 1024, 0);
+			final AudioDispatcher dispatcher = new AudioDispatcher(stream, 1024, 0);
 			dispatcher.addAudioProcessor(new AudioPlayer(audioFormat));
 			dispatcher.run();
 		} else {

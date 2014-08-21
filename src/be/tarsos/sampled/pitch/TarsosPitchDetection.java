@@ -35,6 +35,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
@@ -93,7 +94,7 @@ public class TarsosPitchDetection implements PitchDetector {
 			float sampleRate = audioFile.fileFormat().getFormat().getSampleRate();
 			int bufferSize = 2048;
 			int overlap = 1024;			
-			AudioDispatcher dispatcher = AudioDispatcher.fromFile(new File(audioFile.transcodedPath()), bufferSize, overlap);
+			AudioDispatcher dispatcher = AudioDispatcherFactory.fromFile(new File(audioFile.transcodedPath()), bufferSize, overlap);
 			dispatcher.addAudioProcessor(new PitchProcessor(algorithm, sampleRate, bufferSize, handler ));
 			dispatcher.addAudioProcessor(progressProcessor );
 			dispatcher.run();

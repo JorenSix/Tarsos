@@ -3,23 +3,18 @@ package be.tarsos.ui.link.layers.featurelayers;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.ui.link.LinkedFrame;
 import be.tarsos.ui.link.LinkedPanel;
 import be.tarsos.ui.link.coordinatessystems.ICoordinateSystem;
-import be.tarsos.ui.link.layers.BackgroundLayer;
-import be.tarsos.ui.link.layers.LayerUtilities;
 import be.tarsos.util.AudioFile;
-import be.tarsos.util.StopWatch;
 
 public class WaveFormLayer extends FeatureLayer {
 
@@ -92,7 +87,7 @@ public class WaveFormLayer extends FeatureLayer {
 		AudioFile f = LinkedFrame.getInstance().getAudioFile();
 		int amountOfSamples = f.fileFormat().getFrameLength();
 		try {
-			adp = AudioDispatcher.fromFile(new File(f.originalPath()),
+			adp = AudioDispatcherFactory.fromFile(new File(f.originalPath()),
 					amountOfSamples, this.getOverlap());
 		} catch (UnsupportedAudioFileException e) {
 			e.printStackTrace();

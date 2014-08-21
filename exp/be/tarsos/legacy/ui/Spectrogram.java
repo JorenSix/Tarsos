@@ -112,8 +112,8 @@ public final class Spectrogram extends JComponent {
         line.start();
         final AudioInputStream stream = new AudioInputStream(line);
 
-        // AudioFile audioFile = new
-        // AudioFile(FileUtils.combine("data","transcoded_audio"
+        // PipedAudioStream audioFile = new
+        // PipedAudioStream(FileUtils.combine("data","transcoded_audio"
         // ,"flute.novib.mf.C5B5.wav"));
         // stream = AudioSystem.getAudioInputStream(new File(audioFile.path()));
 

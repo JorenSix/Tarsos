@@ -81,7 +81,7 @@ public final class Tarsos {
 	/**
 	 * Properties file that defines the logging behavior.
 	 */
-	private static final String LOG_PROPS = "/be/hogent/tarsos/util/logging.properties";
+	private static final String LOG_PROPS = "/be/tarsos/util/logging.properties";
 
 	/**
 	 * A reconfigurable logger.

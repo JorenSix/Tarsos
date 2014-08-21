@@ -51,7 +51,7 @@ public class HeaderPanel extends JPanel {
 	public HeaderPanel() {
 		super(new BorderLayout());
 
-		icon = TarsosFrame.createImageIcon("/be/hogent/tarsos/ui/resources/tarsos_logo_small.png");
+		icon = TarsosFrame.createImageIcon("/be/tarsos/ui/resources/tarsos_logo_small.png");
 
 		JPanel titlesPanel = new JPanel(new GridLayout(3, 1));
 		titlesPanel.setOpaque(false);

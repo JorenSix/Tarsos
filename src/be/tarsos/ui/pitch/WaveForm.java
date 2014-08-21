@@ -51,6 +51,7 @@ import javax.swing.SwingUtilities;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.sampled.Player;
 import be.tarsos.sampled.PlayerState;
 import be.tarsos.sampled.pitch.AnnotationPublisher;
@@ -418,7 +419,7 @@ public final class WaveForm extends JPanel implements AudioFileChangedListener  
 
 			final double secondsToX;
 			secondsToX = 1000 * waveFormWidth / (float) audioFile.getLengthInMilliSeconds();
-			AudioDispatcher adp = AudioDispatcher.fromFile(new File(audioFile.transcodedPath()),framesPerPixel,0);
+			AudioDispatcher adp = AudioDispatcherFactory.fromFile(new File(audioFile.transcodedPath()),framesPerPixel,0);
 			adp.addAudioProcessor(new AudioProcessor() {
 
 				private int frame = 0;

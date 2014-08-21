@@ -44,8 +44,9 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.tarsos.dsp.AudioEvent;
-import be.tarsos.dsp.AudioPlayer;
-import be.tarsos.dsp.util.AudioFloatConverter;
+import be.tarsos.dsp.io.TarsosDSPAudioFloatConverter;
+import be.tarsos.dsp.io.jvm.AudioPlayer;
+import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.sampled.pitch.Annotation;
 import be.tarsos.sampled.pitch.PitchDetectionMode;
 import be.tarsos.sampled.pitch.PitchDetector;
@@ -377,7 +378,7 @@ public final class AudioFile {
 			int frameSize = stream.getFormat().getFrameSize();
 			int bytesPerSecond = (int) (frameSize * stream.getFormat().getFrameRate());
 			AudioPlayer player = new AudioPlayer(stream.getFormat());
-			AudioFloatConverter converter = AudioFloatConverter.getConverter(stream.getFormat());
+			TarsosDSPAudioFloatConverter converter = TarsosDSPAudioFloatConverter.getConverter(JVMAudioInputStream.toTarsosDSPFormat(stream.getFormat()));
 
 			int previousStop = 0;
 			for (int i = 0; i < selections.length; i += 2) {
@@ -394,7 +395,7 @@ public final class AudioFile {
 				}
 				byte[] audioInfo = new byte[numberOfBytes];
 				stream.read(audioInfo, 0, numberOfBytes);
-				AudioEvent event = new AudioEvent(stream.getFormat(),-1);
+				AudioEvent event = new AudioEvent(JVMAudioInputStream.toTarsosDSPFormat(stream.getFormat()),-1);
 				float[] floatBuffer = new float[numberOfBytes/frameSize];
 				converter.toFloatArray(audioInfo, floatBuffer);
 				event.setFloatBuffer(floatBuffer);

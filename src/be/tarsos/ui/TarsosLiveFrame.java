@@ -58,8 +58,9 @@ import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
-import be.tarsos.dsp.AudioPlayer;
-import be.tarsos.dsp.WaveformWriter;
+import be.tarsos.dsp.io.jvm.AudioPlayer;
+import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
+import be.tarsos.dsp.io.jvm.WaveformWriter;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
@@ -253,18 +254,15 @@ public class TarsosLiveFrame extends JFrame implements PitchDetectionHandler, Sc
 			String filename = timePart + "-tarsos_live_session.wav"; 
 
 			stream = openAudioInputStream(format);
-			
-			AudioDispatcher dispatcher = new AudioDispatcher(stream, bufferSize, overlap);
+			JVMAudioInputStream inputStream = new JVMAudioInputStream(stream);
+			AudioDispatcher dispatcher = new AudioDispatcher(inputStream, bufferSize, overlap);
 			dispatcher.addAudioProcessor(new PitchProcessor(algo,sampleRate,bufferSize,this));
 			dispatcher.addAudioProcessor(new WaveformWriter(format, filename));
 			dispatcher.addAudioProcessor(new AudioPlayer(format));
 			new Thread(dispatcher,"Tarsos Live Dispatcher").start();
 		} catch (LineUnavailableException e) {
 			
-		} catch (UnsupportedAudioFileException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 	}
 	
 	/*

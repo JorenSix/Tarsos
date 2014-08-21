@@ -251,7 +251,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		String target = FileUtils.combine(FileUtils.temporaryDirectory(),"scales");
 		if(!FileUtils.exists(target)){
 			FileUtils.mkdirs(target);
-			FileUtils.copyDirFromJar("be/hogent/tarsos/ui/resources/scales",target);
+			FileUtils.copyDirFromJar("be/tarsos/ui/resources/scales",target);
 		}
 		addScalaExamplesMenu(importMenu,new File(target));
 	}
@@ -520,7 +520,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			JFrame parent = TarsosFrame.getInstance();
 			
 			/*
-			String contents = FileUtils.readFileFromJar("/be/hogent/tarsos/ui/resources/help.html");
+			String contents = FileUtils.readFileFromJar("/be/tarsos/ui/resources/help.html");
 			JEditorPane helpLabel = new JEditorPane();
 			helpLabel.setEditable(false);
 			helpLabel.setContentType("text/html");
@@ -853,7 +853,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				public void handleFile(final File chosenFile) {
 					String temporaryTarget = new File(FileUtils.temporaryDirectory() , "tikz_ph.tex").getAbsolutePath();
-					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/tikz_ph.te" , temporaryTarget);
+					FileUtils.copyFileFromJar("/be/tarsos/ui/resources/tikz_ph.te" , temporaryTarget);
 					String contents = FileUtils.readFile(temporaryTarget); 
 					
 					String datFileName = audioFile.originalBasename() + ".ph.dat";
@@ -909,7 +909,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				public void handleFile(final File chosenFile) {
 					String temporaryTarget = new File(FileUtils.temporaryDirectory() , "tikz.tex").getAbsolutePath();
-					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/tikz.te" , temporaryTarget);
+					FileUtils.copyFileFromJar("/be/tarsos/ui/resources/tikz.te" , temporaryTarget);
 					String contents = FileUtils.readFile(temporaryTarget); 
 					
 					String datFileName = audioFile.originalBasename() + ".dat";
@@ -989,7 +989,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 				
 				public void handleFile(final File chosenFile) {
 					String temporaryTarget = new File(FileUtils.temporaryDirectory() , "interval_matrix.tex").getAbsolutePath();
-					FileUtils.copyFileFromJar("/be/hogent/tarsos/ui/resources/interval_matrix.te" , temporaryTarget);
+					FileUtils.copyFileFromJar("/be/tarsos/ui/resources/interval_matrix.te" , temporaryTarget);
 					String contents = FileUtils.readFile(temporaryTarget); 
 					
 					List<Integer> scaleAsList = new ArrayList<Integer>();

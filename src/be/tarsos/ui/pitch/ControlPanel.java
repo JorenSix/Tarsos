@@ -43,8 +43,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 import be.tarsos.dsp.AudioEvent;
-import be.tarsos.dsp.AudioPlayer;
-import be.tarsos.dsp.util.AudioFloatConverter;
+import be.tarsos.dsp.io.TarsosDSPAudioFloatConverter;
+import be.tarsos.dsp.io.jvm.AudioPlayer;
+import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import be.tarsos.sampled.pitch.Annotation;
 import be.tarsos.sampled.pitch.AnnotationListener;
 import be.tarsos.sampled.pitch.AnnotationPublisher;
@@ -163,10 +164,10 @@ public class ControlPanel extends JPanel implements AudioFileChangedListener, An
 				byte[] buffer = new byte[bufferSize];
 				float[] floatBuffer = new float[bufferSize/frameSize];
 				AudioPlayer player = new AudioPlayer(format.getFormat());
-				AudioFloatConverter converter = AudioFloatConverter.getConverter(stream.getFormat());
+				TarsosDSPAudioFloatConverter converter = TarsosDSPAudioFloatConverter.getConverter(JVMAudioInputStream.toTarsosDSPFormat(stream.getFormat()));
 				
 				double previousTime = offsetInSeconds;
-				AudioEvent event = new AudioEvent(format.getFormat(),-1);
+				AudioEvent event = new AudioEvent(JVMAudioInputStream.toTarsosDSPFormat(format.getFormat()),-1);
 				while (running && stream.read(buffer) != -1) {
 					byteCount += buffer.length;
 					converter.toFloatArray(buffer, floatBuffer);

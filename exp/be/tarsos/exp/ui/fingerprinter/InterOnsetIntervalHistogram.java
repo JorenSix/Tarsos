@@ -16,6 +16,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.util.KernelDensityEstimate;
 
 public class InterOnsetIntervalHistogram {
@@ -26,7 +27,7 @@ public class InterOnsetIntervalHistogram {
        		
 		AudioFormat format = AudioSystem.getAudioInputStream(new File(file)).getFormat();
 
-		AudioDispatcher dispatcher = AudioDispatcher.fromFile(new File(file),1024,0);
+		AudioDispatcher dispatcher = AudioDispatcherFactory.fromFile(new File(file),1024,0);
 	
 		dispatcher.run();
 	}
