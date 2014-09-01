@@ -4,7 +4,7 @@ Tarsos is a software tool to analyze and experiment with pitch organization in a
 
 To see Tarsos in action you can check the "Tarsos screencast":http://www.youtube.com/watch?v=nzDdYvqgcOo. More detailed information, news and updates can be found on the "Tarsos website":http://0110.be  
 
-To give Tarsos a try, download the "executable Tarsos JAR-file":http://0110.be/releases/Tarsos-latest/Tarsos-latest.jar. A JAVA 6 runtime is required, a more recent runtime is preferred. A "manual for Tarsos":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Manual.pdf an a complete "API reference for Tarsos":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Documentation/ are also available. Drop me a line if you use Tarsos. Always nice to hear how this software is used.
+To give Tarsos a try, download the "executable Tarsos JAR-file":http://0110.be/releases/Tarsos/Tarsos-latest.jar. A JAVA 6 runtime is required, a more recent runtime is preferred. A "manual for Tarsos":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Manual.pdf an a complete "API reference for Tarsos":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Documentation/ are also available. Drop me a line if you use Tarsos. Always nice to hear how this software is used.
 
 h2. Develop Tarsos
 
