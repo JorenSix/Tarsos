@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 /**
  */
@@ -75,7 +74,6 @@ import be.tarsos.sampled.pitch.AnnotationListener;
 import be.tarsos.sampled.pitch.AnnotationPublisher;
 import be.tarsos.sampled.pitch.PitchDetectionMode;
 import be.tarsos.sampled.pitch.PitchDetector;
-import be.tarsos.transcoder.ffmpeg.EncoderException;
 import be.tarsos.ui.pitch.AudioFileChangedListener;
 import be.tarsos.ui.pitch.CommandPanel;
 import be.tarsos.ui.pitch.ConfigurationPanel;
@@ -84,7 +82,6 @@ import be.tarsos.ui.pitch.IntervalTable;
 import be.tarsos.ui.pitch.KeyboardPanel;
 import be.tarsos.ui.pitch.LinkedFeaturePanel;
 import be.tarsos.ui.pitch.Menu;
-import be.tarsos.ui.pitch.PitchContour;
 import be.tarsos.ui.pitch.PlayerControlPanel;
 import be.tarsos.ui.pitch.ScaleChangedListener;
 import be.tarsos.ui.pitch.WaveForm;
@@ -185,7 +182,7 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 		final IntervalTable intervalTable = new IntervalTable();
 		final WaveForm waveForm = new WaveForm();
 		final PlayerControlPanel player = new PlayerControlPanel(waveForm);
-		final PitchContour pitchContourPanel = new PitchContour(waveForm);
+		//final PitchContour pitchContourPanel = new PitchContour(waveForm);
 		final KeyboardPanel keyboardPanel = new KeyboardPanel();
 		
 		final LinkedFeaturePanel linkedFeaturePanel = new LinkedFeaturePanel();
@@ -199,7 +196,7 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 		// patch the scale changed listeners
 		addScaleChangedListener(pitchClassHistogramPanel);
 		addScaleChangedListener(commandPanel);
-		addScaleChangedListener(pitchContourPanel);
+		//addScaleChangedListener(pitchContourPanel);
 		addScaleChangedListener(intervalTable);
 		addScaleChangedListener(keyboardPanel);
 		addScaleChangedListener(menu);
@@ -207,7 +204,7 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 
 		addAudioFileChangedListener(KDEData.getInstance());
 		addAudioFileChangedListener(pitchClassHistogramPanel);
-		addAudioFileChangedListener(pitchContourPanel);
+		//addAudioFileChangedListener(pitchContourPanel);
 		addAudioFileChangedListener(waveForm);
 		addAudioFileChangedListener(menu);
 		addAudioFileChangedListener(player);
@@ -218,7 +215,7 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 		// Patch the annotation listeners
 		annotationPublisher.addListener(KDEData.getInstance());
 		annotationPublisher.addListener(pitchClassHistogramPanel);
-		annotationPublisher.addListener(pitchContourPanel);
+		//annotationPublisher.addListener(pitchContourPanel);
 		annotationPublisher.addListener(player);
 		annotationPublisher.addListener(this);
 		annotationPublisher.addListener(commandPanel);
@@ -280,11 +277,13 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(false);
 		
+		/*
 		constraint = new MultiSplitConstraint(content, 1);
 		content = contentManager.addContent("Annotations", "Annotations", null, pitchContourPanel, null,
 				constraint);
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(true);
+		*/
 
 		content = contentManager.addContent("Keyboard", "Keyboard", null, keyboardPanel, null);
 		setDefaultTabbedContentOptions(content);
@@ -548,11 +547,8 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 		public Void doInBackground() {
 			Runnable runTranscoder = new Runnable(){
 				public void run() {
-					try {
 						transcodedAudioFile = new AudioFile(newFile.getAbsolutePath());
-					} catch (EncoderException e) {
-						interrupt(TranscodingTask.this, e);
-					}
+					
 				}
 			};
 			//Do the actual detection in the background

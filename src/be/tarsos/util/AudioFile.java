@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.util;
 
@@ -51,7 +50,6 @@ import be.tarsos.sampled.pitch.Annotation;
 import be.tarsos.sampled.pitch.PitchDetectionMode;
 import be.tarsos.sampled.pitch.PitchDetector;
 import be.tarsos.sampled.pitch.PitchUnit;
-import be.tarsos.transcoder.ffmpeg.EncoderException;
 import be.tarsos.util.Configuration.ConfigChangeListener;
 
 /**
@@ -147,7 +145,7 @@ public final class AudioFile {
 	 *             If FFMPEG fails to transcode the audio an
 	 *             UnsupportedAudioFileException is generated.
 	 */
-	public AudioFile(final String filePath) throws EncoderException {
+	public AudioFile(final String filePath) {
 		this.originalPath = new File(filePath).getAbsolutePath();
 		try{
 			md5 = FileUtils.getMD5Checksum(originalPath).substring(16);
@@ -184,13 +182,13 @@ public final class AudioFile {
 		FileUtils.mkdirs(FileUtils.combine(dataFolder, subFolder));
 		// return the name where the transcoded file should go
 		transcodedDirectory = FileUtils.combine(dataFolder, subFolder);
-				
+		
+		
 		// 01._qsdfj => 01._qsdfj_transcoded.wav
-		final String fileName = baseName + "_transcoded."
-				+ AudioTranscoder.TARGET_ENCODING.getAttributes().getFormat();
+		final String fileName = baseName + "_transcoded.";
 		// return the name where the transcoded file should go
 		transcodedPath = FileUtils.combine(transcodedDirectory, fileName);
-		
+		/*
 		if (AudioTranscoder.transcodingRequired(transcodedPath())) {
 			try{
 				AudioTranscoder.transcode(filePath, transcodedPath());
@@ -202,6 +200,7 @@ public final class AudioFile {
 				}
 			}
 		}
+		*/
 		if(!list.containsFile(md5)){
 			list.addFile(baseName, this);
 		}
@@ -263,11 +262,7 @@ public final class AudioFile {
 		for (final String folder : folders) {
 			List<String> audioFiles = FileUtils.glob(folder, pattern, true);
 			for (final String originalFile : audioFiles) {
-				try {
-					files.add(new AudioFile(originalFile));
-				} catch (EncoderException e) {
-					LOG.severe(String.format("Transcoding failed: %s is not supported.", originalFile));
-				}
+				files.add(new AudioFile(originalFile));
 			}
 		}
 		return files;
@@ -395,11 +390,15 @@ public final class AudioFile {
 				}
 				byte[] audioInfo = new byte[numberOfBytes];
 				stream.read(audioInfo, 0, numberOfBytes);
+				/*
 				AudioEvent event = new AudioEvent(JVMAudioInputStream.toTarsosDSPFormat(stream.getFormat()),-1);
+				*/
 				float[] floatBuffer = new float[numberOfBytes/frameSize];
 				converter.toFloatArray(audioInfo, floatBuffer);
+				/*
 				event.setFloatBuffer(floatBuffer);
 				player.process(event);
+				*/
 			}
 
 		} catch (UnsupportedAudioFileException e) {

@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.util.histogram;
 
@@ -62,8 +61,4 @@ public final class CrossCorrelation implements HistogramCorrelation {
 		return distance / numberOfClasses;
 	}
 
-	public void plotCorrelation(final Histogram thisHistogram, final int displacement,
-			final Histogram otherHistogram, final String fileName, final String title) {
-		new Intersection().plotCorrelation(thisHistogram, displacement, otherHistogram, fileName, title);
-	}
 }

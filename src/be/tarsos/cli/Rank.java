@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.cli;
 
@@ -39,7 +38,6 @@ import be.tarsos.Tarsos;
 import be.tarsos.sampled.pitch.Annotation;
 import be.tarsos.sampled.pitch.PitchDetectionMode;
 import be.tarsos.sampled.pitch.PitchDetector;
-import be.tarsos.transcoder.ffmpeg.EncoderException;
 import be.tarsos.util.AudioFile;
 import be.tarsos.util.ConfKey;
 import be.tarsos.util.Configuration;
@@ -173,7 +171,7 @@ public final class Rank extends AbstractTarsosApp {
 			histo = HistogramFactory.createPitchClassHistogram(new ScalaFile(path));
 		} else if (path.matches(Configuration.get(ConfKey.audio_file_name_pattern))) {
 			AudioFile audioFile;
-			try {
+			
 				audioFile = new AudioFile(path);
 				final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
 				pitchDetector.executePitchDetection();
@@ -187,10 +185,7 @@ public final class Rank extends AbstractTarsosApp {
 				}
 				histo = PitchClassHistogram.createToneScale(peaks);
 				return histo;
-			} catch (EncoderException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 
 		} else {
 			throw new IllegalArgumentException("Tone scale creation failed: " + path

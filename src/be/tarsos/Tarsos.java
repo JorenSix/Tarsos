@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos;
 
@@ -56,7 +55,6 @@ import be.tarsos.cli.PitchToMidi;
 import be.tarsos.cli.PowerExtractor;
 import be.tarsos.cli.PrintScalaIntervals;
 import be.tarsos.cli.Rank;
-import be.tarsos.cli.TimbreAndScaleRelation;
 import be.tarsos.cli.TuneMidiSynth;
 import be.tarsos.ui.TarsosFrame;
 import be.tarsos.util.ConfKey;
@@ -308,7 +306,6 @@ public final class Tarsos {
 		applicationList.add(new PitchToMidi());
 		applicationList.add(new PitchToHistogram());
 		applicationList.add(new HistogramToScala());
-		applicationList.add(new TimbreAndScaleRelation());
 		applicationList.add(new PitchHistogramRating());
 		applicationList.add(new PrintScalaIntervals());
 		

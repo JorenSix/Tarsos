@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.cli;
 
@@ -35,7 +34,6 @@ import joptsimple.OptionSpec;
 import be.tarsos.sampled.pitch.Annotation;
 import be.tarsos.sampled.pitch.PitchDetectionMode;
 import be.tarsos.sampled.pitch.PitchDetector;
-import be.tarsos.transcoder.ffmpeg.EncoderException;
 import be.tarsos.util.AudioFile;
 import be.tarsos.util.FileUtils;
 import be.tarsos.util.histogram.HistogramFactory;
@@ -96,23 +94,20 @@ public final class AudioToScala extends AbstractTarsosApp {
 	private void exportScalaFile(final File scalaFile, final File inputFile,
 			final PitchDetectionMode detectionMode) {
 		AudioFile audioFile;
-		try {
+	
 			audioFile = new AudioFile(inputFile.getAbsolutePath());
 			final PitchDetector pitchDetector = detectionMode.getPitchDetector(audioFile);
 			pitchDetector.executePitchDetection();
 			final List<Annotation> samples = pitchDetector.getAnnotations();
 			final PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(samples);
 			final PitchClassHistogram scaleHistogram = pitchHistogram.pitchClassHistogram();
-			scaleHistogram.plot(FileUtils.basename(scalaFile.getAbsolutePath()) + "png",
-					FileUtils.basename(scalaFile.getAbsolutePath()));
+			//scaleHistogram.plot(FileUtils.basename(scalaFile.getAbsolutePath()) + "png",
+			//		FileUtils.basename(scalaFile.getAbsolutePath()));
 			scaleHistogram.gaussianSmooth(1.0);
 			final List<Peak> peaks = PeakDetector.detect(scaleHistogram, 15,15);
 			PitchClassHistogram.exportPeaksToScalaFileFormat(scalaFile.getAbsolutePath(),
 					FileUtils.basename(inputFile.getAbsolutePath()), peaks);
-		} catch (EncoderException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 
 	}
 }

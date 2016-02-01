@@ -8,43 +8,33 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
 
+
+
 package be.tarsos.util.histogram;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-
-import ptolemy.plot.Plot;
 import be.tarsos.sampled.pitch.Annotation;
 import be.tarsos.sampled.pitch.PitchUnit;
 import be.tarsos.util.ConfKey;
 import be.tarsos.util.Configuration;
-import be.tarsos.util.FileUtils;
-import be.tarsos.util.SimplePlot;
 
 /**
  * The PitchHistogram accepts values from 0 to 9600 cents or +- from 16Hz to
@@ -140,32 +130,7 @@ public final class PitchHistogram extends Histogram {
 		return summedToneScaleHistogram;
 	}
 
-	/**
-	 * Plot the complete ambitus.
-	 * 
-	 * @param fileName
-	 */
-	public void plotAmbitusHistogram(final String fileName) {
-		this.plotAmbitusHistogram(fileName, (int) getStart(), (int) getStop());
-	}
 
-	/**
-	 * Plot the ambitus but use only values between start and stop (cents).
-	 * 
-	 * @param fileName
-	 *            the plot is saved to this location.
-	 * @param start
-	 *            the starting value
-	 * @param stop
-	 *            stopping value
-	 */
-	public void plotAmbitusHistogram(final String fileName, final int start, final int stop) {
-		final SimplePlot plot = new SimplePlot();
-		for (double current = start; current <= stop; current += this.getClassWidth()) {
-			plot.addData(0, current, this.getCount(current));
-		}
-		plot.save(fileName);
-	}
 	
 	public PitchClassHistogram mostEnergyRitchOctave(){
 		PitchClassHistogram pch = new PitchClassHistogram();
@@ -188,84 +153,8 @@ public final class PitchHistogram extends Histogram {
 		return pch;
 	}
 
-	/**
-	 * Saves a tone scale histogram plot with each octave separately or just the
-	 * total.
-	 * 
-	 * @param fileName
-	 *            the plot is saved to this location.
-	 * @param splitOctaves
-	 *            if true each octave is separated, otherwise only the total is
-	 *            shown.
-	 */
-	public void plotToneScaleHistogram(final String fileName, final boolean splitOctaves) {
-		final PitchClassHistogram summedToneScaleHistogram = pitchClassHistogram();
+	
 
-		if (splitOctaves) {
-			final Plot h = new Plot();
-			h.setXRange(0, 1200);
-			h.setYLabel("Number of Annotations (#)");
-			h.setXLabel("Pitch Class (cent)");
-			for (int dataset = 0; dataset < toneScaleHistogramPerOctave.size(); dataset++) {
-				final PitchClassHistogram currentToneScaleHistogram = toneScaleHistogramPerOctave.get(dataset);
-				for (final double key : currentToneScaleHistogram.keySet()) {
-					long count = currentToneScaleHistogram.getCount(key);
-					for (int i = 0; i < dataset; i++) {
-						count += toneScaleHistogramPerOctave.get(i).getCount(key);
-					}
-					h.addPoint(dataset, key, count, true);
-				}
-			}
-			for (int dataset = 0; dataset < toneScaleHistogramPerOctave.size(); dataset++) {
-				h.addLegend(dataset, "C" + dataset + "-B" + dataset + " [" + dataset * 1200 + "-"
-						+ (dataset * 1200 + 1199) + "]");
-			}
-			h.setSize(1680, 1050);
-			h.setTitle(FileUtils.basename(fileName));
-			try {
-				Thread.sleep(60);
-				final BufferedImage image = h.exportImage();
-				ImageIO.write(image, "png", new File(fileName));
-			} catch (final IOException e) {
-				LOG.log(Level.SEVERE, "Could not write plot.", e);
-			} catch (final InterruptedException e) {
-				LOG.log(Level.SEVERE, "Thread interrupted.", e);
-			}
-		} else {
-			final SimplePlot plot = new SimplePlot();
-			plot.addData(0, summedToneScaleHistogram);
-			plot.setXLabel("Pitch (cent)");
-			plot.setYLabel("Number of Annotations (#)");
-			plot.save(fileName);
-		}
-	}
-
-	@Override
-	public void plot(final String fileName, final String title) {
-		final SimplePlot plot = new SimplePlot(title);
-		double startingValue = getStart();
-		double stoppingValue = getStop();
-		boolean valuesStarted = false;
-		for (final double key : keySet()) {
-			final long count = getCount(key);
-			if (count != 0L) {
-				stoppingValue = key;
-			}
-			if (!valuesStarted && count != 0L) {
-				valuesStarted = true;
-			}
-			if (!valuesStarted) {
-				startingValue = key;
-			}
-		}
-		plot.setXRange(startingValue, stoppingValue);
-		for (final double current : keySet()) {
-			if (current >= startingValue && current <= stoppingValue) {
-				plot.addData(0, current, getCount(current));
-			}
-		}
-		plot.save(fileName);
-	}
 
 	/**
 	 * Create a tone scale histogram using a kernel instead of an ordinary

@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.cli;
 
@@ -40,13 +39,11 @@ import joptsimple.OptionSpec;
 import be.tarsos.sampled.pitch.Annotation;
 import be.tarsos.sampled.pitch.PitchDetectionMode;
 import be.tarsos.sampled.pitch.PitchDetector;
-import be.tarsos.transcoder.ffmpeg.EncoderException;
 import be.tarsos.util.AudioFile;
 import be.tarsos.util.ConfKey;
 import be.tarsos.util.Configuration;
 import be.tarsos.util.FileUtils;
 import be.tarsos.util.SignalPowerExtractor;
-import be.tarsos.util.SimplePlot;
 import be.tarsos.util.histogram.Histogram;
 import be.tarsos.util.histogram.HistogramFactory;
 import be.tarsos.util.histogram.PitchClassHistogram;
@@ -75,7 +72,7 @@ public final class Annotate extends AbstractTarsosApp {
 	 * @throws EncoderException
 	 */
 	private void annotateInputFile(final String inputFile, final PitchDetectionMode detectionMode)
-			throws UnsupportedAudioFileException, EncoderException {
+			throws UnsupportedAudioFileException {
 
 		final AudioFile audioFile = new AudioFile(inputFile);
 
@@ -93,23 +90,23 @@ public final class Annotate extends AbstractTarsosApp {
 		final String ambitusTXT = FileUtils.combine(directory, prefix + "_ambitus.txt");
 		final String ambitusPNG = FileUtils.combine(directory, prefix + "_ambitus.png");
 		final String toneScaleColor = prefix + "_tone_scale_colored.png";
-		pitchHistogram.plotToneScaleHistogram(FileUtils.combine(directory, toneScaleColor), true);
+		//pitchHistogram.plotToneScaleHistogram(FileUtils.combine(directory, toneScaleColor), true);
 		pitchHistogram.export(ambitusTXT);
-		pitchHistogram.plot(ambitusPNG, "Ambitus " + baseName + " " + pitchDetector.getName());
+		//pitchHistogram.plot(ambitusPNG, "Ambitus " + baseName + " " + pitchDetector.getName());
 		final PitchClassHistogram toneScaleHisto = pitchHistogram.pitchClassHistogram();
 		final String toneScaleTxt = FileUtils.combine(directory, prefix + "_tone_scale.txt");
 		final String toneScalePNG = FileUtils.combine(directory, prefix + "_tone_scale.png");
 		toneScaleHisto.export(toneScaleTxt);
-		toneScaleHisto.plot(toneScalePNG, "Tone scale " + baseName + " " + pitchDetector.getName());
+		//toneScaleHisto.plot(toneScalePNG, "Tone scale " + baseName + " " + pitchDetector.getName());
 
 		toneScaleHisto.gaussianSmooth(1.0);
 		final List<Peak> peaks = PeakDetector.detect(toneScaleHisto, 15,15);
 		final Histogram peakHistogram = PeakDetector.newPeakDetection(peaks);
 		final String peaksTitle = prefix + "_peaks_" + 1.0 + "_" + 15 + "_" + 0.8;
-		final SimplePlot plot = new SimplePlot(peaksTitle);
-		plot.addData(0, toneScaleHisto);
-		plot.addData(1, peakHistogram);
-		plot.save(FileUtils.combine(directory, peaksTitle + ".png"));
+		//final SimplePlot plot = new SimplePlot(peaksTitle);
+		//plot.addData(0, toneScaleHisto);
+		//plot.addData(1, peakHistogram);
+		//plot.save(FileUtils.combine(directory, peaksTitle + ".png"));
 		PitchClassHistogram.exportPeaksToScalaFileFormat(FileUtils.combine(directory, peaksTitle + ".scl"),
 				peaksTitle, peaks);
 
@@ -154,9 +151,6 @@ public final class Annotate extends AbstractTarsosApp {
 				for (final String file : inputFiles) {
 					try {
 						annotateInputFile(file, detectionMode);
-					} catch (EncoderException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					} catch (UnsupportedAudioFileException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

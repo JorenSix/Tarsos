@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.util.histogram;
 
@@ -37,7 +36,6 @@ import java.util.logging.Logger;
 import org.apache.commons.math.stat.StatUtils;
 
 import be.tarsos.util.FileUtils;
-import be.tarsos.util.SimplePlot;
 
 /**
  * A histogram is defined by a start value, a stop value and a number of
@@ -1315,36 +1313,8 @@ public class Histogram implements Cloneable {
 		return optimalDisplacement;
 	}
 
-	public void plotCorrelation(final Histogram otherHistogram, final CorrelationMeasure correlationMeasure,
-			final String fileName, final String title) {
-		final int displacement = displacementForOptimalCorrelation(otherHistogram);
-		correlationMeasure.getHistogramCorrelation().plotCorrelation(this, displacement, otherHistogram,
-				fileName, title);
-	}
 
-	// -----------------------------------------------------------
-	// -- --
-	// -- Plot method --
-	// -- --
-	// -----------------------------------------------------------
-
-	/**
-	 * Plots the histogram to a x y plot. The file is saved in PNG file format
-	 * so the fileName should end on PNG.
-	 * 
-	 * @param fileName
-	 *            The file is saved in PNG file format so the fileName should
-	 *            end on PNG.
-	 * @param title
-	 *            The title of the histogram. Use an empty string or null for an
-	 *            empty title.
-	 */
-	public void plot(final String fileName, final String title) {
-		final String actualTitle = title == null ? "" : title;
-		final SimplePlot plot = new SimplePlot(actualTitle);
-		plot.addData(0, this);
-		plot.save(fileName);
-	}
+	
 
 	/**
 	 * Export the histogram data as a plain text file. The format uses ; to

@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.cli;
 
@@ -54,7 +53,6 @@ import be.tarsos.sampled.pitch.PitchDetector;
 import be.tarsos.sampled.pitch.PitchUnit;
 import be.tarsos.sampled.pitch.TarsosPitchDetection;
 import be.tarsos.sampled.pitch.VampPitchDetection;
-import be.tarsos.transcoder.ffmpeg.EncoderException;
 import be.tarsos.ui.virtualkeyboard.PianoTestFrame;
 import be.tarsos.ui.virtualkeyboard.VirtualKeyboard;
 import be.tarsos.util.AudioFile;
@@ -85,7 +83,7 @@ public final class PlayAlong {
 		}
 
 		AudioFile fileToPlayAlongWith;
-		try {
+		
 			fileToPlayAlongWith = new AudioFile(fileName);
 			PitchDetector detector = new TarsosPitchDetection(fileToPlayAlongWith,
 					PitchDetectionMode.TARSOS_YIN);
@@ -174,9 +172,7 @@ public final class PlayAlong {
 
 				currentSample = sampleIterator.next();
 			}
-		} catch (EncoderException e) {
-			e.printStackTrace();
-		}
+		
 
 	}
 

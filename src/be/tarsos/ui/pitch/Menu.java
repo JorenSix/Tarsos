@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.ui.pitch;
 
@@ -74,7 +73,6 @@ import be.tarsos.util.Configuration;
 import be.tarsos.util.FileUtils;
 import be.tarsos.util.MenuScroller;
 import be.tarsos.util.ScalaFile;
-import be.tarsos.util.SimplePlot;
 import be.tarsos.util.StringUtils;
 import be.tarsos.util.Configuration.ConfigChangeListener;
 import be.tarsos.util.histogram.HistogramFactory;
@@ -662,19 +660,19 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					AnnotationPublisher ap = AnnotationPublisher.getInstance();
 										
 					String fileName = chosenFile.getAbsolutePath();
-					PitchContour pc = new PitchContour(new WaveForm());
-					pc.audioFileChanged(audioFile);
-					pc.scaleChanged(scale, false, false);
+					//PitchContour pc = new PitchContour(new WaveForm());
+					//pc.audioFileChanged(audioFile);
+					//pc.scaleChanged(scale, false, false);
 					
 					//adds the annotations also
-					pc.setXRange(ap.getCurrentSelection().getStartTime(), ap.getCurrentSelection().getStopTime());
-					pc.setYRange(ap.getCurrentSelection().getStartPitch(), ap.getCurrentSelection().getStopPitch());
+					//pc.setXRange(ap.getCurrentSelection().getStartTime(), ap.getCurrentSelection().getStopTime());
+					//pc.setYRange(ap.getCurrentSelection().getStartPitch(), ap.getCurrentSelection().getStopPitch());
 					
 					// EPS
 					OutputStream out;
 					try {
 						out = new BufferedOutputStream(new FileOutputStream(new File(fileName + ".eps")));
-						pc.export(out);
+					//	pc.export(out);
 						out.close();
 					} catch (FileNotFoundException e) {
 						e.printStackTrace();
@@ -761,8 +759,8 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
 					PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(annotations);
 					String fileName = chosenFile.getAbsolutePath();
-					SimplePlot plot = new SimplePlot();
-					
+					//SimplePlot plot = new SimplePlot();
+					/*
 					plot.setYLabel("Number of Annotations (#)");
 					plot.setXLabel("Pitch (cent)");
 					
@@ -771,6 +769,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					plot.addData(0, pitchHistogram);
 					
 					plot.save(fileName);
+					*/
 				}
 			});
 		}
@@ -792,7 +791,8 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
 					PitchClassHistogram pitchClassHistogram = HistogramFactory.createPitchClassHistogram(annotations);
 					String fileName = chosenFile.getAbsolutePath();
-					SimplePlot plot = new SimplePlot();
+					
+					/*SimplePlot plot = new SimplePlot();
 					plot.addData(0, pitchClassHistogram);
 					plot.pitchClassHistogramify();
 				
@@ -803,6 +803,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					plot.addXTick("1200", 1200);
 					plot.setTitle("Pitch Class Histogram for " + audioFile.originalBasename());
 					plot.save(fileName);
+					*/
 				}
 			});
 		}
@@ -823,7 +824,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
 					PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(annotations);
 					String fileName = chosenFile.getAbsolutePath();
-					pitchHistogram.plotToneScaleHistogram(fileName, true);
+					//pitchHistogram.plotToneScaleHistogram(fileName, true);//
 				}
 			});
 		}

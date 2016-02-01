@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.util;
 
@@ -255,31 +254,6 @@ public final class SignalPowerExtractor {
 		FileUtils.writeFile(stringBuilder.toString(), textFileName);
 	}
 
-	/**
-	 * Creates a 'power plot' of the signal.
-	 * 
-	 * @param powerPlotFileName
-	 *            Where to save the plot.
-	 * @param silenceThreshold
-	 *            Draw a line at this threshold. Can be used to show where the
-	 *            signal is 'silent'.
-	 */
-	public void savePowerPlot(final String powerPlotFileName, final double silenceThreshold) {
-		if (linearPowerArray == null) {
-			extractPower();
-		}
-
-		final SimplePlot plot = new SimplePlot("Powerplot for " + audioFile.originalBasename());
-		for (int index = 0; index < linearPowerArray.length; index++) {
-			// prevents negative infinity
-			final double power = linearToDecibel(linearPowerArray[index] == 0.0 ? 0.00000000000001
-					: linearPowerArray[index]);
-			final double timeInSeconds = index * readWindow;
-			plot.addData(0, timeInSeconds, power);
-			plot.addData(1, timeInSeconds, silenceThreshold);
-		}
-		plot.save(powerPlotFileName);
-	}
 
 	/**
 	 * Calculates the local (linear) energy of an audio buffer.

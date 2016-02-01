@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.cli;
 
@@ -33,7 +32,6 @@ import java.util.List;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import be.tarsos.transcoder.ffmpeg.EncoderException;
 import be.tarsos.util.AudioFile;
 import be.tarsos.util.SignalPowerExtractor;
 
@@ -68,17 +66,14 @@ public final class PowerExtractor extends AbstractTarsosApp {
 		} else {
 			final List<AudioFile> audioFiles = new ArrayList<AudioFile>();
 			for (final File inputFile : options.valuesOf(inputSpec)) {
-				try {
+				
 					audioFiles.add(new AudioFile(inputFile.getAbsolutePath()));
-				} catch (EncoderException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				
 			}
 			SignalPowerExtractor spex;
 			for (final AudioFile file : audioFiles) {
 				spex = new SignalPowerExtractor(file);
-				spex.savePowerPlot("power_" + file.originalBasename() + ".png", SILENCELEVEL);
+				//spex.savePowerPlot("power_" + file.originalBasename() + ".png", SILENCELEVEL);
 				spex.saveTextFile("power_" + file.originalBasename() + ".txt", true);
 				// spex.saveWaveFormPlot("waveform_" + file.basename() +
 				// ".png");

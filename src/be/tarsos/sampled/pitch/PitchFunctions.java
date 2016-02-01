@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.sampled.pitch;
 
@@ -38,7 +37,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
-import ptolemy.plot.Plot;
+
 import be.tarsos.util.FileUtils;
 import be.tarsos.util.histogram.Histogram;
 
@@ -446,8 +445,8 @@ public final class PitchFunctions {
 		}
 		FileUtils.writeFile(sb.toString(), fileName);
 
-		final Plot h = new Plot();
-		h.setXRange(start, stop);
+		//final Plot h = new Plot();
+		//h.setXRange(start, stop);
 
 		boolean first = true;
 
@@ -457,7 +456,7 @@ public final class PitchFunctions {
 		for (double current = start + histogram.getClassWidth() / 2; current <= stop; current += histogram
 				.getClassWidth()) {
 
-			h.addPoint(0, current, histogram.getCount(current), !first);
+		//	h.addPoint(0, current, histogram.getCount(current), !first);
 			values[i] = histogram.getCount(current);
 			if (histogram.getCount(current) > highWaterMark) {
 				highWaterMark = histogram.getCount(current);
@@ -477,29 +476,31 @@ public final class PitchFunctions {
 
 		if (stop == 1200.0) {
 
-			h.setXLabel("n (cents)");
-			h.setYLabel("frequency of ocurrence");
+			//h.setXLabel("n (cents)");
+			//h.setYLabel("frequency of ocurrence");
 
 			// h.addLegend(0,"Pitch histogram");
 
 			for (int j = 0; j <= 1200; j += 100) {
-				h.addXTick(j + "", j);
+				//h.addXTick(j + "", j);
 			}
 		}
 
-		h.setSize(1024, 786);
+		//h.setSize(1024, 786);
 
-		h.setTitle(FileUtils.basename(fileName));
+		//h.setTitle(FileUtils.basename(fileName));
 
+		/*
 		try {
 			Thread.sleep(60);
-			final BufferedImage image = h.exportImage();
-			ImageIO.write(image, "png", new File(fileName.substring(0, fileName.length() - 4) + ".png"));
+			//final BufferedImage image = h.exportImage();
+			//ImageIO.write(image, "png", new File(fileName.substring(0, fileName.length() - 4) + ".png"));
 		} catch (final IOException e) {
 			e.printStackTrace();
 		} catch (final InterruptedException e1) {
 			e1.printStackTrace();
 		}
+		*/
 	}
 
 	public static void exportFrequencyTable(final Histogram histogram, final String fileName) {

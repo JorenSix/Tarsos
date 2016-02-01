@@ -8,21 +8,20 @@
 *                                                         
 * -----------------------------------------------------------
 *
-*  Tarsos is developed by Joren Six at 
-*  The School of Arts,
-*  University College Ghent,
-*  Hoogpoort 64, 9000 Ghent - Belgium
+* Tarsos is developed by Joren Six at IPEM, University Ghent
 *  
 * -----------------------------------------------------------
 *
 *  Info: http://tarsos.0110.be
 *  Github: https://github.com/JorenSix/Tarsos
-*  Releases: http://tarsos.0110.be/releases/Tarsos/
+*  Releases: http://0110.be/releases/Tarsos/
 *  
 *  Tarsos includes some source code by various authors,
-*  for credits and info, see README.
+*  for credits, license and info: see README.
 * 
 */
+
+
 
 package be.tarsos.midi;
 
@@ -45,7 +44,6 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Synthesizer;
 
-import ptolemy.kernel.util.InvalidStateException;
 import be.tarsos.midi.MidiCommon.MoreMidiInfo;
 import be.tarsos.sampled.pitch.PitchUnit;
 import be.tarsos.util.ConfKey;
@@ -288,7 +286,6 @@ public class TarsosSynth implements ConfigChangeListener {
 			LOG.log(Level.WARNING, "Tuning failed: MIDI device threw an I/O error.", e);
 		} catch (InvalidMidiDataException e) {
 			LOG.log(Level.WARNING, "Tuning failed: MIDI tuning message incorrectly constructed.", e);
-			throw new InvalidStateException("MIDI tuning message incorrectly constructed");
 		}
 	}
 	
