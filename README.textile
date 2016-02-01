@@ -8,7 +8,7 @@ To give Tarsos a try, download the "executable Tarsos JAR-file":http://0110.be/r
 
 h2. Develop Tarsos
 
-If you want to help develop Tarsos, you are more than welcome to. Please, start by consulting the "API documentation":http://tarsos.0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Documentation/. If you want to build from source, you need "Apache Ant":http://ant.apache.org/ and "git":http://git-scm.com/ installed on your system. The following commands fetch the source and build Tarsos: 
+If you want to help develop Tarsos, you are more than welcome to. Please, start by consulting the "API documentation":http://0110.be/releases/Tarsos/Tarsos-latest/Tarsos-latest-Documentation/. If you want to build from source, you need "Apache Ant":http://ant.apache.org/ and "git":http://git-scm.com/ installed on your system. The following commands fetch the source and build Tarsos: 
 <pre><code>git clone https://JorenSix@github.com/JorenSix/Tarsos.git
 cd Tarsos/build
 ant #Build Tarsos
@@ -22,9 +22,6 @@ Tarsos is developed at the "University College Ghent, Faculty of Music":http://c
 
 Tarsos uses a number of open source libraries:
 * "Gervill":https://gervill.dev.java.net/: a software sound synthesizer, supports the MIDI Tuning Standard. "API":https://gervill.dev.java.net/nonav/javadoc/index.html.
-* "Jave":http://www.sauronsoftware.it/projects/jave/: a wrapper for "ffmpeg":http://ffmpeg.org/. 
 * "Apache Commons Math":http://commons.apache.org/math/: a library of lightweight, self-contained mathematics and statistics components "API":http://people.cs.ubc.ca/~kvdoel/jass/doc/index.html.
 * "Java-getopt":http://www.urbanophile.com/~arenn/hacking/download.html: a port of the GNU getopt family of functions. "API":http://www.urbanophile.com/~arenn/hacking/getopt/Package-gnu.getopt.html.
-* "Ptplot":http://ptolemy.berkeley.edu/java/ptplot5.7/ptolemy/plot/doc/index.htm a 2D plotting library. "API":http://ptolemy.berkeley.edu/java/ptplot5.7/doc/codeDoc/index.html.
-* "JTransforms":http://sites.google.com/site/piotrwendykier/software/jtransforms the first, open source, multithreaded FFT library written in pure Java.
 * "TarsosDSP":https://github.com/JorenSix/TarsosDSP is a Java library for audio processing. Its aim is to provide an easy-to-use interface to practical audio (signal) processing algorithms implemented, as simply as possible, in pure Java and without any other external dependencies.
