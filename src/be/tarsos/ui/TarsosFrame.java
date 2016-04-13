@@ -251,6 +251,8 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 		setDefaultTabbedContentOptions(content);
 		content.setMinimized(false);
 		
+	
+		
 
 		content = contentManager.addContent("Configuration", "Configuration", null, configurationPanel);
 		MultiSplitConstraint constraint = new MultiSplitConstraint(content, 1);

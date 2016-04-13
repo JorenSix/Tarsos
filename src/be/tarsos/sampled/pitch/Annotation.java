@@ -217,9 +217,11 @@ public final class Annotation implements Comparable<Annotation> {
 		final double timeStamp = Double.parseDouble(data[0]);
 		final double pitch = Double.parseDouble(data[1]);
 		final double probability = Double.parseDouble(data[2]);
-		final PitchDetectionMode source = PitchDetectionMode.valueOf(data[3]);
+		PitchDetectionMode source = PitchDetectionMode.TARSOS_FFT_YIN;
+		if(data.length!=3){
+			source = PitchDetectionMode.valueOf(data[3]);
+		}
 		return new Annotation(timeStamp, pitch, source, probability);
-
 	}
 
 	/**

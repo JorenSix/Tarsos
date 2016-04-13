@@ -67,7 +67,12 @@ public class LinkedFeaturePanel extends JPanel implements ScaleChangedListener, 
 		panels = new HashMap<String, LinkedPanel>();
 		split = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		split.setPreferredSize(new Dimension(500,500));
-		this.add(split,BorderLayout.CENTER);
+		CoordinateSystem cs = getCoordinateSystem(AxisUnit.AMPLITUDE);
+		LinkedPanel panel = new LinkedPanel(cs);
+		panel.addLayer(new BackgroundLayer(cs));
+		panel.addLayer(new AmplitudeAxisLayer(cs));
+		
+		this.add(panel,BorderLayout.CENTER);
 	}
 
 	private CoordinateSystem getCoordinateSystem(AxisUnit yUnits) {
@@ -83,7 +88,7 @@ public class LinkedFeaturePanel extends JPanel implements ScaleChangedListener, 
 	@Override
 	public void audioFileChanged(AudioFile newAudioFile) {
 		CoordinateSystem cs = getCoordinateSystem(AxisUnit.AMPLITUDE);
-		be.tarsos.dsp.ui.LinkedPanel panel = new be.tarsos.dsp.ui.LinkedPanel(cs);
+		LinkedPanel panel = new LinkedPanel(cs);
 		panel.addLayer(new BackgroundLayer(cs));
 		panel.addLayer(new AmplitudeAxisLayer(cs));
 		panel.addLayer(new WaveFormLayer(cs, new File(newAudioFile.transcodedPath())));
