@@ -185,14 +185,14 @@ public final class AudioFile {
 		
 		
 		// 01._qsdfj => 01._qsdfj_transcoded.wav
-		final String fileName = baseName + "_transcoded.";
+		final String fileName = baseName + "_transcoded.wav";
 		// return the name where the transcoded file should go
 		transcodedPath = FileUtils.combine(transcodedDirectory, fileName);
-		/*
+		
 		if (AudioTranscoder.transcodingRequired(transcodedPath())) {
 			try{
 				AudioTranscoder.transcode(filePath, transcodedPath());
-			}catch(EncoderException e){
+			}catch(Exception e){
 				//try to continue if the transcoded file exists
 				LOG.warning("Transcoding probably failed: " + e.getMessage());
 				if(!FileUtils.exists(transcodedPath())){
@@ -200,7 +200,7 @@ public final class AudioFile {
 				}
 			}
 		}
-		*/
+		
 		if(!list.containsFile(md5)){
 			list.addFile(baseName, this);
 		}

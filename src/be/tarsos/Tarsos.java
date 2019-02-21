@@ -47,7 +47,6 @@ import be.tarsos.cli.AnnotationSynth;
 import be.tarsos.cli.AudioToScala;
 import be.tarsos.cli.DetectPitch;
 import be.tarsos.cli.HistogramToScala;
-import be.tarsos.cli.MidiToWav;
 import be.tarsos.cli.PitchHistogramRating;
 import be.tarsos.cli.PitchTable;
 import be.tarsos.cli.PitchToHistogram;
@@ -296,7 +295,6 @@ public final class Tarsos {
 		final List<AbstractTarsosApp> applicationList = new ArrayList<AbstractTarsosApp>();
 		applicationList.add(new Annotate());
 		applicationList.add(new PitchTable());
-		applicationList.add(new MidiToWav());
 		applicationList.add(new AudioToScala());
 		applicationList.add(new DetectPitch());
 		applicationList.add(new AnnotationSynth());

@@ -36,7 +36,11 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import com.sun.media.sound.AudioFloatInputStream;
+import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.AudioEvent;
+import be.tarsos.dsp.AudioProcessor;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
+
 
 /**
  * An utility class to calculate and access the power of an audio file at any
@@ -146,20 +150,29 @@ public final class SignalPowerExtractor {
 		AudioInputStream ais = null;
 		try {
 			ais = AudioSystem.getAudioInputStream(inputFile);
-			final AudioFloatInputStream afis = AudioFloatInputStream.getInputStream(ais);
+			final int readAmount = (int) (readWindow * sampleRate);
+			AudioDispatcher adp  = AudioDispatcherFactory.fromFile(inputFile, readAmount, 0);
 
 			linearPowerArray = new double[secondsToIndex(audioLengtInSecs) + 1];
-			final int readAmount = (int) (readWindow * sampleRate);
-			final float[] buffer = new float[readAmount];
-
-			int index = 0;
-			while (afis.read(buffer, 0, readAmount) != -1) {
-				final double power = SignalPowerExtractor.localEnergy(buffer);
-				minLinearPower = Math.min(power, minLinearPower);
-				maxLinearPower = Math.max(power, maxLinearPower);
-				linearPowerArray[index] = power;
-				index++;
-			}
+			
+			adp.addAudioProcessor(new AudioProcessor() {
+				int index = 0;
+				@Override
+				public void processingFinished() {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public boolean process(AudioEvent audioEvent) {
+					double power = audioEvent.getdBSPL();
+					minLinearPower = Math.min(power, minLinearPower);
+					maxLinearPower = Math.max(power, maxLinearPower);
+					linearPowerArray[index] = power;
+					index++;
+					return true;
+				}
+			});
 		} catch (final UnsupportedAudioFileException e) {
 			LOG.log(Level.SEVERE, e.getLocalizedMessage(), e);
 		} catch (final IOException e) {

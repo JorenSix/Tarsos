@@ -129,6 +129,8 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		menu.add(exportMenu);
 		
 		
+		
+		
 		/* Annotations sub menu */
 		JMenu annotationsMenu = new JMenu("Annotations");
 		exportMenu.add(annotationsMenu);
@@ -240,6 +242,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		}
 		//exit action
 		menu.addSeparator();
+	
 		item = new JMenuItem("Exit");
 		item.addActionListener(exitAction);
 		menu.add(item);

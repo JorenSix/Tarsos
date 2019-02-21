@@ -34,6 +34,8 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -56,17 +58,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
-
-import org.noos.xing.mydoggy.Content;
-import org.noos.xing.mydoggy.ContentManager;
-import org.noos.xing.mydoggy.MultiSplitConstraint;
-import org.noos.xing.mydoggy.MultiSplitContentManagerUI;
-import org.noos.xing.mydoggy.TabbedContentManagerUI;
-import org.noos.xing.mydoggy.TabbedContentUI;
-import org.noos.xing.mydoggy.ToolWindow;
-import org.noos.xing.mydoggy.ToolWindowManager;
-import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
-import org.noos.xing.mydoggy.plaf.ui.content.MyDoggyMultiSplitContentManagerUI;
 
 import be.tarsos.sampled.Player;
 import be.tarsos.sampled.pitch.Annotation;
@@ -98,6 +89,9 @@ import be.tarsos.util.FileUtils;
 import be.tarsos.util.JLabelHandler;
 import be.tarsos.util.ScalaFile;
 import be.tarsos.util.TextAreaHandler;
+import bibliothek.gui.dock.common.CControl;
+import bibliothek.gui.dock.common.CLocation;
+import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import be.tarsos.util.Configuration.ConfigChangeListener;
 
 /**
@@ -123,7 +117,6 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 
 	private static TarsosFrame instance;
 	
-	private final ToolWindowManager toolWindowManager;
 
 	private AudioFile audioFile;
 
@@ -220,17 +213,8 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 		annotationPublisher.addListener(this);
 		annotationPublisher.addListener(commandPanel);
 		annotationPublisher.addListener(linkedFeaturePanel);
-
-		// initialize content and tool window manager of the 'mydoggy'
-		// framework.
-		// Create a new instance of MyDoggyToolWindowManager passing the frame.
-		MyDoggyToolWindowManager windowManager = new MyDoggyToolWindowManager();
-		toolWindowManager = windowManager;
-		ContentManager contentManager = toolWindowManager.getContentManager();
-		MultiSplitContentManagerUI contentManagerUI = new MyDoggyMultiSplitContentManagerUI();
-		contentManager.setContentManagerUI(contentManagerUI);
-		contentManagerUI.setShowAlwaysTab(true);
-		contentManagerUI.setTabPlacement(TabbedContentManagerUI.TabPlacement.TOP);
+		
+		CControl control = new CControl( this ) ;
 		
 		JPanel lowerPanel = new JPanel(new BorderLayout());
 		lowerPanel.add(player,BorderLayout.NORTH);
@@ -240,76 +224,80 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 
 		// add the components to the frame
 		add(headerPanel, BorderLayout.NORTH);
-		add(windowManager, BorderLayout.CENTER);
+		add(control.getContentArea(), BorderLayout.CENTER);
 		add(lowerPanel, BorderLayout.SOUTH);
 		
 
 		// add components to the window manager.
-		Content content;
-	
-		content = contentManager.addContent("Pitch Class Histogram", "Pitch Class Histogram", null, pitchClassHistogramPanel);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(false);
-		
-	
-		
-
-		content = contentManager.addContent("Configuration", "Configuration", null, configurationPanel);
-		MultiSplitConstraint constraint = new MultiSplitConstraint(content, 1);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(true);
-		
-		content = contentManager.addContent("Features", "Features", null, linkedFeaturePanel);
-		constraint = new MultiSplitConstraint(content, 1);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(true);
-		
-		content = contentManager.addContent("Command", "Command", null, commandPanel);
-		constraint = new MultiSplitConstraint(content, 1);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(true);
-		
-		constraint = new MultiSplitConstraint(content, 3);
-		content = contentManager.addContent("Interval table", "Interval table", null, intervalTable,null,constraint);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(true);
 
 		
-		content = contentManager.addContent("Waveform", "Waveform", null, waveForm);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(false);
+		DefaultSingleCDockable content;
 		
-		/*
-		constraint = new MultiSplitConstraint(content, 1);
-		content = contentManager.addContent("Annotations", "Annotations", null, pitchContourPanel, null,
-				constraint);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(true);
-		*/
+		content = new DefaultSingleCDockable("Pitch Class Histogram", "Pitch Class Histogram", pitchClassHistogramPanel);
+		control.addDockable(content);
+		content.setVisible(true);
+		content.setLocation(CLocation.base().normalNorth(0.5));
+		
 
-		content = contentManager.addContent("Keyboard", "Keyboard", null, keyboardPanel, null);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(true);
+		content = new DefaultSingleCDockable("Configuration", "Configuration", configurationPanel);
+		control.addDockable(content);	
+		content.setVisible(true);
+		content.setLocation(CLocation.base().normalSouth(0.2));
 		
-		content = contentManager.addContent("Logging", "Logging", null, logPanel, null);
-		setDefaultTabbedContentOptions(content);
-		content.setMinimized(true);
+		content = new DefaultSingleCDockable("Features", "Features", linkedFeaturePanel);
+		control.addDockable(content);
+		
+		content = new DefaultSingleCDockable("Command", "Command", commandPanel);
+		control.addDockable(content);
+		content.setVisible(true);
+		content.setLocation(CLocation.base().normalEast(0.2));
 		
 		
+		content = new DefaultSingleCDockable("Interval table", "Interval table", intervalTable);
+		control.addDockable(content);
+		content.setVisible(true);
+		content.setLocation(CLocation.base().normalEast(0.2));
 		
-		
-		//Disable the browser for now.
-		//toolWindowManager.registerToolWindow("Player", "Player", null, player, ToolWindowAnchor.BOTTOM);
-		//toolWindowManager.registerToolWindow("Help", "Help", null, helpPanel, ToolWindowAnchor.BOTTOM);
-		;
+		content = new DefaultSingleCDockable("Waveform", "Waveform", waveForm);
+		control.addDockable(content);
+		content.setVisible(true);
+		content.setLocation(CLocation.base().normalEast(0.2));
 
-		// Make all tools available
-		for (ToolWindow window : toolWindowManager.getToolWindows()) {
-			window.setAvailable(true);
-		}
+		//content = new DefaultSingleCDockable("Annotations", "Annotations", pitchContourPanel);
+		//control.addDockable(content);
+
+		content = new DefaultSingleCDockable("Keyboard", "Keyboard", keyboardPanel);
+		control.addDockable(content);
+		content.setVisible(true);
+		content.setLocation(CLocation.base().normalEast(0.2));
+
+		content = new DefaultSingleCDockable("Logging", "Logging", logPanel);
+		control.addDockable(content);
+		content.setVisible(true);
+		content.setLocation(CLocation.base().normalEast(0.2));
 		
-		//toolWindowManager.getToolWindow(1).setVisible(true);
+		File file = new File(".layout.data");
+		if(file.exists())
+			try {
+				control.read(file);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		
+		  this.addWindowListener(new WindowAdapter() {
+	            @Override
+	            public void windowClosing(WindowEvent e) {
+	            	File file = new File(".layout.data");
+	            	try {
+						control.write(file);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+	            }
+	        });
+				
 		setJMenuBar(menu);
 		
 		setupChangeInPitchDetectors();
@@ -349,13 +337,6 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 		return statusBarLabel;
 	}
 
-	private void setDefaultTabbedContentOptions(final Content content) {
-		TabbedContentUI tabbedContent = (TabbedContentUI) content.getContentUI();
-		tabbedContent.setCloseable(false);
-		tabbedContent.setDetachable(true);
-		tabbedContent.setTransparentMode(false);
-		tabbedContent.setMinimizable(true);		
-	}
 
 	public static void setTarsosProgramIcon(JFrame frame) {
 		try {
@@ -602,11 +583,7 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 			// So progress can be updated in this thread, every 30ms.
 			while (t.isAlive() && !isCancelled()) {
 				try {
-					if(lengthIsDetermined()){
-						setProgress((int) (pitchDetector.progress() * 100));
-					}else{
-						setProgress(50);
-					}
+					setProgress(50);
 					Thread.sleep(30);
 				} catch (InterruptedException e) {
 				}
