@@ -38,8 +38,13 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 import be.tarsos.sampled.pitch.Annotation;
 import be.tarsos.sampled.pitch.AnnotationListener;
@@ -54,9 +59,6 @@ import be.tarsos.util.histogram.PitchClassHistogram;
 import be.tarsos.util.histogram.peaks.Peak;
 import be.tarsos.util.histogram.peaks.PeakDetector;
 
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
-
 public class CommandPanel extends JPanel implements AudioFileChangedListener, ScaleChangedListener, AnnotationListener{
 	
 	/**
@@ -68,7 +70,7 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 	private  int thresholdPeakDetection = 15;
 	private double[] scale;
 	private final Set<PitchDetectionMode> pitchDetectors; 
-	private final JComboBox pitchDetectorSelection;
+	private final JComboBox<PitchDetectionMode> pitchDetectorSelection;
 	
 	private final List<JComponent> listOfComponentsToDisableOrEnable;
 	
@@ -95,10 +97,11 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		});
 		listOfComponentsToDisableOrEnable.add(probabilitySlider);
 		
-		pitchDetectorSelection = new JComboBox();
+		pitchDetectorSelection = new JComboBox<PitchDetectionMode>();
 		listOfComponentsToDisableOrEnable.add(pitchDetectorSelection);
 
-		JSlider peakSlider = new JSlider(0, 100);
+		final JSpinner peakSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 100, 1));
+		final JSlider peakSlider = new JSlider(0, 100);
 		peakSlider.setValue(windowSizePeakDetection);
 		peakSlider.setMajorTickSpacing(20);
 		peakSlider.addChangeListener(new ChangeListener() {
@@ -106,9 +109,18 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 				final JSlider source = (JSlider) e.getSource();
 				windowSizePeakDetection = source.getValue();
 				doPeakDetection(source.getValueIsAdjusting());
+				peakSpinner.setValue(windowSizePeakDetection);
 			}
 		});
+		peakSpinner.addChangeListener(new ChangeListener() {
+	        @Override
+	        public void stateChanged(ChangeEvent e) {
+	        	peakSlider.setValue((int) peakSpinner.getValue());
+	        }
+	    });
 		listOfComponentsToDisableOrEnable.add(peakSlider);
+		listOfComponentsToDisableOrEnable.add(peakSpinner);
+	
 		
 		JSlider quantizeToScaleSlider = new JSlider(0, 150);
 		quantizeToScaleSlider.setValue(15);
@@ -117,6 +129,7 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 			public void stateChanged(final ChangeEvent e) {
 				final JSlider source = (JSlider) e.getSource();
 				final double cents = source.getValue(); //cents
+				source.setToolTipText(quantizeToScaleSlider.getValue() + " cents");
 				AnnotationPublisher.getInstance().applyPitchClassFilter(scale, cents);
 			}
 		});
@@ -129,13 +142,12 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 			public void stateChanged(final ChangeEvent e) {
 				final JSlider source = (JSlider) e.getSource();
 				final double cents = source.getValue(); //cents
+				source.setToolTipText(waveletCompressionSlider.getValue() + "");
 				AnnotationPublisher.getInstance().applyWaveletCompressionFilter(cents);
 			}
 		});
 		listOfComponentsToDisableOrEnable.add(waveletCompressionSlider);
 		
-		
-			
 		
 		final JSlider centsSlider = new JSlider(0, 1200);
 		centsSlider.setValue(thresholdPeakDetection);
@@ -148,6 +160,8 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 				final double cents = centsSlider.getValue(); //cents
 				final double time = timingSlider.getValue() / 1000.0; //seconds
 				AnnotationPublisher.getInstance().applySteadyStateFilter(cents,time);
+				timingSlider.setToolTipText(timingSlider.getValue() / 1000.0 + "s");
+				centsSlider.setToolTipText(centsSlider.getValue() + "cents");
 			}
 		};
 		centsSlider.addChangeListener(steadyStateChangeListener);	
@@ -156,30 +170,42 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		listOfComponentsToDisableOrEnable.add(timingSlider);
 		
 		
-		JSlider thresholdSlider = new JSlider(0, 100);
+		final JSlider thresholdSlider = new JSlider(0, 100);
+		final JSpinner thresholdSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 100, 1));
 		thresholdSlider.setValue(thresholdPeakDetection);
 		thresholdSlider.setMajorTickSpacing(20);
 		thresholdSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(final ChangeEvent e) {
 				final JSlider source = (JSlider) e.getSource();
 				thresholdPeakDetection = source.getValue();
+				source.setToolTipText("" + thresholdPeakDetection);
 				doPeakDetection(source.getValueIsAdjusting());
+				thresholdSpinner.setValue((int) thresholdSlider.getValue());
 			}
 		});
+		thresholdSpinner.addChangeListener(new ChangeListener() {
+	        @Override
+	        public void stateChanged(ChangeEvent e) {
+	        	thresholdSlider.setValue((int) thresholdSpinner.getValue());
+	        }
+	    });
 		listOfComponentsToDisableOrEnable.add(thresholdSlider);
+		listOfComponentsToDisableOrEnable.add(thresholdSpinner);
 
 
-		FormLayout layout = new FormLayout("right:min,2dlu,min:grow");
+		FormLayout layout = new FormLayout("right:min,2dlu,min:grow,left:min");
 		DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 		builder.setDefaultDialogBorder();
-		
-		
 		
 		builder.append("Pitch detector data:", pitchDetectorSelection, true);
 		
 		builder.appendSeparator("Peak picking");
 		builder.append("Window:", peakSlider, true);
+		builder.append("", peakSpinner, true);
+		
 		builder.append("Threshold:", thresholdSlider, true);
+		builder.append("", thresholdSpinner, true);
+	
 		
 		builder.appendSeparator("Steady state filter");
 		builder.append("Time:", timingSlider, true);
@@ -193,11 +219,9 @@ public class CommandPanel extends JPanel implements AudioFileChangedListener, Sc
 		
 		builder.appendSeparator("Wavelet compressor");
 		builder.append("Compression:", waveletCompressionSlider, true);
-				
 		
 		this.add(new JScrollPane(builder.getPanel()));
 		setEnabledForAll(false);
-		
 	}
 	
 	private void setEnabledForAll(boolean enabled){
