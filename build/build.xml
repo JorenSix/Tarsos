@@ -65,12 +65,18 @@
 			<zipfileset excludes="META-INF/*.SF" src="../lib/forms-1.3.0.jar"/>
 			<zipfileset excludes="META-INF/*.SF" src="../lib/jgoodies-common-1.0.0.jar"/>
 			<zipfileset excludes="META-INF/*.SF" src="../lib/swing-layout-1.0.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/commons-exec-1.1.jar"/>
 
-			<!-- my doggy-->
+			<!-- my doggy
 			<zipfileset excludes="META-INF/*.SF" src="../lib/TableLayout-20050920.jar"/>
 			<zipfileset excludes="META-INF/*.SF" src="../lib/mydoggy-res-1.4.2.jar"/>
 			<zipfileset excludes="META-INF/*.SF" src="../lib/mydoggy-plaf-1.4.2.jar"/>
 			<zipfileset excludes="META-INF/*.SF" src="../lib/mydoggy-api-1.4.2.jar"/>
+			-->
+			
+			<!-- Docking library -->
+			<zipfileset excludes="META-INF/*.SF" src="../lib/docking-frames-core.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/docking-frames-common.jar"/>	
 
 			<!-- KD Tree -->
 			<zipfileset excludes="META-INF/*.SF" src="../lib/kd.jar"/>

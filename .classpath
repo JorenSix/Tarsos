@@ -9,7 +9,6 @@
 	<classpathentry kind="lib" path="lib/jopt-simple-3.2.jar"/>
 	<classpathentry kind="lib" path="lib/kd.jar"/>
 	<classpathentry kind="lib" path="lib/swing-layout-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/TableLayout-20050920.jar"/>
 	<classpathentry kind="lib" path="lib/docking-frames-common.jar"/>
 	<classpathentry kind="lib" path="lib/docking-frames-core.jar"/>
 	<classpathentry kind="lib" path="lib/TarsosDSP-2.4.jar"/>

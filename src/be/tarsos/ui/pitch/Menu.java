@@ -25,6 +25,7 @@
 
 package be.tarsos.ui.pitch;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -46,13 +47,17 @@ import javax.sound.sampled.Mixer.Info;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 
 import be.tarsos.midi.MidiCommon;
@@ -478,12 +483,12 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	}
 
 	private void addHelpMenu() {
-		JMenu menu = new JMenu("About");
+		JMenu menu = new JMenu("Help");
 		this.add(menu);
 
 		JMenuItem item;
 
-		item = new JMenuItem("About Tarsos...");
+		item = new JMenuItem("Cheat sheet...");
 		item.addActionListener(showAboutDialogAction);
 		menu.add(item);
 
@@ -495,7 +500,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 	
 	private ActionListener openWebsiteAction = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			BareBonesBrowserLaunch.openURL("http://tarsos.0110.be");				
+			BareBonesBrowserLaunch.openURL("https://0110.be/tags/Tarsos");				
 		}
 	};
 	
@@ -520,17 +525,19 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 		public void actionPerformed(final ActionEvent e) {
 			JFrame parent = TarsosFrame.getInstance();
 			
-			/*
+			
 			String contents = FileUtils.readFileFromJar("/be/tarsos/ui/resources/help.html");
+			
 			JEditorPane helpLabel = new JEditorPane();
 			helpLabel.setEditable(false);
 			helpLabel.setContentType("text/html");
 			helpLabel.setPreferredSize(new Dimension(500, 300));
 			helpLabel.setText(contents);
 			helpLabel.setCaretPosition(0);
-			*/
 			
-			JOptionPane.showMessageDialog(parent, "Tarsos \n\nDeveloped at University College Ghent – Faculty of Music ");
+		
+			//"Tarsos \n\nDeveloped at University College Ghent – Faculty of Music "
+			JOptionPane.showMessageDialog(parent,new JScrollPane(helpLabel));
 		}
 	};
 	
@@ -660,7 +667,7 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			String defaultFileName = audioFile.originalBasename() + "_annotations.eps";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				public void handleFile(final File chosenFile) {
-					AnnotationPublisher ap = AnnotationPublisher.getInstance();
+					//AnnotationPublisher ap = AnnotationPublisher.getInstance();
 										
 					String fileName = chosenFile.getAbsolutePath();
 					//PitchContour pc = new PitchContour(new WaveForm());
@@ -758,10 +765,10 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			String defaultFileName = audioFile.originalBasename() + "_pitch_histogram." + extension;
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				public void handleFile(final File chosenFile) {
-					AnnotationPublisher ap = AnnotationPublisher.getInstance();
-					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
-					PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(annotations);
-					String fileName = chosenFile.getAbsolutePath();
+					//AnnotationPublisher ap = AnnotationPublisher.getInstance();
+					//List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
+					//PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(annotations);
+					//String fileName = chosenFile.getAbsolutePath();
 					//SimplePlot plot = new SimplePlot();
 					/*
 					plot.setYLabel("Number of Annotations (#)");
@@ -790,10 +797,10 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			String defaultFileName = audioFile.originalBasename() + "_pitch_class_histogram.png";
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {
 				public void handleFile(final File chosenFile) {
-					AnnotationPublisher ap = AnnotationPublisher.getInstance();
-					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
-					PitchClassHistogram pitchClassHistogram = HistogramFactory.createPitchClassHistogram(annotations);
-					String fileName = chosenFile.getAbsolutePath();
+					//AnnotationPublisher ap = AnnotationPublisher.getInstance();
+					//List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
+					//PitchClassHistogram pitchClassHistogram = HistogramFactory.createPitchClassHistogram(annotations);
+					//String fileName = chosenFile.getAbsolutePath();
 					
 					/*SimplePlot plot = new SimplePlot();
 					plot.addData(0, pitchClassHistogram);
@@ -823,10 +830,10 @@ public class Menu extends JMenuBar implements ScaleChangedListener, AudioFileCha
 			String defaultFileName = audioFile.originalBasename() + "_pitch_class_histogram_with_octaves." + extension;
 			showFileChooserDialog(dialogTitle,JFileChooser.FILES_ONLY,false,defaultFileName, new ChosenFileHandler() {	
 				public void handleFile(final File chosenFile) {
-					AnnotationPublisher ap = AnnotationPublisher.getInstance();
-					List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
-					PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(annotations);
-					String fileName = chosenFile.getAbsolutePath();
+					//AnnotationPublisher ap = AnnotationPublisher.getInstance();
+					//List<Annotation> annotations = ap.getAnnotationTree().select(ap.getCurrentSelection());
+					//PitchHistogram pitchHistogram = HistogramFactory.createPitchHistogram(annotations);
+					//String fileName = chosenFile.getAbsolutePath();
 					//pitchHistogram.plotToneScaleHistogram(fileName, true);//
 				}
 			});
