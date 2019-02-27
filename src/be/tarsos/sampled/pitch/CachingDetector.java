@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import be.tarsos.util.AudioFile;
+import be.tarsos.util.ConfKey;
+import be.tarsos.util.Configuration;
 import be.tarsos.util.FileUtils;
 
 /**
@@ -68,7 +70,11 @@ public final class CachingDetector implements PitchDetector {
 	 */
 	public List<Annotation> executePitchDetection() {
 		String directory = file.transcodedDirectory();
-		String annotationsFileName = detector.getName() + "_" + file.originalBasename() + ".txt";
+		
+		int bufferSizeInMs = Configuration.getInt(ConfKey.pitch_detector_buffer_size);
+		int overlapPercentage = Configuration.getInt(ConfKey.pitch_detector_buffer_overlap);
+		String annotationsFileName = String.format("%s_%s_%d_%d.txt",detector.getName(),file.originalBasename(),bufferSizeInMs,overlapPercentage);
+		
 		annotationsFileName = FileUtils.combine(directory, annotationsFileName);
 		if (FileUtils.exists(annotationsFileName)) {
 			annotations = FileUtils.readPitchAnnotations(annotationsFileName);

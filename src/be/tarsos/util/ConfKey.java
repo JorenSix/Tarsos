@@ -179,10 +179,22 @@ public enum ConfKey {
 	 * The width of the window in pixels. On startup this height is used to set the window size.
 	 */
 	window_height,
+	
+	
+	
 	/**
 	 * Reset the histograms when a new file is imported. Or not. 
 	 */
-	reset_on_import;
+	reset_on_import, 
+	
+	/**
+	 * The buffer size in milliseconds
+	 */
+	pitch_detector_buffer_size, 
+	/**
+	 * Pitch detector buffer overlap (%)
+	 */
+	pitch_detector_buffer_overlap;
 	
 	
 	

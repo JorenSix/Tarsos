@@ -36,8 +36,13 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import be.tarsos.util.ConfKey;
 import be.tarsos.util.Configuration;
@@ -63,7 +68,11 @@ public class ConfigurationPanel extends JPanel {
 		configurationTextFields = new HashMap<JTextField, ConfKey>();
 		builder.setDefaultDialogBorder();
 		builder.setRowGroupingEnabled(true);
+		
 		addConfigurationTextFields(builder);
+		
+		addPitchConfiguration(builder);
+
 		JComponent center = builder.getPanel();
 		add(center, BorderLayout.CENTER);
 		Configuration.addListener(new ConfigChangeListener() {
@@ -76,9 +85,43 @@ public class ConfigurationPanel extends JPanel {
 				}
 			}
 		});
+		
+		
+		
 	}
 
 	
+
+
+	private void addPitchConfiguration(DefaultFormBuilder builder) {
+		builder.appendSeparator("Tarsos Pitch detection parameters");
+		
+		final JSpinner bufferSizeSpinner = new JSpinner(new SpinnerNumberModel(Configuration.getInt(ConfKey.pitch_detector_buffer_size),1,1000,1));
+		final JSpinner bufferOverlapSpinner = new JSpinner(new SpinnerNumberModel(Configuration.getInt(ConfKey.pitch_detector_buffer_overlap),1,100,1));
+		final JLabel minDetectableFrequency = new JLabel(String.format("%.3f Hz", 2000.0 / (int) bufferSizeSpinner.getValue() ));
+		final JLabel stepSizeInMilliseconds = new JLabel(String.format("%.3f ms",  (int) bufferOverlapSpinner.getValue() / 100.0 * (int) bufferSizeSpinner.getValue() ));
+		
+		ChangeListener updateLabels = new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				minDetectableFrequency.setText(String.format("%.3f Hz", 2000.0 / (int) bufferSizeSpinner.getValue()));
+				stepSizeInMilliseconds.setText(String.format("%.3f ms", (int) bufferOverlapSpinner.getValue() / 100.0 * (int) bufferSizeSpinner.getValue()));
+				
+				Configuration.set(ConfKey.pitch_detector_buffer_size, bufferSizeSpinner.getValue());
+				Configuration.set(ConfKey.pitch_detector_buffer_overlap, bufferOverlapSpinner.getValue());
+			}
+		};
+		
+		bufferOverlapSpinner.addChangeListener(updateLabels);
+		bufferSizeSpinner.addChangeListener(updateLabels);
+		
+		builder.append("Buffer size (in milliseconds)",bufferSizeSpinner, true );
+		builder.append("Buffer overlap (percentage)",bufferOverlapSpinner, true);
+		builder.append("Minimum detectable frequency",minDetectableFrequency, true);
+		builder.append("Step size",stepSizeInMilliseconds, true);
+	}
+
+
 
 
 	/**

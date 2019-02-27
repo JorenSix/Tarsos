@@ -40,6 +40,8 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import be.tarsos.util.AudioFile;
+import be.tarsos.util.ConfKey;
+import be.tarsos.util.Configuration;
 
 public class TarsosPitchDetection implements PitchDetector {
 	
@@ -91,8 +93,11 @@ public class TarsosPitchDetection implements PitchDetector {
 	public List<Annotation> executePitchDetection() {
 		try {
 			float sampleRate = audioFile.fileFormat().getFormat().getSampleRate();
-			int bufferSize = 2048;
-			int overlap = 1024;			
+			int bufferSizeInMs = Configuration.getInt(ConfKey.pitch_detector_buffer_size);
+			int overlapPercentage = Configuration.getInt(ConfKey.pitch_detector_buffer_overlap);
+			
+			int bufferSize = (int) (sampleRate * bufferSizeInMs / 1000.0);
+			int overlap = (int) (bufferSize * overlapPercentage / 100.0) ;
 			AudioDispatcher dispatcher = AudioDispatcherFactory.fromFile(new File(audioFile.transcodedPath()), bufferSize, overlap);
 			dispatcher.addAudioProcessor(new PitchProcessor(algorithm, sampleRate, bufferSize, handler ));
 			dispatcher.addAudioProcessor(progressProcessor );
