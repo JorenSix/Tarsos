@@ -170,11 +170,22 @@ public enum ConfKey {
 	/**
 	 * Sound card device index.
 	 */
-	mixer_output_device, 
+	mixer_output_device,
+	/**
+	 * The height of the window in pixels. On startup this height is used to set the window size.
+	 */
+	window_width,
+	/**
+	 * The width of the window in pixels. On startup this height is used to set the window size.
+	 */
+	window_height,
 	/**
 	 * Reset the histograms when a new file is imported. Or not. 
 	 */
 	reset_on_import;
+	
+	
+	
 
 	/**
 	 * True if the configured key is a required directory. False otherwise.

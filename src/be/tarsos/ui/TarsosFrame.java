@@ -99,14 +99,6 @@ import be.tarsos.util.Configuration.ConfigChangeListener;
  */
 public final class TarsosFrame extends JFrame implements ScaleChangedListener, AnnotationListener {
 	/**
-	 * Default height.
-	 */
-	private static final int INITIAL_HEIGHT = 600;
-	/**
-	 * Default width.
-	 */
-	private static final int INITIAL_WIDTH = 800;
-	/**
      */
 	private static final long serialVersionUID = -8095965296377515567L;
 
@@ -145,9 +137,19 @@ public final class TarsosFrame extends JFrame implements ScaleChangedListener, A
 
 	private TarsosFrame() {
 		super("Tarsos");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
-		setSize(INITIAL_WIDTH, INITIAL_HEIGHT);
+		
+		//save and restore the window dimensions
+		this.addWindowListener(new WindowAdapter(){
+            public void windowClosing(WindowEvent e){
+            	Configuration.set(ConfKey.window_height, getHeight());
+            	Configuration.set(ConfKey.window_width, getWidth());
+            	System.exit(0);
+            }
+        });
+		int configuredWidth = Configuration.getInt(ConfKey.window_width);
+		int configuredHeight = Configuration.getInt(ConfKey.window_height);
+		setSize(configuredWidth, configuredHeight);
 		
 		// center
 		setLocationRelativeTo(null);
