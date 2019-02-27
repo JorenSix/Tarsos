@@ -26,6 +26,5 @@ public class AudioTranscoder {
 		if(transcodedSize == 0) {
 			LOG.warning("Failed to transcode media file. Check ffmpeg");
 		}
-		
 	}
 }
