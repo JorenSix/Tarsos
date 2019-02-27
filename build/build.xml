@@ -4,6 +4,10 @@
 	<!-- Configuration -->
 	<property name="version"   value="1.2"/>
 	<property name="built_by"  value="${user.name}"/>
+	
+	<!-- Ensure compatibility with Java 8 -->
+	<property name="ant.build.javac.source" value="1.8"/>
+	<property name="ant.build.javac.target" value="1.8"/>
 
 	<tstamp>
 		<format property="TODAY" pattern="yyyy-MM-dd_HH:mm:ss" />
@@ -52,7 +56,7 @@
 			<fileset dir="../bin"/>
 
 			<!-- TarsosDSP -->
-			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosDSP-2.3.jar"/>
+			<zipfileset excludes="META-INF/*.SF" src="../lib/TarsosDSP-2.4.jar"/>
 			
 			<!-- Other Dependencies -->
 			<zipfileset excludes="META-INF/*.SF" src="../lib/commons-math-2.0.jar"/>

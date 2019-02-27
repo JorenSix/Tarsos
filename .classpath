@@ -10,9 +10,9 @@
 	<classpathentry kind="lib" path="lib/kd.jar"/>
 	<classpathentry kind="lib" path="lib/swing-layout-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/TableLayout-20050920.jar"/>
-	<classpathentry kind="lib" path="lib/TarsosDSP-2.3.jar"/>
 	<classpathentry kind="lib" path="lib/docking-frames-common.jar"/>
 	<classpathentry kind="lib" path="lib/docking-frames-core.jar"/>
+	<classpathentry kind="lib" path="lib/TarsosDSP-2.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="module" value="true"/>
